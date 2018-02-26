@@ -9,7 +9,7 @@
  * @package Lib
  * @subpackage itop
  */
-class itop_PCSoftware extends itop_FunctionalCIi {
+class itop_PCSoftware extends itop_FunctionalCI {
 	/**
 	 * var privee
 	 *
