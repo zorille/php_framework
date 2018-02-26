@@ -60,6 +60,8 @@ class utilisateurs extends abstract_log {
 	 * @var string
 	 */
 	private $password = "";
+	
+	const METHOD = 'aes-256-cbc';
 
 	/*********************** Creation de l'objet *********************/
 	/**
@@ -148,9 +150,9 @@ class utilisateurs extends abstract_log {
 	 */
 	public function prepare_cryptage() {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->setIvSize ( mcrypt_get_iv_size ( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC ) )
-			->setCleCryptage ( pack ( 'H*', "bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3" ) )
-			->setIv ( mcrypt_create_iv ( $this->getIvSize (), MCRYPT_RAND ) );
+		$this->setIvSize(openssl_cipher_iv_length(self::METHOD))
+		->setCleCryptage(pack ( 'H*', "bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3" ))
+		->setIv(openssl_random_pseudo_bytes($this->getIvSize()));
 		
 		return $this;
 	}
@@ -250,7 +252,7 @@ class utilisateurs extends abstract_log {
 	function encrypt(
 			$pure_string) {
 		$this->onDebug ( __METHOD__, 1 );
-		$encrypted_string = mcrypt_encrypt ( MCRYPT_RIJNDAEL_128, $this->getCleCryptage (), $pure_string, MCRYPT_MODE_CBC, $this->getIv () );
+		$encrypted_string = openssl_encrypt($pure_string,self::METHOD, $this->getCleCryptage (), OPENSSL_RAW_DATA, $this->getIv ());
 		return base64_encode ( $this->getIv () . $encrypted_string );
 	}
 
@@ -265,7 +267,7 @@ class utilisateurs extends abstract_log {
 		$ciphertext_dec = base64_decode ( $encrypted_string );
 		$iv_dec = substr ( $ciphertext_dec, 0, $this->getIvSize () );
 		$ciphertext_dec = substr ( $ciphertext_dec, $this->getIvSize () );
-		$decrypted_string = mcrypt_decrypt ( MCRYPT_RIJNDAEL_128, $this->getCleCryptage (), $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec );
+		$decrypted_string = openssl_decrypt( $ciphertext_dec, self::METHOD, $this->getCleCryptage (), OPENSSL_RAW_DATA, $iv_dec);
 		return trim ( $decrypted_string );
 	}
 
