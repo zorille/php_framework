@@ -129,6 +129,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/pingdom" 
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/splunk" );
 /**
+ * Inclue Les class d'appel a LibreNMS
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/librenms" );
+/**
  * Inclue Les class d'appel a SolarWinds
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/solarwinds" );
