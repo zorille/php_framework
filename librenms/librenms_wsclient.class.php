@@ -24,13 +24,7 @@ class librenms_wsclient extends wsclient {
 	 * @access private
 	 * @var array.
 	 */
-	private $defaultParams = array ( 
-			'count' => 30, 
-			'offset' => 0, 
-			'search' => '', 
-			'sort_dir' => 'asc', 
-			'sort_key' => 'name', 
-			'sort_mode' => 'auto' );
+	private $defaultParams = array ();
 	/**
 	 * var privee
 	 * @access private
@@ -104,12 +98,6 @@ class librenms_wsclient extends wsclient {
 			return $this ->onError ( "Aucune definition de librenms pour " . $nom );
 		}
 		
-		if (! isset ( $liste_data_librenms ["username"] )) {
-			return $this ->onError ( "Il faut un username dans la liste des parametres librenms" );
-		}
-		if (! isset ( $liste_data_librenms ["password"] )) {
-			return $this ->onError ( "Il faut un password dans la liste des parametres librenms" );
-		}
 		if (! isset ( $liste_data_librenms ["url"] )) {
 			return $this ->onError ( "Il faut une url dans la liste des parametres librenms" );
 		}
@@ -117,11 +105,6 @@ class librenms_wsclient extends wsclient {
 		$this ->getGestionConnexionUrl () 
 			->retrouve_connexion_params ( $liste_data_librenms ) 
 			->prepare_prepend_url ( $liste_data_librenms ["url"] );
-		
-		//On prepare l'objet utilisateurs de la connexion, car l'objet curl ne connait pas l'objet datas
-		$this ->userLogin ( array ( 
-				'username' => $liste_data_librenms ["username"], 
-				'password' => $liste_data_librenms ["password"] ) );
 		
 		return $this;
 	}
