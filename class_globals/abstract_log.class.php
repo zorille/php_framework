@@ -141,6 +141,7 @@ abstract class abstract_log {
 		if (! is_array ( $message ) && ! is_object ( $message )) {
 			$message = "(" . $this ->getEntete () . ") " . $message;
 		}
+		
 		if ($code_retour == 0) {
 			$code_retour = 1;
 		}
@@ -329,6 +330,9 @@ abstract class abstract_log {
 		$retour = false;
 		$boucle = true;
 		if (is_array ( $tableau )) {
+			if(isset($tableau['password'])){
+				$tableau['password']='*********************';
+			}
 			abstract_log::affiche_ligne ( $entete . print_r ( $tableau, true ), $niveau, $verbose );
 			$retour = true;
 		}
