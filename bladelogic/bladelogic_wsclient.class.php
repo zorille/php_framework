@@ -124,8 +124,8 @@ class bladelogic_wsclient extends abstract_log {
 
 	/**
 	 *
-	 * @param unknown $wsdl
-	 * @return Ambigous <boolean, soap, false, False, soap>
+	 * @param string $wsdl
+	 * @return boolean|soap
 	 */
 	public function &connecte_bsa($wsdl) {
 		$this ->onDebug ( "connecte_bsa", 1 );
@@ -151,7 +151,7 @@ class bladelogic_wsclient extends abstract_log {
 	 * Execute la demande soap
 	 * @param string $fonction Fonction SOAP demandee
 	 * @param array $params Parametres de la fonction
-	 * @return Ambigous <false, boolean>|boolean
+	 * @return boolean
 	 */
 	public function applique_requete_soap($fonction, $params = array()) {
 		$this ->onDebug ( "applique_requete_soap", 1 );
@@ -284,7 +284,7 @@ class bladelogic_wsclient extends abstract_log {
 
 	/**
 	 * Methode temporaire @codeCoverageIgnore
-	 * @return Ambigous <false, boolean>|boolean
+	 * @return boolean
 	 */
 	private function _retrouveDonneesSoap() {
 		try {

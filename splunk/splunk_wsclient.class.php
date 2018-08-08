@@ -321,7 +321,7 @@ class splunk_wsclient extends wsclient {
 	 * Autentification
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	final public function userLogin($params = array()) {

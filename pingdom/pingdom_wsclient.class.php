@@ -130,7 +130,7 @@ class pingdom_wsclient extends wsclient {
 	/**
      * Sends are prepare_requete_json to the pingdom API and returns the response as object.
 	 *
-	 * @param   $method     Name of the API method.
+	 * @param   string $method     Name of the API method.
 	 * @return  string    API JSON response.
 	 * @throws Exception
 	 */
@@ -165,7 +165,7 @@ class pingdom_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Actions
 	 *   Method: Get Actions (Alerts) List
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getActions($params = array()) {
@@ -183,8 +183,8 @@ class pingdom_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Analysis
 	 *   Method: Get Root Cause Analysis Results List
-	 * @param   $checkid            ID to get.
-	 * @param   $params				Request Parameters
+	 * @param   integer $checkid            ID to get.
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAnalysisRootCause($checkid, $params = array()) {
@@ -204,9 +204,9 @@ class pingdom_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Analysis
 	 *   Method: Get Raw Analysis Results
-	 * @param   $checkid            ID to get.
-	 * @param   $analisysid            ID to get.
-	 * @param   $params				Request Parameters
+	 * @param   integer $checkid            ID to get.
+	 * @param   integer $analisysid            ID to get.
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAnalysisRaw($checkid, $analisysid, $params = array()) {
@@ -226,8 +226,8 @@ class pingdom_wsclient extends wsclient {
 	 * Resource: Checks
 	 *   Method: Get Check List
 	 *   Method: Get Detailed Check Information
-	 * @param   $checkid            ID to get.
-	 * @param   $params				Request Parameters
+	 * @param   integer $checkid            ID to get.
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getChecks($checkid = '', $params = array()) {
@@ -253,7 +253,7 @@ class pingdom_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Contacts
 	 *   Method: Get Contacts List
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getContacts($params = array()) {
@@ -271,7 +271,7 @@ class pingdom_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Credits
 	 *   Method: Get Credits List
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getCredits($params = array()) {

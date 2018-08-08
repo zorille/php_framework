@@ -73,7 +73,7 @@ class splunk_search_jobs extends splunk_search {
 	 * Get details of all current searches.  
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllJobs($params = array()) {
@@ -90,7 +90,7 @@ class splunk_search_jobs extends splunk_search {
 	 * Start a new search and return the search ID (<sid>) 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function runSingleJob($search, $params = array()) {

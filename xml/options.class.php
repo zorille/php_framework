@@ -265,8 +265,8 @@ class options extends xml {
 
 	/**
 	 * Attribut une valeur par defaut au parametre dans $option
-	 * @param unknown $option
-	 * @param unknown $plusieurs_vars
+	 * @param options $option
+	 * @param boolean $plusieurs_vars
 	 * @return options
 	 */
 	private function _setOptionParDefaut($option, $plusieurs_vars) {
@@ -578,7 +578,7 @@ class options extends xml {
 	 * Verifie la presence d'une variable necessaires au traitement.<br>
 	 *
 	 * @param string|array $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
-	 * @return 1 si la variable existe en ligne de commande, 2 si la variable existe en fichier de conf, FALSE sinon
+	 * @return integer 1 si la variable existe en ligne de commande, 2 si la variable existe en fichier de conf, FALSE sinon
 	 */
 	public function verifie_variable_standard($option_xml) {
 		$this->onDebug ( __METHOD__, 2 );

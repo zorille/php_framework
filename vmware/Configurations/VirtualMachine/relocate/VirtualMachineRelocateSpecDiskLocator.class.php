@@ -14,7 +14,7 @@ class VirtualMachineRelocateSpecDiskLocator extends VirtualMachineCommun {
 	 * var privee
 	 * ManagedObjectReference to a Datastore
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $datastore = array ();
 	/**

@@ -65,7 +65,7 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * var privee
 	 *
 	 * @access private
-	 * @var zabbix_usergroup_permissions
+	 * @var zabbix_permissions
 	 */
 	private $liste_permission = null;
 

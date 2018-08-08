@@ -97,7 +97,7 @@ class splunk_datamodel_pivot_name extends splunk_datamodel_pivot {
 	 * Access a specific data model. 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getPivotInformations($params = array()) {

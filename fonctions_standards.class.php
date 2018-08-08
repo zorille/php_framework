@@ -95,7 +95,7 @@ class fonctions_standards extends abstract_log {
 			if ($facteur === 1)
 				$CODE_RETOUR = $taille;
 			else
-				$CODE_RETOUR = floor ( substr ( $taille, 0, count ( $taille ) - 3 ) / $facteur );
+				$CODE_RETOUR = floor ( trim(substr ( $taille, 0, count ( $taille ) - 3 )) / $facteur );
 		}
 		return $CODE_RETOUR;
 	}

@@ -79,7 +79,7 @@ class ssh2_commandes extends abstract_log {
 	/**
 	 * Instancie une connexion avec les cle public/privee (voir help du ssh2_connect du plugin ssh2)
 	 * @codeCoverageIgnore
-	 * @param ressource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
+	 * @param resource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
 	 * @param string $username Username de connexion
 	 * @param string $pubkey Pubkey de connexion
 	 * @param string $privkey Privkey de connexion
@@ -98,7 +98,7 @@ class ssh2_commandes extends abstract_log {
 	/**
 	 * Instancie une connexion avec un user/mot de passe (voir help du ssh2_connect du plugin ssh2)
 	 * @codeCoverageIgnore
-	 * @param ressource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
+	 * @param resource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
 	 * @param string $username Username de connexion
 	 * @param string $password Password de connexion
 	 * @return boolean Returns true on success or false on failure.
@@ -115,7 +115,7 @@ class ssh2_commandes extends abstract_log {
 	/**
 	 * Execute une commande ssh (voir help du ssh2_exec du plugin ssh2)
 	 * @codeCoverageIgnore
-	 * @param ressource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
+	 * @param resource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
 	 * @param string $commande commande a excuter
 	 * @return boolean Returns array of streams on success or false on failure.
 	 * @throws Exception
@@ -136,7 +136,7 @@ class ssh2_commandes extends abstract_log {
 	/**
 	 * Execute une commande ssh (voir help du ssh2_shell du plugin ssh2)
 	 * @codeCoverageIgnore
-	 * @param ressource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
+	 * @param resource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
 	 * @param string $type_shell commande a excuter
 	 * @return boolean Returns array of streams on success or false on failure.
 	 * @throws Exception
@@ -158,7 +158,7 @@ class ssh2_commandes extends abstract_log {
 	/**
 	 * envoie un fichier (voir help du ssh2_scp_send du plugin ssh2)
 	 * @codeCoverageIgnore
-	 * @param ressource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
+	 * @param resource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
 	 * @param string $source Fichier source
 	 * @param string $dest Nom complet du fichier de destination
 	 * @param string $create_mode Code Hexa de creation de fichier
@@ -176,7 +176,7 @@ class ssh2_commandes extends abstract_log {
 	/**
 	 * Recupere un fichier (voir help du ssh2_scp_send du plugin ssh2)
 	 * @codeCoverageIgnore
-	 * @param ressource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
+	 * @param resource $session An SSH connection link identifier, obtained from a call to ssh2_connect.
 	 * @param string $source Fichier source
 	 * @param string $dest Nom complet du fichier de destination
 	 * @param string $create_mode Code Hexa de creation de fichier

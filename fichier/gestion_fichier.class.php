@@ -88,7 +88,6 @@ class gestion_fichier extends variables_standards {
 	 * @param int $hour heure du fichier a copier (cookie_log).
 	 * @param int $min Minute du fichier a copier (cookie_log).
 	 * @param int $sec seconde du fichier a copier (cookie_log).
-	 * @param services $liste_services Pointeur sur un objet services.
 	 * @param int $genday Date de generation au format standard.
 	 * @return true
 	 */

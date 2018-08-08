@@ -97,7 +97,7 @@ class splunk_datamodel_model_name extends splunk_datamodel_model {
 	 * Access a specific data model. 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getModelInformations($params = array()) {
@@ -115,7 +115,7 @@ class splunk_datamodel_model_name extends splunk_datamodel_model {
 	 * Update a specific data model.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function updateModel($params = array()) {

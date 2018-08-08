@@ -275,7 +275,7 @@ class Telnet extends abstract_log {
 	 * Lit un caractere sur la connexion.
 	 * @codeCoverageIgnore
 	 *
-	 * @return char Donnee lue.
+	 * @return string Donnee lue.
 	 */
 	public function getc() {
 		return fgetc ( $this->socket );
@@ -285,7 +285,7 @@ class Telnet extends abstract_log {
 	 * Lit un caractere sur la connexion.
 	 * @codeCoverageIgnore
 	 *
-	 * @return char Donnee lue.
+	 * @return string Donnee lue.
 	 */
 	public function clearBuffer() {
 		$this->buffer = '';

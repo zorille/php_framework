@@ -15,7 +15,7 @@ class sftp_z extends ssh_z {
 	/**
 	 * var privee
 	 * @access private
-	 * @var handler
+	 * @var resource
 	 */
 	private $sftp_connexion = false;
 	/**
@@ -236,8 +236,8 @@ class sftp_z extends ssh_z {
 	/**
 	 * Lit un dossier distant
 	 * @codeCoverageIgnore
-	 * @param unknown $remote_file
-	 * @return Ambigous <false, boolean>|multitype:string
+	 * @param string $remote_file
+	 * @return multitype:string
 	 */
 	public function lire_dossier($remote_file) {
 		if (! $this->tester_sftp_existe) {
@@ -264,7 +264,7 @@ class sftp_z extends ssh_z {
 	 * Supprime un fichier distant
 	 * @codeCoverageIgnore
 	 * @param string $remote_file
-	 * @return Ambigous <false, boolean>
+	 * @return boolean
 	 */
 	public function supprime_fichier($remote_file) {
 		if (! $this->tester_sftp_existe) {
@@ -278,7 +278,6 @@ class sftp_z extends ssh_z {
 	 */
 	public function __destruct() {
 		$this->ssh_close ();
-		unset ( $this );
 	}
 	
 	/******************************* ACCESSEURS ********************************/

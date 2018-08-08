@@ -98,7 +98,7 @@ class splunk_datamodel_acceleration_name extends splunk_datamodel_acceleration {
 	 *
 	 * Return system datamodel_acceleration
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getDatamodelAccelerationName($params = array()) {

@@ -79,7 +79,7 @@ class splunk_scheduled_views extends splunk_scheduled {
 	 * List all scheduled view objects.  
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllScheduledViews($params = array()) {

@@ -72,7 +72,7 @@ class splunk_saved_searches extends splunk_saved {
 	 * Access saved search configurations.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllJobs($params = array()) {

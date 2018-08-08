@@ -273,7 +273,7 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 
 	/**
 	 * Fait un PowerOn sur la VM
-	 * @param HostSystem $host (optional) The host where the virtual machine is to be powered on
+	 * @param vmwareHostSystem $host (optional) The host where the virtual machine is to be powered on
 	 * @return array|false
 	 */
 	public function PowerOnVM_Task($host = "") {

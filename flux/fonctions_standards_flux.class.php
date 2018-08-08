@@ -316,7 +316,7 @@ class fonctions_standards_flux extends abstract_log {
 	 * Creer la connexion en fonction du type demande.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Pointeur sur un objet options.
-	 * @param $type_connexion Type de connexion ssh/rsync/ftp.
+	 * @param string $type_connexion Type de connexion ssh/rsync/ftp.
 	 * @param String $compte user du comte a utiliser (compte par defaut).
 	 */
 	public function creer_objet_flux(&$liste_option, $type_connexion, $compte = 'compte') {
@@ -358,7 +358,7 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param string $dest	Chemin complet de la destination local.
 	 * @param string $type_connexion Type de connexion ssh/rsync.
 	 * @param string|false $machine_dest Machine de destination.
-	 * @param $machine_source|false Machine source.
+	 * @param string|false $machine_source|false Machine source.
 	 * @return true
 	 */
 	public function affiche_resume_debug($protocole, $source, $dest, $type_connexion, $machine_dest = false, $machine_source = false, $compte = 'compte') {

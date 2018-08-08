@@ -24,7 +24,7 @@ class itop_OSVersion extends itop_ci {
 	/**
 	 * Instancie un objet de type itop_OSVersion. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param itop_webservice_rest $itop_webservice_rest Reference sur un objet itop_webservice_rest
+	 * @param itop_wsclient_rest $itop_webservice_rest Reference sur un objet itop_webservice_rest
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return itop_OSVersion
@@ -71,7 +71,15 @@ class itop_OSVersion extends itop_ci {
 			->retrouve_ci ();
 	}
 
-	public function creer_oql($name) {
+	/**
+	 *
+	 * @param string $name Nom du CI
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return itop_OSVersion
+	 */
+	public function creer_oql (
+	    $name,
+	    $fields = array()) {
 		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . " WHERE name='" . $name . "'" );
 	}
 

@@ -85,7 +85,7 @@ class vmwareSearchIndex extends abstract_log {
 	/************************* Methodes VMWare ***********************/
 	/**
 	 *
-	 * @param ManagedEntity $ManagedEntity_ref
+	 * @param vmwareManagedEntity $ManagedEntity_ref
 	 * @return array|false
 	 */
 	public function FindChild($ManagedEntity_ref, $name = "") {

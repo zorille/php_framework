@@ -217,7 +217,7 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * Pour les multi-bases :<br> --sql=multi <br> --noms_sgbd=\"NOM_BD1 NOM_BD2 ...\"<br> --NOM_BD1_dbhost=xx <br> --NOM_BD1_username=xx <br> --NOM_BD1_password=xx <br> --NOM_BD1_database=xx <br> --NOM_BD1_SQL_type=mysql //par defaut mysql<br> --NOM_BD1_SQL_sort_en_erreur=oui //par defaut oui<br> --NOM_BD1_using=oui/non //par defaut oui<br> --NOM_BD2_dbhost=xx <br> .<br> .<br> .
 	 *
 	 * @param options &$liste_option Pointeur sur les arguments
-	 * @return db array false un objet DB, soit un tableau d'objet DB, soit FALSE en cas d'erreur.
+	 * @return connexion|array|false un objet DB, soit un tableau d'objet DB, soit FALSE en cas d'erreur.
 	 */
 	static public function creer_connexion_liste_option(&$liste_option) {
 		// voir help SQL
@@ -309,7 +309,7 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * Applique une requete sur la base defini dans les options.<br> Si la connexion n'existe pas, la fonction cree la connexion et la referme.<br> Include : $INCLUDE_FONCTIONS<br> @codeCoverageIgnore
 	 * @param options &$liste_option Liste d'options.
 	 * @param string $requete Requete a appliquer.
-	 * @param db $connexion_local Connexion des type bd pour appliquer la requete.
+	 * @param connexion $connexion_local Connexion des type bd pour appliquer la requete.
 	 * @return array false un tableau de resultat, FALSE sinon.
 	 */
 	static public function requete_sql(&$liste_option, $requete, $connexion_local = "non") {
@@ -444,28 +444,6 @@ class fonctions_standards_sgbd extends abstract_log {
 	 */
 	static public function recupere_db_sitescope(&$connexion, $sort_en_erreur = false) {
 		return fonctions_standards_sgbd::recupere_db ( $connexion, "sitescope", $sort_en_erreur );
-	}
-
-	/**
-	 * Set le $db_bo avec la base bo standard.
-	 *
-	 * @param array $connexion
-	 * @param bool $sort_en_erreur
-	 * @return requete_complexe_bo false renvoi l'objet requete_complexe_bo, false en cas d'erreur.
-	 */
-	static public function recupere_db_bo(&$connexion, $sort_en_erreur = false) {
-		return fonctions_standards_sgbd::recupere_db ( $connexion, "bo", $sort_en_erreur );
-	}
-
-	/**
-	 * Set le $db_cmdb_vodafone avec la base cmdb_vodafone standard.
-	 *
-	 * @param array $connexion
-	 * @param bool $sort_en_erreur
-	 * @return requete_complexe_cmdb_vodafone false renvoi l'objet requete_complexe_cmdb_vodafone, false en cas d'erreur.
-	 */
-	static public function recupere_db_cmdb_vodafone(&$connexion, $sort_en_erreur = false) {
-		return fonctions_standards_sgbd::recupere_db ( $connexion, "cmdb_vodafone", $sort_en_erreur );
 	}
 
 	/**

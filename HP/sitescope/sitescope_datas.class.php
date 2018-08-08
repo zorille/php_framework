@@ -184,7 +184,7 @@ class sitescope_datas extends serveur_datas {
 	 * Execute la demande soap
 	 * @param string $fonction Fonction SOAP demandee
 	 * @param array $params Parametres de la fonction
-	 * @return Ambigous <false, boolean>|boolean
+	 * @return boolean
 	 */
 	public function applique_requete_soap($fonction, $params = array()) {
 		$this->onDebug ( "applique_requete_soap", 1 );

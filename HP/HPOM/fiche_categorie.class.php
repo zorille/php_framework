@@ -262,7 +262,7 @@ class fiche_categorie extends abstract_log {
 		$this->onDebug ( $CMAs, 2 );
 		
 		if (isset ( $CMAs ["xymon"] )) {
-			$liste_xymon = split ( "\|", $CMAs ["xymon"] );
+			$liste_xymon = explode ( "|", $CMAs ["xymon"] );
 			if ($liste_xymon !== false && count ( $liste_xymon ) == 3) {
 				$this->setFA ( $liste_xymon [0] )
 					->setImpact ( $liste_xymon [1] )

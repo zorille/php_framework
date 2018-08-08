@@ -73,7 +73,7 @@ class splunk_messages extends splunk_ci {
 	 *
 	 * Return system messages
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllSystemMessages($params = array()) {
@@ -90,7 +90,7 @@ class splunk_messages extends splunk_ci {
 	 * Create a persistent message displayed at /services/messages.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function postNewMessage($name, $message, $severity = "info", $params = array()) {

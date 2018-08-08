@@ -72,7 +72,7 @@ class splunk_datamodel_model extends splunk_datamodel {
 	 * List data models on the server.  
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllModel($params = array()) {
@@ -89,7 +89,7 @@ class splunk_datamodel_model extends splunk_datamodel {
 	 * Create a new data model (TODO) 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function createNewModel($datamodel, $params = array()) {

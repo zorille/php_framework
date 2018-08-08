@@ -31,7 +31,7 @@ class VirtualDiskSparseVer1BackingInfo extends VirtualDeviceFileBackingInfo {
 	/**
 	 * var privee
 	 * @access private
-	 * @var long
+	 * @var integer
 	 */
 	private $spaceUsedInKB = 0;
 	/**

@@ -38,13 +38,13 @@ class VirtualMachineConfigInfo extends VirtualMachineConfig {
 	/**
 	 * var privee
 	 * @access private
-	 * @var long
+	 * @var integer
 	 */
 	private $hotPlugMemoryIncrementSize = 0;
 	/**
 	 * var privee
 	 * @access private
-	 * @var long
+	 * @var integer
 	 */
 	private $hotPlugMemoryLimit = 0;
 	/**

@@ -14,7 +14,7 @@ class VirtualMachineRelocateSpec extends VirtualMachineCommun {
 	 * var privee
 	 * ManagedObjectReference to a Datastore
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $datastore = array ();
 	/**
@@ -41,14 +41,14 @@ class VirtualMachineRelocateSpec extends VirtualMachineCommun {
 	 * var privee
 	 * ManagedObjectReference to a Host
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $host = array ();
 	/**
 	 * var privee
 	 * ManagedObjectReference to a ResourcePool
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $pool = array ();
 	/**

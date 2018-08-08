@@ -16,7 +16,7 @@ class fichier_gz extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var handler
+	 * @var resource
 	 */
 	var $handler;
 	/**

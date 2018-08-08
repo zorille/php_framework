@@ -379,7 +379,6 @@ class groupe_forks extends abstract_log
 	 */
 	public function __destruct()
 	{
-		unset($this);
 	}
 
 	/**

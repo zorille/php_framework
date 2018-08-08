@@ -221,7 +221,7 @@ class zabbix_hostgroups extends zabbix_fonctions_standard {
 	
 	/**
 	 * Valide les groupes zabbix qui correspondent au groupid dans la liste en argument
-	 * @return zabbix_groupes
+	 * @return zabbix_hostgroups
 	 * @throws Exception
 	 */
 	public function &ajoute_liste_groupes_a_partir_de_tableau($liste_groupids) {
@@ -307,7 +307,7 @@ class zabbix_hostgroups extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve l'id d'un hostgroup
 	 * @param string $nom_hostgroup
-	 * @return strind|boolean hostgoupid ou False en cas d'erreur
+	 * @return string|boolean hostgoupid ou False en cas d'erreur
 	 */
 	public function retrouve_hostgroupId($nom_hostgroup) {
 		$this->onDebug ( __METHOD__, 1 );

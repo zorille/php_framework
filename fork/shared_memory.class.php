@@ -158,7 +158,6 @@ class shared_memory extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	function __destruct() {
-		unset ( $this );
 	}
 	
 	/******************************* ACCESSEURS ********************************/

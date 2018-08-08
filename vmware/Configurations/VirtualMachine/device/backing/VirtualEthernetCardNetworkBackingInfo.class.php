@@ -21,7 +21,7 @@ class VirtualEthernetCardNetworkBackingInfo extends VirtualDeviceDeviceBackingIn
 	 * var privee
 	 * ManagedObjectReference to a Network
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $network=array();
 	

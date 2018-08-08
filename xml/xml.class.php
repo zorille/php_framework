@@ -303,7 +303,7 @@ class xml extends abstract_log {
 	/**
 	 * Ajoute une valeur au DOM en memoire
 	 * @param string|array $champ
-	 * @param string|numeric $valeur
+	 * @param string|integer $valeur
 	 * @return xml
 	 */
 	public function ajoute_donnee($champ, $valeur) {

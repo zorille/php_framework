@@ -228,7 +228,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * Retrouve les donnees d'un ClusterComputeResource/ComputeResource
 	 *
 	 * @param string $name
-	 * @return vmware_Cluster|false
+	 * @return vmwareClusterComputeResource|false
 	 * @throws Exception
 	 */
 	public function Get_Cluster_Datas($cluster_name, $all = true, $pathSet = array(), $options = "") {
@@ -250,7 +250,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * Recherche un datacenter par nom et instancie un objet vmware_Cluster si le nom est trouve
 	 *
 	 * @param string $name
-	 * @return vmware_Cluster|false
+	 * @return vmwareClusterComputeResource|false
 	 * @throws Exception
 	 */
 	public function Get_Cluster_Name($name) {
@@ -769,7 +769,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * Fait un CreateVM_Task
 	 *
 	 * @param NetworkConfigSpec $NetworkConfigSpec
-	 * @param ResourcePool $ResourcePool
+	 * @param vmwareResourcePool $ResourcePool
 	 * @param host $host
 	 * @return array|false
 	 * @throws Exception
@@ -1042,7 +1042,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * Fait un CreateVM_Task
 	 *
 	 * @param VirtualMachineConfigSpec $VirtualMachineConfigSpec
-	 * @param ResourcePool $ResourcePool
+	 * @param vmwareResourcePool $ResourcePool
 	 * @param host $host
 	 * @return array (Task)|false
 	 * @throws Exception

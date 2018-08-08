@@ -69,7 +69,7 @@ class aws_cloudwatch extends aws_wsclient {
 	/**
 	 * 
 	 * @param array $reponse
-	 * @return Ambigous <false, boolean>|boolean
+	 * @return boolean
 	 */
 	public function valide_requete($reponse) {
 		if (isset ( $reponse ["Error"] )) {

@@ -372,7 +372,6 @@ class gestion_definition_table extends requete {
 	 * @codeCoverageIgnore
 	 */
 	public function close() {
-		unset ( $this );
 	}
 
 	/***************** Accesseurs ************/

@@ -85,7 +85,7 @@ class vmwareDiagnosticManager extends abstract_log {
 	/************************* Methodes VMWare ***********************/
 	/**
 	 *
-	 * @param hostSystem $host_ref
+	 * @param vmwareHostSystem $host_ref
 	 * @return array|false
 	 */
 	public function QueryDescriptions($host_ref) {

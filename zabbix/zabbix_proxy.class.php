@@ -48,7 +48,7 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	 * var privee
 	 *
 	 * @access private
-	 * @var zabbix_proxy_interfaces
+	 * @var zabbix_proxy_interface
 	 */
 	private $proxy_interface = null;
 	/**

@@ -14,7 +14,7 @@
 class curl extends abstract_log {
 	/**
 	 * @access protected
-	 * @var handle
+	 * @var resource
 	 */
 	private $connexion;
 	/**

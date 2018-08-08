@@ -112,7 +112,7 @@ class zabbix_host_interface extends zabbix_common_interface {
 
 	/**
 	 * Compare un objet de type zabbix_interface avec l'objet en cours
-	 * @param zabbix_interface $zabbix_interface_compare
+	 * @param zabbix_common_interface $zabbix_interface_compare
 	 * @return boolean True si les interfaces correspondent, false sinon
 	 */
 	public function compare_interface($zabbix_interface_compare) {

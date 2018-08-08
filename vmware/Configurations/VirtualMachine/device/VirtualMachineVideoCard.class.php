@@ -37,7 +37,7 @@ class VirtualMachineVideoCard extends VirtualDevice {
 	/**
 	 * var privee
 	 * @access private
-	 * @var Long
+	 * @var integer
 	 */
 	private $videoRamSizeInKB = 0;
 

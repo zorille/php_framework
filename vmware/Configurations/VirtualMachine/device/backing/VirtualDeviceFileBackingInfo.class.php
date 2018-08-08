@@ -20,7 +20,7 @@ abstract class VirtualDeviceFileBackingInfo extends VirtualDeviceBackingInfo {
 	 * var privee
 	 * ManagedObjectReference to a Datastore
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $datastore=array();
 	/**

@@ -73,7 +73,7 @@ class splunk_services_admin_summarization extends splunk_services_admin {
 	 * Get a list of field:value pairs showing current data model acceleration information.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllServicesAdminSummarization($params = array()) {

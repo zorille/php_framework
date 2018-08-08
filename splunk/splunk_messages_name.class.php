@@ -98,7 +98,7 @@ class splunk_messages_name extends splunk_messages {
 	 *
 	 * Return system messages
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getSystemMessages($params = array()) {
@@ -115,7 +115,7 @@ class splunk_messages_name extends splunk_messages {
 	 * Remove system message
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function deleteMessage($params = array()) {

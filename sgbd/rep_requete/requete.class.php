@@ -37,7 +37,7 @@ class requete extends connexion {
      * @param options $liste_option Reference sur un objet options
      * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
      * @param string $entete Entete des logs de l'objet
-     * @return db
+     * @return requete
      */
 	static function &creer_requete(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
 		$objet = new requete ( $sort_en_erreur, $entete );
@@ -52,7 +52,7 @@ class requete extends connexion {
      * Initialisation de l'objet
      * @codeCoverageIgnore
      * @param array $liste_class
-     * @return db
+     * @return requete
      */
 	public function &_initialise($liste_class) {
 		parent::_initialise ( $liste_class );
@@ -419,7 +419,7 @@ class requete extends connexion {
 	/**************************** ACCESSEURS **********************/
 	/**
  	* @codeCoverageIgnore
- 	* @param unknown $arg
+ 	* @param string|array $arg
  	* @return boolean
  	*/
 	private function _testArgument($arg) {

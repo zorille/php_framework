@@ -71,7 +71,7 @@ class comparaison_resultat_sql extends abstract_log {
 	 * Applique les requetes et renvoi un tableau "de hash" representant la liste des tuples : <br>
 	 * $tableau["champ1"]["champ2"].....["champN"]=1
 	 *
-	 * @param db $connexion Connexion ouverte sur une base (objet BD).
+	 * @param connexion $connexion Connexion ouverte sur une base (objet BD).
 	 * @param string $requete Requete a appliquer sur la base.
 	 * @return array false de resultat (liste des tuples), FALSE sinon.
 	 * @throws Exception

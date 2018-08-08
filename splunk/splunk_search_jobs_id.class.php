@@ -97,7 +97,7 @@ class splunk_search_jobs_id extends splunk_search_jobs {
 	 * Get information about the {search_id} search job. 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getJobInformations($params = array()) {
@@ -115,7 +115,7 @@ class splunk_search_jobs_id extends splunk_search_jobs {
 	 * Get {search_id} search results.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getJobResults($params = array()) {
@@ -133,7 +133,7 @@ class splunk_search_jobs_id extends splunk_search_jobs {
 	 * Preview {search_id} search results.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getJobResultsPreview($params = array()) {
@@ -151,7 +151,7 @@ class splunk_search_jobs_id extends splunk_search_jobs {
 	 * Run a job control command for the {search_id} search.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function runJob($params = array()) {

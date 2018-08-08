@@ -68,11 +68,11 @@ class slurm extends CommandLine {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @param unknown $serial
-	 * @param unknown $ram
-	 * @param unknown $disk
+	 * @param string $serial
+	 * @param integer $ram
+	 * @param string $disk
 	 * @param number $cpu
-	 * @return boolean|Ambigous <string, false>
+	 * @return boolean|string
 	 */
 	private function _attribut($serial, $ram, $disk, $cpu = 1) {
 		$this->onDebug ( "_attribution du calculateur pour le serial : " . $serial, 1 );
@@ -88,7 +88,7 @@ class slurm extends CommandLine {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @param unknown $serial
+	 * @param string $serial
 	 * @return boolean
 	 */
 	private function _libere($serial) {
@@ -185,7 +185,7 @@ class slurm extends CommandLine {
 
 	/**
  	* @codeCoverageIgnore
- 	* @param unknown $serial
+ 	* @param string $serial
 	*/
 	public function creer_slurmid($serial) {
 		$this->slurmid = $serial . "_" . mt_rand ();

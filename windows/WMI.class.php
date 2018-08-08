@@ -74,7 +74,7 @@ class WMI extends abstract_log {
 
 	/**
 	 * 
-	 * @param unknown $objet
+	 * @param WMI $objet
 	 * @return multitype:multitype:
 	 * @codeCoverageIgnore
 	 */
@@ -110,8 +110,8 @@ class WMI extends abstract_log {
 
 	/**
 	 * 
-	 * @param unknown $donnees
-	 * @param unknown $properties
+	 * @param object $donnees
+	 * @param array $properties
 	 * @return WMI
 	 * @codeCoverageIgnore
 	 */
@@ -165,8 +165,8 @@ class WMI extends abstract_log {
 
 	/**
 	 * 
-	 * @param unknown $donnees
-	 * @param unknown $tableau
+	 * @param object $donnees
+	 * @param array $tableau
 	 * @return WMI
 	 */
 	public function lire_Methods($donnees, &$tableau) {
@@ -188,8 +188,8 @@ class WMI extends abstract_log {
 
 	/**
 	 * 
-	 * @param unknown $donnees
-	 * @param unknown $tableau
+	 * @param object $donnees
+	 * @param array $tableau
 	 * @return WMI
 	 */
 	public function lire_Qualifiers($donnees, &$tableau) {

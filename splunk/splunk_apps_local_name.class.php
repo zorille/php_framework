@@ -96,7 +96,7 @@ class splunk_apps_local_name extends splunk_apps_local {
 	 * List information about the {name} app. 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getNamedLocalApps($params = array()) {

@@ -24,7 +24,7 @@ class itop_OtherSoftware extends itop_FunctionalCI {
 	/**
 	 * Instancie un objet de type itop_OtherSoftware. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param itop_webservice_rest $itop_webservice_rest Reference sur un objet itop_webservice_rest
+	 * @param itop_wsclient_rest $itop_webservice_rest Reference sur un objet itop_webservice_rest
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return itop_OtherSoftware

@@ -54,13 +54,14 @@ class definition_fichier extends variables_standards {
 	
 	/**
 	 * @codeCoverageIgnore
-	 * @return unknown_type
+	 * @return definition_fichier
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
 		$this->structure_fichier = false;
+		return $this;
 	}
 
 	/**

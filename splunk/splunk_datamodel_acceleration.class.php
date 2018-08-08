@@ -72,7 +72,7 @@ class splunk_datamodel_acceleration extends splunk_datamodel {
 	 * List datamodels acceleration on the server.  
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllDatamodelAcceleration($params = array()) {

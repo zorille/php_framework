@@ -195,7 +195,7 @@ class serveur_fichier extends abstract_log {
 	 * 
 	 * @param $position
 	 * @param $id_retour
-	 * @return unknown_type
+	 * @return serveur_fichier
 	 */
 	private function _prepareGestionFichier($position, $id_retour) {
 		if (! isset ( $this->liste_reponse [$position] )) {
@@ -209,6 +209,8 @@ class serveur_fichier extends abstract_log {
 			if ($id === false)
 				array_push ( $this->liste_reponse [$position] ["retour"], $id_retour );
 		}
+		
+		return $this;
 	}
 
 	/**

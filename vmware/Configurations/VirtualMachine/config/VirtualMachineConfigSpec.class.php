@@ -20,7 +20,7 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * var privee
 	 * @access private
-	 * @var long
+	 * @var integer
 	 */
 	private $memoryMB = 2048;
 	/**

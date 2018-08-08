@@ -28,7 +28,7 @@ class zabbix_usergroups extends zabbix_fonctions_standard {
 	 * var privee
 	 *
 	 * @access private
-	 * @var zabbix_user_group
+	 * @var zabbix_usergroup
 	 */
 	private $zabbix_group_reference = "";
 

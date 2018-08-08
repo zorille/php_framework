@@ -161,7 +161,7 @@ class zabbix_common_interface extends zabbix_fonctions_standard {
 	 * @param string $UseIp IP/FQDN utilise l'ip ou la resolution DNS
 	 * @param string $IP IP du CI
 	 * @param string $FQDN FQDN du CI
-	 * @return zabbix_common_interfaces
+	 * @return zabbix_common_interface
 	 * @throws Exception
 	 */
 	public function creer_une_interface($UseIp, $IP, $FQDN) {

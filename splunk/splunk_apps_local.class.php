@@ -72,7 +72,7 @@ class splunk_apps_local extends splunk_apps {
 	 * List installed apps and properties. 
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getAllLocalApps($params = array()) {

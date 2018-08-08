@@ -154,9 +154,9 @@ class zabbix_wsclient extends wsclient {
      * Sends are prepare_requete_json to the zabbix API and returns the response
 	 *          as object.
 	 *
-	 * @param   $method     Name of the API method.
-	 * @param   $params     Additional parameters.
-	 * @param   $auth       Enable auth string (default TRUE).
+	 * @param   string $method     Name of the API method.
+	 * @param   array $params     Additional parameters.
+	 * @param   boolean $auth       Enable auth string (default TRUE).
 	 *
 	 * @return  stdClass    API JSON response.
 	 * @throws Exception
@@ -216,8 +216,8 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore	
      * @brief   Convertes an indexed array to an associative array.
 	 *
-	 * @param   $indexedArray           Indexed array with objects.
-	 * @param   $useObjectProperty      Object property to use as array key.
+	 * @param   object $indexedArray           Indexed array with objects.
+	 * @param   object $useObjectProperty      Object property to use as array key.
 	 *
 	 * @retval  associative Array
 	 */
@@ -257,7 +257,7 @@ class zabbix_wsclient extends wsclient {
 	 * Example for this behaviour are delete operations, which are directly
 	 * expecting an array of IDs '[ 1,2,3 ]' instead of '{ ids: [ 1,2,3 ] }'.
 	 *
-	 * @param   $params     Params array.
+	 * @param   array $params     Params array.
 	 *
 	 * @retval  Array
 	 */
@@ -297,7 +297,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -326,7 +326,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -354,7 +354,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -383,7 +383,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -412,7 +412,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -441,7 +441,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -470,7 +470,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -499,7 +499,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -528,7 +528,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -557,7 +557,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -586,7 +586,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -615,7 +615,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -644,7 +644,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -673,7 +673,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -702,7 +702,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -731,7 +731,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -760,7 +760,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -789,7 +789,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -818,7 +818,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -847,7 +847,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -876,7 +876,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -905,7 +905,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -934,7 +934,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -963,7 +963,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -992,7 +992,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1021,7 +1021,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1050,7 +1050,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1079,7 +1079,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1108,7 +1108,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1137,7 +1137,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1166,7 +1166,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1195,7 +1195,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1224,7 +1224,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1253,7 +1253,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1282,7 +1282,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1311,7 +1311,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1340,7 +1340,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1369,7 +1369,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1398,7 +1398,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1427,7 +1427,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1456,7 +1456,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1485,7 +1485,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1514,7 +1514,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1543,7 +1543,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1572,7 +1572,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1601,7 +1601,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1630,7 +1630,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1659,7 +1659,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1688,7 +1688,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1717,7 +1717,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1746,7 +1746,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1775,7 +1775,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1804,7 +1804,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1833,7 +1833,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1862,7 +1862,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1891,7 +1891,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1920,7 +1920,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1949,7 +1949,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -1978,7 +1978,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2007,7 +2007,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2036,7 +2036,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2065,7 +2065,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2094,7 +2094,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2123,7 +2123,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2152,7 +2152,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2181,7 +2181,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2210,7 +2210,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2239,7 +2239,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2268,7 +2268,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2297,7 +2297,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2326,7 +2326,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2355,7 +2355,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2384,7 +2384,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2413,7 +2413,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2442,7 +2442,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2471,7 +2471,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2500,7 +2500,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2529,7 +2529,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2558,7 +2558,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2587,7 +2587,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2616,7 +2616,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2645,7 +2645,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2674,7 +2674,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2703,7 +2703,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2732,7 +2732,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2761,7 +2761,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2790,7 +2790,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2819,7 +2819,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2848,7 +2848,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2877,7 +2877,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2906,7 +2906,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2935,7 +2935,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2964,7 +2964,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -2993,7 +2993,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3022,7 +3022,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3051,7 +3051,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3080,7 +3080,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3109,7 +3109,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3138,7 +3138,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3167,7 +3167,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3196,7 +3196,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3225,7 +3225,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3254,7 +3254,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3283,7 +3283,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3312,7 +3312,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3341,7 +3341,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3370,7 +3370,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3399,7 +3399,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3428,7 +3428,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3457,7 +3457,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3486,7 +3486,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3515,7 +3515,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3544,7 +3544,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3573,7 +3573,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3602,7 +3602,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3631,7 +3631,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3660,7 +3660,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3689,7 +3689,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3718,7 +3718,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3747,7 +3747,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3776,7 +3776,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3805,7 +3805,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3834,7 +3834,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3863,7 +3863,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3892,7 +3892,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3921,7 +3921,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3950,7 +3950,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -3979,7 +3979,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4008,7 +4008,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4037,7 +4037,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4066,7 +4066,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4095,7 +4095,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4124,7 +4124,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4153,7 +4153,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4182,7 +4182,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4211,7 +4211,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4240,7 +4240,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4269,7 +4269,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4298,7 +4298,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4327,7 +4327,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4356,7 +4356,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4385,7 +4385,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4414,7 +4414,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4443,7 +4443,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4472,7 +4472,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4501,7 +4501,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4530,7 +4530,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4559,7 +4559,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4588,7 +4588,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4617,7 +4617,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4646,7 +4646,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4675,7 +4675,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4704,7 +4704,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4733,7 +4733,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4762,7 +4762,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4791,7 +4791,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4820,7 +4820,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4849,7 +4849,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4878,7 +4878,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4907,7 +4907,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4936,7 +4936,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4965,7 +4965,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -4994,7 +4994,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5023,7 +5023,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5052,7 +5052,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5081,7 +5081,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5110,7 +5110,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5139,7 +5139,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5168,7 +5168,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5197,7 +5197,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5226,7 +5226,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5255,7 +5255,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5284,7 +5284,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5313,7 +5313,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5342,7 +5342,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5371,7 +5371,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5400,7 +5400,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5429,7 +5429,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5458,7 +5458,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5487,7 +5487,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5516,7 +5516,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5545,7 +5545,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5574,7 +5574,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5603,7 +5603,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5632,7 +5632,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5661,7 +5661,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5690,7 +5690,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5719,7 +5719,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5748,7 +5748,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5777,7 +5777,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5806,7 +5806,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5835,7 +5835,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5864,7 +5864,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5893,7 +5893,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5922,7 +5922,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5951,7 +5951,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -5980,7 +5980,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6009,7 +6009,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6038,7 +6038,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6067,7 +6067,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6096,7 +6096,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6125,7 +6125,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6154,7 +6154,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6183,7 +6183,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6212,7 +6212,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6241,7 +6241,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6270,7 +6270,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6299,7 +6299,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6328,7 +6328,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6357,7 +6357,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6386,7 +6386,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6415,7 +6415,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6444,7 +6444,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6473,7 +6473,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6502,7 +6502,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6531,7 +6531,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6560,7 +6560,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6589,7 +6589,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6618,7 +6618,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6647,7 +6647,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6676,7 +6676,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6705,7 +6705,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6734,7 +6734,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6763,7 +6763,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6792,7 +6792,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6821,7 +6821,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6850,7 +6850,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6879,7 +6879,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6908,7 +6908,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6937,7 +6937,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6966,7 +6966,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -6995,7 +6995,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7024,7 +7024,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7053,7 +7053,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7082,7 +7082,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7111,7 +7111,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7140,7 +7140,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7169,7 +7169,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7198,7 +7198,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7227,7 +7227,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7256,7 +7256,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7285,7 +7285,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7314,7 +7314,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7343,7 +7343,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7372,7 +7372,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7401,7 +7401,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7430,7 +7430,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7459,7 +7459,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7488,7 +7488,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7517,7 +7517,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7546,7 +7546,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7575,7 +7575,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7604,7 +7604,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7633,7 +7633,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7662,7 +7662,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7691,7 +7691,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7720,7 +7720,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7749,7 +7749,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7778,7 +7778,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7807,7 +7807,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7836,7 +7836,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7865,7 +7865,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7894,7 +7894,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7923,7 +7923,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7952,7 +7952,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -7981,7 +7981,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8010,7 +8010,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8039,7 +8039,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8068,7 +8068,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8097,7 +8097,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8126,7 +8126,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8155,7 +8155,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8184,7 +8184,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8213,7 +8213,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8242,7 +8242,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8271,7 +8271,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8300,7 +8300,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass
@@ -8329,7 +8329,7 @@ class zabbix_wsclient extends wsclient {
 	 * this $arrayKeyProperty is any property of the returned JSON objects
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param   $params             Parameters to pass through.
+	 * @param   array $params             Parameters to pass through.
 	 * @param   $arrayKeyProperty   Object property for key of array.
 	 *
 	 * @retval  stdClass

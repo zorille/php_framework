@@ -967,7 +967,6 @@ class message extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	function __destruct() {
-		unset ( $this );
 		return true;
 	}
 }

@@ -121,14 +121,14 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * var privee
 	 *
 	 * @access private
-	 * @var zabbix_host_hostgroups
+	 * @var zabbix_hostgroups
 	 */
 	private $host_groups = null;
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var zabbix_host_templates
+	 * @var zabbix_templates
 	 */
 	private $host_templates = null;
 	/**
@@ -353,7 +353,7 @@ class zabbix_host extends zabbix_fonctions_standard {
 	
 	/**
 	 * Valide qu'un hostid est present
-	 * @return Ambigous <false, boolean>|zabbix_host
+	 * @return zabbix_host
 	 * @throws Exception 
 	 */
 	public function valide_hostid_present(){

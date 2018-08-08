@@ -44,7 +44,7 @@ class VirtualMachineCloneSpec extends VirtualMachineCommun {
 	 * var privee
 	 * ManagedObjectReference to a VirtualMachineSnapshot
 	 * @access private
-	 * @var ManagedObjectReference
+	 * @var array
 	 */
 	private $snapshot = array ();
 	/**

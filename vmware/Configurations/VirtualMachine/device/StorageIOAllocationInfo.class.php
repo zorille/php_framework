@@ -13,7 +13,7 @@ class StorageIOAllocationInfo extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var Long
+	 * @var integer
 	 */
 	private $limit = 0;
 	/**

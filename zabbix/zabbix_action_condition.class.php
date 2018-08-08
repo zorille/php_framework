@@ -143,7 +143,7 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @param interger $event_source Id du type d'evenement lie a l'action
+	 * @param integer $event_source Id du type d'evenement lie a l'action
 	 * @param string $contition creation d'une condition a partir d'une string au format "type|operator|valeur"
 	 * @return boolean True est OK, False sinon.
 	 * @throws Exception

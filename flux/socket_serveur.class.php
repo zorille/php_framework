@@ -15,13 +15,13 @@ class socket_serveur extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var handler
+	 * @var resource
 	 */
 	private $connexion;
 	/**
 	 * var privee
 	 * @access private
-	 * @var handler
+	 * @var resource
 	 */
 	private $socket;
 	/**

@@ -185,7 +185,6 @@ class fork extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function __destruct() {
-		unset ( $this );
 	}
 
 	/*************** ACCESSEURS *******************/

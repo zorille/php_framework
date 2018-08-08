@@ -97,7 +97,7 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	 * Access the named saved search.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getSavedSearchInformations($params = array()) {
@@ -115,7 +115,7 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	 * List available search jobs created from the {name} saved search.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getSavedSearchHistory($params = array()) {
@@ -134,7 +134,7 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	 * Dispatch the {name} saved search.
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getSavedSearchDispatch($params = array()) {
@@ -153,7 +153,7 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	 * Access {name} saved search scheduled time. 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getSavedSearchScheduledTime($params = array()) {

@@ -176,7 +176,7 @@ class vmwareCustomFieldsManager extends abstract_log {
 	
 	/**
 	 *
-	 * @param ManagedObject $obj_ref A reference to the ManagedObject used to make the method call.
+	 * @param vmwareVim25ManagedObject $obj_ref A reference to the ManagedObject used to make the method call.
 	 * @param string $key The unique key for the field definition.
 	 * @param string $value Value to be assigned to the custom field.
 	 * @return array|false

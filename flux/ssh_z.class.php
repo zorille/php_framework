@@ -20,7 +20,7 @@ class ssh_z extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var handler
+	 * @var resource
 	 */
 	private $connexion = false;
 	/**
@@ -471,7 +471,6 @@ class ssh_z extends abstract_log {
 	 */
 	public function __destruct() {
 		$this ->ssh_close ();
-		unset ( $this );
 	}
 
 	/**
@@ -479,7 +478,7 @@ class ssh_z extends abstract_log {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return handler
+	 * @return resource
 	 */
 	public function &getSshConnexion() {
 		return $this->connexion;

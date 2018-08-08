@@ -87,7 +87,7 @@ class solarwinds_wsclient_rest extends wsclient {
 	/**
 	 * Prepare l'url de connexion au solarwinds nomme $nom
 	 * @param string $nom
-	 * @return boolean|solarwinds_wsclient
+	 * @return boolean|solarwinds_wsclient_soap
 	 * @throws Exception
 	 */
 	public function prepare_connexion($nom) {
@@ -124,7 +124,7 @@ class solarwinds_wsclient_rest extends wsclient {
 	/**
      * Sends are prepare_requete_json to the solarwinds API and returns the response as object.
 	 *
-	 * @param   $method     Name of the API method.
+	 * @param   string $method     Name of the API method.
 	 * @return  string    API JSON response.
 	 * @throws Exception
 	 */
@@ -175,7 +175,7 @@ class solarwinds_wsclient_rest extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Actions
 	 *   Method: Get Actions (Alerts) List
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getQuery($params = array()) {
@@ -197,7 +197,7 @@ class solarwinds_wsclient_rest extends wsclient {
 	 * @codeCoverageIgnore
 	 * Resource: Actions
 	 *   Method: Get Actions (Alerts) List
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function postQuery($params = array()) {

@@ -114,7 +114,7 @@ class VirtualSCSIController extends VirtualController {
 	}
 
 	/**
-	 * @param $type_scsi Type de class SCSI (ParaVirtualSCSIController/VirtualBusLogicController/VirtualLsiLogicController/VirtualLsiLogicSASController)
+	 * @param string $type_scsi Type de class SCSI (ParaVirtualSCSIController/VirtualBusLogicController/VirtualLsiLogicController/VirtualLsiLogicSASController)
 	 * @codeCoverageIgnore
 	 */
 	public function &setTypeScsi($type_scsi) {

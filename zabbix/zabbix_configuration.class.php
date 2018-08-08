@@ -211,7 +211,7 @@ class zabbix_configuration extends zabbix_fonctions_standard {
 
 	/**
 	 * Valide le format d'un parametre de type boolean
-	 * @param unknown $param
+	 * @param string $param
 	 * @return zabbix_configuration
 	 */
 	public function valide_format_param(&$param) {

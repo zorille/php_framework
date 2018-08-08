@@ -13,7 +13,7 @@ class VirtualDiskVFlashCacheConfigInfo extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var Long
+	 * @var integer
 	 */
 	private $blockSizeInKB = 0;
 	/**
@@ -31,7 +31,7 @@ class VirtualDiskVFlashCacheConfigInfo extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var Long
+	 * @var integer
 	 */
 	private $reservationInMB = 0;
 	/**

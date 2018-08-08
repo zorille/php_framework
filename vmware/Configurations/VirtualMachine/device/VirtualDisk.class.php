@@ -29,14 +29,14 @@ class VirtualDisk extends VirtualDevice {
 	/**
 	 * var privee
 	 * @access private
-	 * @var Long
+	 * @var integer
 	 */
 	private $capacityInBytes = 0;
 	/**
 	 * var privee
 	 * deprecated mais obligatoire :|
 	 * @access private
-	 * @var Long
+	 * @var integer
 	 */
 	private $capacityInKB = 0;
 	/**

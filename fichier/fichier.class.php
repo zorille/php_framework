@@ -16,7 +16,7 @@ class fichier extends repertoire {
 	/**
 	 * var privee
 	 * @access private
-	 * @var handler
+	 * @var resource
 	 */
 	var $handler;
 	/**

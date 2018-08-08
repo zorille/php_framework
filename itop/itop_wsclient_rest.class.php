@@ -121,7 +121,7 @@ class itop_wsclient_rest extends wsclient {
 	/**
 	 * Sends are prepare_requete_json to the itop API and returns the response as object.
 	 *
-	 * @param $params Additional parameters. 
+	 * @param $params array Additional parameters. 
 	 * @return array
 	 * @throws Exception
 	 */
@@ -169,7 +169,7 @@ class itop_wsclient_rest extends wsclient {
 	 * The $params Array can be used, to pass through params to the itop API. For more informations about this params, check the itop API Documentation.
 	 * The $arrayKeyProperty is "PHP-internal" and can be used, to get an associatve instead of an indexed array as response. A valid value for this $arrayKeyProperty is any property of the returned JSON objects (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param $params Parameters to pass through.
+	 * @param $params array Parameters to pass through.
 	 * @param $arrayKeyProperty Object property for key of array. @retval stdClass
 	 * @throws Exception
 	 */
@@ -187,7 +187,7 @@ class itop_wsclient_rest extends wsclient {
 	 * The $params Array can be used, to pass through params to the itop API. For more informations about this params, check the itop API Documentation.
 	 * The $arrayKeyProperty is "PHP-internal" and can be used, to get an associatve instead of an indexed array as response. A valid value for this $arrayKeyProperty is any property of the returned JSON objects (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param $params Parameters to pass through.
+	 * @param $params array Parameters to pass through.
 	 * @param $arrayKeyProperty Object property for key of array. @retval stdClass
 	 * @throws Exception
 	 */
@@ -209,7 +209,7 @@ class itop_wsclient_rest extends wsclient {
 	 * The $params Array can be used, to pass through params to the itop API. For more informations about this params, check the itop API Documentation.
 	 * The $arrayKeyProperty is "PHP-internal" and can be used, to get an associatve instead of an indexed array as response. A valid value for this $arrayKeyProperty is any property of the returned JSON objects (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param $params Parameters to pass through.
+	 * @param $params array Parameters to pass through.
 	 * @param $arrayKeyProperty Object property for key of array. @retval stdClass
 	 * @throws Exception
 	 */
@@ -230,7 +230,7 @@ class itop_wsclient_rest extends wsclient {
 	 * The $params Array can be used, to pass through params to the itop API. For more informations about this params, check the itop API Documentation.
 	 * The $arrayKeyProperty is "PHP-internal" and can be used, to get an associatve instead of an indexed array as response. A valid value for this $arrayKeyProperty is any property of the returned JSON objects (e.g. name, host, hostid, graphid, screenitemid).
 	 *
-	 * @param $params Parameters to pass through.
+	 * @param $params array Parameters to pass through.
 	 * @param $arrayKeyProperty Object property for key of array. @retval stdClass
 	 * @throws Exception
 	 */

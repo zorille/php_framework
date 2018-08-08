@@ -1129,7 +1129,7 @@ class requete_complexe_sitescope extends desc_bd_sitescope {
      * Ferme la connexion.
      */
 	public function close() {
-		unset ( $this );
+		
 	}
 
 	/**

@@ -21,7 +21,7 @@ function my_autoloader($class) {
 		 * Class IOFactory
 		 */
 		require_once "/TOOLS/php_outils/Excel/PHPExcel/PHPExcel/IOFactory.php";
-	} elseif (preg_match ( "/^(PHPUnit|Composer|ZipArchive|Instantiator|LazyMap)/", $class ) !== 0) {
+	} elseif (preg_match ( "/^(PHPUnit|Composer|ZipArchive|Instantiator|LazyMap|Symfony)/", $class ) !== 0) {
 		//On ne fait rien, ce sont les tests unitaires
 	} else {
 		require_once $class . spl_autoload_extensions ();

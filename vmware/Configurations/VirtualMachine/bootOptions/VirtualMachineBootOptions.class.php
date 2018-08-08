@@ -26,7 +26,7 @@ class VirtualMachineBootOptions extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var long
+	 * @var integer
 	 */
 	private $bootRetryDelay = 0;
 	/**

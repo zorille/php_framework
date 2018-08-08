@@ -96,7 +96,7 @@ class cacti_hostsTemplates extends parametresStandard {
 	 * @param string $template Terme recherche dans le nom du template
 	 * @param string $preg_match RegExpr permetant de filtrer les templates recupere par le terme $template
 	 * @param boolean $error True pour afficher une erreur si le template n'est pas trouve,false passe en warning
-	 * @return boolean|Ambigous <boolean, unknown>
+	 * @return boolean
 	 */
 	public function retrouve_templateid_par_nom(&$db_cacti, $template, $preg_match = "/^IMSL - /", $error = true) {
 		// On retrouve l'id du template host

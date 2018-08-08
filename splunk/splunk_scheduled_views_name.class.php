@@ -97,7 +97,7 @@ class splunk_scheduled_views_name extends splunk_scheduled_views {
 	 * Access a scheduled view 
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getScheduledViewsInformations($params = array()) {
@@ -115,7 +115,7 @@ class splunk_scheduled_views_name extends splunk_scheduled_views {
 	 * List search jobs used to render the {name} scheduled view
 	 *
 	 * @codeCoverageIgnore
-	 * @param   $params				Request Parameters
+	 * @param   array $params				Request Parameters
 	 * @throws  Exception
 	 */
 	public function getScheduledViewHistory($params = array()) {

@@ -440,7 +440,7 @@ class connexion extends sql {
 	 */
 	public function close() {
 		//Pas de fermeture
-		unset ( $this );
+		
 	}
 
 	/************** Accesseur ****************/
