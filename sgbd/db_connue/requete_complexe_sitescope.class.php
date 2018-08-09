@@ -226,7 +226,7 @@ class requete_complexe_sitescope extends desc_bd_sitescope {
 	 * Retrouve le nombre de CI par client
 	 * @param string|array $serveur_id
 	 * @param string|array $name
-	 * @return Ambigous <PDO, boolean, multitype:, false>
+	 * @return PDO|boolean
 	 */
 	public function compte_ci_par_client($customer, $serveur_id, $name) {
 		//select count(distinct _name) from ci where serveur_id in (18,19,20,21,22) and _name like "%TPL%" ;
@@ -260,7 +260,7 @@ class requete_complexe_sitescope extends desc_bd_sitescope {
 	 * @param string|array $serveur_id
 	 * @param string|array $name
 	 * @param string|array $type_os 
-	 * @return Ambigous <PDO, boolean, multitype:, false>
+	 * @return PDO|boolean
 	 */
 	public function compte_ci_par_client_et_os($serveur_id, $name, $type_os) {
 		//select count(distinct _name) from ci join props on ci.id=props.parent_id where serveur_id in (18,19,20,21,22,23) and _name like "LTPL%" and _key='_os' and _value='NT' ;
@@ -401,7 +401,7 @@ class requete_complexe_sitescope extends desc_bd_sitescope {
 	 * @param string $leaf_name
 	 * @param string $serveur_id
 	 * @param string $parent_id
-	 * @return Ambigous <PDO, boolean, multitype:, false>
+	 * @return PDO|boolean
 	 */
 	public function retrouve_leaf_avec_donnees_serveur($customer = "", $leaf_name = "", $serveur_id = "", $leaf_id = "", $parent_id = "") {
 		$order = "";

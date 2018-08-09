@@ -768,9 +768,9 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * Fait un CreateVM_Task
 	 *
-	 * @param NetworkConfigSpec $NetworkConfigSpec
+	 * @param vmwareNetworkConfigSpec $NetworkConfigSpec
 	 * @param vmwareResourcePool $ResourcePool
-	 * @param host $host
+	 * @param vmwareHostSystem $host
 	 * @return array|false
 	 * @throws Exception
 	 */
@@ -1043,7 +1043,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 *
 	 * @param VirtualMachineConfigSpec $VirtualMachineConfigSpec
 	 * @param vmwareResourcePool $ResourcePool
-	 * @param host $host
+	 * @param vmwareHostSystem $host
 	 * @return array (Task)|false
 	 * @throws Exception
 	 */

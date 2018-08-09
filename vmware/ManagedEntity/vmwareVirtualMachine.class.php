@@ -176,7 +176,7 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * Fait un CloneVM sur la VM
 	 * @param string $name
-	 * @param Folder $folder
+	 * @param vmwareFolder $folder
 	 * @param VirtualMachineCloneSpec $spec
 	 * @return array|false
 	 */

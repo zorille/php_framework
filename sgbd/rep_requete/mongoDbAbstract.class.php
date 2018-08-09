@@ -15,7 +15,7 @@ class mongoDbAbstract extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var mongo
+	 * @var Mongo
 	 */
 	private $connexion;
 	/**
