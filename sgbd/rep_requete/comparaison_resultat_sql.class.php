@@ -81,7 +81,7 @@ class comparaison_resultat_sql extends abstract_log {
 		if (! is_array ( $resultat_sql )) {
 			return $this->onError ( "La liste de donnees n'est pas un tableau pour la comparaison.", $resultat_sql, 3005 );
 		} else {
-			$CODE_RETOUR = "";
+			$CODE_RETOUR = array();
 		}
 		// On joue avec les adresses memoires pour creer le tableau de hash
 		foreach ( $resultat_sql as $row ) {

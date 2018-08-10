@@ -65,7 +65,7 @@ class zabbix_fonctions_standard extends abstract_log {
 	}
 
 	/**
-	 * Extrait des parametres d'un liste d'option
+	 * Extrait des parametres d'une liste d'option
 	 * @codeCoverageIgnore
 	 * @param string|array $chemin_option
 	 * @return boolean string array

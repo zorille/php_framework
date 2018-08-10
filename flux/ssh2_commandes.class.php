@@ -150,7 +150,7 @@ class ssh2_commandes extends abstract_log {
 		$stderr_stream = ssh2_fetch_stream ( $stdout_stream, SSH2_STREAM_STDERR );
 		stream_set_blocking ( $stdio_stream, true );
 		stream_set_blocking ( $stderr_stream, true );
-		flush ( $stdio_stream );
+		flush ( );
 	
 		return array("stdio"=>$stdio_stream,"stdout"=>$stdout_stream,"stderr"=>$stderr_stream);
 	}
