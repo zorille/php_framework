@@ -22,14 +22,7 @@ class dolibarr_wsclient extends wsclient {
 	 * @access private
 	 * @var array.
 	 */
-	private $defaultParams = array (
-			'count' => 30,
-			'offset' => 0,
-			'search' => '',
-			'sort_dir' => 'asc',
-			'sort_key' => 'name',
-			'sort_mode' => 'auto'
-	);
+	private $defaultParams = array ();
 	/**
 	 * var privee
 	 * @access private
