@@ -125,6 +125,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/itop" );
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/pingdom" );
 /**
+ * Inclue Les class d'appel a Dolibarr
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/dolibarr" );
+/**
  * Inclue Les class d'appel a Splunk
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/splunk" );
