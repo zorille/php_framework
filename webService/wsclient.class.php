@@ -173,9 +173,10 @@ class wsclient extends abstract_log {
 	/**
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"return_code":0}
 	 * @param string $retour_json
+	 * @param boolean $return_array
 	 * @return array
 	 */
-	public function traite_retour_json($retour_json) {
+	public function traite_retour_json($retour_json,$return_array=true) {
 		$this ->onDebug ( __METHOD__, 1 );
 		$this ->onDebug ( "Retour JSON selectionne", 2 );
 		$this ->onDebug ( $retour_json, 2 );
@@ -190,7 +191,7 @@ class wsclient extends abstract_log {
 			$tableau_resultat ["return_code"] = 0;
 			$tableau_resultat ["message"] = "";
 		} else {
-			$tableau_resultat = json_decode ( $retour_json, true );
+			$tableau_resultat = json_decode ( $retour_json, $return_array );
 		}
 		
 		$this ->onDebug ( "tableau JSON de retour :", 2 );
