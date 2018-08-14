@@ -148,7 +148,7 @@ abstract class dolibarr_ci extends abstract_log {
 		if (isset ( $ListEntryArray ['success'] )) {
 			return $ListEntryArray ['success'];
 		}
-		return array ();
+		return $ListEntryArray;
 	}
 
 	/**
