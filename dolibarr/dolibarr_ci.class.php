@@ -80,12 +80,11 @@ abstract class dolibarr_ci extends abstract_log {
 	}
 
 	/**
-	 * @param object|array $retour
 	 * @return dolibarr_ci
 	 * @throws Exception
 	 */
-	public function verifie_erreur(
-			$retour) {
+	public function verifie_erreur() {
+		$retour = $this->getContent ();
 		if ($retour == NULL) {
 			return $this->onError ( "Erreur durant la requete : le retour est NULL", "" );
 		}
@@ -93,7 +92,13 @@ abstract class dolibarr_ci extends abstract_log {
 			if (isset ( $retour ['debug'] )) {
 				$this->onDebug ( $retour ['debug'], 1 );
 			}
-			return $this->onError ( "Erreur durant la requete : " . $retour ['error'] ['message'], "", $retour ['error'] ['code'] );
+			//Dolibarr renvoi un 404 lorsqu'il n'y a pas de resultat a la requete emise
+			if (strpos ( $retour ['error'] ['message'], "No category found" ) !== false) {
+				$this->onWarning ( $retour ['error'] ['message'] );
+				$this->setListEntry ( array () );
+			} else {
+				return $this->onError ( "Erreur durant la requete : " . $retour ['error'] ['message'], "", $retour ['error'] ['code'] );
+			}
 		}
 		return $this;
 	}
@@ -104,11 +109,11 @@ abstract class dolibarr_ci extends abstract_log {
 	 */
 	public function get(
 			$params) {
-		$results = $this->getObjetdolibarrWsclient ()
-			->getMethod ( $this->prepare_url (), $params );
-		$this->verifie_erreur ( $results );
-		$this->setListEntry ( $this->recupereListEntry ( $results ) );
-		return $results;
+		$this->setContent ( $this->getObjetdolibarrWsclient ()
+			->getMethod ( $this->prepare_url (), $params ) )
+			->recupereListEntry ()
+			->verifie_erreur ();
+		return $this;
 	}
 
 	/**
@@ -117,11 +122,11 @@ abstract class dolibarr_ci extends abstract_log {
 	 */
 	public function post(
 			$params) {
-		$results = $this->getObjetdolibarrWsclient ()
-			->postMethod ( $this->prepare_url (), $params );
-		$this->verifie_erreur ( $results );
-		$this->setListEntry ( $this->recupereListEntry ( $results ) );
-		return $results;
+		$this->setContent ( $this->getObjetdolibarrWsclient ()
+			->postMethod ( $this->prepare_url (), $params ) )
+			->recupereListEntry ()
+			->verifie_erreur ();
+		return $this;
 	}
 
 	/**
@@ -130,11 +135,11 @@ abstract class dolibarr_ci extends abstract_log {
 	 */
 	public function delete(
 			$params) {
-		$results = $this->getObjetdolibarrWsclient ()
-			->deleteMethod ( $this->prepare_url (), $params );
-		$this->verifie_erreur ( $results );
-		$this->setListEntry ( $this->recupereListEntry ( $results ) );
-		return $results;
+		$this->setContent ( $this->getObjetdolibarrWsclient ()
+			->deleteMethod ( $this->prepare_url (), $params ) )
+			->recupereListEntry ()
+			->verifie_erreur ();
+		return $this;
 	}
 
 	/**
@@ -143,12 +148,12 @@ abstract class dolibarr_ci extends abstract_log {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function recupereListEntry(
-			$ListEntryArray) {
+	public function recupereListEntry() {
+		$ListEntryArray = $this->getContent ();
 		if (isset ( $ListEntryArray ['success'] )) {
-			return $ListEntryArray ['success'];
+			return $this->setListEntry ( $ListEntryArray ['success'] );
 		}
-		return $ListEntryArray;
+		return $this->setListEntry ( $ListEntryArray );
 	}
 
 	/**

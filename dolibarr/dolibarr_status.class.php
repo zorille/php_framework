@@ -22,39 +22,44 @@ class dolibarr_status extends dolibarr_ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return dolibarr_status
 	 */
-	static function &creer_dolibarr_status(&$liste_option, &$dolibarr_webservice_rest, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_dolibarr_status(
+			&$liste_option,
+			&$dolibarr_webservice_rest,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new dolibarr_status ( $sort_en_erreur, $entete );
-		$objet ->_initialise ( array ( 
-				"options" => $liste_option, 
-				"dolibarr_wsclient" => $dolibarr_webservice_rest ) );
-		
+		$objet->_initialise ( array (
+				"options" => $liste_option,
+				"dolibarr_wsclient" => $dolibarr_webservice_rest
+		) );
 		return $objet;
 	}
 
 	/**
-	 * Initialisation de l'objet 
+	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return dolibarr_status
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
-		
-		 return $this ->reset_resource();
+		return $this->reset_resource ();
 	}
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
-	
 	/**
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
 	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		// Gestion du parent
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -64,43 +69,37 @@ class dolibarr_status extends dolibarr_ci {
 	 * @return dolibarr_status
 	 */
 	public function &reset_resource() {
-		return parent::reset_resource () ->addResource ( 'status' );
+		return parent::reset_resource ()->addResource ( 'status' );
 	}
 
 	/**
-	 * Resource: status
-	 *   Method: Get 
-	 * Get details of all current searches.  
-	 * 
+	 * Resource: status Method: Get Get details of all current searches.
+	 *
 	 * @codeCoverageIgnore
-	 * @param   array $params				Request Parameters
-	 * @throws  Exception
+	 * @param array $params Request Parameters
+	 * @throws Exception
 	 */
-	public function getStatus($params = array()) {
-		$this ->onDebug ( __METHOD__, 1 );
-		$results = $this ->reset_resource () 
+	public function getStatus(
+			$params = array()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->reset_resource ()
 			->get ( $params );
-		
-		return $results;
+		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
 	static public function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "dolibarr_status :";
-		
 		return $help;
 	}
 }

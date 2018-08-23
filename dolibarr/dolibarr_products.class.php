@@ -81,15 +81,13 @@ class dolibarr_products extends dolibarr_ci {
 	public function getAllProducts(
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$results = $this->reset_resource ()
+		$this->reset_resource ()
 			->get ( $params );
-		return $results;
+		return $this;
 	}
 
 	/**
-	 * Resource: products Method: Get 
-	 * Get categories for a product 
-	 * params : sortfield,sortorder,limit,page 
+	 * Resource: products Method: Get Get categories for a product params : sortfield,sortorder,limit,page
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
@@ -98,30 +96,12 @@ class dolibarr_products extends dolibarr_ci {
 			$product_id,
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$results = $this->reset_resource ()
+		$this->reset_resource ()
 			->addResource ( $product_id )
 			->addResource ( 'categories' )
 			->get ( $params );
-		return $results;
+		return $this;
 	}
-
-	/**
-	 * Resource: products Method: Post Start a new search and return the search ID (<sid>)
-	 *
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function runSingleProduct(
-			$search,
-			$params = array()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$params ['search'] = $search;
-		$results = $this->reset_resource ()
-			->post ( $params );
-		return $results;
-	}
-
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
