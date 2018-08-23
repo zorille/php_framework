@@ -57,13 +57,17 @@ class itop_ci extends abstract_log {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return itop_ci
 	 */
-	static function &creer_itop_ci(&$liste_option, &$itop_webservice_rest, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_itop_ci(
+			&$liste_option,
+			&$itop_webservice_rest,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new itop_ci ( $sort_en_erreur, $entete );
-		$objet ->_initialise ( array ( 
-				"options" => $liste_option, 
-				"itop_wsclient_rest" => $itop_webservice_rest ) );
-		
+		$objet->_initialise ( array (
+				"options" => $liste_option,
+				"itop_wsclient_rest" => $itop_webservice_rest
+		) );
 		return $objet;
 	}
 
@@ -72,66 +76,67 @@ class itop_ci extends abstract_log {
 	 * @param array $liste_class
 	 * @return itop_ci
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
-		
-		return $this ->setObjetItopWsclientRest ( $liste_class ["itop_wsclient_rest"] );
+		return $this->setObjetItopWsclientRest ( $liste_class ["itop_wsclient_rest"] );
 	}
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
-	
 	/**
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
 	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
-	
+
 	/**
 	 * Cree un ligne type ' AND champ1='valeur1' AND champ2='valeur2' ... etc
 	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
 	 * @return string
 	 */
-	public function prepare_oql_fields (
+	public function prepare_oql_fields(
 			$fields) {
-				$liste_fields = "";
-				foreach ( $fields as $champ => $valeur ) {
-					$liste_fields .= " AND " . $champ . "='" . $valeur . "'";
-				}
-				return $liste_fields;
+		$liste_fields = "";
+		foreach ( $fields as $champ => $valeur ) {
+			$liste_fields .= " AND " . $champ . "='" . $valeur . "'";
+		}
+		return $liste_fields;
 	}
-	
+
 	/**
 	 * Enregistre les donnees class, key et fields du premier objet de la reponse REST
 	 * @param array $ci Retour d'un requete REST sur itop
 	 * @return itop_ci
 	 */
-	public function enregistre_ci_a_partir_rest($ci) {
+	public function enregistre_ci_a_partir_rest(
+			$ci) {
 		foreach ( $ci ['objects'] as $donnees ) {
-			$this ->setFormat ( $donnees ['class'] ) 
-				->setId ( $donnees ['key'] ) 
+			$this->setFormat ( $donnees ['class'] )
+				->setId ( $donnees ['key'] )
 				->setDonnees ( $donnees ['fields'] );
 			break;
 		}
-		
 		return $this;
 	}
 
 	/**
-	 * Permet de trouver un CI dans itop a partir d'une requete OQL 
+	 * Permet de trouver un CI dans itop a partir d'une requete OQL
 	 * @return itop_ci|false False en cas d'erreur sans leve d'Exception ($error=false)
 	 * @throws Exception
 	 */
 	public function recupere_ci_dans_itop() {
-		//Sinon, on requete iTop
-		return $this ->getObjetItopWsclientRest () 
-			->core_get ( $this ->getFormat (), $this ->getOqlCi () );
+		// Sinon, on requete iTop
+		return $this->getObjetItopWsclientRest ()
+			->core_get ( $this->getFormat (), $this->getOqlCi () );
 	}
 
 	/**
@@ -140,18 +145,17 @@ class itop_ci extends abstract_log {
 	 * @throws Exception
 	 */
 	public function retrouve_ci() {
-		//Si il y a deja un objet itop_ci, alors le ci existe
-		if ( $this ->getDonnees () ) {
+		// Si il y a deja un objet itop_ci, alors le ci existe
+		if ($this->getDonnees ()) {
 			return $this;
 		}
-		//Sinon, on requete iTop
-		$ci = $this ->recupere_ci_dans_itop ();
+		// Sinon, on requete iTop
+		$ci = $this->recupere_ci_dans_itop ();
 		if ($ci ['message'] != 'Found: 1') {
-			//Le ci n'existe pas donc on emet une exception
-			return $this ->onError ( "Probleme avec la requete : " . $this ->getOqlCi () . " : " . $ci ['message'] );
+			// Le ci n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la requete : " . $this->getOqlCi () . " : " . $ci ['message'] );
 		}
-		
-		return $this ->enregistre_ci_a_partir_rest ( $ci );
+		return $this->enregistre_ci_a_partir_rest ( $ci );
 	}
 
 	/**
@@ -159,19 +163,18 @@ class itop_ci extends abstract_log {
 	 * @return itop_ci|null
 	 */
 	public function valide_ci_existe() {
-		//Si il y a deja un objet itop_ci, alors le ci existe
-		if ( $this ->getDonnees () ) {
+		// Si il y a deja un objet itop_ci, alors le ci existe
+		if ($this->getDonnees ()) {
 			return $this;
 		}
-		//Sinon, on requete iTop
-		$ci = $this ->recupere_ci_dans_itop ();
+		// Sinon, on requete iTop
+		$ci = $this->recupere_ci_dans_itop ();
 		if ($ci ['message'] != 'Found: 1') {
-			//Le ci n'existe pas
-			$this ->onDebug ( "Probleme avec la requete : " . $this ->getOqlCi () . " : " . $ci ['message'], 1 );
+			// Le ci n'existe pas
+			$this->onDebug ( "Probleme avec la requete : " . $this->getOqlCi () . " : " . $ci ['message'], 1 );
 			return null;
 		}
-		
-		return $this ->enregistre_ci_a_partir_rest ( $ci );
+		return $this->enregistre_ci_a_partir_rest ( $ci );
 	}
 
 	/**
@@ -181,16 +184,16 @@ class itop_ci extends abstract_log {
 	 * @return itop_ci
 	 * @throws Exception
 	 */
-	public function creer_ci($name, $params) {
-		$this ->onDebug ( __METHOD__, 1 );
-		
-		if (! $this ->valide_ci_existe ()) {
-			$this ->onInfo ( "Ajout de : " . $name );
-			$ci = $this ->getObjetItopWsclientRest () 
-				->core_create ( $this ->getFormat (), '', $params );
-			$this ->enregistre_ci_a_partir_rest ( $ci );
+	public function creer_ci(
+			$name,
+			$params) {
+		$this->onDebug ( __METHOD__, 1 );
+		if (! $this->valide_ci_existe ()) {
+			$this->onInfo ( "Ajout de : " . $name );
+			$ci = $this->getObjetItopWsclientRest ()
+				->core_create ( $this->getFormat (), '', $params );
+			$this->enregistre_ci_a_partir_rest ( $ci );
 		}
-		
 		return $this;
 	}
 
@@ -207,9 +210,9 @@ class itop_ci extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFormat($format) {
+	public function &setFormat(
+			$format) {
 		$this->format = $format;
-		
 		return $this;
 	}
 
@@ -223,9 +226,9 @@ class itop_ci extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setId($id) {
+	public function &setId(
+			$id) {
 		$this->id = $id;
-		
 		return $this;
 	}
 
@@ -239,7 +242,8 @@ class itop_ci extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDonnees($donnees) {
+	public function &setDonnees(
+			$donnees) {
 		if (is_array ( $donnees )) {
 			$this->donnees = $donnees;
 		}
@@ -257,9 +261,9 @@ class itop_ci extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopWsclientRest(&$itop_wsclient_rest) {
+	public function &setObjetItopWsclientRest(
+			&$itop_wsclient_rest) {
 		$this->itop_wsclient_rest = $itop_wsclient_rest;
-		
 		return $this;
 	}
 
@@ -273,25 +277,22 @@ class itop_ci extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOqlCi($oql_ci) {
+	public function &setOqlCi(
+			$oql_ci) {
 		$this->oql_ci = $oql_ci;
-		
 		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
 	static public function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "itop_ci :";
-		
 		return $help;
 	}
 }

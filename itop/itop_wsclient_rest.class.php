@@ -139,7 +139,9 @@ class itop_wsclient_rest extends wsclient {
 			$this ->onDebug ( "DRY RUN :" . print_r ( $prepare_requete_json, true ), 1 );
 			return '';
 		} else {
-			$this ->onDebug ( $prepare_requete_json, 2 );
+			$debug_tableau=$prepare_requete_json;
+			$debug_tableau['auth_pwd']='******************************';
+			$this ->onDebug ( $debug_tableau, 2 );
 			$this ->setPostDatas ( $prepare_requete_json );
 			
 			$retour_json = $this ->envoi_requete ( array ( 
