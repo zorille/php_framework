@@ -29,6 +29,11 @@ class curl extends abstract_log {
 	private $code_retour_curl=200;
 	/**
 	 * @access protected
+	 * @var boolean
+	 */
+	private $valide_code_retour=true;
+	/**
+	 * @access protected
 	 * @var string
 	 */
 	private $UAgent = "Mozilla/5.0 (Windows NT 6.0; rv:5.0) Gecko/20100101 Firefox/5.0";
@@ -105,12 +110,25 @@ class curl extends abstract_log {
 			}
 		}
 		/* Test des codes retour HTTP. */
+		if($this->getValideCodeErreur()){
+			$this->test_code_retour($retour);
+		}
+		
+		return $retour;
+	}
+	
+	/**
+	 * Test les code retour d'erreur standard.
+	 * @return false|curl
+	 */
+	public function test_code_retour($retour){
+		/* Test des codes retour HTTP. */
 		$httpCode = $this ->curl_getinfo ();
 		if ($httpCode == 404) {
 			return $this ->onError ( "Erreur HTTP : " . $httpCode, $retour, $httpCode );
 		}
 		
-		return $retour;
+		return $this;
 	}
 
 	/**
@@ -440,6 +458,21 @@ class curl extends abstract_log {
 	 */
 	public function &setOptionArray($option_array) {
 		curl_setopt_array ( $this->getConnexion (), $option_array );
+		return $this;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getValideCodeErreur() {
+		return $this->valide_code_retour;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setValideCodeErreur($valide_code_erreur) {
+		$this->valide_code_retour = $valide_code_erreur;
 		return $this;
 	}
 	/******************** Accesseurs *****************/
