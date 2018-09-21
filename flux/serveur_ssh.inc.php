@@ -5,7 +5,8 @@
  * @package Lib
  * @subpackage Flux
 */
-
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * Permet d'ouvrir le pipe du serveur.
  * @codeCoverageIgnore

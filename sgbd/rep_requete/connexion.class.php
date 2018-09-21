@@ -3,6 +3,8 @@
 /**
  * @author dvargas
  */
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class sql<br>
  * Gere la connexion a une base SQL.

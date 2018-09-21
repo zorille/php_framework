@@ -2,6 +2,8 @@
 /**
  * @author dvargas
  */
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class procedure_stockee<br>
  * Gere la connexion a une base SQL.

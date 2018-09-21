@@ -4,6 +4,8 @@
  * @package Lib
  *
  */
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class gestion_bd_gestion_zabbix<br>
  * Gere la connexion a une base gestion_zabbix.

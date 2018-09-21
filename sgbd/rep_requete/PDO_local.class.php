@@ -2,6 +2,10 @@
 /**
  * @author dvargas
  */
+namespace Zorille\framework;
+use \Exception as Exception;
+use \PDO as PDO;
+use \PDOException as PDOException;
 /**
  * Cette class evite un new dans la class connexion pour les tests unitaires
  * @package Lib

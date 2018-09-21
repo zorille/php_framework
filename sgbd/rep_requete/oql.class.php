@@ -3,6 +3,8 @@
  * @author dvargas
  * @package Lib
  */
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class oql<br>
  * Gere la construction d'une requete SQL.

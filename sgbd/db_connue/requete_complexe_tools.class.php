@@ -4,6 +4,8 @@
  * @package Lib
  *
  */
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class requete_complexe_tools<br>
 

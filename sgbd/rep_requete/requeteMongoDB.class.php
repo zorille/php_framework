@@ -4,6 +4,12 @@
  * @package Lib
  *
  */
+namespace Zorille\framework;
+use \Exception as Exception;
+use \MongoId as MongoId;
+use \MongoRegex as MongoRegex;
+use \MongoDate as MongoDate;
+use \MongoException as MongoException;
 /**
  * class requeteMongoDB<br>
  * 

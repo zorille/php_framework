@@ -4,6 +4,22 @@
  * @package Lib
  *
  */
+namespace Zorille\framework;
+use \Exception as Exception;
+use \Mongo as Mongo;
+use \InvalidArgumentException as InvalidArgumentException;
+use \MongoDB as MongoDB;
+use \MongoId as MongoId;
+use \MongoDBRef as MongoDBRef;
+use \MongoRegex as MongoRegex;
+use \MongoDate as MongoDate;
+use \MongoCursor as MongoCursor;
+use \MongoCollection as MongoCollection;
+use \MongoException as MongoException;
+use \MongoCursorException as MongoCursorException;
+use \MongoCursorTimeoutException as MongoCursorTimeoutException;
+use \MongoConnectionException as MongoConnectionException;
+
 /**
  * class mongoDbAbstract<br>
  * 

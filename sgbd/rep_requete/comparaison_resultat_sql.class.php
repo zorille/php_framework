@@ -3,6 +3,8 @@
  * Permet la comparaison de gros tableau de 1 niveau
  * @author dvargas
  */
+namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class comparaison_resultat_sql
  *
