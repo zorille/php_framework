@@ -5,7 +5,6 @@
  * 
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class gestion_fichier<br>
  * @codeCoverageIgnore

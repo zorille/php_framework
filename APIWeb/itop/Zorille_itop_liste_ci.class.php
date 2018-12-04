@@ -12,7 +12,7 @@ use \Exception as Exception;
  * @package iTop
  * @subpackage liste_ci
  */
-class liste_ci extends abstract_log {
+class liste_ci extends Core\abstract_log {
 	/**
 	 * var privee
 	 *

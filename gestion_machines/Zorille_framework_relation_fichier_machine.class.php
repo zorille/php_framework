@@ -5,7 +5,6 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class copie_donnees<br>
  *
@@ -339,6 +338,7 @@ class relation_fichier_machine extends definition_fichier {
 					"filer",
 					"liste_machines" 
 			) ) as $nom => $machine ) {
+				$machine;
 				$this->structure_variable_machines ( $nom );
 			}
 		} else {

@@ -6,6 +6,7 @@
  */
 namespace Zorille\framework;
 use \Exception as Exception;
+use \SimpleXMLElement as SimpleXMLElement;
 /**
  * class librenms_wsclient<br>
  *

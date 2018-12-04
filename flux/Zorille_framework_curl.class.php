@@ -303,6 +303,9 @@ class curl extends abstract_log {
 			case "any" :
 				curl_setopt ( $this->getConnexion (), CURLOPT_HTTPAUTH, CURLAUTH_ANY );
 				break;
+			case "basic" :
+				curl_setopt ( $this->getConnexion (), CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+				break;
 		}
 
 		return $this;

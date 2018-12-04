@@ -6,7 +6,6 @@
  * @subpackage Flux
 */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * Permet d'ouvrir le pipe du serveur.
  * @codeCoverageIgnore
@@ -79,7 +78,6 @@ function traite_message(&$fichier_log, $message, &$liste_ssh) {
 */
 function creer_connexion_ssh_serveur(&$liste_donnees, &$liste_ssh) {
 	if (count ( $liste_donnees ) == 11) {
-		$machine_distante = $liste_donnees [1];
 		if (! isset ( $liste_ssh [$liste_donnees [1]] )) {
 			$liste_ssh [$liste_donnees [1]] = ssh_z::creer_ssh_z ( $liste_option, $liste_donnees [2], $liste_donnees [3], $liste_donnees [4], $liste_donnees [5], $liste_donnees [6], $liste_donnees [7], $liste_donnees [8], $liste_donnees [9], $liste_donnees [10] );
 		}
@@ -98,7 +96,7 @@ function creer_connexion_ssh_serveur(&$liste_donnees, &$liste_ssh) {
 function connecter_ssh(&$liste_donnees, &$liste_ssh) {
 	if (count ( $liste_donnees ) == 3) {
 		if (! isset ( $liste_ssh [$liste_donnees [0]] )) {
-			$CODE_RETOUR = $liste_ssh [$liste_donnees [0]]->ssh_connect ( $liste_donnees [0], $liste_donnees [2] );
+			$liste_ssh [$liste_donnees [0]]->ssh_connect ( $liste_donnees [0], $liste_donnees [2] );
 		}
 	}
 	
@@ -115,7 +113,7 @@ function connecter_ssh(&$liste_donnees, &$liste_ssh) {
 function commande_ssh(&$liste_donnees, &$liste_ssh) {
 	if (count ( $liste_donnees ) == 3) {
 		if (! isset ( $liste_ssh [$liste_donnees [0]] )) {
-			$CODE_RETOUR = $liste_ssh [$liste_donnees [0]]->ssh_commande ( $liste_donnees [1], $liste_donnees [2] );
+			$liste_ssh [$liste_donnees [0]]->ssh_commande ( $liste_donnees [1], $liste_donnees [2] );
 		}
 	}
 	

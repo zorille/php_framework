@@ -5,7 +5,6 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class xymon_client<br>
  * Gere un point de monitoring.
@@ -339,8 +338,8 @@ class xymon_client extends moniteur {
 	 * @return true.
 	 */
 	public function send($mail_to, $mail_from) {
-		$output = array ();
-		$flag = false;
+		//output = array ();
+		//flag = false;
 		
 		if (strlen ( $this->getDatas () ) > 32000) {
 			$donnees = "&" . $this->getYellow () . " Argument list too long\n";

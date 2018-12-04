@@ -188,8 +188,8 @@ class wsclient_soap extends Core\abstract_log {
 		$liste_cis = array ();
 		if (is_array ( $ci )) {
 			foreach ( $ci as $ci_type => $ci_name ) {
-				$liste_cis [count ( $liste_cis )] = new SOAPLinkCreationSpec ( $ci_type, array (
-						new SOAPSearchCondition ( 'name', $ci_name ) ), array () );
+				$liste_cis [count ( $liste_cis )] = new Core\SOAPLinkCreationSpec ( $ci_type, array (
+						new Core\SOAPSearchCondition ( 'name', $ci_name ) ), array () );
 			}
 		} else {
 			$this ->onError ( "Le champ ci doit etre un tableau", $ci );
@@ -243,8 +243,8 @@ class wsclient_soap extends Core\abstract_log {
 		$liste_cis = array ();
 		if (is_array ( $ci )) {
 			foreach ( $ci as $ci_type => $ci_name ) {
-				$liste_cis [count ( $liste_cis )] = new SOAPLinkCreationSpec ( $ci_type, array (
-						new SOAPSearchCondition ( 'name', $ci_name ) ), array () );
+				$liste_cis [count ( $liste_cis )] = new Core\SOAPLinkCreationSpec ( $ci_type, array (
+						new Core\SOAPSearchCondition ( 'name', $ci_name ) ), array () );
 			}
 		} else {
 			$this ->onError ( "Le champ ci doit etre un tableau", $ci );
@@ -301,12 +301,12 @@ class wsclient_soap extends Core\abstract_log {
 
 	/**
 	 * Gestion des erreur iTop
-	 * @param SOAPResult $resultat_soap
+	 * @param Core\SOAPResult $resultat_soap
 	 * @return wsclient_soap
 	 * @throws Exception
 	 */
 	public function gestion_erreur($resultat_soap) {
-		if(!$resultat_soap instanceof SOAPResult){
+		if(!$resultat_soap instanceof Core\SOAPResult){
 			return $this;
 		}
 		//Gestion des erreurs
@@ -339,8 +339,8 @@ class wsclient_soap extends Core\abstract_log {
 	 */
 	public function creer_SOAPExternalKeySearch_par_name($valeur) {
 		if ($valeur != '') {
-			$valeur_search = new SOAPExternalKeySearch ( array (
-					new SOAPSearchCondition ( 'name', $valeur ) ) );
+			$valeur_search = new Core\SOAPExternalKeySearch ( array (
+					new Core\SOAPSearchCondition ( 'name', $valeur ) ) );
 		} else {
 			$valeur_search = '';
 		}

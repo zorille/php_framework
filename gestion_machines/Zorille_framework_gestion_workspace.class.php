@@ -5,7 +5,6 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class dossier_standard<br>
  *
@@ -109,7 +108,7 @@ class gestion_workspace extends abstract_log {
 	 */
 	public function supprime_workspace() {
 		$this->onDebug ( "supprime_workspace : ", 1 );
-		foreach ( $this->getWorkspace() as $type => $donnee ) {
+		foreach ( $this->getWorkspace() as $donnee ) {
 			$this->onDebug ( "Suppression du dossier : " . $donnee ["dir"], 1 );
 			//$sup=repertoire::supprimer_repertoire($donnee["dir"]);
 			$cmd = "rm -Rf " . $donnee ["dir"]." 2> /dev/null";

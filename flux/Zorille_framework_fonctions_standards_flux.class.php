@@ -5,7 +5,6 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class fonctions_standards_flux<br>
  * 
@@ -511,7 +510,7 @@ class fonctions_standards_flux extends abstract_log {
 							"commande",
 							"mkdir" 
 					) ) . " -p " . $dossier_dest . " ; fi\"";
-					$output = $this->class_standard->applique_commande_systeme ( $CMD );
+					$this->class_standard->applique_commande_systeme ( $CMD );
 					$CODE_RETOUR = $this->copie_rsync ( $liste_option, $source, $dest, $machine_dest, "envoi", $erreur );
 					break;
 				case "ftp" :

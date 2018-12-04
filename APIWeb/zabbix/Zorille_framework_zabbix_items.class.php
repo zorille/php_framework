@@ -239,7 +239,7 @@ class zabbix_items extends zabbix_fonctions_standard {
 	public function supprime_items($liste_items) {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_item_finale = array ();
-		foreach ( $liste_items as $item_name => $item ) {
+		foreach ( $liste_items as $item ) {
 			$objet_item = $this->creer_item ( $item );
 			foreach ( $this->getListeItem () as $obj_item ) {
 				if ($objet_item->compare_item ( $obj_item )) {

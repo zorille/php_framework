@@ -5,7 +5,6 @@
  * 
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class copie_donnees<br>
 

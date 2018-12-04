@@ -570,7 +570,7 @@ class zabbix_item extends zabbix_fonctions_standard {
 		$this->onDebug ( __METHOD__, 1 );
 		foreach ( $donnees_item as $type => $valeur ) {
 			$method = "set" . $type;
-			if (method_exists ( "zabbix_item", $method )) {
+			if (method_exists ( 'Zorille\framework\zabbix_item', $method )) {
 				$this->$method ( $valeur );
 			}
 		}

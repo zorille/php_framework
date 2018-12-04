@@ -6,7 +6,6 @@
  */
 
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class slurm<br>
  * @codeCoverageIgnore
@@ -179,6 +178,7 @@ class slurm extends CommandLine {
 		} else {
 			$CODE_RETOUR = true;
 			foreach ( $serials_fait as $serial => $code_retour ) {
+				$code_retour;
 				$this->_libere ( $serial );
 			}
 		}

@@ -6,7 +6,7 @@
  * @package Lib
  * @subpackage Config
  */
-
+namespace Zorille\framework;
 //On creer l'objet $cacti_datas seulement si cacti_machines existe dans la liste d'option
 //Obligatoire pour les class suivante
 if ($liste_option->verifie_option_existe ( "cacti_machines" ) !== false) {
@@ -18,7 +18,7 @@ if ($liste_option->verifie_option_existe ( "cacti_machines" ) !== false) {
 // Specifiquement pour cacti, on a des INCLUDES qui permettent de charger les APIs de Cacti
 if (isset ( $INCLUDE_CACTI_DEVICE )) {
 	if ($cacti_datas !== false && $liste_option->verifie_option_existe ( "cacti_env" ) !== false) {
-		$no_http_headers = true;
+		//no_http_headers = true;
 
 		$liste_includes = $cacti_datas->getIncludesData ( $liste_option->getOption ( "cacti_env" ) );
 		$path = $cacti_datas->getPathData ( $liste_option->getOption ( "cacti_env" ) );
@@ -38,7 +38,7 @@ if (isset ( $INCLUDE_CACTI_DEVICE )) {
 } elseif (isset ( $INCLUDE_CACTI_ADDTREE )) {
 	// Specifiquement pour cacti, on a des INCLUDES qui permettent de charger les APIs de Cacti
 	if ($cacti_datas !== false && $liste_option->verifie_option_existe ( "cacti_env" ) !== false) {
-		$no_http_headers = true;
+		//no_http_headers = true;
 
 		$liste_includes=$cacti_datas->getIncludesData($liste_option->getOption ( "cacti_env" ));
 		$path=$cacti_datas->getPathData($liste_option->getOption ( "cacti_env" ));
@@ -54,7 +54,7 @@ if (isset ( $INCLUDE_CACTI_DEVICE )) {
 } elseif (isset ( $INCLUDE_CACTI_IMPORTTEMPLATE )) {
 	// Specifiquement pour cacti, on a des INCLUDES qui permettent de charger les APIs de Cacti
 	if ($cacti_datas !== false && $liste_option->verifie_option_existe ( "cacti_env" ) !== false) {
-		$no_http_headers = true;
+		//no_http_headers = true;
 
 		$liste_includes=$cacti_datas->getIncludesData($liste_option->getOption ( "cacti_env" ));
 		$path=$cacti_datas->getPathData($liste_option->getOption ( "cacti_env" ));
@@ -67,7 +67,7 @@ if (isset ( $INCLUDE_CACTI_DEVICE )) {
 	}
 } elseif ($cacti_datas !== false && $liste_option->verifie_option_existe ( "cacti_env" ) !== false) {
 	// Specifiquement pour cacti, on a des INCLUDES qui permettent de charger les APIs de Cacti
-	$no_http_headers = true;
+	//no_http_headers = true;
 
 	$liste_includes=$cacti_datas->getIncludesData($liste_option->getOption ( "cacti_env" ));
 	$path=$cacti_datas->getPathData($liste_option->getOption ( "cacti_env" ));

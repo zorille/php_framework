@@ -6,6 +6,8 @@
  */
 namespace Zorille\framework;
 use \Exception as Exception;
+use \stdClass as stdClass;
+use \SimpleXMLElement as SimpleXMLElement;
 /**
  * class solarwinds_wsclient_soap<br> Renvoi des information via un webservice.
  * @package Lib

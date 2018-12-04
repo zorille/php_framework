@@ -10,8 +10,7 @@ namespace Zorille\framework;
 use Exception as Exception;
 
 /**
- * class wsclient<br>
- * Renvoi des information via un webservice.
+ * class wsclient<br> Renvoi des information via un webservice.
  * @package Lib
  * @subpackage WebService
  */
@@ -57,6 +56,12 @@ class wsclient extends abstract_log {
 	 * @var boolean
 	 */
 	private $validSSLcert = false;
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $httpAuth = 'any';
 	/**
 	 * @access private
 	 * @var gestion_connexion_url
@@ -291,7 +296,7 @@ class wsclient extends abstract_log {
 	 * @return wsclient
 	 */
 	public function gere_post_data() {
-		if ($this->getHttpMethod () == "POST") {
+		if ($this->getHttpMethod () == "POST" || $this->getHttpMethod () == "PUT") {
 			if ($this->getPostDatas () != "") {
 				$this->getObjetCurl ()
 					->setPostData ( $this->getPostDatas () );
@@ -317,7 +322,8 @@ class wsclient extends abstract_log {
 				->getObjetUtilisateurs ()
 				->getUsername (), $this->getGestionConnexionUrl ()
 				->getObjetUtilisateurs ()
-				->getPassword () );
+				->getPassword () )
+				->setHttpHAuth ( $this->getHttpAuth () );
 		}
 		return $this;
 	}
@@ -359,7 +365,6 @@ class wsclient extends abstract_log {
 	 */
 	public function prepare_url_get() {
 		$this->onDebug ( __METHOD__, 1 );
-		$separateur = "";
 		$url = $this->getGestionConnexionUrl ()
 			->getPrependUrl () . $this->getUrl ();
 		if (count ( $this->getParams () ) !== 0) {
@@ -495,6 +500,22 @@ class wsclient extends abstract_log {
 	public function &setValidSSL(
 			$validSSLcert) {
 		$this->validSSLcert = $validSSLcert;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getHttpAuth() {
+		return $this->httpAuth;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setHttpAuth(
+			$httpAuth) {
+		$this->httpAuth = $httpAuth;
 		return $this;
 	}
 

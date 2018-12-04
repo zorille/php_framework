@@ -176,7 +176,7 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_interface_finale = array ();
 		
-		foreach ( $liste_interfaces as $position => $interface ) {
+		foreach ( $liste_interfaces as $interface ) {
 			$objet_interface = clone $this ->getObjetHostInterfaceRef ();
 			$objet_interface ->setType ( $interface ["type"] );
 			$objet_interface ->setMain ( $interface ["main"] );

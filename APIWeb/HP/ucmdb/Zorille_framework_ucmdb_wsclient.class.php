@@ -5,7 +5,6 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class ucmdb_wsclient<br> Renvoi des information via un webservice.
  * @package Lib

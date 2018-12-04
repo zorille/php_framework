@@ -265,7 +265,6 @@ class soap extends abstract_log {
 	 */
 	public function retrouve_variables_liste_options () {
 		$this ->onDebug ( __METHOD__, 1 );
-		$serveur_data = array ();
 		if ($this ->getListeOptions () 
 			->verifie_parametre_standard ( "soap[@sort_en_erreur='oui']" )) {
 			$this ->setSortEnErreur ( true );

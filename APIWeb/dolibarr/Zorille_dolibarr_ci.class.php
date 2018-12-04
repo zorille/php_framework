@@ -1,11 +1,14 @@
 <?php
+
 /**
  * Gestion de dolibarr.
  * @author dvargas
  */
 namespace Zorille\dolibarr;
+
 use Zorille\framework as Core;
-use \Exception as Exception;
+use Exception as Exception;
+
 /**
  * class ci
  *
@@ -34,6 +37,13 @@ abstract class ci extends Core\abstract_log {
 	 * @var string
 	 */
 	private $title = "";
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $Message404Error = "";
 	/**
 	 * var privee
 	 *
@@ -95,8 +105,8 @@ abstract class ci extends Core\abstract_log {
 			if (isset ( $retour ['debug'] )) {
 				$this->onDebug ( $retour ['debug'], 1 );
 			}
-			//Dolibarr renvoi un 404 lorsqu'il n'y a pas de resultat a la requete emise
-			if (strpos ( $retour ['error'] ['message'], "No category found" ) !== false) {
+			// Dolibarr renvoi un 404 lorsqu'il n'y a pas de resultat a la requete emise
+			if (strpos ( $retour ['error'] ['message'], $this->getMessage404Error () ) !== false) {
 				$this->onWarning ( $retour ['error'] ['message'] );
 				$this->setListEntry ( array () );
 			} else {
@@ -136,6 +146,19 @@ abstract class ci extends Core\abstract_log {
 	 * @param array $params
 	 * @return array
 	 */
+	public function put(
+			$params) {
+		$this->setContent ( $this->getObjetdolibarrWsclient ()
+			->putMethod ( $this->prepare_url (), $params ) )
+			->recupereListEntry ()
+			->verifie_erreur ();
+		return $this;
+	}
+
+	/**
+	 * @param array $params
+	 * @return array
+	 */
 	public function delete(
 			$params) {
 		$this->setContent ( $this->getObjetdolibarrWsclient ()
@@ -157,6 +180,22 @@ abstract class ci extends Core\abstract_log {
 			return $this->setListEntry ( $ListEntryArray ['success'] );
 		}
 		return $this->setListEntry ( $ListEntryArray );
+	}
+
+	/**
+	 * Insert Dolibarr Single Entry
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function insertSingleEntry(
+			$liste_donnees) {
+		$this->onDebug ( __METHOD__, 1 );
+		$params = $liste_donnees;
+		$results = $this->reset_resource ()
+			->post ( $params );
+		return $results;
 	}
 
 	/**
@@ -218,6 +257,22 @@ abstract class ci extends Core\abstract_log {
 	public function &setTitle(
 			$title) {
 		$this->title = $title;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getMessage404Error() {
+		return $this->Message404Error;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setMessage404Error(
+			$Message404Error) {
+		$this->Message404Error = $Message404Error;
 		return $this;
 	}
 

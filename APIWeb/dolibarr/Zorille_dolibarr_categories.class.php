@@ -1,11 +1,14 @@
 <?php
+
 /**
  * Gestion de dolibarr.
  * @author dvargas
  */
 namespace Zorille\dolibarr;
+
 use Zorille\framework as Core;
-use \Exception as Exception;
+use Exception as Exception;
+
 /**
  * class categories
  *
@@ -30,7 +33,7 @@ class categories extends ci {
 			&$webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
-				Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
+		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new categories ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -85,6 +88,7 @@ class categories extends ci {
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
+			->setMessage404Error ( "No category found" )
 			->get ( $params );
 		return $this;
 	}

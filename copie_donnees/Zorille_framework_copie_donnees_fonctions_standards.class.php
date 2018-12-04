@@ -4,7 +4,6 @@
  * @package Lib
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class copie_donnees_fonctions_standards<br>
  *

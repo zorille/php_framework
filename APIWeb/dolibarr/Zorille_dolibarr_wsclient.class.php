@@ -1,16 +1,18 @@
 <?php
+
 /**
  * @author dvargas
  * @package Lib
  *
  */
 namespace Zorille\dolibarr;
+
 use Zorille\framework as Core;
-use \Exception as Exception;
-use \SimpleXMLElement as SimpleXMLElement;
+use Exception as Exception;
+use SimpleXMLElement as SimpleXMLElement;
+
 /**
- * class wsclient<br>
- * Renvoi des informations via un webservice.
+ * class wsclient<br> Renvoi des informations via un webservice.
  * @package Lib
  * @subpackage dolibarr
  */
@@ -182,7 +184,7 @@ class wsclient extends Core\wsclient {
 	public function prepare_requete() {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
-			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'DELETE')) {
+				->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' ||$this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
 			$this->onInfo ( "DRY RUN :" . $this->getUrl () );
 			$this->onInfo ( "DRY RUN :" . print_r ( $this->getParams (), true ) );
 		} else {
@@ -263,6 +265,24 @@ class wsclient extends Core\wsclient {
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "POST" )
+			->setPostDatas ( http_build_query ( $full_params ) );
+		return $this->prepare_requete ();
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @param string $resource Url Resource
+	 * @param array $params Data to send
+	 * @return SimpleXMLElement
+	 * @throws Exception
+	 */
+	public function putMethod(
+			$resource,
+			$params = array()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$full_params = array_merge ( $this->getDefaultParams (), $params );
+		$this->setUrl ( $resource )
+			->setHttpMethod ( "PUT" )
 			->setPostDatas ( http_build_query ( $full_params ) );
 		return $this->prepare_requete ();
 	}

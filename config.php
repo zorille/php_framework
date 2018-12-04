@@ -168,7 +168,7 @@ if (isset ( $INCLUDE_THRIFT )) {
  * Inclue THRIFT
  */
 if (isset ( $INCLUDE_GRAPHVIZ )) {
-	set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_outils . "/graphiz" );
+	set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_outils . "/graphviz" );
 }
 
 
@@ -185,6 +185,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/zabbix
  * Inclue Les class d'appel a iTop
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop" );
+/**
+ * Inclue Les class d'appel a OPNSense
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/opnsense" );
 /**
  * Inclue Les class d'appel a PingDom
  */

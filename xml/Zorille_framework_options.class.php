@@ -220,6 +220,7 @@ class options extends xml {
 		$this->onDebug ( __METHOD__, 2 );
 		$dossiers_conf = $this->getListeDossiersConf ();
 		foreach ( $dossiers_conf as $dossier_conf => $datas ) {
+			$datas;
 			$fichier_conf = repertoire::lire_repertoire ( $dossier_conf );
 			$regexp = $this->getRegexpConfDir ();
 			foreach ( $fichier_conf as $conf ) {

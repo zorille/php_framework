@@ -4,7 +4,6 @@
  * @author dvargas
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class CommandLine
  * @package Lib
@@ -117,7 +116,7 @@ class CommandLine extends abstract_log {
 		if (count ( $liste_fichiers ) > 0) {
 			$liste_ligne_commande = "";
 			//On creer des listes
-			foreach ( $liste_fichiers as $id => $fichier ) {
+			foreach ( $liste_fichiers as $fichier ) {
 				//Si l'entree est vide on boucle
 				if ($fichier === "") {
 					continue;

@@ -132,15 +132,16 @@ class gestion_connexion_url extends abstract_log {
 			$this->setHttps ( true );
 		}
 		
+		// @codeCoverageIgnoreStart
 		//Si on force l'utilisation du tunnel ssh via --use_tunnel
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "use_tunnel" ) !== false && isset ( $serveur_data ["tunnel"] )) {
 			$this->setTunnel ( $serveur_data ["tunnel"] )
 				->utilise_tunnel ();
-			// @codeCoverageIgnoreStart
+			
 			return $this;
-			// @codeCoverageIgnoreEnd
 		}
+		// @codeCoverageIgnoreEnd
 		
 		// Le proxy est par defaut
 		if (isset ( $serveur_data ["proxy"] )) {
@@ -180,6 +181,7 @@ class gestion_connexion_url extends abstract_log {
 			// @codeCoverageIgnoreStart
 			//On ne peut pas tester une methode static
 			$tunnel = $this->getTunnel ();
+			var_dump($tunnel);
 			if (! isset ( $tunnel ["host"] ) || ! isset ( $tunnel ["port"] )) {
 				return $this->onError ( "Il manque des parametres obligatoire dans la definition du tunnel (host ou port)" );
 			}

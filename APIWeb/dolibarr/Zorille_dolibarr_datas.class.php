@@ -5,7 +5,6 @@
  */
 namespace Zorille\dolibarr;
 use Zorille\framework as Core;
-use \Exception as Exception;
 /**
  * class datas
  *

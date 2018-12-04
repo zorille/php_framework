@@ -4,7 +4,6 @@
  * @package Lib
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class fonctions_standards_dates.
  * @package Lib
@@ -36,7 +35,7 @@ class fonctions_standards_dates extends abstract_log {
 	
 	/**
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
-	 *
+	 * @codeCoverageIgnore
 	 * @param string $sort_en_erreur Prend les valeurs true/false.
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {

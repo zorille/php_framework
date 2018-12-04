@@ -374,7 +374,6 @@ class logs {
 	 */
 	public function valide_exit_web() {
 		if ($this ->getIsWeb () === true) {
-			$resultat = $this ->getResultat ();
 			
 			if ($this ->getExit () != 0) {
 				$this ->AjouteMessageResultat ( false, 'success' );

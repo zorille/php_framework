@@ -205,7 +205,7 @@ class zabbix_usergroups extends zabbix_fonctions_standard {
 	public function supprime_groups($liste_groups) {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_group_finale = array ();
-		foreach ( $liste_groups as $usergroup_name => $usergroup ) {
+		foreach ( $liste_groups as $usergroup ) {
 			$objet_group = $this->creer_usergroup ( $usergroup );
 			foreach ( $this->getListeGroup () as $obj_group ) {
 				if ($objet_group->compare_usergroup ( $obj_group )) {

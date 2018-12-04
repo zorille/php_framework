@@ -739,7 +739,8 @@ class ssh_z extends abstract_log {
 	 * @param int $timeout Temps de vie du tunnel
 	 */
 	static function creer_tunnel_temporaire($passerelle, $port_passerelle, $host_distant, $port_distant, $timeout = 60, $ssh_option = "", $ssh = "/usr/bin/ssh") {
-		$retour = fonctions_standards::applique_commande_systeme ( $ssh . " " . $ssh_option . " -f -L " . $port_passerelle . ":" . $host_distant . ":" . $port_distant . " " . $passerelle . " sleep " . $timeout . " >> /tmp/logfile 2>&1" );
+		$cmd=$ssh . " " . $ssh_option . " -f -L " . $port_passerelle . ":" . $host_distant . ":" . $port_distant . " " . $passerelle . " sleep " . $timeout . " >> /tmp/logfile 2>&1";
+		$retour = fonctions_standards::applique_commande_systeme ( $cmd );
 		
 		if ($retour [0] != 0) {
 			return abstract_log::onError_standard ( "Connexion ssh en erreur." );

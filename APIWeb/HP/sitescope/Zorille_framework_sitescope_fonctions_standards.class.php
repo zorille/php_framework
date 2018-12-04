@@ -188,7 +188,7 @@ class sitescope_fonctions_standards extends abstract_log {
 	 */
 	public function creer_arbre_dependance_from_FullConf() {
 		$dependance = array ();
-		foreach ( $this->getArbreMoniteurs () as $groupe => $liste_moniteurs_machine ) {
+		foreach ( $this->getArbreMoniteurs () as $liste_moniteurs_machine ) {
 			foreach ( $liste_moniteurs_machine as $moniteur ) {
 				if (isset ( $moniteur ["entitySnapshot_properties"] ["_ownerID"] )) {
 					$dependance [$moniteur ["entitySnapshot_properties"] ["_ownerID"] . " " . $moniteur ["entitySnapshot_properties"] ["_id"]] = $moniteur ["entitySnapshot_properties"] ["_name"];
@@ -213,7 +213,7 @@ class sitescope_fonctions_standards extends abstract_log {
 		// Pour chaque machine, on retrouve le detail des informations
 		if (isset ( $full_confs ["snapshot_preferenceSnapShot"] ["snapshot_remoteNTSnapshotChildren"] )) {
 			$this->onDebug ( "snapshot_remoteNTSnapshotChildren", 1 );
-			foreach ( $full_confs ["snapshot_preferenceSnapShot"] ["snapshot_remoteNTSnapshotChildren"] as $name => $machine_data ) {
+			foreach ( $full_confs ["snapshot_preferenceSnapShot"] ["snapshot_remoteNTSnapshotChildren"] as $machine_data ) {
 				$arbre_machines ["RemoteNTInstancePreferences_" . $machine_data ["entitySnapshot_properties"] ["_id"]] = $machine_data ["entitySnapshot_properties"];
 				$arbre_machines ["RemoteNTInstancePreferences_" . $machine_data ["entitySnapshot_properties"] ["_id"]] ["type_os"] = 1;
 				$arbre_machines ["machines"] [$machine_data ["entitySnapshot_properties"] ["_host"]] = "RemoteNTInstancePreferences_" . $machine_data ["entitySnapshot_properties"] ["_id"];
@@ -221,7 +221,7 @@ class sitescope_fonctions_standards extends abstract_log {
 		}
 		if (isset ( $full_confs ["snapshot_preferenceSnapShot"] ["snapshot_remoteUNIXSnapshotChildren"] )) {
 			$this->onDebug ( "snapshot_remoteUNIXSnapshotChildren", 1 );
-			foreach ( $full_confs ["snapshot_preferenceSnapShot"] ["snapshot_remoteUNIXSnapshotChildren"] as $name => $machine_data ) {
+			foreach ( $full_confs ["snapshot_preferenceSnapShot"] ["snapshot_remoteUNIXSnapshotChildren"] as $machine_data ) {
 				$arbre_machines ["RemoteUnixInstancePreferences_" . $machine_data ["entitySnapshot_properties"] ["_id"]] = $machine_data ["entitySnapshot_properties"];
 				$arbre_machines ["RemoteUnixInstancePreferences_" . $machine_data ["entitySnapshot_properties"] ["_id"]] ["type_os"] = 2;
 				$arbre_machines ["machines"] [$machine_data ["entitySnapshot_properties"] ["_host"]] = "RemoteUnixInstancePreferences_" . $machine_data ["entitySnapshot_properties"] ["_id"];

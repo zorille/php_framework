@@ -8,7 +8,7 @@
  */
 namespace Zorille\framework;
 
-$rep_vmware=$rep_lib . "/vmware";
+$rep_vmware=$rep_lib . "/APIWeb/vmware";
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_vmware );
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_vmware . "/Configurations" );
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_vmware . "/Configurations/Network" );

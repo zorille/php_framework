@@ -4,7 +4,6 @@
  * @author dvargas
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /*
 * Code erreur stars
 * 5100 Il manque les parametres clients stars

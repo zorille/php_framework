@@ -352,7 +352,7 @@ class xml extends abstract_log {
 		
 		if ($node ->hasAttributes ()) {
 			//Les attributs sont transformes en ligne du tableau
-			foreach ( $node->attributes as $k => $v ) {
+			foreach ( $node->attributes as $v ) {
 				$result [$v->name] = $v->value;
 			}
 		}
@@ -436,7 +436,7 @@ class xml extends abstract_log {
 		$this ->creer_domDocument ();
 		$dom_imported_NODE = $this ->getDomDatas () 
 			->importNode ( $dom_element, true );
-		$domNode = $this ->getDomDatas () 
+		$this ->getDomDatas () 
 			->appendChild ( $dom_imported_NODE );
 		
 		$this ->setEnteteTagXml ( $entete );
@@ -618,6 +618,7 @@ class xml extends abstract_log {
 	public function isSingleElement($simpleXML) {
 		$count = 0;
 		foreach ( $simpleXML as $item ) {
+			$item;
 			$count ++;
 			if ($count >= 2)
 				return false;

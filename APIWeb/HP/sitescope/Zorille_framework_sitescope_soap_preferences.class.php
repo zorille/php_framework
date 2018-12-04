@@ -5,6 +5,7 @@
  */
 namespace Zorille\framework;
 use \Exception as Exception;
+use \stdClass as stdClass;
 /**
  * class sitescope_soap_preferences
  *

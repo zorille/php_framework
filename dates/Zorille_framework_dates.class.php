@@ -5,6 +5,7 @@
  */
 namespace Zorille\framework;
 use \Exception as Exception;
+use \DateTime as DateTime;
 /**
  * class dates<br>
  * Gere des dates au format standard (YYYYMMDD) :

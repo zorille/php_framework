@@ -147,6 +147,7 @@ class cacti_trees extends parametresStandard {
 		while ($i<$niveau){
 			$last_entry="";
 			foreach($tableau as $nom=>$inutile){
+				$inutile;
 				$last_entry=$nom;
 			}
 			$tableau=&$tableau[$last_entry];

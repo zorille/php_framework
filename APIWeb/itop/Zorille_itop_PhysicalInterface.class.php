@@ -5,7 +5,6 @@
  */
 namespace Zorille\itop;
 use Zorille\framework as Core;
-use \Exception as Exception;
 /**
  * class PhysicalInterface
  *

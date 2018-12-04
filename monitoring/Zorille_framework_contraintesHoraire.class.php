@@ -5,7 +5,6 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class contraintesHoraire<br>
  * Gere les contraintes horaires de monitoring.

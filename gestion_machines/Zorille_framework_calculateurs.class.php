@@ -196,7 +196,7 @@ class calculateurs extends abstract_log {
 	 */
 	public function renvoi_nb_max_job() {
 		$CODE_RETOUR = 0;
-		foreach ( $this->getListeMachine () as $id => $calculateur ) {
+		foreach ( $this->getListeMachine () as $calculateur ) {
 			$CODE_RETOUR += $calculateur->renvoi_donnees_machine ( "MaxNbJob" );
 		}
 		
@@ -317,6 +317,7 @@ class calculateurs extends abstract_log {
 	 */
 	public function libere_tous_calculateurs() {
 		foreach ( $this->getAttribution () as $uniq_id => $calc ) {
+			$calc;
 			$this->libere_calculateur ( $uniq_id );
 		}
 		

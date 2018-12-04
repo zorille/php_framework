@@ -222,7 +222,7 @@ class zabbix_hosts extends zabbix_fonctions_standard {
 	public function supprime_hosts($liste_hosts) {
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_host_finale = array ();
-		foreach ( $liste_hosts as $host_name => $host ) {
+		foreach ( $liste_hosts as $host ) {
 			$objet_host = $this ->creer_host ( $host );
 			foreach ( $this ->getListeHost () as $obj_host ) {
 				if ($objet_host ->compare_host ( $obj_host )) {

@@ -5,6 +5,7 @@
  */
 namespace Zorille\framework;
 use \Exception as Exception;
+use \COM as COM;
 /**
  * class hpom
  *$msgID="7b5b9444-ceec-71e3-01a7-ac1040200000";
@@ -272,7 +273,6 @@ class hpom extends abstract_log {
 		//Si le message est interne a HPOM (ne vient pas d'un client spécifique)
 		if (in_array ( $this->getCustomer (), $internal_msg_grp )) {
 			//On gere le changement de client pour certain CI
-			$vrai_customer = array ();
 			$internal_err_map = $this->getListeOptions ()
 				->getOption ( "internal_err_map" );
 			if (fichier::tester_fichier_existe ( $internal_err_map )) {

@@ -4,7 +4,6 @@
  * @package Lib
  */
 namespace Zorille\framework;
-use \Exception as Exception;
 /**
  * class fonctions_standards_gestion_machines.
  * @package Lib
@@ -241,7 +240,6 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * @return true.
 	 */
 	public function creer_liste_calculateurs($ramdom_liste = true) {
-		$pos = 0;
 		$liste_calculateurs = array ();
 		
 		$liste_calculateurs = $this->trouve_attribut_calculateur ();

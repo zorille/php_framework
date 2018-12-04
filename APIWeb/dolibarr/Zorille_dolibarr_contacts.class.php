@@ -1,11 +1,14 @@
 <?php
+
 /**
  * Gestion de dolibarr.
  * @author dvargas
  */
 namespace Zorille\dolibarr;
+
 use Zorille\framework as Core;
-use \Exception as Exception;
+use Exception as Exception;
+
 /**
  * class contacts
  *
@@ -30,7 +33,7 @@ class contacts extends ci {
 			&$dolibarr_webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
-				Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
+		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new contacts ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -85,6 +88,7 @@ class contacts extends ci {
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
+			->setMessage404Error ( 'Contacts not found' )
 			->get ( $params );
 		return $this;
 	}
@@ -96,14 +100,10 @@ class contacts extends ci {
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function runSingleContact(
-			$search,
-			$params = array()) {
+	public function insertSingleContact(
+			$liste_donnees) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params ['search'] = $search;
-		$results = $this->reset_resource ()
-			->post ( $params );
-		return $results;
+		return $this->insertSingleEntry ( $liste_donnees );
 	}
 
 	/**

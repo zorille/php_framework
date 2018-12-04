@@ -86,6 +86,7 @@ class machines extends abstract_log {
 		if($this->getListeOptions()->verifie_option_existe ( "machines" )){
 			$liste_machine = $this->getListeMachines ();
 			foreach($this->getListeOptions()->getOption ( "machines" ) as $nom_machine=>$donnees_machine){
+				$donnees_machine;
 				$machine=clone $this->getObjetMachineRef();
 				$liste_machine [$nom_machine] =$machine->retrouve_machine_param($nom_machine,"machines");
 			}

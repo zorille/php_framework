@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class bladelogic_wsclient<br>
  * Renvoi des information via un webservice.
@@ -138,7 +139,7 @@ class bladelogic_wsclient extends abstract_log {
 		
 		if ($this ->getAuth () != "") {
 			$header = array ();
-			$header [] = new SoapHeader ( "http://bladelogic.com/webservices/framework/xsd", 'sessionId', $this ->getAuth () );
+			$header [] = new \SoapHeader ( "http://bladelogic.com/webservices/framework/xsd", 'sessionId', $this ->getAuth () );
 			
 			$this ->getObjetSoap () 
 				->getSoapClient () 
@@ -308,9 +309,6 @@ class bladelogic_wsclient extends abstract_log {
 			foreach ( $Types as $types ) {
 				$this ->onInfo ( print_r ( $types, true ) );
 			}
-			$request = $this ->getObjetSoap () 
-				->getSoapClient () 
-				->__getLastRequest ();
 		} catch ( Exception $e ) {
 			$this ->onDebug ( $this ->getObjetSoap () 
 				->getSoapClient () 

@@ -142,7 +142,7 @@ class fonctions_standards_moniteur extends abstract_log {
 		
 		try {
 			$fichier_en_cours = fichier::creer_fichier ( $this->getListeOptions (), $fichier, "non", false );
-			$presence = $fichier_en_cours->ouvrir ();
+			$fichier_en_cours->ouvrir ();
 		} catch ( Exception $e ) {
 			$this->getMoniteur ()
 				->ecrit ( "Le fichier : " . $fichier . " n'a pas pu &ecirc;tre ouvert\n" );
@@ -176,7 +176,7 @@ class fonctions_standards_moniteur extends abstract_log {
 		
 		try {
 			$fichier_en_cours = fichier::creer_fichier ( $this->getListeOptions (), $fichier, "non", false );
-			$presence = $fichier_en_cours->ouvrir ();
+			$fichier_en_cours->ouvrir ();
 		} catch ( Exception $e ) {
 			$this->getMoniteur ()
 				->ecrit ( "Le fichier : " . $fichier . " n'a pas pu &ecirc;tre ouvert\n" );
