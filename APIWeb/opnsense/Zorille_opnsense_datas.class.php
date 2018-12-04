@@ -41,7 +41,7 @@ class datas extends Core\serveur_datas {
 	public function &_initialise($liste_class) {
 		parent::_initialise ( $liste_class );
 		
-		$this->retrouve_opnsense_param ();
+		$this->retrouve_param ();
 		return $this;
 	}
 
@@ -63,10 +63,11 @@ class datas extends Core\serveur_datas {
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
 	 * @return boolean True est OK, False sinon.
 	 */
-	public function retrouve_opnsense_param() {
+	public function retrouve_param() {
 		$this->onDebug ( __METHOD__, 1 );
 		$donnee_opnsense = $this->_valideOption ( array (
-				"opnsense_machines",
+				"opnsense",
+				"machines",
 				"serveur" 
 		) );
 		
@@ -79,7 +80,7 @@ class datas extends Core\serveur_datas {
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
 	 */
-	public function valide_presence_opnsense_data($nom) {
+	public function valide_presence_data($nom) {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->valide_presence_serveur_data ( $nom );
 	}

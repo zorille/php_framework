@@ -71,7 +71,7 @@ class wsclient extends Core\wsclient {
 			$this->onError ( "il faut un objet de type opnsense_datas" );
 			return false;
 		}
-		$this->setObjetopnsenseDatas ( $liste_class ["opnsense_datas"] );
+		$this->setObjetOpnsenseDatas ( $liste_class ["opnsense_datas"] );
 		return $this;
 	}
 
@@ -101,8 +101,8 @@ class wsclient extends Core\wsclient {
 	public function prepare_connexion(
 			$nom) {
 		$this->onDebug ( __METHOD__, 1 );
-		$liste_data_opnsense = $this->getObjetopnsenseDatas ()
-			->valide_presence_opnsense_data ( $nom );
+		$liste_data_opnsense = $this->getObjetOpnsenseDatas ()
+			->valide_presence_data ( $nom );
 		if ($liste_data_opnsense === false) {
 			return $this->onError ( "Aucune definition de opnsense pour " . $nom );
 		}
@@ -355,14 +355,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return datas
 	 */
-	public function &getObjetopnsenseDatas() {
+	public function &getObjetOpnsenseDatas() {
 		return $this->opnsense_datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetopnsenseDatas(
+	public function &setObjetOpnsenseDatas(
 			&$opnsense_datas) {
 		$this->opnsense_datas = $opnsense_datas;
 		return $this;

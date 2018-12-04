@@ -20,9 +20,9 @@ class wsclient extends Core\wsclient {
 	/**
 	 * var privee
 	 * @access private
-	 * @var Core\dolibarr_datas
+	 * @var datas
 	 */
-	private $dolibarr_datas = null;
+	private $datas = null;
 	/**
 	 * var privee
 	 * @access private
@@ -44,7 +44,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param datas &$datas Reference sur un objet dolibarr_datas
+	 * @param datas &$datas Reference sur un objet datas
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
@@ -58,7 +58,7 @@ class wsclient extends Core\wsclient {
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
-				"dolibarr_datas" => $datas
+				"datas" => $datas
 		) );
 		return $objet;
 	}
@@ -73,11 +73,11 @@ class wsclient extends Core\wsclient {
 	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		if (! isset ( $liste_class ["dolibarr_datas"] )) {
-			$this->onError ( "il faut un objet de type dolibarr_datas" );
+		if (! isset ( $liste_class ["datas"] )) {
+			$this->onError ( "il faut un objet de type datas" );
 			return false;
 		}
-		$this->setObjetdolibarrDatas ( $liste_class ["dolibarr_datas"] );
+		$this->setObjetdolibarrDatas ( $liste_class ["datas"] );
 		return $this;
 	}
 
@@ -108,7 +108,7 @@ class wsclient extends Core\wsclient {
 			$nom) {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_dolibarr = $this->getObjetdolibarrDatas ()
-			->valide_presence_dolibarr_data ( $nom );
+			->valide_presence_data ( $nom );
 		if ($liste_data_dolibarr === false) {
 			return $this->onError ( "Aucune definition de dolibarr pour " . $nom );
 		}
@@ -315,16 +315,16 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return datas
 	 */
-	public function &getObjetdolibarrDatas() {
-		return $this->dolibarr_datas;
+	public function &getObjetDolibarrDatas() {
+		return $this->datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetdolibarrDatas(
-			&$dolibarr_datas) {
-		$this->dolibarr_datas = $dolibarr_datas;
+	public function &setObjetDolibarrDatas(
+			&$datas) {
+		$this->datas = $datas;
 		return $this;
 	}
 

@@ -3,27 +3,28 @@
  * Gestion de librenms.
  * @author dvargas
  */
-namespace Zorille\framework;
+namespace Zorille\librenms;
+use Zorille\framework as Core;
 /**
- * class librenms_datas
+ * class datas
  *
  * @package Lib
  * @subpackage librenms
  */
-class librenms_datas extends serveur_datas {
+class datas extends Core\serveur_datas {
 
 	/*********************** Creation de l'objet *********************/
 	/**
-	 * Instancie un objet de type librenms_datas.
+	 * Instancie un objet de type datas.
 	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return librenms_datas
+	 * @return datas
 	 */
-	static function &creer_librenms_datas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
-		abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new librenms_datas ( $sort_en_erreur, $entete );
+	static function &creer_datas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
+		$objet = new datas ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
 		) );
@@ -35,12 +36,12 @@ class librenms_datas extends serveur_datas {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return librenms_datas
+	 * @return datas
 	 */
 	public function &_initialise($liste_class) {
 		parent::_initialise ( $liste_class );
 		
-		$this->retrouve_librenms_param ();
+		$this->retrouve_param ();
 		return $this;
 	}
 
@@ -62,10 +63,11 @@ class librenms_datas extends serveur_datas {
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
 	 * @return boolean True est OK, False sinon.
 	 */
-	public function retrouve_librenms_param() {
+	public function retrouve_param() {
 		$this->onDebug ( __METHOD__, 1 );
 		$donnee_librenms = $this->_valideOption ( array (
-				"librenms_machines",
+				"librenms",
+				"machines",
 				"serveur" 
 		) );
 		
@@ -78,7 +80,7 @@ class librenms_datas extends serveur_datas {
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
 	 */
-	public function valide_presence_librenms_data($nom) {
+	public function valide_presence_data($nom) {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->valide_presence_serveur_data ( $nom );
 	}
@@ -95,7 +97,7 @@ class librenms_datas extends serveur_datas {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "librenms_datas :";
+		$help [__CLASS__] ["text"] [] .= "datas :";
 		$help [__CLASS__] ["text"] [] .= "\t--librenms_machines_serveur {Donnees du/des serveur/s} Donnees contenus dans le fichier de configuration";
 		
 		return $help;

@@ -4,23 +4,24 @@
  * @package Lib
  *
  */
-namespace Zorille\framework;
+namespace Zorille\librenms;
+use Zorille\framework as Core;
 use \Exception as Exception;
 use \SimpleXMLElement as SimpleXMLElement;
 /**
- * class librenms_wsclient<br>
+ * class wsclient<br>
  *
  * Renvoi des informations via un webservice.
  * @package Lib
  * @subpackage librenms
  */
-class librenms_wsclient extends wsclient {
+class wsclient extends Core\wsclient {
 	/**
 	 * var privee
 	 * @access private
-	 * @var librenms_datas
+	 * @var datas
 	 */
-	private $librenms_datas = null;
+	private $datas = null;
 	/**
 	 * var privee
 	 * @access private
@@ -36,21 +37,21 @@ class librenms_wsclient extends wsclient {
 
 	/*********************** Creation de l'objet *********************/
 	/**
-	 * Instancie un objet de type librenms_wsclient.
+	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param librenms_datas &$librenms_datas Reference sur un objet librenms_datas
+	 * @param datas &$datas Reference sur un objet datas
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return librenms_wsclient
+	 * @return wsclient
 	 */
-	static function &creer_librenms_wsclient(&$liste_option, &$librenms_datas, $sort_en_erreur = false, $entete = __CLASS__) {
-		abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new librenms_wsclient ( $sort_en_erreur, $entete );
+	static function &creer_wsclient(&$liste_option, &$datas = NULL, $sort_en_erreur = false, $entete = __CLASS__) {
+		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
+		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet ->_initialise ( array ( 
 				"options" => $liste_option, 
-				"librenms_datas" => $librenms_datas ) );
+				"datas" => $datas ) );
 		return $objet;
 	}
 
@@ -58,17 +59,17 @@ class librenms_wsclient extends wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return librenms_wsclient
+	 * @return wsclient
 	 * @throws Exception
 	 */
 	public function &_initialise($liste_class) {
 		parent::_initialise ( $liste_class );
 		
-		if (! isset ( $liste_class ["librenms_datas"] )) {
-			$this ->onError ( "il faut un objet de type librenms_datas" );
+		if (! isset ( $liste_class ["datas"] )) {
+			$this ->onError ( "il faut un objet de type datas" );
 			return false;
 		}
-		$this ->setObjetlibrenmsDatas ( $liste_class ["librenms_datas"] );
+		$this ->setObjetLibrenmsDatas ( $liste_class ["datas"] );
 		return $this;
 	}
 
@@ -89,13 +90,13 @@ class librenms_wsclient extends wsclient {
 	/**
 	 * Prepare l'url de connexion au librenms nomme $nom
 	 * @param string $nom
-	 * @return boolean|librenms_wsclient
+	 * @return boolean|wsclient
 	 * @throws Exception
 	 */
 	public function prepare_connexion($nom) {
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_data_librenms = $this ->getObjetlibrenmsDatas () 
-			->valide_presence_librenms_data ( $nom );
+			->valide_presence_data ( $nom );
 		if ($liste_data_librenms === false) {
 			return $this ->onError ( "Aucune definition de librenms pour " . $nom );
 		}
@@ -242,17 +243,17 @@ class librenms_wsclient extends wsclient {
 	/************************* Accesseurs ***********************/
 	/**
 	 * @codeCoverageIgnore
-	 * @return librenms_datas
+	 * @return datas
 	 */
-	public function &getObjetlibrenmsDatas() {
-		return $this->librenms_datas;
+	public function &getObjetLibrenmsDatas() {
+		return $this->datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetlibrenmsDatas(&$librenms_datas) {
-		$this->librenms_datas = $librenms_datas;
+	public function &setObjetLibrenmsDatas(&$datas) {
+		$this->datas = $datas;
 		return $this;
 	}
 
@@ -288,7 +289,7 @@ class librenms_wsclient extends wsclient {
 	 *
 	 * @param   $defaultParams  Array with default params.
 	 *
-	 * @retrun librenms_wsclient
+	 * @retrun wsclient
 	 *
 	 * @throws  Exception
 	 */
@@ -313,7 +314,7 @@ class librenms_wsclient extends wsclient {
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "librenms Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, librenms_datas::help () );
+		$help = array_merge ( $help, datas::help () );
 		
 		return $help;
 	}
