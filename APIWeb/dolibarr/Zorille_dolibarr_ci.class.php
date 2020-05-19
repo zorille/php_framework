@@ -96,9 +96,12 @@ abstract class ci extends Core\abstract_log {
 	 * @return ci
 	 * @throws Exception
 	 */
-	public function verifie_erreur() {
+	public function verifie_erreur($null_accepted=false) {
 		$retour = $this->getContent ();
 		if ($retour == NULL) {
+			if($null_accepted){
+				return $this->setListEntry ( array () );
+			}
 			return $this->onError ( "Erreur durant la requete : le retour est NULL", "" );
 		}
 		if (is_array ( $retour ) && isset ( $retour ['error'] )) {
@@ -121,11 +124,11 @@ abstract class ci extends Core\abstract_log {
 	 * @return array
 	 */
 	public function get(
-			$params) {
+			$params,$null_accepted=false) {
 		$this->setContent ( $this->getObjetdolibarrWsclient ()
 			->getMethod ( $this->prepare_url (), $params ) )
 			->recupereListEntry ()
-			->verifie_erreur ();
+			->verifie_erreur ($null_accepted);
 		return $this;
 	}
 

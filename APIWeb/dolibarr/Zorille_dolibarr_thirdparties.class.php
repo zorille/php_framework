@@ -109,6 +109,23 @@ class thirdparties extends ci {
 			->get ( $params );
 		return $this;
 	}
+	
+	/**
+	 * Resource: Thirdpartie Method: Get Get categories for a Thirdpartie params : sortfield,sortorder,limit,page
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function getThirdpartieRepresentatives(
+			$Thirdpartie_id,
+			$params = array()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$this->reset_resource ()
+				->addResource ( $Thirdpartie_id )
+				->addResource ( 'representatives' )
+				->get ( $params, true );
+				return $this;
+	}
 
 	/**
 	 * Resource: thirdparties Method: Post Start a new search and return the search ID (<sid>)
