@@ -148,7 +148,9 @@ abstract class abstract_log {
 		if ($code_retour == 0) {
 			$code_retour = 1;
 		}
-		abstract_log::onError_standard ( $message, $donnee_sup, $code_retour );
+		if (!$this ->getThrowException ()) {
+			abstract_log::onError_standard ( $message, $donnee_sup, $code_retour );
+		}
 		
 		if ($this ->getSortEnErreur ()) {
 			// @codeCoverageIgnoreStart

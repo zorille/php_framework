@@ -12,7 +12,17 @@ spl_autoload_extensions ( '.class.php' );
 
 function my_autoloader(
 		$class) {
-	if (strpos ( $class, "PHPExcel" ) !== false) {
+			if (strpos ( $class, "Spreadsheet" ) !== false) {
+				/**
+				 * Class PHPExcel
+				 */
+				require_once "/TOOLS/php_outils/Excel/PhpSpreadsheet/".str_replace("\\","/",str_replace("PhpOffice\\PhpSpreadsheet","",$class)).".php";
+			} else if (strpos ( $class, "Psr" ) !== false) {
+				/**
+				 * Class Psr
+				 */
+				require_once "/TOOLS/php_outils/Excel/".str_replace("\\","/",$class).".php";
+			} else if (strpos ( $class, "PHPExcel" ) !== false) {
 		/**
 		 * Class PHPExcel
 		 */
