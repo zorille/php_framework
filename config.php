@@ -208,6 +208,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/pingdo
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/dolibarr" );
 /**
+ * Inclue Les class d'appel a Pipedrive
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/pipedrive" );
+/**
  * Inclue Les class d'appel a Splunk
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/splunk" );
