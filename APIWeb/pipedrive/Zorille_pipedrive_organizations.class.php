@@ -10,31 +10,31 @@ use Zorille\framework as Core;
 use Exception as Exception;
 
 /**
- * class deals
+ * class organizations
  *
  * @package Lib
  * @subpackage pipedrive
  */
-class deals extends ci {
+class organizations extends ci {
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
 	/**
-	 * Instancie un objet de type deals. @codeCoverageIgnore
+	 * Instancie un objet de type organizations. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $pipedrive_webservice_rest Reference sur un objet wsclient
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return deals
+	 * @return organizations
 	 */
-	static function &creer_deals(
+	static function &creer_organizations(
 			&$liste_option,
 			&$pipedrive_webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new deals ( $sort_en_erreur, $entete );
+		$objet = new organizations ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
 				"wsclient" => $pipedrive_webservice_rest
@@ -46,7 +46,7 @@ class deals extends ci {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return deals
+	 * @return organizations
 	 */
 	public function &_initialise(
 			$liste_class) {
@@ -72,104 +72,56 @@ class deals extends ci {
 
 	/**
 	 * Remet l'url par defaut
-	 * @return deals
+	 * @return organizations
 	 */
 	public function &reset_resource() {
-		return parent::reset_resource ()->addResource ( 'deals' );
+		return parent::reset_resource ()->addResource ( 'organizations' );
 	}
 
 	/**
-	 * Resource: deals Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
+	 * Resource: organizations Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
 	 * 
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getAllDeals(
+	public function getAllOrganizations(
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->getDeals( $params );
+		$this->getOrganizations( $params );
 		while( isset($this->getAdditionalData()['pagination']) && 
 				isset($this->getAdditionalData()['pagination']['more_items_in_collection']) && 
 				$this->getAdditionalData()['pagination']['more_items_in_collection']=== true ){
 			$params['start']=$this->getAdditionalData()['pagination']['next_start'];
-			$this->getDeals($params, true);
+			$this->getOrganizations($params, true);
 		}
 		return $this;
 	}
 	
 	/**
-	 * Resource: deals Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
+	 * Resource: organizations Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getDeals(
+	public function getOrganizations(
 			$params = array(), 
 			$add_data = false ) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
-			->setMessage404Error ( "Not Found: Deals not found" )
+			->setMessage404Error ( "Not Found: Organizations not found" )
 			->get ( $params, false, $add_data );
 		return $this;
 	}
 
 	/**
-	 * Resource: Deals Method: Get Get search for a Deals params : sortfield,sortorder,limit,page
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function getDealsSearch(
-			$params = array()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$this->reset_resource ()
-			->addResource ( 'search' )
-			->get ( $params );
-		return $this;
-	}
-	
-	/**
-	 * Resource: deals Method: Get Get one deal by ID
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function getDealById(
-			$Deals_id,
-			$params = array()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$this->reset_resource ()
-			->addResource ( $Deals_id )
-			->get ( $params, true );
-		return $this;
-	}
-		
-	/**
-	 * Resource: Deals Method: Get Get search for a Deals params : sortfield,sortorder,limit,page
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function getDealsParticipants(
-			$Deals_id,
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->reset_resource ()
-				->addResource ( $Deals_id )
-				->addResource ( 'participants' )
-				->get ( $params, true );
-			return $this;
-	}
-
-	/**
-	 * Resource: deals Method: Post Start a new search and return the search ID (<sid>)
+	 * Resource: organizations Method: Post Start a new search and return the search ID (<sid>)
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function insertSingleDeals(
+	public function insertSingleOrganizations(
 			$liste_donnees) {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $liste_donnees;
@@ -179,19 +131,19 @@ class deals extends ci {
 	}
 
 	/**
-	 * Resource: deals Method: Post Start a new search and return the search ID (<sid>)
+	 * Resource: organizations Method: Post Start a new search and return the search ID (<sid>)
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function updateSingleDeals(
-			$Deals_id,
+	public function updateSingleOrganizations(
+			$Organizations_id,
 			$liste_donnees) {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $liste_donnees;
 		$results = $this->reset_resource ()
-			->addResource ( $Deals_id )
+			->addResource ( $Organizations_id )
 			->put ( $params );
 		return $results;
 	}
@@ -208,7 +160,7 @@ class deals extends ci {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "deals :";
+		$help [__CLASS__] ["text"] [] .= "organizations :";
 		return $help;
 	}
 }

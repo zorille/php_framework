@@ -10,31 +10,31 @@ use Zorille\framework as Core;
 use Exception as Exception;
 
 /**
- * class deals
+ * class leads
  *
  * @package Lib
  * @subpackage pipedrive
  */
-class deals extends ci {
+class leads extends ci {
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
 	/**
-	 * Instancie un objet de type deals. @codeCoverageIgnore
+	 * Instancie un objet de type leads. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $pipedrive_webservice_rest Reference sur un objet wsclient
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return deals
+	 * @return leads
 	 */
-	static function &creer_deals(
+	static function &creer_leads(
 			&$liste_option,
 			&$pipedrive_webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new deals ( $sort_en_erreur, $entete );
+		$objet = new leads ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
 				"wsclient" => $pipedrive_webservice_rest
@@ -46,7 +46,7 @@ class deals extends ci {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return deals
+	 * @return leads
 	 */
 	public function &_initialise(
 			$liste_class) {
@@ -72,55 +72,55 @@ class deals extends ci {
 
 	/**
 	 * Remet l'url par defaut
-	 * @return deals
+	 * @return leads
 	 */
 	public function &reset_resource() {
-		return parent::reset_resource ()->addResource ( 'deals' );
+		return parent::reset_resource ()->addResource ( 'leads' );
 	}
 
 	/**
-	 * Resource: deals Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
+	 * Resource: leads Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
 	 * 
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getAllDeals(
+	public function getAllLeads(
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->getDeals( $params );
+		$this->getLeads( $params );
 		while( isset($this->getAdditionalData()['pagination']) && 
 				isset($this->getAdditionalData()['pagination']['more_items_in_collection']) && 
 				$this->getAdditionalData()['pagination']['more_items_in_collection']=== true ){
 			$params['start']=$this->getAdditionalData()['pagination']['next_start'];
-			$this->getDeals($params, true);
+			$this->getLeads($params, true);
 		}
 		return $this;
 	}
 	
 	/**
-	 * Resource: deals Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
+	 * Resource: leads Method: Get Get details of all current searches. params : sortfield,sortorder,limit,page,thirdparty_ids,sqlfilters
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getDeals(
+	public function getLeads(
 			$params = array(), 
 			$add_data = false ) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
-			->setMessage404Error ( "Not Found: Deals not found" )
+			->setMessage404Error ( "Not Found: Leads not found" )
 			->get ( $params, false, $add_data );
 		return $this;
 	}
 
 	/**
-	 * Resource: Deals Method: Get Get search for a Deals params : sortfield,sortorder,limit,page
+	 * Resource: Leads Method: Get Get search for a Leads params : sortfield,sortorder,limit,page
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getDealsSearch(
+	public function getLeadsSearch(
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
@@ -130,46 +130,46 @@ class deals extends ci {
 	}
 	
 	/**
-	 * Resource: deals Method: Get Get one deal by ID
+	 * Resource: leads Method: Get Get one lead by ID
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getDealById(
-			$Deals_id,
+	public function getLeadById(
+			$Leads_id,
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
-			->addResource ( $Deals_id )
+			->addResource ( $Leads_id )
 			->get ( $params, true );
 		return $this;
 	}
 		
 	/**
-	 * Resource: Deals Method: Get Get search for a Deals params : sortfield,sortorder,limit,page
+	 * Resource: Leads Method: Get Get search for a Leads params : sortfield,sortorder,limit,page
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function getDealsParticipants(
-			$Deals_id,
+	public function getLeadsParticipants(
+			$Leads_id,
 			$params = array()) {
 				$this->onDebug ( __METHOD__, 1 );
 				$this->reset_resource ()
-				->addResource ( $Deals_id )
+				->addResource ( $Leads_id )
 				->addResource ( 'participants' )
 				->get ( $params, true );
 			return $this;
 	}
 
 	/**
-	 * Resource: deals Method: Post Start a new search and return the search ID (<sid>)
+	 * Resource: leads Method: Post Start a new search and return the search ID (<sid>)
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function insertSingleDeals(
+	public function insertSingleLeads(
 			$liste_donnees) {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $liste_donnees;
@@ -179,20 +179,20 @@ class deals extends ci {
 	}
 
 	/**
-	 * Resource: deals Method: Post Start a new search and return the search ID (<sid>)
+	 * Resource: leads Method: Post Start a new search and return the search ID (<sid>)
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function updateSingleDeals(
-			$Deals_id,
+	public function updateSingleLeads(
+			$Leads_id,
 			$liste_donnees) {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $liste_donnees;
 		$results = $this->reset_resource ()
-			->addResource ( $Deals_id )
-			->put ( $params );
+			->addResource ( $Leads_id )
+			->patch ( $params );
 		return $results;
 	}
 
@@ -208,7 +208,7 @@ class deals extends ci {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "deals :";
+		$help [__CLASS__] ["text"] [] .= "leads :";
 		return $help;
 	}
 }

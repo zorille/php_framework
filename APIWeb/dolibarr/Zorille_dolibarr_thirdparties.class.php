@@ -144,7 +144,7 @@ class thirdparties extends ci {
 	}
 
 	/**
-	 * Resource: thirdparties Method: Post Start a new search and return the search ID (<sid>)
+	 * Resource: thirdparties Method: Put update thirdpartie
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
@@ -162,7 +162,7 @@ class thirdparties extends ci {
 	}
 
 	/**
-	 * Resource: Thirdpartie Method: Get Get categories for a Thirdpartie params : sortfield,sortorder,limit,page
+	 * Resource: Thirdpartie Method: Post Get categories for a Thirdpartie params : sortfield,sortorder,limit,page
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception

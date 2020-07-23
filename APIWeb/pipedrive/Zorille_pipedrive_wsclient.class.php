@@ -292,10 +292,11 @@ class wsclient extends Core\wsclient {
 			$resource,
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "POST" )
-			->setPostDatas ( http_build_query ( $full_params ) );
+			->setParams ( $this->getDefaultParams () )
+			->setForceParamInUrl(true)
+			->setPostDatas ( http_build_query ( $params ) );
 		return $this->prepare_requete ();
 	}
 
@@ -310,11 +311,31 @@ class wsclient extends Core\wsclient {
 			$resource,
 			$params = array()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "PUT" )
-			->setPostDatas ( http_build_query ( $full_params ) );
+			->setParams ( $this->getDefaultParams () )
+			->setForceParamInUrl(true)
+			->setPostDatas ( http_build_query ( $params ) );
 		return $this->prepare_requete ();
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 * @param string $resource Url Resource
+	 * @param array $params Data to send
+	 * @return SimpleXMLElement
+	 * @throws Exception
+	 */
+	public function patchMethod(
+			$resource,
+			$params = array()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$this->setUrl ( $resource )
+				->setHttpMethod ( "PATCH" )
+				->setParams ( $this->getDefaultParams () )
+				->setForceParamInUrl(true)
+				->setPostDatas ( http_build_query ( $params ) );
+				return $this->prepare_requete ();
 	}
 
 	/**

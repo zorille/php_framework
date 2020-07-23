@@ -187,6 +187,10 @@ class wsclient extends Core\wsclient {
 				->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' ||$this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
 			$this->onInfo ( "DRY RUN :" . $this->getUrl () );
 			$this->onInfo ( "DRY RUN :" . print_r ( $this->getParams (), true ) );
+			$this->onInfo ( "DRY RUN : HTTP METHOD : " . $this->getHttpMethod () );
+			if ($this->getHttpMethod () == 'POST'){
+				$this->onInfo ( "DRY RUN :" . print_r ( $this->getPostDatas(), true ) );
+			}
 		} else {
 			$header = $this->prepare_html_entete ();
 			$retour_wsclient = $this->envoi_requete ( $header );

@@ -193,9 +193,8 @@ abstract class ci extends Core\abstract_log {
 	 * @throws Exception
 	 */
 	public function insertSingleEntry(
-			$liste_donnees) {
+			$params) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = $liste_donnees;
 		$results = $this->reset_resource ()
 			->post ( $params );
 		return $results;

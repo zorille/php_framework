@@ -43,7 +43,7 @@ abstract class ci extends Core\abstract_log {
 	 * @access private
 	 * @var string
 	 */
-	private $Message404Error = "";
+	private $Message404Error = "ZDEFAULT No error message";
 	/**
 	 * var privee
 	 *
@@ -103,10 +103,11 @@ abstract class ci extends Core\abstract_log {
 	 * @return ci
 	 * @throws Exception
 	 */
-	public function verifie_erreur($null_accepted=false) {
+	public function verifie_erreur(
+			$null_accepted = false) {
 		$retour = $this->getContent ();
 		if ($retour == NULL) {
-			if($null_accepted){
+			if ($null_accepted) {
 				return $this->setListEntry ( array () );
 			}
 			return $this->onError ( "Erreur durant la requete : le retour est NULL", "" );
@@ -115,12 +116,19 @@ abstract class ci extends Core\abstract_log {
 			if (isset ( $retour ['debug'] )) {
 				$this->onDebug ( $retour ['debug'], 1 );
 			}
-			// Dolibarr renvoi un 404 lorsqu'il n'y a pas de resultat a la requete emise
-			if (strpos ( $retour ['error'], $this->getMessage404Error () ) !== false) {
+			// Pipedrive renvoi un 404 lorsqu'il n'y a pas de resultat a la requete emise
+			if (isset ( $retour ['error'] ['message'] ) && strpos ( $retour ['error'] ['message'], $this->getMessage404Error () ) !== false) {
 				$this->onWarning ( $retour ['error'] );
 				$this->setListEntry ( array () );
 			} else {
-				return $this->onError ( "Erreur durant la requete : " . $retour ['error'], "", $retour ['errorCode'] );
+				if (isset ( $retour ['error'] ['code'] )) {
+					$error_code = $retour ['error'] ['code'];
+				} elseif (isset ( $retour ['errorCode'] )) {
+					$error_code = $retour ['errorCode'];
+				} else {
+					$error_code = 1;
+				}
+				return $this->onError ( "Erreur durant la requete : " . print_r ( $retour ['error'], true ), "", $error_code );
 			}
 		}
 		return $this;
@@ -132,12 +140,12 @@ abstract class ci extends Core\abstract_log {
 	 */
 	public function get(
 			$params,
-			$null_accepted = false, 
+			$null_accepted = false,
 			$add_data = false) {
 		$this->setContent ( $this->getObjetPipedriveWsclient ()
 			->getMethod ( $this->prepare_url (), $params ) )
-			->recupereListEntry ($add_data)
-			->verifie_erreur ($null_accepted);
+			->recupereListEntry ( $add_data )
+			->verifie_erreur ( $null_accepted );
 		return $this;
 	}
 
@@ -149,7 +157,7 @@ abstract class ci extends Core\abstract_log {
 			$params) {
 		$this->setContent ( $this->getObjetPipedriveWsclient ()
 			->postMethod ( $this->prepare_url (), $params ) )
-			->recupereListEntry (false)
+			->recupereListEntry ( false )
 			->verifie_erreur ();
 		return $this;
 	}
@@ -162,7 +170,20 @@ abstract class ci extends Core\abstract_log {
 			$params) {
 		$this->setContent ( $this->getObjetPipedriveWsclient ()
 			->putMethod ( $this->prepare_url (), $params ) )
-			->recupereListEntry (false)
+			->recupereListEntry ( false )
+			->verifie_erreur ();
+		return $this;
+	}
+
+	/**
+	 * @param array $params
+	 * @return array
+	 */
+	public function patch(
+			$params) {
+		$this->setContent ( $this->getObjetPipedriveWsclient ()
+			->patchMethod ( $this->prepare_url (), $params ) )
+			->recupereListEntry ( false )
 			->verifie_erreur ();
 		return $this;
 	}
@@ -175,7 +196,7 @@ abstract class ci extends Core\abstract_log {
 			$params) {
 		$this->setContent ( $this->getObjetPipedriveWsclient ()
 			->deleteMethod ( $this->prepare_url (), $params ) )
-			->recupereListEntry (false)
+			->recupereListEntry ( false )
 			->verifie_erreur ();
 		return $this;
 	}
@@ -186,11 +207,12 @@ abstract class ci extends Core\abstract_log {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function recupereListEntry($add_data=false) {
+	public function recupereListEntry(
+			$add_data = false) {
 		$ListEntryArray = $this->getContent ();
-		if (isset ( $ListEntryArray ['success'] ) && $ListEntryArray ['success']==1 && isset ( $ListEntryArray ['data'] )) {
-			if(isset($ListEntryArray ['additional_data'])){
-				$this->setAdditionalData($ListEntryArray ['additional_data']);
+		if (isset ( $ListEntryArray ['success'] ) && $ListEntryArray ['success'] == 1 && isset ( $ListEntryArray ['data'] )) {
+			if (isset ( $ListEntryArray ['additional_data'] )) {
+				$this->setAdditionalData ( $ListEntryArray ['additional_data'] );
 			}
 			return $this->setListEntry ( $ListEntryArray ['data'], $add_data );
 		}
@@ -198,7 +220,7 @@ abstract class ci extends Core\abstract_log {
 	}
 
 	/**
-	 * Insert Dolibarr Single Entry
+	 * Insert Pipedrive Single Entry
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
@@ -320,29 +342,30 @@ abstract class ci extends Core\abstract_log {
 	public function &setListEntry(
 			$liste_entry,
 			$add_data = false) {
-				if($add_data){
-					$this->liste_entry=array_merge($this->liste_entry,$liste_entry);
-				} else {
-					$this->liste_entry = $liste_entry;
-				}
+		if ($add_data) {
+			$this->liste_entry = array_merge ( $this->liste_entry, $liste_entry );
+		} else {
+			$this->liste_entry = $liste_entry;
+		}
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function getAdditionalData() {
 		return $this->additional_data;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function &setAdditionalData(
 			$additional_data) {
-				$this->additional_data = $additional_data;
-				return $this;
+		$this->additional_data = $additional_data;
+		return $this;
 	}
+
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */

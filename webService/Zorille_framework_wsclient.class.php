@@ -72,6 +72,12 @@ class wsclient extends abstract_log {
 	 * @var curl
 	 */
 	private $objet_curl = null;
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $force_param_url = false;
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -296,7 +302,7 @@ class wsclient extends abstract_log {
 	 * @return wsclient
 	 */
 	public function gere_post_data() {
-		if ($this->getHttpMethod () == "POST" || $this->getHttpMethod () == "PUT") {
+		if ($this->getHttpMethod () == "POST" || $this->getHttpMethod () == "PUT" || $this->getHttpMethod () == "PATCH") {
 			if ($this->getPostDatas () != "") {
 				$this->getObjetCurl ()
 					->setPostData ( $this->getPostDatas () );
@@ -351,7 +357,7 @@ class wsclient extends abstract_log {
 	 */
 	public function prepare_url_standard() {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->getHttpMethod () == "GET") {
+		if ($this->getHttpMethod () == "GET" || $this->getForceParamInUrl()) {
 			return $this->prepare_url_get ();
 		}
 		// On ajoute les donnees post sur une connexion active uniquement
@@ -553,6 +559,24 @@ class wsclient extends abstract_log {
 		return $this;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getForceParamInUrl() {
+		return $this->force_param_url;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setForceParamInUrl(
+			$force_param_url) {
+				if (is_bool ( $force_param_url )) {
+					$this->force_param_url = $force_param_url;
+				}
+				return $this;
+	}
+	
 	/**
 	 * *********************** Accesseurs **********************
 	 */
