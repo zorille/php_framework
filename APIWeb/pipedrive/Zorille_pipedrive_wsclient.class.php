@@ -176,7 +176,8 @@ class wsclient extends Core\wsclient {
 	public function prepare_html_entete() {
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
-				"Content-Type: application/x-www-form-urlencoded"
+				"Accept: application/json",
+				"Content-Type: application/json"
 		);
 	}
 
@@ -296,7 +297,7 @@ class wsclient extends Core\wsclient {
 			->setHttpMethod ( "POST" )
 			->setParams ( $this->getDefaultParams () )
 			->setForceParamInUrl(true)
-			->setPostDatas ( http_build_query ( $params ) );
+			->setPostDatas ( json_encode ( $params ) );
 		return $this->prepare_requete ();
 	}
 
@@ -315,7 +316,7 @@ class wsclient extends Core\wsclient {
 			->setHttpMethod ( "PUT" )
 			->setParams ( $this->getDefaultParams () )
 			->setForceParamInUrl(true)
-			->setPostDatas ( http_build_query ( $params ) );
+			->setPostDatas ( json_encode ( $params ) );
 		return $this->prepare_requete ();
 	}
 	
@@ -334,7 +335,7 @@ class wsclient extends Core\wsclient {
 				->setHttpMethod ( "PATCH" )
 				->setParams ( $this->getDefaultParams () )
 				->setForceParamInUrl(true)
-				->setPostDatas ( http_build_query ( $params ) );
+				->setPostDatas ( json_encode ( $params ) );
 				return $this->prepare_requete ();
 	}
 
