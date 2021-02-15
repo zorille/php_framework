@@ -12,39 +12,24 @@ spl_autoload_extensions ( '.class.php' );
 
 function my_autoloader(
 		$class) {
-			if (strpos ( $class, "Spreadsheet" ) !== false) {
-				/**
-				 * Class PHPExcel
-				 */
-				require_once "/TOOLS/php_outils/Excel/PhpSpreadsheet/".str_replace("\\","/",str_replace("PhpOffice\\PhpSpreadsheet","",$class)).".php";
-			} else if (strpos ( $class, "Psr" ) !== false) {
-				/**
-				 * Class Psr
-				 */
-				require_once "/TOOLS/php_outils/Excel/".str_replace("\\","/",$class).".php";
-			} else if (strpos ( $class, "PHPExcel" ) !== false) {
-		/**
-		 * Class PHPExcel
-		 */
-		require_once "/TOOLS/php_outils/Excel/PHPExcel/PHPExcel.php";
-		/**
-		 * Class IOFactory
-		 */
-		require_once "/TOOLS/php_outils/Excel/PHPExcel/PHPExcel/IOFactory.php";
-	} elseif (preg_match ( "/^(PHPUnit|Composer|ZipArchive|Instantiator|LazyMap|Symfony)/", $class ) !== 0) {
-		// On ne fait rien, ce sont les tests unitaires
-	} else {
-		if (strpos ( $class, '\\' )) {
-			$class = str_replace ( '\\', '_', $class );
-		}
-		require_once $class . spl_autoload_extensions ();
-	}
+			if (strpos($class,"Zorille\\")!==false) {
+				if (strpos ( $class, '\\' )) {
+					$class = str_replace ( '\\', '_', $class );
+				}
+				require_once $class . spl_autoload_extensions ();
+			} else if (strpos($class,".php")!==false) {
+				require_once str_replace ( '\\', '/', $class );
+			} else {
+				require_once str_replace ( '\\', '/', $class ).".php";
+			}
 }
 spl_autoload_register ( 'my_autoloader' );
 if (! isset ( $rep_document ) && $rep_document != "")
 	$rep_document = ".";
 $rep_lib = $rep_document . "/php_framework";
 $rep_outils = $rep_document . "/php_outils";
+
+
 /**
  * Inclue les fonctions standards
  */
@@ -175,10 +160,18 @@ if (isset ( $INCLUDE_THRIFT )) {
 	require_once "config_thrift.php";
 }
 /**
- * Inclue THRIFT
+ * Inclue GRAPHVIZ
  */
 if (isset ( $INCLUDE_GRAPHVIZ )) {
 	set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_outils . "/graphviz" );
+}
+
+/**
+ * Inclue EXCEL
+ */
+if (isset ( $INCLUDE_EXCEL )) {
+	set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_outils . "/Excel" );
+	set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_outils . "/Excel/PhpOffice/PhpSpreadsheet" );
 }
 
 
