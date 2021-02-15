@@ -6,7 +6,7 @@
  * @package Lib
  * @subpackage VMWare
  */
-namespace Zorille\framework;
+namespace Zorille\VMware;
 
 $rep_vmware=$rep_lib . "/APIWeb/vmware";
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_vmware );
