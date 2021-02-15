@@ -329,6 +329,13 @@ class soap extends abstract_log {
 		return null;
 	}
 
+	/**		'trace' => $trace,
+			'location' => $this->makeRequestsLocation($vhost),
+			'exceptions' => $useExceptions,
+			'connection_timeout' => 10,
+			'classmap' => $this->wsdlClassMapper->getClassMap(),
+			'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE,
+			'stream_context' => $context,
 	/******************* Gestion via SOAP ************************/
 	/**
 	 * Prepare les valeurs necessaire a une connexion soap via SoapClient
