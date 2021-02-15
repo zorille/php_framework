@@ -12,7 +12,13 @@ use Zorille\framework as Core;
  * @subpackage itop
  */
 class Person extends Contact {
-
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var Team
+	 */
+	private $Team = null;
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
@@ -46,7 +52,8 @@ class Person extends Contact {
 	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		return $this->setFormat ( 'Person' );
+		return $this->setFormat ( 'Person' )
+			->setObjetItopTeam ( Team::creer_Team ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
 
 	/**
@@ -63,6 +70,25 @@ class Person extends Contact {
 			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
+	}
+	
+	/**
+	* Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes
+	* Format array('nom du champ obligatoire'=>false, ... )
+	* @return Person
+	*/
+	public function champ_obligatoire_standard(){
+		if(empty($this->getMandatory())) {
+			$this->setMandatory(
+				array(
+					'name'=>false,
+					'first_name'=>false,
+					'email'=>false,
+					'org_id'=>false
+					)
+				);
+		}
+		return $this;
 	}
 
 	/**
@@ -86,44 +112,92 @@ class Person extends Contact {
 	 * @return Person
 	 */
 	public function creer_oql(
-			$name = '',
+			$name='', 
 			$firstname = '',
-			$email = '') {
-		if (empty ( $firstname )) {
-			$oql = "SELECT " . $this->getFormat () . " WHERE friendlyname='" . $name . "'";
-		} else {
-			$oql = "SELECT " . $this->getFormat () . " WHERE friendlyname='" . $firstname . " " . $name . "'";
+			$email='', 
+			$org_name='') {
+		$where="";
+		if(!empty($name)){
+			if (empty ( $firstname )) {
+				$where = " friendlyname='" . $name . "'";
+			} else {
+				$where = " friendlyname='" . $firstname . " " . $name . "'";
+			}
 		}
-		if (! empty ( $email )) {
-			$oql .= " AND email='" . $email . "'";
+		if(!empty($email)){
+			if(!empty($where)){
+				$where .= " AND ";
+			}
+			$where .= " email='" . $email . "'";
 		}
-		return $this->setOqlCi ( $oql );
+		if(!empty($org_name)){
+			if(!empty($where)){
+				$where .= " AND ";
+			}
+			$where .= " org_name='" . $org_name . "'";
+		}
+		if(!empty($where)){
+			$where = " WHERE".$where;
+		}
+		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . $where );
 	}
 
+	/**
+	* Récupère une personne existante suivant les critères données ou créer cette personne si elle n'existe pas
+	* 'org_name', 'team_name
+	* @param array $parametres Liste des critères. Le nom de la case= le nom du champ itop, la valeur de la case est la valeur dans itop.
+	* @return Person
+	*/
 	public function gestion_Person(
-			$name,
-			$firstname,
-			$org_name,
-			$email,
-			$status) {
+			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $name,
-				'first_name' => $firstname,
-				'email' => $email,
-				'status' => $status
-		);
-		$params ['org_id'] = $this->getObjetItopOrganization ()
-			->creer_oql ( $org_name )
-			->getOqlCi ();
-		$this->creer_oql ( $name, $firstname )
-			->creer_ci ( $firstname . " " . $name, $params );
+		$params=array();
+		$this->champ_obligatoire_standard();
+		foreach($parametres as $champ=>$valeur) {
+			if(isset($mandatory[$champ]) && !empty($valeur)) {
+				$mandatory[$champ]=true;
+			}
+			switch ($champ) {
+				case 'org_name':
+					$params['org_id']=$this->getObjetItopOrganization ()
+						->creer_oql ( $valeur )
+						->getOqlCi ();
+					break;
+				case 'team_name':
+					$params['team_id']=$this->getObjetItopTeam ()
+						->creer_oql ( $valeur )
+						->getOqlCi ();
+					break;
+				default :
+					$params[$champ]=$valeur;
+			}
+		}
+		$this->valide_mandatory_fields();
+		$this->creer_oql ( $params['name'], $params['first_name'], $params['email'], $params['org_id'] )
+			->creer_ci ( $params['first_name'] . " " . $params['name']. " " . $params['email'], $params );
 		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
+	 /**
+	 * @codeCoverageIgnore
+	 * @return Team
+	 */
+	public function &getObjetItopTeam() {
+		return $this->Team;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setObjetItopTeam(&$Team) {
+		$this->Team = $Team;
+		
+		return $this;
+	}
+
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */

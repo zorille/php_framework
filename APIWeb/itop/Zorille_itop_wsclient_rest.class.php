@@ -152,7 +152,11 @@ class wsclient_rest extends Core\wsclient {
 			$this ->onDebug ( $retour, 2 );
 			
 			if (is_array ( $retour )) {
-				if (isset ( $retour ["code"] ) && $retour ["code"] != 0) {
+				$error=true;
+				if(strpos($retour ["message"],'is not writable because it is mastered by the data synchronization')!==false) {
+					$error=false;
+				}
+				if (isset ( $retour ["code"] ) && $retour ["code"] != 0 && $error) {
 					return $this ->onError ( $retour ["message"], "", $retour ["code"] );
 				}
 				
@@ -169,7 +173,7 @@ class wsclient_rest extends Core\wsclient {
 	
 	/**
 	 * @codeCoverageIgnore 
-	 * Reqeusts the itop API and returns the response of the API method action.get.
+	 * Requests the itop API and returns the response of the API method action.get.
 	 * The $params Array can be used, to pass through params to the itop API. For more informations about this params, check the itop API Documentation.
 	 * The $arrayKeyProperty is "PHP-internal" and can be used, to get an associatve instead of an indexed array as response. A valid value for this $arrayKeyProperty is any property of the returned JSON objects (e.g. name, host, hostid, graphid, screenitemid).
 	 *

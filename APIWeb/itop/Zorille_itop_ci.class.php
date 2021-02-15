@@ -38,6 +38,13 @@ class ci extends Core\abstract_log {
 	 * var privee
 	 *
 	 * @access private
+	 * @var array
+	 */
+	private $mandatory = array ();
+	/**
+	 * var privee
+	 *
+	 * @access private
 	 * @var wsclient_rest
 	 */
 	private $wsclient_rest = null;
@@ -48,6 +55,13 @@ class ci extends Core\abstract_log {
 	 * @var string
 	 */
 	private $oql_ci = '';
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var boolean
+	 */
+	private $update = false;
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -110,9 +124,26 @@ class ci extends Core\abstract_log {
 			$fields) {
 		$liste_fields = "";
 		foreach ( $fields as $champ => $valeur ) {
-			$liste_fields .= " AND " . $champ . "='" . $valeur . "'";
+			if(!$liste_fields=="") {
+				$liste_fields .= " AND ";
+			}
+			$liste_fields .= $champ . "='" . $valeur . "'";
 		}
 		return $liste_fields;
+	}
+	
+	/**
+	 * Prepare une requete OQL de recherche dans itop
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return Organization
+	 */
+	public function creer_oql (
+			$fields = array()) {
+		$where=$this->prepare_oql_fields($fields);
+		if(!empty($where)){
+			$where=" WHERE ".$where;
+		}
+		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . $where );
 	}
 
 	/**
@@ -196,9 +227,35 @@ class ci extends Core\abstract_log {
 			$ci = $this->getObjetItopWsclientRest ()
 				->core_create ( $this->getFormat (), '', $params );
 			$this->enregistre_ci_a_partir_rest ( $ci );
+		} else if ($this->getUpdate()) {
+			$this->onInfo ( "Update de : " . $name );
+			$ci = $this->getObjetItopWsclientRest ()
+				->core_update ( $this->getFormat (), $this->getId(), $params );
+			$this->enregistre_ci_a_partir_rest ( $ci );
 		}
 		return $this;
 	}
+	
+	/**
+	 * Valide si tous les champs nécessaires sont remplis avec une données
+	 * @param array $mandatory
+	 * @return boolean true si tous les champs sont remplis
+	 * @throws Exception
+	 */
+	public function valide_mandatory_fields() {
+		$this->onDebug ( __METHOD__, 1 );
+		$retour=array();
+		foreach( $this->getMandatory() as $champ => $valeur ) {
+			if($valeur===false){
+				$retour[].=$champ;
+			}
+		}
+		if(count($retour)!=0) {
+			return $this->onError("Il manque des champs obligatoires : ",$retour,1);
+		}
+		return true;
+	}
+				
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
@@ -255,6 +312,24 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * @codeCoverageIgnore
+	 */
+	public function getMandatory() {
+		return $this->mandatory;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setMandatory(
+			$mandatory) {
+		if (is_array ( $mandatory )) {
+			$this->mandatory = $mandatory;
+		}
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
 	 * @return wsclient_rest
 	 */
 	public function &getObjetItopWsclientRest() {
@@ -283,6 +358,22 @@ class ci extends Core\abstract_log {
 	public function &setOqlCi(
 			$oql_ci) {
 		$this->oql_ci = $oql_ci;
+		return $this;
+	}
+
+		/**
+	 * @codeCoverageIgnore
+	 */
+	public function getUpdate() {
+		return $this->update;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setUpdate(
+			$update) {
+		$this->update = $update;
 		return $this;
 	}
 

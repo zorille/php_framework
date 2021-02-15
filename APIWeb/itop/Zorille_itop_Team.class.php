@@ -60,25 +60,54 @@ class Team extends Contact {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_Team($name='', $email='') {
-		return $this ->retrouve_Contact($name, $email);
+	/**
+	* Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes
+	* Format array('nom du champ obligatoire'=>false, ... )
+	* @return Person
+	*/
+	public function champ_obligatoire_standard(){
+		if(empty($this->getMandatory())) {
+			$this->setMandatory(
+				array(
+					'name'=>false,
+					'org_id'=>false
+					)
+				);
+		}
+		return $this;
 	}
 
-	public function gestion_Team($name, $org_name, $status, $email, $notify) {
-		$this ->onDebug ( __METHOD__, 1 );
-		
-		$params = array ( 
-				'name' => $name, 
-				'status' => $status, 
-				'email' => $email, 
-				'notify' => $notify );
-		$params ['org_id'] = $this ->getObjetItopOrganization () 
-			->creer_oql ( $org_name ) 
-			->getOqlCi ();
-		
-		$this ->creer_oql ( $name ) 
-			->creer_ci ( $name, $params );
-		
+	public function retrouve_Team($name='', $email='', $org_id='') {
+		return $this ->retrouve_Contact($name, $email, $org_id);
+	}
+
+	/**
+	* Récupère une team existante suivant les critères données ou créer cette team si elle n'existe pas
+	* @param array $parametres Liste des critères. Le nom de la case= le nom du champ itop, la valeur de la case est la valeur dans itop.
+	* @return Team
+	*/
+	public function gestion_Team(
+			$parametres) {
+		$this->onDebug ( __METHOD__, 1 );
+		$params=array();
+		$this->champ_obligatoire_standard();
+		foreach($parametres as $champ=>$valeur) {
+			if(isset($mandatory[$champ]) && !empty($valeur)) {
+				$mandatory[$champ]=true;
+			}
+			switch ($champ) {
+				case 'org_id':
+					$params[$champ]=$this->getObjetItopOrganization ()
+						->creer_oql ( $parametres[$champ] )
+						->getOqlCi ();
+					break;
+				default :
+					$params[$champ]=$valeur;
+			}
+		}
+		$this->valide_mandatory_fields();
+		$this->creer_oql ( $params['name'], '', $params['org_id'] )
+			->creer_ci ( $params['name'], $params );
 		return $this;
 	}
 

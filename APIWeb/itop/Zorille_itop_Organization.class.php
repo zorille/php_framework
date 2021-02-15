@@ -12,7 +12,13 @@ use Zorille\framework as Core;
  * @subpackage itop
  */
 class Organization extends ci {
-
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var $DeliveryModel
+	 */
+	private $DeliveryModel = null;
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
@@ -42,7 +48,8 @@ class Organization extends ci {
 	public function &_initialise($liste_class) {
 		parent::_initialise ( $liste_class );
 		
-		return $this ->setFormat ( 'Organization' );
+		return $this ->setFormat ( 'Organization' )
+			->setObjetItopDeliveryModel ( DeliveryModel::creer_DeliveryModel ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );;
 	}
 
 	/**
@@ -60,6 +67,26 @@ class Organization extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
+	/**
+	* Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes
+	* Format array('nom du champ obligatoire'=>false, ... )
+	* @return Organization
+	*/
+	public function champ_obligatoire_standard(){
+		if(empty($this->getMandatory())) {
+			$this->setMandatory(
+				array(
+					'name'=>false
+					)
+				);
+		}
+		return $this;
+	}
+	
+	/**
+	 * Retrouve une organisation
+	 * @return Organization
+	 */
 	public function retrouve_Organization($name) {
 		return $this ->creer_oql ( $name ) 
 			->retrouve_ci ();
@@ -72,28 +99,67 @@ class Organization extends ci {
 	 * @return Organization
 	 */
 	public function creer_oql (
-	    $name,
-	    $fields = array()) {
-		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . " WHERE name='" . $name . "'" );
+			$name,
+			$fields = array()) {
+		$fields['name']=$name;
+		return parent::creer_oql ( $fields );
 	}
 
-	public function gestion_Organization($name, $code, $status, $parent = '') {
-		$this ->onDebug ( __METHOD__, 1 );
-		
-		$params = array ( 
-				'name' => $name, 
-				'code' => $code, 
-				'status' => $status );
-		if (! empty ( $parent )) {
-			$params ['parent_id'] = "SELECT " . $this ->getFormat () . " WHERE name='" . $parent . "'";
+	/**
+	 * Creer un CI de type Organization
+	 * 'name', 'code', 'status', 'parent_name', 'deliverymodel_name'
+ 	 * @param array $parametres Liste des critères. Le nom de la case= le nom du champ itop, la valeur de la case est la valeur dans itop.
+	 * @return Organization
+	*/
+	public function gestion_Organization(
+			$parametres) {
+		$this->onDebug ( __METHOD__, 1 );
+		$params=array();
+		$this->champ_obligatoire_standard();
+		foreach($parametres as $champ=>$valeur) {
+			if(isset($mandatory[$champ]) && !empty($valeur)) {
+				$mandatory[$champ]=true;
+			}
+			switch ($champ) {
+				case 'parent_name':
+					$params['parent_id']=$this->creer_oql ( $valeur )
+						->getOqlCi ();
+					break;
+				case 'deliverymodel_name':
+					$params['deliverymodel_id']=$this->getObjetItopDeliveryModel ()
+						->creer_oql ( $valeur )
+						->getOqlCi ();
+					break;
+				default :
+					$params[$champ]=$valeur;
+			}
 		}
-		return $this ->creer_oql ( $name ) 
-			->creer_ci ( $name, $params );
+		$this->valide_mandatory_fields();
+		$this->creer_oql ( $params['name'] )
+			->creer_ci ( $params['name'], $params );
+		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
+	/**
+	 * @codeCoverageIgnore
+	 * @return DeliveryModel
+	 */
+	public function &getObjetItopDeliveryModel() {
+		return $this->DeliveryModel;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setObjetItopDeliveryModel(&$DeliveryModel) {
+		$this->DeliveryModel = $DeliveryModel;
+		
+		return $this;
+	}
+
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */

@@ -69,12 +69,12 @@ class Contact extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_Contact($name,$email) {
-		return $this ->creer_oql ( $name,$email ) 
+	public function retrouve_Contact($name,$email,$org_name='') {
+		return $this ->creer_oql ( $name, $email, $org_name ) 
 			->retrouve_ci ();
 	}
 
-	public function creer_oql($name='',$email='') {
+	public function creer_oql($name='', $email='', $org_name='') {
 		$where="";
 		if(!empty($name)){
 			$where .= " name='" . $name . "'";
@@ -84,6 +84,12 @@ class Contact extends ci {
 				$where .= " AND ";
 			}
 			$where .= " email='" . $email . "'";
+		}
+		if(!empty($org_name)){
+			if(!empty($where)){
+				$where .= " AND ";
+			}
+			$where .= " org_name='" . $org_name . "'";
 		}
 		if(!empty($where)){
 			$where = " WHERE".$where;
