@@ -237,6 +237,26 @@ class ci extends Core\abstract_log {
 	}
 	
 	/**
+	 * Creer un CI dans itop du format de l'objet
+	 * @param string $name
+	 * @param array $params
+	 * @return ci
+	 * @throws Exception
+	 */
+	public function update_ci(
+			$name,
+			$params) {
+				$this->onDebug ( __METHOD__, 1 );
+				if ($this->valide_ci_existe ()) {
+					$this->onInfo ( "Update de : " . $name );
+					$ci = $this->getObjetItopWsclientRest ()
+					->core_update ( $this->getFormat (), $this->getId(), $params );
+					$this->enregistre_ci_a_partir_rest ( $ci );
+				}
+				return $this;
+	}
+	
+	/**
 	 * Valide si tous les champs nécessaires sont remplis avec une données
 	 * @param array $mandatory
 	 * @return boolean true si tous les champs sont remplis

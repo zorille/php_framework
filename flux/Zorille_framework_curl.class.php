@@ -28,6 +28,11 @@ class curl extends abstract_log {
 	 * @access protected
 	 * @var string
 	 */
+	private $curl_infos;
+	/**
+	 * @access protected
+	 * @var string
+	 */
 	private $code_retour_curl=200;
 	/**
 	 * @access protected
@@ -101,6 +106,7 @@ class curl extends abstract_log {
 		$this->setCurlUserAgent ();
 		$retour = curl_exec ( $this->getConnexion () );
 		$this->onDebug($retour,2);
+		$this ->curl_getinfo ();
 		if ($retour === false) {
 			$curl_no = curl_errno ( $this->getConnexion () );
 			switch ($curl_no) {
@@ -203,6 +209,7 @@ class curl extends abstract_log {
 	 * @throws Exception
 	 */
 	public function curl_getinfo() {
+		$this->setCurlInfos(curl_getinfo ( $this->getConnexion ()));
 		$code_retour=curl_getinfo ( $this->getConnexion (), CURLINFO_HTTP_CODE );
 		$this->setCodeRetourCurl($code_retour);
 		return $code_retour;
@@ -335,6 +342,16 @@ class curl extends abstract_log {
 	public function &setReturnTransfert($actif) {
 		if (is_bool ( $actif )) {
 			curl_setopt ( $this->getConnexion (), CURLOPT_RETURNTRANSFER, $actif );
+		}
+		return $this;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setLocation($actif) {
+		if (is_bool ( $actif )) {
+			curl_setopt ( $this->getConnexion (), CURLOPT_FOLLOWLOCATION, $actif );
 		}
 		return $this;
 	}
@@ -478,6 +495,21 @@ class curl extends abstract_log {
 	 */
 	public function &setValideCodeErreur($valide_code_erreur) {
 		$this->valide_code_retour = $valide_code_erreur;
+		return $this;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getCurlInfos() {
+		return $this->curl_infos;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setCurlInfos($curl_infos) {
+		$this->curl_infos = $curl_infos;
 		return $this;
 	}
 	/******************** Accesseurs *****************/

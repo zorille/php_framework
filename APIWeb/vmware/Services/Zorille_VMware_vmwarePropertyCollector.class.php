@@ -40,7 +40,7 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	/**
 	 * Instancie un objet de type vmwarePropertyCollector.
 	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
 	 * @param vmwareServiceInstance $ObjectServiceInstance Reference sur un objet vmwareServiceInstance
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false

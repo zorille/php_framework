@@ -44,7 +44,7 @@ class vmwareWsclient extends Core\abstract_log {
 	 * var privee
 	 *
 	 * @access private
-	 * @var soap
+	 * @var Core\soap
 	 */
 	private $objet_soap = null;
 
@@ -53,7 +53,7 @@ class vmwareWsclient extends Core\abstract_log {
 	 */
 	/**
 	 * Instancie un objet de type vmwareWsclient. @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param vmwareDatas &$vmwareDatas Reference sur un objet vmwareDatas
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
@@ -230,7 +230,7 @@ class vmwareWsclient extends Core\abstract_log {
 	 * Convertit les donnees renvoyees par le soap en array ou xml
 	 * @param stdClass $donnees
 	 * @param string $type array|xml
-	 * @return array|xml
+	 * @return array|Core\xml
 	 */
 	public function convertit_donnees(
 			$donnees, 
@@ -378,7 +378,7 @@ class vmwareWsclient extends Core\abstract_log {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return soap
+	 * @return Core\soap
 	 */
 	public function &getObjetSoap() {
 		return $this->objet_soap;

@@ -4,6 +4,7 @@
  * @author dvargas
  */
 namespace Zorille\framework;
+use Zorille\framework\relation_fichier_machine as relation_fichier_machine;
 /**
  * class CommandLine
  * @package Lib

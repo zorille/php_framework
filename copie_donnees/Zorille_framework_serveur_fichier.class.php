@@ -5,6 +5,7 @@
  * 
  */
 namespace Zorille\framework;
+use Zorille\framework\mem_message as mem_message;
 /**
  * class gestion_fichier<br>
  * @codeCoverageIgnore
@@ -28,7 +29,7 @@ class serveur_fichier extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
-	 * @var message
+	 * @var mem_message
 	*/
 	var $message_idle;
 	/**

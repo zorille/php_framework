@@ -219,7 +219,7 @@ class dates extends abstract_log {
 	}
 
 	/**
-	 * Prend un timestamp epoc et renvoi une date au format mysql.<br>
+	 * Prend un timestamp epoc et renvoi une date au format Y-m-d H:i:s.<br>
 	 *
 	 * @param int $timestamp timestamp Epoc
 	 * @return string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
@@ -233,7 +233,7 @@ class dates extends abstract_log {
 	}
 
 	/**
-	 * Prend une date au format Ymd et renvoi le timestamp.<br>
+	 * Prend une date au format Ymd et renvoi la date au format Y-m-d H:i:s.<br>
 	 *
 	 * @param int $date date au format Ymd
 	 * @return int false un timestamp epoc ou FALSE si le format ne correspond pas.
@@ -242,7 +242,7 @@ class dates extends abstract_log {
 	public function extraire_date_mysql_standard($date, $hour = "00:00:00") {
 		$ts_date = $this->extraire_timestamp ( $date, $hour );
 		if ($ts_date !== false) {
-			return date ( "Y-m-d H:i:s", $ts_date ); // dd-MM-yyyy HH:mm:ss
+			return date ( "Y-m-d H:i:s", $ts_date ); // Y-m-d H:i:s
 		}
 		
 		return false;

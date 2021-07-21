@@ -66,8 +66,7 @@ class datas extends Core\serveur_datas {
 	public function retrouve_param() {
 		$this->onDebug ( __METHOD__, 1 );
 		$donnee_librenms = $this->_valideOption ( array (
-				"librenms",
-				"machines",
+				"librenms_machines",
 				"serveur" 
 		) );
 		

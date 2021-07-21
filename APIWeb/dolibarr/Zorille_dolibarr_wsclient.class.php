@@ -77,7 +77,9 @@ class wsclient extends Core\wsclient {
 			$this->onError ( "il faut un objet de type datas" );
 			return false;
 		}
-		$this->setObjetdolibarrDatas ( $liste_class ["datas"] );
+		$this->setObjetdolibarrDatas ( $liste_class ["datas"] )
+			->setContentType ( 'application/x-www-form-urlencoded' )
+			->setAccept ( 'application/json' );
 		return $this;
 	}
 
@@ -140,14 +142,14 @@ class wsclient extends Core\wsclient {
 	public function prepare_html_entete() {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
-			return array (
-					"Content-Type: application/x-www-form-urlencoded",
+			return $this->setHttpHeader ( array (
+					"Content-Type: " . $this->getContentType (),
 					"DOLAPIKEY: " . $this->getAuth ()
-			);
+			) );
 		}
-		return array (
-				"Content-Type: application/x-www-form-urlencoded"
-		);
+		return $this->setHttpHeader ( array (
+				"Content-Type: " . $this->getContentType ()
+		) );
 	}
 
 	/**
@@ -184,16 +186,16 @@ class wsclient extends Core\wsclient {
 	public function prepare_requete() {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
-				->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' ||$this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
+			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
 			$this->onInfo ( "DRY RUN :" . $this->getUrl () );
 			$this->onInfo ( "DRY RUN :" . print_r ( $this->getParams (), true ) );
 			$this->onInfo ( "DRY RUN : HTTP METHOD : " . $this->getHttpMethod () );
-			if ($this->getHttpMethod () == 'POST'){
-				$this->onInfo ( "DRY RUN :" . print_r ( $this->getPostDatas(), true ) );
+			if ($this->getHttpMethod () == 'POST') {
+				$this->onInfo ( "DRY RUN :" . print_r ( $this->getPostDatas (), true ) );
 			}
 		} else {
-			$header = $this->prepare_html_entete ();
-			$retour_wsclient = $this->envoi_requete ( $header );
+			$retour_wsclient = $this->prepare_html_entete ()
+				->envoi_requete ();
 			$retour = $this->prepare_retour ( $retour_wsclient );
 			$this->onDebug ( $retour, 2 );
 			return $retour;
@@ -225,7 +227,7 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	final public function userLogin(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		// $resultat = $this ->postMethod ( 'login', $params );
 		// if (isset ( $resultat["success"] ) && isset($resultat["success"]['code']) && $resultat["success"]['code']=='200') {
@@ -246,7 +248,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function getMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -264,7 +266,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function postMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -282,7 +284,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function putMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -300,7 +302,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function deleteMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )

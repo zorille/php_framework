@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use Zorille\framework\definition_fichier as definition_fichier;
 /**
  * class copie_donnees<br>
  *

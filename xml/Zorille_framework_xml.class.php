@@ -346,7 +346,6 @@ class xml extends abstract_log {
 	 * @return array|string tableau ou string contenant les resultats.
 	 */
 	public function Dom_To_Array(DOMNode $node = null) {
-		$this ->onDebug ( __METHOD__, 2 );
 		$result = array ();
 		$group = array ();
 		

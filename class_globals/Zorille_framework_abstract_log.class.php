@@ -161,6 +161,17 @@ abstract class abstract_log {
 			// @codeCoverageIgnoreEnd
 		}
 		
+		// Le tableau se retrouve dans le tableau_output
+		if ($donnee_sup !== "") {
+			if (is_object( $donnee_sup )) {
+				$message.=" \n".print_r($donnee_sup,true);
+			} elseif (is_array( $donnee_sup )) {
+				$message.=" \n".print_r($donnee_sup,true);
+			} elseif (is_string( $donnee_sup )) {
+				$message.=" \n".$donnee_sup;
+			}
+		}
+		
 		$this ->setMessage ( $message );
 		if ($this ->getThrowException ()) {
 			throw new Exception ( $message, $code_retour );

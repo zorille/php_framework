@@ -40,6 +40,24 @@ class wsclient extends abstract_log {
 	 */
 	private $http_method = "GET";
 	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $http_entete = "";
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $content_type = "text/plain";
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $accept = "text/plain";
+	/**
 	 * @access protected
 	 * @var int
 	 */
@@ -78,6 +96,24 @@ class wsclient extends abstract_log {
 	 * @var string
 	 */
 	private $force_param_url = false;
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $collect_header = false;
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $header_data = "";
+	/**
+	 * var privee
+	 * @access private
+	 * @var string
+	 */
+	private $curl_info = "";
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -187,6 +223,19 @@ class wsclient extends abstract_log {
 		) ) );
 		return $this;
 	}
+	
+	/**
+	 * Creation d'entete HTTP standard
+	 * @return wsclient
+	 */
+	public function prepare_html_entete() {
+				$this->onDebug ( __METHOD__, 1 );
+				return $this->setHttpHeader(array (
+						"Content-Type: " . $this->getContentType (),
+						"Accept: " . $this->getAccept ()
+				));
+	}
+	
 
 	/**
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"return_code":0}
@@ -217,13 +266,12 @@ class wsclient extends abstract_log {
 	}
 
 	/**
-	 * Envoi la requete de type JSon par defaut et attend un retour json.
+	 * Envoi la requete de type CuRL par defaut et attend un retour CuRL.
 	 *
 	 * @return array|boolean resultat du json ou false en cas d'erreur
 	 * @throws Exception
 	 */
-	public function envoi_requete(
-			$header = '') {
+	public function envoi_requete() {
 		$this->onDebug ( __METHOD__, 1 );
 		$url = $this->prepare_url_standard ();
 		$this->onDebug ( "Url = " . $url, 1 );
@@ -237,10 +285,15 @@ class wsclient extends abstract_log {
 			->connectService ( $url );
 		try {
 			// On gere les differents parmetres d'une requete
+			if ($this->getCollectHeader ()) {
+				$this->getObjetCurl ()
+					->setHeader ( true )
+					->setReturnTransfert ( true );
+			}
 			$this->gere_request ()
 				->gere_utilisateurs ()
 				->gere_proxy ()
-				->gere_header ( $header );
+				->gere_header ( $this->getHttpHeader() );
 			// On invalide le check SSL du certificat
 			if ($this->getValidSSL () === false) {
 				$this->getObjetCurl ()
@@ -252,14 +305,25 @@ class wsclient extends abstract_log {
 				$this->getObjetCurl ()
 					->setVerbose ();
 			}
+			$this->getObjetCurl ()
+				->setLocation ( true );
 			$retour_curl = $this->getObjetCurl ()
 				->send_curl ();
+			if ($this->getCollectHeader ()) {
+				$this->setCurlInfo($this->getObjetCurl ()
+					->getCurlInfos ());
+				$header_size = $this->getCurlInfo() ['header_size'];
+				$this->setHeaderData(substr ( $retour_curl, 0, $header_size ));
+				$retour_curl = substr ( $retour_curl, $header_size );
+			}
 		} catch ( Exception $e ) {
 			return $this->onError ( "Requete " . $url . " en erreur", $e->getMessage (), 4500 );
 		}
 		// On ferme la connexion
 		$this->getObjetCurl ()
 			->close ();
+		$this->onDebug ( "Retour de CURL", 2 );
+		$this->onDebug ( $retour_curl, 2 );
 		return $retour_curl;
 	}
 
@@ -357,7 +421,7 @@ class wsclient extends abstract_log {
 	 */
 	public function prepare_url_standard() {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->getHttpMethod () == "GET" || $this->getForceParamInUrl()) {
+		if ($this->getHttpMethod () == "GET" || $this->getForceParamInUrl ()) {
 			return $this->prepare_url_get ();
 		}
 		// On ajoute les donnees post sur une connexion active uniquement
@@ -476,6 +540,54 @@ class wsclient extends abstract_log {
 		$this->http_method = strtoupper ( $http_method );
 		return $this;
 	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getHttpHeader() {
+		return $this->http_entete;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setHttpHeader(
+			$http_entete) {
+				$this->http_entete = $http_entete;
+				return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getContentType() {
+		return $this->content_type;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setContentType(
+			$content_type) {
+		$this->content_type = $content_type;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getAccept() {
+		return $this->accept;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setAccept(
+			$accept) {
+		$this->accept = $accept;
+		return $this;
+	}
 
 	/**
 	 * @codeCoverageIgnore
@@ -565,18 +677,66 @@ class wsclient extends abstract_log {
 	public function getForceParamInUrl() {
 		return $this->force_param_url;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function &setForceParamInUrl(
 			$force_param_url) {
-				if (is_bool ( $force_param_url )) {
-					$this->force_param_url = $force_param_url;
-				}
-				return $this;
+		if (is_bool ( $force_param_url )) {
+			$this->force_param_url = $force_param_url;
+		}
+		return $this;
 	}
-	
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &getCollectHeader() {
+		return $this->collect_header;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setCollectHeader(
+			$collect_header) {
+		$this->collect_header = $collect_header;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &getHeaderData() {
+		return $this->header_data;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setHeaderData(
+			$header_data) {
+		$this->header_data = $header_data;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &getCurlInfo() {
+		return $this->curl_info;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setCurlInfo(
+			$curl_info) {
+		$this->curl_info = $curl_info;
+		return $this;
+	}
+
 	/**
 	 * *********************** Accesseurs **********************
 	 */

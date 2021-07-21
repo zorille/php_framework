@@ -193,6 +193,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop" 
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/opnsense" );
 /**
+ * Inclue Les class d'appel a Office 365
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/o365" );
+/**
  * Inclue Les class d'appel a PingDom
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/pingdom" );
@@ -216,6 +220,11 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/libren
  * Inclue Les class d'appel a SolarWinds
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/solarwinds" );
+/**
+ * Inclue Les class d'appel a Veeam
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam/veeamone" );
 /**
  * Inclue Les class d'appel a bladelogic
  */

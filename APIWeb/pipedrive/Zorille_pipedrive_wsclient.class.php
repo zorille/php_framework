@@ -12,43 +12,8 @@ use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
 
 /**
- * class wsclient<br> Renvoi des informations via un webservice.
- * https://pipedrive.readme.io/docs/core-api-concepts-requests
- * Endpoints :
-Activities
-ActivityFields
-ActivityTypes
-CallLogs
-Currencies
-Deals
-DealFields
-Files
-Filters
-GlobalMessages
-Goals
-ItemSearch
-MailMessages
-MailThreads
-Notes
-NoteFields
-OrganizationFields
-Organizations
-OrganizationRelationships
-PermissionSets
-Persons
-PersonFields
-Pipelines
-Products
-ProductFields
-Recents
-Roles
-SearchResults
-Stages
-Teams
-Users
-UserConnections
-UserSettings
-
+ * class wsclient<br> Renvoi des informations via un webservice. https://pipedrive.readme.io/docs/core-api-concepts-requests Endpoints : Activities ActivityFields ActivityTypes CallLogs Currencies Deals DealFields Files Filters GlobalMessages Goals ItemSearch MailMessages MailThreads Notes NoteFields OrganizationFields Organizations OrganizationRelationships PermissionSets Persons PersonFields Pipelines Products ProductFields Recents Roles SearchResults Stages Teams Users UserConnections UserSettings
+ *
  * @package Lib
  * @subpackage pipedrive
  */
@@ -113,7 +78,9 @@ class wsclient extends Core\wsclient {
 			$this->onError ( "il faut un objet de type datas" );
 			return false;
 		}
-		$this->setObjetpipedriveDatas ( $liste_class ["datas"] );
+		$this->setObjetpipedriveDatas ( $liste_class ["datas"] )
+			->setContentType ( 'application/json' )
+			->setAccept ( 'application/json' );
 		return $this;
 	}
 
@@ -169,19 +136,6 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * Http pipedrive header creator
-	 *
-	 * @return string Http Header
-	 */
-	public function prepare_html_entete() {
-		$this->onDebug ( __METHOD__, 1 );
-		return array (
-				"Accept: application/json",
-				"Content-Type: application/json"
-		);
-	}
-
-	/**
 	 * Http pipedrive params creator
 	 *
 	 * @return wsclient
@@ -215,12 +169,12 @@ class wsclient extends Core\wsclient {
 	public function prepare_requete() {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
-				->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' ||$this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
+			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
 			$this->onInfo ( "DRY RUN :" . $this->getUrl () );
 			$this->onInfo ( "DRY RUN :" . print_r ( $this->getParams (), true ) );
 		} else {
-			$header = $this->prepare_html_entete ();
-			$retour_wsclient = $this->envoi_requete ( $header );
+			$retour_wsclient = $this->prepare_html_entete ()
+				->envoi_requete ();
 			$retour = $this->prepare_retour ( $retour_wsclient );
 			$this->onDebug ( $retour, 2 );
 			return $retour;
@@ -252,14 +206,15 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	final public function userLogin(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		// $resultat = $this ->postMethod ( 'login', $params );
 		// if (isset ( $resultat["success"] ) && isset($resultat["success"]['code']) && $resultat["success"]['code']=='200') {
 		// return $this ->setAuth ( ( string ) $resultat['success']['token'] );
 		// }
 		if (isset ( $params ['password'] )) {
-			return $this->setAuth ( $params ['password'] )->modifie_default_param ( "api_token",$this->getAuth() );
+			return $this->setAuth ( $params ['password'] )
+				->modifie_default_param ( "api_token", $this->getAuth () );
 		}
 		return $this->onError ( "Erreur durant l'autentification", $resultat );
 	}
@@ -273,7 +228,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function getMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -291,12 +246,12 @@ class wsclient extends Core\wsclient {
 	 */
 	public function postMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "POST" )
 			->setParams ( $this->getDefaultParams () )
-			->setForceParamInUrl(true)
+			->setForceParamInUrl ( true )
 			->setPostDatas ( json_encode ( $params ) );
 		return $this->prepare_requete ();
 	}
@@ -310,16 +265,16 @@ class wsclient extends Core\wsclient {
 	 */
 	public function putMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "PUT" )
 			->setParams ( $this->getDefaultParams () )
-			->setForceParamInUrl(true)
+			->setForceParamInUrl ( true )
 			->setPostDatas ( json_encode ( $params ) );
 		return $this->prepare_requete ();
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
@@ -329,14 +284,14 @@ class wsclient extends Core\wsclient {
 	 */
 	public function patchMethod(
 			$resource,
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( $resource )
-				->setHttpMethod ( "PATCH" )
-				->setParams ( $this->getDefaultParams () )
-				->setForceParamInUrl(true)
-				->setPostDatas ( json_encode ( $params ) );
-				return $this->prepare_requete ();
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( $resource )
+			->setHttpMethod ( "PATCH" )
+			->setParams ( $this->getDefaultParams () )
+			->setForceParamInUrl ( true )
+			->setPostDatas ( json_encode ( $params ) );
+		return $this->prepare_requete ();
 	}
 
 	/**
@@ -348,7 +303,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function deleteMethod(
 			$resource,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )

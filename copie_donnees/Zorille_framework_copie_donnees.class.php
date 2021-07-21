@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use Zorille\framework\relation_fichier_machine as relation_fichier_machine;
 /**
  * class copie_donnees<br>
  * @codeCoverageIgnore

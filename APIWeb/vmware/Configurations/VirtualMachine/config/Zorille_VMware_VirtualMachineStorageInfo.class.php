@@ -19,7 +19,7 @@ class VirtualMachineStorageInfo extends Core\abstract_log {
 	/**
 	 * Instancie un objet de type VirtualMachineStorageInfo.
 	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return VirtualMachineStorageInfo

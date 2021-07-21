@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\VMware;
+use Zorille\framework\options as options;
 use \Exception as Exception;
 use \ArrayObject as ArrayObject;
 use \soapvar as soapvar;
@@ -247,34 +248,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 		$this->onDebug ( __METHOD__, 1 );
 		
 		//On retrouve la liste des Cluster
-		/*$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		$a->append ( new soapvar ( array (
-				'name' => 'ComputeResourceHostTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$b = $this->creer_Datacenter_spec ( 'hostFolder' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$c = $this->creer_ClusterRessource_spec ();
-		$c->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $c, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
-		) );*/
-
-		$session=$this->creer_ContainerView('ComputeResource');
+		$session=$this->creer_ContainerView('ClusterComputeResource');
 		$a = $this->creer_traverseView_spec ();
 			
 		$objectref= new stdClass ();
@@ -284,7 +258,7 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
 		
-		$resultat_recherche = $this->retrouve_objets ( 'ComputeResource', array (), $options, $full );
+		$resultat_recherche = $this->retrouve_objets ( 'ClusterComputeResource', array (), $options, $full );
 		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
@@ -674,39 +648,21 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 */
 	public function Get_HostSystem($options = array (
 			"maxObjects" => "50"
-	)) {
+	), $full=true) {
 		$this->onDebug ( __METHOD__, 1 );
 		
 		//On retrouve la liste des HostSystems
-		$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		$a->append ( new soapvar ( array (
-				'name' => 'hostFolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
+		$session=$this->creer_ContainerView('HostSystem');
+		$a = $this->creer_traverseView_spec ();
 		
-		$b = $this->creer_Datacenter_spec ( 'hostFolder' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$c = new ArrayObject ( array (
-				'name' => 'hostFolderTraversalSpec',
-				'type' => 'ComputeResource',
-				'path' => 'host',
-				'skip' => false 
-		) );
-		
+		$objectref= new stdClass ();
+		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $c, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
+		->ObjectSpec ( $objectref, false, array (
+				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
-		$resultat_recherche = $this->retrouve_objets ( 'HostSystem', array (), $options );
+		
+		$resultat_recherche = $this->retrouve_objets ( 'HostSystem', array (), $options, $full );
 		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
@@ -1047,11 +1003,11 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 */
 	public function Get_VirtualMachine($options = array (
 			"maxObjects" => "50"
-	)) {
+	),$full=true) {
 		$this->onDebug ( __METHOD__, 1 );
 		
 		//On retrouve la liste des VirtualMachines
-		$a = $this->creer_Folder_spec ();
+		/*$a = $this->creer_Folder_spec ();
 		$a->append ( new soapvar ( array (
 				'name' => 'FolderTraversalSpec' 
 		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
@@ -1072,6 +1028,19 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
 		) );
 		$resultat_recherche = $this->retrouve_objets ( 'VirtualMachine', array (), $options );
+		
+		return $this->renvoi_obj ( $resultat_recherche );*/
+		$session=$this->creer_ContainerView('VirtualMachine');
+		$a = $this->creer_traverseView_spec ();
+		
+		$objectref= new stdClass ();
+		$objectref->_this = $session;
+		$this->getObjectVmwarePropertyCollector ()
+		->ObjectSpec ( $objectref, false, array (
+				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
+		) );
+		
+		$resultat_recherche = $this->retrouve_objets ( 'VirtualMachine', array (), $options, $full );
 		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}

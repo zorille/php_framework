@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\VMware;
+use Zorille\framework\options as options;
 use Zorille\framework as Core;
 use \Exception as Exception;
 /**

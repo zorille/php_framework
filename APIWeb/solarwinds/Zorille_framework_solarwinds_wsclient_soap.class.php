@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use \Zorille\VMware as VMware;
 use \Exception as Exception;
 use \stdClass as stdClass;
 use \SimpleXMLElement as SimpleXMLElement;
@@ -247,7 +248,7 @@ class solarwinds_wsclient_soap extends abstract_log {
 	 * Transforme un soap VMWare en SimpleXMLElement
 	 * @param stdClass|array $object_src
 	 * @param SimpleXMLElement $xml_output
-	 * @return vmwareWsclient
+	 * @return VMware\vmwareWsclient
 	 */
 	public function renvoi_donnees_xml($object_src, &$xml_output) {
 		if (is_array ( $object_src )) {

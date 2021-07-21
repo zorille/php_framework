@@ -4,6 +4,8 @@
  * @package Lib
  */
 namespace Zorille\framework;
+use Zorille\framework\ssh_z as ssh_z;
+use Zorille\framework\ftp as ftp;
 /**
  * class copie_donnees_fonctions_standards<br>
  *

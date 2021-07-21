@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\VMware;
+use Zorille\framework\options as options;
 use \Exception as Exception;
 /**
  * class vmwareVim25ManagedObject<br>

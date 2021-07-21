@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use Zorille\framework\abstract_log as abstract_log;
 use \Exception as Exception;
 /**
  * class options<br>

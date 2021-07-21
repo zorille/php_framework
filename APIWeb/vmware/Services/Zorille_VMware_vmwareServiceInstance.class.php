@@ -8,7 +8,6 @@ namespace Zorille\VMware;
 use Zorille\framework as Core;
 use \Exception as Exception;
 use \stdClass as stdClass;
-use \ArrayObject as ArrayObject;
 use \Soapvar as Soapvar;
 /**
  * class vmwareServiceInstance<br>
@@ -35,7 +34,7 @@ class vmwareServiceInstance extends Core\abstract_log {
 	/**
 	 * Instancie un objet de type vmwareServiceInstance.
 	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareServiceInstance

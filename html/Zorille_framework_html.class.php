@@ -356,7 +356,7 @@ class html extends abstract_log {
 	}
 
 	/**
-	 * Cree une ligne de tableau.<br>
+	 * Cree une ligne par entree du tableau.<br>
 	 * $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
@@ -372,6 +372,32 @@ class html extends abstract_log {
 				$ligne .= $this->creer_case_tableau ( $donnees, $TD_option );
 				$ligne .= " </TR>\n";
 			}
+		} else {
+			$ligne .= " <TR " . $TR_option . ">\n";
+			$ligne .= $this->creer_case_tableau ( $variable, $TD_option );
+			$ligne .= " </TR>\n";
+		}
+		
+		return $ligne;
+	}
+	
+	/**
+	 * Cree une ligne de tableau.<br>
+	 * $variable contient la valeur de chaque case du tableau.
+	 *
+	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
+	 * @param string $TR_option Ligne contenant des options pour un tag TR.
+	 * @param string $TD_option Ligne contenant des options pour un tag TD.
+	 * @return string Ligne de tableau.
+	 */
+	public function creer_une_ligne_de_tableau($variable, $TR_option = "", $TD_option = "") {
+		$ligne = "";
+		if (is_array ( $variable )) {
+				$ligne .= " <TR " . $TR_option . ">\n";
+				foreach ( $variable as $donnees ) {
+					$ligne .= $this->creer_case_tableau ( $donnees, $TD_option );
+				}
+				$ligne .= " </TR>\n";
 		} else {
 			$ligne .= " <TR " . $TR_option . ">\n";
 			$ligne .= $this->creer_case_tableau ( $variable, $TD_option );

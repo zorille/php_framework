@@ -11,8 +11,7 @@ use Zorille\framework as Core;
 use Exception as Exception;
 
 /**
- * class wsclient<br>
- * Renvoi des information via un webservice.
+ * class wsclient<br> Renvoi des information via un webservice.
  * @package Lib
  * @subpackage opnsense
  */
@@ -71,7 +70,9 @@ class wsclient extends Core\wsclient {
 			$this->onError ( "il faut un objet de type opnsense_datas" );
 			return false;
 		}
-		$this->setObjetOpnsenseDatas ( $liste_class ["opnsense_datas"] );
+		$this->setObjetOpnsenseDatas ( $liste_class ["opnsense_datas"] )
+			->setContentType ( 'application/json' )
+			->setAccept ( 'application/json' );
 		return $this;
 	}
 
@@ -120,7 +121,7 @@ class wsclient extends Core\wsclient {
 			->getObjetUtilisateurs ()
 			->setUsername ( $liste_data_opnsense ["username"] )
 			->setPassword ( $liste_data_opnsense ["password"] );
-		$this->setHttpAuth('basic');
+		$this->setHttpAuth ( 'basic' );
 		$this->getGestionConnexionUrl ()
 			->retrouve_connexion_params ( $liste_data_opnsense )
 			->prepare_prepend_url ( $liste_data_opnsense ["url"] );
@@ -141,13 +142,12 @@ class wsclient extends Core\wsclient {
 			->verifie_option_existe ( "dry-run" ) !== false && (preg_match ( "/^set$|^add$|^del$/", $method ) === 1 || $this->getHttpMethod () == "DELETE" || $this->getHttpMethod () == "POST")) {
 			$this->onInfo ( "DRY RUN :" . $method . " " . print_r ( $this->getParams (), true ) );
 		} else {
-			$retour_json = $this->envoi_requete ( array (
-					"Accept: application/json"
-			) );
+			$retour_json = $this->prepare_html_entete ()
+				->envoi_requete ();
 			$retour = $this->traite_retour_json ( $retour_json );
 			$this->onDebug ( $retour, 2 );
 			if (is_array ( $retour )) {
-				if (isset ( $retour ["status"] ) && (is_numeric($retour ["status"]) && $retour ["status"] != 200)) {
+				if (isset ( $retour ["status"] ) && (is_numeric ( $retour ["status"] ) && $retour ["status"] != 200)) {
 					return $this->onError ( $retour ["status"] . " : " . $retour ["message"], "", $retour ["status"] );
 				}
 				return $retour;
@@ -167,7 +167,7 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getMenu(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'core/menu/search' );
 		$this->setHttpMethod ( "GET" )
@@ -180,7 +180,6 @@ class wsclient extends Core\wsclient {
 	/**
 	 * *********************** API opnsense **********************
 	 */
-	
 	/**
 	 * *********************** API SockdIOPS opnsense **********************
 	 */
@@ -192,16 +191,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSGlobal(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/sockdglobal/get' );
-				$this->setHttpMethod ( "GET" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'get' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/sockdglobal/get' );
+		$this->setHttpMethod ( "GET" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'get' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -210,16 +209,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSClients(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/clientslist/get' );
-				$this->setHttpMethod ( "GET" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'get' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/clientslist/get' );
+		$this->setHttpMethod ( "GET" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'get' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -228,16 +227,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSSocks(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/sockslist/get' );
-				$this->setHttpMethod ( "GET" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'get' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/sockslist/get' );
+		$this->setHttpMethod ( "GET" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'get' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -246,16 +245,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSRoutes(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/routeslist/get' );
-				$this->setHttpMethod ( "GET" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'get' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/routeslist/get' );
+		$this->setHttpMethod ( "GET" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'get' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -264,16 +263,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function searchSockdIOPSClients(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/clientslist/searchClient' );
-				$this->setHttpMethod ( "POST" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'search' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/clientslist/searchClient' );
+		$this->setHttpMethod ( "POST" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'search' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -282,16 +281,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function searchSockdIOPSSocks(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/sockslist/searchSock' );
-				$this->setHttpMethod ( "POST" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'search' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/sockslist/searchSock' );
+		$this->setHttpMethod ( "POST" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'search' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -300,16 +299,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function searchSockdIOPSRoutes(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/routeslist/searchRoute' );
-				$this->setHttpMethod ( "POST" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'search' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/routeslist/searchRoute' );
+		$this->setHttpMethod ( "POST" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'search' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -318,16 +317,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function SockdIOPSServiceStatus(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/service/status' );
-				$this->setHttpMethod ( "POST" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'get' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/service/status' );
+		$this->setHttpMethod ( "POST" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'get' );
+		return $retour;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * Resource: SockdIOPS
@@ -336,15 +335,16 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function SockdIOPSServiceDirty(
-			$params = array()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$this->setUrl ( 'sockdiops/service/dirty' );
-				$this->setHttpMethod ( "get" )
-				->setParams ( $params );
-				// prepare_requete_json
-				$retour = $this->prepare_requete_json ( 'get' );
-				return $retour;
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( 'sockdiops/service/dirty' );
+		$this->setHttpMethod ( "get" )
+			->setParams ( $params );
+		// prepare_requete_json
+		$retour = $this->prepare_requete_json ( 'get' );
+		return $retour;
 	}
+
 	/**
 	 * *********************** API SockdIOPS opnsense **********************
 	 */

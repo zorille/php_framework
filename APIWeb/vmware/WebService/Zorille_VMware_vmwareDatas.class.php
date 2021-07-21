@@ -25,7 +25,7 @@ class vmwareDatas extends Core\serveur_datas {
 	/**
 	 * Instancie un objet de type vmwareDatas.
 	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
+	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet serveur_connexion_url
 	 * @return vmwareDatas
