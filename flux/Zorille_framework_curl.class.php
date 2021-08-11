@@ -43,8 +43,9 @@ class curl extends abstract_log {
 	 * @access protected
 	 * @var string
 	 */
-	private $UAgent = "Mozilla/5.0 (Windows NT 6.0; rv:5.0) Gecko/20100101 Firefox/5.0";
-
+	private $UAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0";
+	
+	//private $UAgent = "Mozilla/5.0 (Windows NT 6.0; rv:5.0) Gecko/20100101 Firefox/5.0";
 	/*********************** Creation de l'objet *********************/
 	/**
 	 * Instancie un objet de type curl.
@@ -214,6 +215,19 @@ class curl extends abstract_log {
 		$this->setCodeRetourCurl($code_retour);
 		return $code_retour;
 	}
+	
+	/**
+	 * Active le connect Time Out
+	 * @codeCoverageIgnore
+	 * @return curl
+	 * @throws Exception
+	 */
+	public function curl_connecttimeout($time=1) {
+		$this->setReturnTransfert(TRUE);
+		curl_setopt ( $this->getConnexion (), CURLOPT_CONNECTTIMEOUT, $time );
+		
+		return $this;
+	}
 
 	/**
 	 * Ferme la connexion
@@ -347,6 +361,7 @@ class curl extends abstract_log {
 	}
 	
 	/**
+	 * pour suivre tous les en-tetes "Location: " que le serveur envoie dans les en-tetes HTTP
 	 * @codeCoverageIgnore
 	 */
 	public function &setLocation($actif) {

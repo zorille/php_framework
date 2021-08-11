@@ -361,6 +361,7 @@ class enveloppe extends abstract_log {
 
 	/**
 	 * Prepare la liste des fichiers a attacher
+	 * @param array $liste_fichiers Liste des fichiers (de moins de 4Mo) a envoyer avec leur chemin relatif
 	 * @return enveloppe
 	 * @throws Exception
 	 */

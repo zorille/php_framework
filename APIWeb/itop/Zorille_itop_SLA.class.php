@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class SLA
  *
@@ -56,6 +59,7 @@ class SLA extends ci {
 			$liste_class) {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'SLA' )
+			->champ_obligatoire_standard ()
 			->setObjetItopOrganization ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
 
@@ -75,54 +79,67 @@ class SLA extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'name' => false
+			) );
+		}
+		return $this;
+	}
+
 	public function retrouve_SLA(
 			$name) {
-		return $this->creer_oql ( $name )
+		return $this->creer_oql ( array (
+				'name' => $name
+		) )
 			->retrouve_ci ();
 	}
 
 	/**
-	 * @param string $name Nom du CI
-	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return SLA
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
 	 */
-	public function creer_oql(
-			$name,
-			$fields = array()) {
-		$where = "";
-		if (! empty ( $name )) {
-			$where .= " WHERE name='" . $name . "'";
-		}
-		return $this->setOqlCi ( "SELECT " . $this->getFormat () . $where );
+	public function prepare_params_SLA(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		return $params;
 	}
 
 	/**
-	 * Creer une entree SLA
-	 * @param string $SLA_name
-	 * @param string $org_name
-	 * @param string $status
-	 * @param string $description
-	 * @param string $SLT_name
+	 * Fait un requete OQL sur les champs Mandatory
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return SLA
+	 */
+	public function creer_oql_SLA(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				default :
+					$filtre [$field] = $fields [$field];
+			}
+		}
+		return parent::creer_oql ( $filtre );
+	}
+
+	/**
+	 * Creer une entree SLA Champs standards : name, org_name, status, description, slts_list
 	 * @return SLA
 	 */
 	public function gestion_SLA(
-			$SLA_name,
-			$org_name,
-			$description,
-			$List_SLT = array()) {
+			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $SLA_name,
-				'description' => $description,
-				'slts_list' => $List_SLT
-		);
-		$params ['org_id'] = $this->getObjetItopOrganization ()
-			->creer_oql ( $org_name )
-			->getOqlCi ();
-		
-		$this->creer_oql ( $SLA_name )
-			->creer_ci ( $SLA_name, $params );
-		return $this;
+		$params = $this->prepare_params_SLA ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_SLA ( $parametres )
+			->creer_ci ( $params ['name'], $params );
 	}
 
 	/**

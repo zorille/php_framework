@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class UserLocal
  *
@@ -54,6 +57,7 @@ class UserLocal extends Contact {
 			$liste_class) {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'UserLocal' )
+			->champ_obligatoire_standard ()
 			->setObjetItopPerson ( Person::creer_Person ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
 
@@ -74,75 +78,91 @@ class UserLocal extends Contact {
 	}
 
 	/**
-	* Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes
-	* Format array('nom du champ obligatoire'=>false, ... )
-	* @return Person
-	*/
-	public function champ_obligatoire_standard(){
-		if(empty($this->getMandatory())) {
-			$this->setMandatory(
-				array(
-					'login'=>false,
-					'language'=>false,
-					'reset_pwd_token'=>false,
-					'password'=>false,
-					'org_id'=>false
-					)
-				);
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Person
+	 */
+	public function champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'login' => false,
+					'language' => false,
+					'reset_pwd_token' => false,
+					'password' => false,
+					'org_id' => false,
+					'contactid' => false
+			) );
 		}
 		return $this;
 	}
 
 	public function retrouve_UserLocal(
 			$login) {
-		return $this->creer_oql ( $login )
+		return $this->creer_oql ( array (
+				'login' => $login
+		) )
 			->retrouve_ci ();
 	}
 
-	public function creer_oql(
-			$login = '', $email='') {
-		if (empty ( $login )) {
-			$oql = "SELECT " . $this->getFormat ();
-		} else {
-			$oql = "SELECT " . $this->getFormat () . " WHERE login='" . $login . "'";
+	/**
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_params_UserLocal(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		foreach ( $parametres as $champ => $valeur ) {
+			switch ($champ) {
+				case 'person_friendlyname' :
+					$params ['contactid_friendlyname'] = $this->getObjetItopPerson ()
+						->creer_oql ( array (
+							'fiendlyname' => $valeur,
+							'org_id' => $params ['org_id']
+					) )
+						->getOqlCi ();
+					$this->valide_mandatory_field_filled ( 'contactid', $params ['contactid'] );
+					if (isset ( $params ['person_friendlyname'] )) {
+						unset ( $params ['person_friendlyname'] );
+					}
+					break;
+			}
 		}
-		return $this->setOqlCi ( $oql );
+		return $params;
 	}
 
 	/**
-	 * Creer un CI de type UserLocal (necessite un Contact existant)
-	 * 'name', 'first_name', 'email', 'login', 'password', 'language', 'status', 'org_name', 'profile_list', 'allowed_org_list'
- 	 * @param array $parametres Liste des critères. Le nom de la case= le nom du champ itop, la valeur de la case est la valeur dans itop.
+	 * Fait un requete OQL sur les champs Mandatory
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
 	 * @return UserLocal
-	*/
+	 */
+	public function creer_oql_UserLocal(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				case 'org_id' :
+					$filtre ['org_name'] = $fields ['org_name'];
+					break;
+				default :
+					$filtre [$field] = $fields [$field];
+			}
+		}
+		return parent::creer_oql ( $filtre );
+	}
+
+	/**
+	 * Creer un CI de type UserLocal (necessite un Contact existant) 'login', 'language', 'status', 'org_name', 'person_friendlyname', 'profile_list', 'allowed_org_list'
+	 * @param array $parametres Liste des critères. Le nom de la case= le nom du champ itop, la valeur de la case est la valeur dans itop.
+	 * @return UserLocal
+	 */
 	public function gestion_UserLocal(
 			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params=array();
-		$this->champ_obligatoire_standard();
-		foreach($parametres as $champ=>$valeur) {
-			if(isset($mandatory[$champ]) && !empty($valeur)) {
-				$mandatory[$champ]=true;
-			}
-			switch ($champ) {
-				case 'org_name':
-					$params['org_id']=$this->getObjetItopOrganization ()
-						->creer_oql ( $valeur )
-						->getOqlCi ();
-					break;
-				case 'contactid_friendlyname':
-					$params[$champ]=$this->getObjetItopPerson ()
-						->creer_oql ( $valeur,'','',$parametres['org_name'] )
-						->getOqlCi ();
-					break;
-				default :
-					$params[$champ]=$valeur;
-			}
-		}
-		$this->valide_mandatory_fields($mandatory);
-		$this->creer_oql ( $params['login'] )
-			->creer_ci ( $params['login'], $params );
-		return $this;
+		$params = $this->prepare_params_UserLocal ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_UserLocal ( $parametres )
+			->creer_ci ( $params ['login'], $params );
 	}
 
 	/**

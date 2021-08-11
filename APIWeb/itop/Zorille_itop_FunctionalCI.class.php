@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class FunctionalCI
  *
@@ -31,16 +34,16 @@ class FunctionalCI extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return FunctionalCI
 	 */
-	static function &creer_FunctionalCI (
-			&$liste_option, 
-			&$webservice_rest, 
-			$sort_en_erreur = false, 
+	static function &creer_FunctionalCI(
+			&$liste_option,
+			&$webservice_rest,
+			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new FunctionalCI ( $sort_en_erreur, $entete );
-		$objet ->_initialise ( array (
+		$objet->_initialise ( array (
 				"options" => $liste_option,
-				"wsclient_rest" => $webservice_rest 
+				"wsclient_rest" => $webservice_rest
 		) );
 		return $objet;
 	}
@@ -50,10 +53,10 @@ class FunctionalCI extends ci {
 	 * @param array $liste_class
 	 * @return FunctionalCI
 	 */
-	public function &_initialise (
+	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		return $this ->setFormat ( 'FunctionalCI' );
+		return $this->setFormat ( 'FunctionalCI' );
 	}
 
 	/**
@@ -65,34 +68,38 @@ class FunctionalCI extends ci {
 	 * @param string $entete entete de log
 	 * @return true
 	 */
-	public function __construct (
-			$sort_en_erreur = false, 
+	public function __construct(
+			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
-	 * 
 	 * @param string $name
 	 * @return FunctionalCI
 	 */
-	public function retrouve_FunctionalCI (
+	public function retrouve_FunctionalCI(
 			$name) {
-		return $this ->creer_oql ( $name ) 
+		return $this->creer_oql ( array (
+				'name' => $name
+		) )
 			->retrouve_ci ();
 	}
 
-	/**
-	 * 
-	 * @param string $name Nom du CI
-	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return FunctionalCI
-	 */
-	public function creer_oql (
-			$name, 
-			$fields = array()) {
-		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . " WHERE name='" . $name . "'" . $this->prepare_oql_fields($fields) );
+	public function creer_oql_FunctionalCI(
+			$liste_finalclass,
+			$name) {
+		// 'SELECT FunctionalCI WHERE finalclass IN (\'Server\',\'VirtualMachine\',\'PC\') AND name = "' . $server_name . '"',
+		$where = $this->prepare_oql_fields ( array (
+				'name' => $name,
+				'finalclass' => " IN (\'" . implode ( "\',\'", $liste_finalclass ) . "\')"
+		) );
+		if (! empty ( $where )) {
+			$where = " WHERE " . $where;
+		}
+		$this->onDebug ( "OQL : " . "SELECT FunctionalCI " . $where, 1 );
+		return $this->setOqlCi ( "SELECT FunctionalCI " . $where );
 	}
 
 	/**
@@ -101,17 +108,17 @@ class FunctionalCI extends ci {
 	 * @param string $functionalci_id_friendlyname
 	 * @return array
 	 */
-	public function creer_lnkApplicationSolutionToFunctionalCI (
-			$friendlyname = '', 
+	public function creer_lnkApplicationSolutionToFunctionalCI(
+			$friendlyname = '',
 			$functionalci_id_friendlyname = '') {
-		$lnkApplicationSolutionToFunctionalCI = $this ->creer_lnkToFunctionalCI ();
+		$lnkApplicationSolutionToFunctionalCI = $this->creer_lnkToFunctionalCI ();
 		if (! empty ( $friendlyname )) {
 			$lnkApplicationSolutionToFunctionalCI ['friendlyname'] = $friendlyname;
 		}
 		if (! empty ( $functionalci_id_friendlyname )) {
 			$lnkApplicationSolutionToFunctionalCI ['functionalci_id_friendlyname'] = $functionalci_id_friendlyname;
 		}
-		$lnkApplicationSolutionToFunctionalCI ['functionalci_id_finalclass_recall'] = $this ->getFormat ();
+		$lnkApplicationSolutionToFunctionalCI ['functionalci_id_finalclass_recall'] = $this->getFormat ();
 		return $lnkApplicationSolutionToFunctionalCI;
 	}
 
@@ -121,10 +128,10 @@ class FunctionalCI extends ci {
 	 * @param string $contact_name
 	 * @return array lnkContactToFunctionalCI
 	 */
-	public function creer_lnkContactToFunctionalCI (
-			$contact_id = '', 
+	public function creer_lnkContactToFunctionalCI(
+			$contact_id = '',
 			$contact_name = '') {
-		$lnkContactToFunctionalCI = $this ->creer_lnkToFunctionalCI ();
+		$lnkContactToFunctionalCI = $this->creer_lnkToFunctionalCI ();
 		if (! empty ( $contact_id )) {
 			$lnkContactToFunctionalCI ['contact_id'] = $contact_id;
 		}
@@ -138,12 +145,12 @@ class FunctionalCI extends ci {
 	 * Creer un lnkToFunctionalCI en fonction du CI
 	 * @return array ['functionalci_id']/['functionalci_name']
 	 */
-	public function creer_lnkToFunctionalCI () {
+	public function creer_lnkToFunctionalCI() {
 		$lnkToFunctionalCI = array ();
-		if ($this ->getId ()) {
-			$lnkToFunctionalCI ['functionalci_id'] = $this ->getId ();
+		if ($this->getId ()) {
+			$lnkToFunctionalCI ['functionalci_id'] = $this->getId ();
 		}
-		$tableau = $this ->getDonnees ();
+		$tableau = $this->getDonnees ();
 		if (isset ( $tableau ['name'] )) {
 			$lnkToFunctionalCI ['functionalci_name'] = $tableau ['name'];
 		}
@@ -157,16 +164,16 @@ class FunctionalCI extends ci {
 	 * @codeCoverageIgnore
 	 * @return Organization
 	 */
-	public function &getObjetItopOrganization () {
-		return $this ->Organization;
+	public function &getObjetItopOrganization() {
+		return $this->Organization;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopOrganization (
+	public function &setObjetItopOrganization(
 			&$Organization) {
-		$this ->Organization = $Organization;
+		$this->Organization = $Organization;
 		return $this;
 	}
 
@@ -176,7 +183,7 @@ class FunctionalCI extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help () {
+	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "FunctionalCI :";

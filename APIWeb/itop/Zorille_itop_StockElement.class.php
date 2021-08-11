@@ -9,38 +9,38 @@ namespace Zorille\itop;
 use Zorille\framework as Core;
 
 /**
- * class WebApplication
+ * class StockElement
  *
  * @package Lib
  * @subpackage itop
  */
-class WebApplication extends FunctionalCI {
+class StockElement extends FunctionalCI {
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var WebServer
+	 * @var Location
 	 */
-	private $WebServer = null;
+	private $Location = null;
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
 	/**
-	 * Instancie un objet de type WebApplication. @codeCoverageIgnore
+	 * Instancie un objet de type StockElement. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return WebApplication
+	 * @return StockElement
 	 */
-	static function &creer_WebApplication(
+	static function &creer_StockElement(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new WebApplication ( $sort_en_erreur, $entete );
+		$objet = new StockElement ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
 				"wsclient_rest" => $webservice_rest
@@ -51,15 +51,15 @@ class WebApplication extends FunctionalCI {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return WebApplication
+	 * @return StockElement
 	 */
 	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		return $this->setFormat ( 'WebApplication' )
+		return $this->setFormat ( 'StockElement' )
 			->champ_obligatoire_standard ()
 			->setObjetItopOrganization ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) )
-			->setObjetItopWebServer ( WebServer::creer_WebServer ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
+			->setObjetItopLocation ( Location::creer_Location ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
 
 	/**
@@ -87,18 +87,10 @@ class WebApplication extends FunctionalCI {
 			$this->setMandatory ( array (
 					'name' => false,
 					'org_id' => false,
-					'webserver_id' => false
+					'location_id' => false
 			) );
 		}
 		return $this;
-	}
-
-	public function retrouve_WebApplication(
-			$name) {
-		return $this->creer_oql ( array (
-				'friendlyname' => $name
-		) )
-			->retrouve_ci ();
 	}
 
 	/**
@@ -106,21 +98,20 @@ class WebApplication extends FunctionalCI {
 	 * @param array $parametres
 	 * @return array liste des parametres au format iTop
 	 */
-	public function prepare_params_WebApplication(
+	public function prepare_params_StockElement(
 			$parametres) {
 		$params = $this->prepare_standard_params ( $parametres );
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
-				case 'webserver_name' :
-					$params ['webserver_id'] = $this->getObjetItopWebServer ()
-						->creer_oql ( array (
-							'fiendlyname' => $valeur,
+				case 'location_name' :
+					$params ['location_id'] = $this->getObjetItopLocation ()
+						->prepare_params_obligatoire ( array (
+							'name' => $parametres ['location_name'],
 							'org_id' => $params ['org_id']
-					) )
-						->getOqlCi ();
-					$this->valide_mandatory_field_filled ( 'webserver_id', $params ['webserver_id'] );
-					if (isset ( $params ['webserver_name'] )) {
-						unset ( $params ['webserver_name'] );
+					) );
+					$this->valide_mandatory_field_filled ( 'location_id', $params ['location_id'] );
+					if (isset ( $params ['location_name'] )) {
+						unset ( $params ['location_name'] );
 					}
 					break;
 			}
@@ -131,9 +122,9 @@ class WebApplication extends FunctionalCI {
 	/**
 	 * Fait un requete OQL sur les champs Mandatory
 	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return WebApplication
+	 * @return Organization
 	 */
-	public function creer_oql_WebApplication(
+	public function creer_oql_StockElement(
 			$fields = array ()) {
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
@@ -141,8 +132,8 @@ class WebApplication extends FunctionalCI {
 				case 'org_id' :
 					$filtre ['org_name'] = $fields ['org_name'];
 					break;
-				case 'webserver_id' :
-					$filtre ['webserver_name'] = $fields ['webserver_name'];
+				case 'location_id' :
+					$filtre ['location_name'] = $fields ['location_name'];
 					break;
 				default :
 					$filtre [$field] = $fields [$field];
@@ -151,17 +142,30 @@ class WebApplication extends FunctionalCI {
 		return parent::creer_oql ( $filtre );
 	}
 
+	public function retrouve_StockElement(
+			$name) {
+		if (is_array ( $name )) {
+			return $this->creer_oql ( $name )
+				->retrouve_ci ();
+		}
+		return $this->creer_oql ( array (
+				'name' => $name
+		) )
+			->retrouve_ci ();
+	}
+
 	/**
-	 * Champs standards : name, org_name,webserver_name, business_criticity, move2production
-	 * @return WebApplication
+	 * name, description, org_name, location_name, picture, current_quantity, threshold
+	 * @param array $parametres
+	 * @return StockElement
 	 */
-	public function gestion_WebApplication(
+	public function gestion_StockElement(
 			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = $this->prepare_params_WebApplication ( $parametres );
+		$params = $this->prepare_params_StockElement ( $parametres );
 		$this->onDebug ( $params, 1 );
 		return $this->valide_mandatory_fields ()
-			->creer_oql_WebApplication ( $parametres )
+			->creer_oql_StockElement ( $parametres )
 			->creer_ci ( $params ['name'], $params );
 	}
 
@@ -170,18 +174,18 @@ class WebApplication extends FunctionalCI {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return WebServer
+	 * @return Location
 	 */
-	public function &getObjetItopWebServer() {
-		return $this->WebServer;
+	public function &getObjetItopLocation() {
+		return $this->Location;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopWebServer(
-			&$WebServer) {
-		$this->WebServer = $WebServer;
+	public function &setObjetItopLocation(
+			&$Location) {
+		$this->Location = $Location;
 		return $this;
 	}
 
@@ -194,7 +198,7 @@ class WebApplication extends FunctionalCI {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "WebApplication :";
+		$help [__CLASS__] ["text"] [] .= "StockElement :";
 		return $help;
 	}
 }

@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class ContactType
  *
@@ -48,7 +51,8 @@ class ContactType extends ci {
 	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		return $this->setFormat ( 'ContactType' );
+		return $this->setFormat ( 'ContactType' )
+			->champ_obligatoire_standard ();
 	}
 
 	/**
@@ -67,24 +71,56 @@ class ContactType extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'name' => false
+			) );
+		}
+		return $this;
+	}
+
 	public function retrouve_ContactType(
 			$name) {
-		return $this->creer_oql ( $name )
+		return $this->creer_oql ( array (
+				'name' => $name
+		) )
 			->retrouve_ci ();
 	}
 
 	/**
-	 * @param string $name Nom du ContactType
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_params_ContactType(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		return $params;
+	}
+
+	/**
+	 * Fait un requete OQL sur les champs Mandatory
 	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
 	 * @return ContactType
 	 */
-	public function creer_oql(
-			$name = '') {
-		$where = "";
-		if (! empty ( $name )) {
-			$where .= " WHERE name='" . $name . "'";
+	public function creer_oql_ContactType(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				case 'org_id' :
+					$filtre ['org_name'] = $fields ['org_name'];
+					break;
+				default :
+					$filtre [$field] = $fields [$field];
+			}
 		}
-		return $this->setOqlCi ( "SELECT " . $this->getFormat () . $where );
+		return parent::creer_oql ( $filtre );
 	}
 
 	/**
@@ -94,22 +130,18 @@ class ContactType extends ci {
 	 * @return ContactType
 	 */
 	public function gestion_ContactType(
-			$name,
-			$service_name = '') {
+			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $name
-		);
-
-		$this->creer_oql ( $name )
-			->creer_ci ( $name, $params );
-		return $this;
+		$params = $this->prepare_params_ContactType ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_ContactType ( $parametres )
+			->creer_ci ( $params ['title'], $params );
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */

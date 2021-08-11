@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class Service
  *
@@ -63,6 +66,7 @@ class Service extends ci {
 			$liste_class) {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Service' )
+			->champ_obligatoire_standard ()
 			->setObjetItopOrganization ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) )
 			->setObjetItopServiceFamily ( ServiceFamily::creer_ServiceFamily ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
@@ -83,59 +87,86 @@ class Service extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'name' => false,
+					'org_id' => false
+			) );
+		}
+		return $this;
+	}
+
 	public function retrouve_Service(
 			$name) {
-		return $this->creer_oql ( $name )
+		return $this->creer_oql ( array (
+				'name' => $name
+		) )
 			->retrouve_ci ();
 	}
 
 	/**
-	 * @param string $name Nom du CI
-	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return Service
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
 	 */
-	public function creer_oql(
-			$name,
-			$fields = array()) {
-		$where = "";
-		if (! empty ( $name )) {
-			$where .= " WHERE name='" . $name . "'";
+	public function prepare_params_Service(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		foreach ( $parametres as $champ => $valeur ) {
+			switch ($champ) {
+				case 'serviceFamily_name' :
+					$params ['servicefamily_id'] = $this->getObjetItopServiceFamily ()
+						->creer_oql ( array (
+							'name' => $valeur
+					) )
+						->getOqlCi ();
+					$this->valide_mandatory_field_filled ( 'servicefamily_id', $params ['servicefamily_id'] );
+					if (isset ( $params ['serviceFamily_name'] )) {
+						unset ( $params ['serviceFamily_name'] );
+					}
+					break;
+			}
 		}
-		return $this->setOqlCi ( "SELECT " . $this->getFormat () . $where );
+		return $params;
 	}
 
 	/**
-	 * Creer une entree Service
-	 * @param string $service_name
-	 * @param string $org_name
-	 * @param string $status
-	 * @param string $description
-	 * @param string $serviceFamily_name
+	 * Fait un requete OQL sur les champs Mandatory
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return Service
+	 */
+	public function creer_oql_Service(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				case 'org_id' :
+					$filtre ['org_name'] = $fields ['org_name'];
+					break;
+				default :
+					$filtre [$field] = $fields [$field];
+			}
+		}
+		return parent::creer_oql ( $filtre );
+	}
+
+	/**
+	 * Creer une entree Service Champs standards : name, org_name, status, description, serviceFamily_name
 	 * @return Service
 	 */
 	public function gestion_Service(
-			$service_name,
-			$org_name,
-			$status,
-			$description,
-			$serviceFamily_name = '') {
+			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $service_name,
-				'description' => $description,
-				'status' => $status
-		);
-		$params ['org_id'] = $this->getObjetItopOrganization ()
-			->creer_oql ( $org_name )
-			->getOqlCi ();
-		if (! empty ( $serviceFamily_name )) {
-			$params ['servicefamily_id'] = $this->getObjetItopServiceFamily ()
-				->creer_oql ( $serviceFamily_name )
-				->getOqlCi ();
-		}
-		$this->creer_oql ( $service_name )
-			->creer_ci ( $service_name, $params );
-		return $this;
+		$params = $this->prepare_params_Service ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_Service ( $parametres )
+			->creer_ci ( $params ['name'], $params );
 	}
 
 	/**

@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class Typology
  *
@@ -48,7 +51,8 @@ class Typology extends ci {
 	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		return $this->setFormat ( 'Typology' );
+		return $this->setFormat ( 'Typology' )
+			->champ_obligatoire_standard ();
 	}
 
 	/**
@@ -67,49 +71,72 @@ class Typology extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'name' => false
+			) );
+		}
+		return $this;
+	}
+
 	public function retrouve_Typology(
 			$name) {
-		return $this->creer_oql ( $name )
+		return $this->creer_oql ( array (
+				'name' => $name
+		) )
 			->retrouve_ci ();
 	}
 
 	/**
-	 * @param string $name Nom du Typology
-	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return Typology
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
 	 */
-	public function creer_oql(
-			$name = '') {
-		$where = "";
-		if (! empty ( $name )) {
-			$where .= " WHERE name='" . $name . "'";
-		}
-		return $this->setOqlCi ( "SELECT " . $this->getFormat () . $where );
+	public function prepare_params_Typology(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		return $params;
 	}
 
 	/**
-	 * Creer une entree Typology
-	 * @param string $name Nom de la famille de service
-	 * @param string $service_name Nom de service existant
+	 * Fait un requete OQL sur les champs Mandatory
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return Typology
+	 */
+	public function creer_oql_Typology(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				default :
+					$filtre [$field] = $fields [$field];
+			}
+		}
+		return parent::creer_oql ( $filtre );
+	}
+
+	/**
+	 * Creer une entree Typology. Champs standards : name
 	 * @return Typology
 	 */
 	public function gestion_Typology(
-			$name,
-			$service_name = '') {
+			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $name
-		);
-
-		$this->creer_oql ( $name )
-			->creer_ci ( $name, $params );
-		return $this;
+		$params = $this->prepare_params_Typology ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_Typology ( $parametres )
+			->creer_ci ( $params ['name'], $params );
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */

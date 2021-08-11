@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class CustomerContract
  *
@@ -38,13 +41,17 @@ class CustomerContract extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return CustomerContract
 	 */
-	static function &creer_CustomerContract(&$liste_option, &$webservice_rest, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_CustomerContract(
+			&$liste_option,
+			&$webservice_rest,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new CustomerContract ( $sort_en_erreur, $entete );
-		$objet ->_initialise ( array ( 
-				"options" => $liste_option, 
-				"wsclient_rest" => $webservice_rest ) );
-		
+		$objet->_initialise ( array (
+				"options" => $liste_option,
+				"wsclient_rest" => $webservice_rest
+		) );
 		return $objet;
 	}
 
@@ -53,10 +60,11 @@ class CustomerContract extends ci {
 	 * @param array $liste_class
 	 * @return CustomerContract
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
-		
-		return $this ->setFormat ( 'CustomerContract' ) 
+		return $this->setFormat ( 'CustomerContract' )
+			->champ_obligatoire_standard ()
 			->setObjetItopOrganization ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) )
 			->setObjetItopProvider ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
@@ -64,130 +72,101 @@ class CustomerContract extends ci {
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
-	
 	/**
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
 	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_CustomerContract($name,$org_name) {
-		return $this ->creer_oql ( $name,$org_name ) 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'name' => false,
+					'org_id' => false,
+					'provider_id' => false
+			) );
+		}
+		return $this;
+	}
+
+	public function retrouve_CustomerContract(
+			$name,
+			$org_name) {
+		return $this->creer_oql ( array (
+				'name' => $name,
+				'org_name' => $org_name
+		) )
 			->retrouve_ci ();
 	}
 
-	public function creer_oql($name='',$org_name='') {
-		$where="";
-		if(!empty($name)){
-			$where .= " name='" . $name . "'";
-		}
-		if(!empty($org_name)){
-			if(!empty($where)){
-				$where .= " AND ";
-			}
-			$where .= " organization_name='" . $org_name . "'";
-		}
-		if(!empty($where)){
-			$where = " WHERE".$where;
-		}
-		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . $where );
-	}
-	
 	/**
-	 * Creer une entree CustomerContract
-	 * @param string $CustomerContract_name
-	 * @param string $org_name
-	 * @param string $status
-	 * @param string $provider_name
-	 * @param string $description
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_params_CustomerContract(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		foreach ( $parametres as $champ => $valeur ) {
+			switch ($champ) {
+				case 'provider_name' :
+					$$params ['provider_id'] = $this->getObjetItopOrganization ()
+						->prepare_params_obligatoire ( array (
+							'name' => $valeur
+					) );
+					$this->valide_mandatory_field_filled ( 'provider_id', $params ['provider_id'] );
+					if (isset ( $params ['provider_name'] )) {
+						unset ( $params ['provider_name'] );
+					}
+					break;
+			}
+		}
+		return $params;
+	}
+
+	/**
+	 * Fait un requete OQL sur les champs Mandatory
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return CustomerContract
+	 */
+	public function creer_oql_CustomerContract(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				case 'org_id' :
+					$filtre ['organization_name'] = $fields ['org_name'];
+					break;
+				default :
+					$filtre [$field] = $fields [$field];
+			}
+		}
+		return parent::creer_oql ( $filtre );
+	}
+
+	/**
+	 * Creer une entree CustomerContract. Champs existants : name, org_name, status, provider_name, start_date, end_date, cost, cost_currency, cost_unit, billing_frequency, description
 	 * @return CustomerContract
 	 */
 	public function gestion_CustomerContract(
-			$CustomerContract_name,
-			$org_name,
-			$status,
-			$provider_name,
-			$description="",
-			$start_date="",
-			$end_date="",
-			$cost="",
-			$cost_currency="",
-			$cost_unit="",
-			$billing_frequency="") {
+			$parametres) {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $CustomerContract_name,
-				'description' => $description,
-				'status' => $status,
-				'start_date' => $start_date,
-				'end_date' => $end_date,
-				'cost' => $cost,
-				'cost_currency' => $cost_currency,
-				'cost_unit' => $cost_unit,
-				'billing_frequency' => $billing_frequency
-		);
-		$params ['org_id'] = $this->getObjetItopOrganization ()
-			->creer_oql ( $org_name )
-			->getOqlCi ();
-		$params ['provider_id'] = $this->getObjetItopProvider ()
-			->creer_oql ( $provider_name )
-			->getOqlCi ();
-			
-		$this->creer_oql ( $CustomerContract_name, $org_name )
-			->creer_ci ( $CustomerContract_name, $params );
-		return $this;
-	}
-	
-	/**
-	 * Creer une entree CustomerContract
-	 * @param string $CustomerContract_name
-	 * @param string $org_name
-	 * @param string $status
-	 * @param string $provider_name
-	 * @param string $description
-	 * @return CustomerContract
-	 */
-	public function gestion_CustomerContract_Euclyde(
-			$CustomerContract_name,
-			$org_name,
-			$status,
-			$provider_name,
-			$description="",
-			$start_date="",
-			$end_date="",
-			$cost="",
-			$cost_currency="",
-			$cost_unit="",
-			$billing_frequency="",
-			$remise=0) {
-		$this->onDebug ( __METHOD__, 1 );
-		$params = array (
-				'name' => $CustomerContract_name,
-				'description' => $description,
-				'status' => $status,
-				'start_date' => $start_date,
-				'end_date' => $end_date,
-				'cost' => $cost,
-				'cost_currency' => $cost_currency,
-				'cost_unit' => $cost_unit,
-				'billing_frequency' => $billing_frequency,
-				'remise'=>$remise
-		);
-		$params ['org_id'] = $this->getObjetItopOrganization ()
-			->creer_oql ( $org_name )
-			->getOqlCi ();
-		$params ['provider_id'] = $this->getObjetItopProvider ()
-			->creer_oql ( $provider_name )
-			->getOqlCi ();
-			
-		$this->creer_oql ( $CustomerContract_name, $org_name )
-			->creer_ci ( $CustomerContract_name, $params );
-		return $this;
+		$params = $this->prepare_params_CustomerContract ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_CustomerContract ( $parametres )
+			->creer_ci ( $params ['name'], $params );
 	}
 
 	/**
@@ -204,12 +183,12 @@ class CustomerContract extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopOrganization(&$Organization) {
+	public function &setObjetItopOrganization(
+			&$Organization) {
 		$this->Organization = $Organization;
-		
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * @return Organization
@@ -221,25 +200,22 @@ class CustomerContract extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopProvider(&$Provider) {
+	public function &setObjetItopProvider(
+			&$Provider) {
 		$this->Provider = $Provider;
-		
 		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
 	static public function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "CustomerContract :";
-		
 		return $help;
 	}
 }

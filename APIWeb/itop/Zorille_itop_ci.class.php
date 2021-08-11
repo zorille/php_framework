@@ -1,11 +1,14 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
-use \Exception as Exception;
+use Exception as Exception;
+
 /**
  * class ci
  *
@@ -124,32 +127,37 @@ class ci extends Core\abstract_log {
 			$fields) {
 		$liste_fields = "";
 		foreach ( $fields as $champ => $valeur ) {
-			if(!$liste_fields=="") {
+			if (! $liste_fields == "") {
 				$liste_fields .= " AND ";
 			}
-			$liste_fields .= $champ . "='" . $valeur . "'";
+			if (preg_match ( '/( IN | LIKE )/', $valeur )) {
+				$liste_fields .= $champ . $valeur;
+			} else {
+				$liste_fields .= $champ . "='" . str_replace ( "'", "\'", $valeur ) . "'";
+			}
 		}
 		return $liste_fields;
 	}
-	
+
 	/**
 	 * Prepare une requete OQL de recherche dans itop
 	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return Organization
+	 * @return $this
 	 */
-	public function creer_oql (
-			$fields = array()) {
-		$where=$this->prepare_oql_fields($fields);
-		if(!empty($where)){
-			$where=" WHERE ".$where;
+	public function creer_oql(
+			$fields = array ()) {
+		$where = $this->prepare_oql_fields ( $fields );
+		if (! empty ( $where )) {
+			$where = " WHERE " . $where;
 		}
-		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . $where );
+		$this->onDebug ( "OQL : " . "SELECT " . $this->getFormat () . $where, 1 );
+		return $this->setOqlCi ( "SELECT " . $this->getFormat () . $where );
 	}
 
 	/**
 	 * Enregistre les donnees class, key et fields du premier objet de la reponse REST
 	 * @param array $ci Retour d'un requete REST sur itop
-	 * @return ci
+	 * @return $this
 	 */
 	public function enregistre_ci_a_partir_rest(
 			$ci) {
@@ -164,7 +172,7 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * Permet de trouver un CI dans itop a partir d'une requete OQL
-	 * @return ci|false False en cas d'erreur sans leve d'Exception ($error=false)
+	 * @return $this|false False en cas d'erreur sans leve d'Exception ($error=false)
 	 * @throws Exception
 	 */
 	public function recupere_ci_dans_itop() {
@@ -175,7 +183,7 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * Permet de trouver un CI dans itop a partir d'une requete OQL et enregistre les donnees du CI dans l'objet
-	 * @return ci
+	 * @return $this
 	 * @throws Exception
 	 */
 	public function retrouve_ci() {
@@ -194,7 +202,7 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * Valide que le CI existe et est unique dans itop et enregistre les donnees du CI dans l'objet s'il est trouve
-	 * @return ci|null
+	 * @return $this|null
 	 */
 	public function valide_ci_existe() {
 		// Si il y a deja un objet ci, alors le ci existe
@@ -215,7 +223,7 @@ class ci extends Core\abstract_log {
 	 * Creer un CI dans itop du format de l'objet
 	 * @param string $name
 	 * @param array $params
-	 * @return ci
+	 * @return $this
 	 * @throws Exception
 	 */
 	public function creer_ci(
@@ -227,55 +235,111 @@ class ci extends Core\abstract_log {
 			$ci = $this->getObjetItopWsclientRest ()
 				->core_create ( $this->getFormat (), '', $params );
 			$this->enregistre_ci_a_partir_rest ( $ci );
-		} else if ($this->getUpdate()) {
+		} else if ($this->getUpdate ()) {
 			$this->onInfo ( "Update de : " . $name );
 			$ci = $this->getObjetItopWsclientRest ()
-				->core_update ( $this->getFormat (), $this->getId(), $params );
+				->core_update ( $this->getFormat (), $this->getId (), $params );
 			$this->enregistre_ci_a_partir_rest ( $ci );
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * Creer un CI dans itop du format de l'objet
 	 * @param string $name
 	 * @param array $params
-	 * @return ci
+	 * @return $this
 	 * @throws Exception
 	 */
 	public function update_ci(
 			$name,
 			$params) {
-				$this->onDebug ( __METHOD__, 1 );
-				if ($this->valide_ci_existe ()) {
-					$this->onInfo ( "Update de : " . $name );
-					$ci = $this->getObjetItopWsclientRest ()
-					->core_update ( $this->getFormat (), $this->getId(), $params );
-					$this->enregistre_ci_a_partir_rest ( $ci );
-				}
-				return $this;
+		$this->onDebug ( __METHOD__, 1 );
+		if ($this->valide_ci_existe ()) {
+			$this->onInfo ( "Update de : " . $name );
+			$ci = $this->getObjetItopWsclientRest ()
+				->core_update ( $this->getFormat (), $this->getId (), $params );
+			$this->enregistre_ci_a_partir_rest ( $ci );
+		}
+		return $this;
 	}
-	
+
 	/**
 	 * Valide si tous les champs nécessaires sont remplis avec une données
 	 * @param array $mandatory
-	 * @return boolean true si tous les champs sont remplis
+	 * @return $this
 	 * @throws Exception
 	 */
 	public function valide_mandatory_fields() {
 		$this->onDebug ( __METHOD__, 1 );
-		$retour=array();
-		foreach( $this->getMandatory() as $champ => $valeur ) {
-			if($valeur===false){
-				$retour[].=$champ;
+		$retour = array ();
+		foreach ( $this->getMandatory () as $champ => $valeur ) {
+			if ($valeur === false) {
+				$retour [] .= $champ;
 			}
 		}
-		if(count($retour)!=0) {
-			return $this->onError("Il manque des champs obligatoires : ",$retour,1);
+		if (count ( $retour ) != 0) {
+			return $this->onError ( "Il manque des champs obligatoires : ", $retour, 1 );
+		}
+		return $this;
+	}
+
+	/**
+	 * Valide que valeur a des donnees et que le champ esr Mandatory
+	 * @param string $champ
+	 * @param string $valeur
+	 * @return $this
+	 */
+	public function valide_mandatory_field_filled(
+			$champ,
+			$valeur) {
+		if (isset ( $this->getMandatory () [$champ] ) && ! empty ( $valeur )) {
+			$this->setMandatoryField ( $champ );
 		}
 		return true;
 	}
-				
+
+	/**
+	 * Prepare les parametres standards d'un objet + org_name s'il existe
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_standard_params(
+			$parametres) {
+		$params = array ();
+		foreach ( $parametres as $champ => $valeur ) {
+			switch ($champ) {
+				case 'org_name' :
+				case 'organisation_name' :
+					$params ['org_id'] = $this->getObjetItopOrganization ()
+						->prepare_params_obligatoire ( array (
+							'name' => $valeur
+					) );
+					$this->valide_mandatory_field_filled ( 'org_id', $params ['org_id'] );
+					break;
+				default :
+					$this->valide_mandatory_field_filled ( $champ, $valeur );
+					$params [$champ] = $valeur;
+			}
+		}
+		return $params;
+	}
+
+	/**
+	 * Prepare les parametres obligatoire d'un objet. Necessite les champ type org_id deja rempli correctement.
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_params_obligatoire(
+			$parametres) {
+		$params = array ();
+		foreach ( $this->getMandatory () as $champ => $inutile ) {
+			if (isset ( $parametres [$champ] )) {
+				$params [$champ] = $parametres [$champ];
+			}
+		}
+		return $params;
+	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
@@ -350,6 +414,19 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * @codeCoverageIgnore
+	 * @param string $field
+	 * @return \Zorille\itop\ci
+	 */
+	public function &setMandatoryField(
+			$field) {
+		if (isset ( $this->mandatory [$field] )) {
+			$this->mandatory [$field] = true;
+		}
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
 	 * @return wsclient_rest
 	 */
 	public function &getObjetItopWsclientRest() {
@@ -381,7 +458,7 @@ class ci extends Core\abstract_log {
 		return $this;
 	}
 
-		/**
+	/**
 	 * @codeCoverageIgnore
 	 */
 	public function getUpdate() {

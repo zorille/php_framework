@@ -223,19 +223,18 @@ class wsclient extends abstract_log {
 		) ) );
 		return $this;
 	}
-	
+
 	/**
 	 * Creation d'entete HTTP standard
 	 * @return wsclient
 	 */
 	public function prepare_html_entete() {
-				$this->onDebug ( __METHOD__, 1 );
-				return $this->setHttpHeader(array (
-						"Content-Type: " . $this->getContentType (),
-						"Accept: " . $this->getAccept ()
-				));
+		$this->onDebug ( __METHOD__, 1 );
+		return $this->setHttpHeader ( array (
+				"Content-Type: " . $this->getContentType (),
+				"Accept: " . $this->getAccept ()
+		) );
 	}
-	
 
 	/**
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"return_code":0}
@@ -284,36 +283,15 @@ class wsclient extends abstract_log {
 		$this->getObjetCurl ()
 			->connectService ( $url );
 		try {
-			// On gere les differents parmetres d'une requete
-			if ($this->getCollectHeader ()) {
-				$this->getObjetCurl ()
-					->setHeader ( true )
-					->setReturnTransfert ( true );
-			}
-			$this->gere_request ()
-				->gere_utilisateurs ()
-				->gere_proxy ()
-				->gere_header ( $this->getHttpHeader() );
-			// On invalide le check SSL du certificat
-			if ($this->getValidSSL () === false) {
-				$this->getObjetCurl ()
-					->setSslVerifyPeerAndHost ( false );
-			}
+			$this->gere_curl_options ();
 			// On applique la requete
-			if ($this->getListeOptions ()
-				->getOption ( "verbose" ) == 3) {
-				$this->getObjetCurl ()
-					->setVerbose ();
-			}
-			$this->getObjetCurl ()
-				->setLocation ( true );
 			$retour_curl = $this->getObjetCurl ()
 				->send_curl ();
 			if ($this->getCollectHeader ()) {
-				$this->setCurlInfo($this->getObjetCurl ()
-					->getCurlInfos ());
-				$header_size = $this->getCurlInfo() ['header_size'];
-				$this->setHeaderData(substr ( $retour_curl, 0, $header_size ));
+				$this->setCurlInfo ( $this->getObjetCurl ()
+					->getCurlInfos () );
+				$header_size = $this->getCurlInfo () ['header_size'];
+				$this->setHeaderData ( substr ( $retour_curl, 0, $header_size ) );
 				$retour_curl = substr ( $retour_curl, $header_size );
 			}
 		} catch ( Exception $e ) {
@@ -332,9 +310,9 @@ class wsclient extends abstract_log {
 	 * @param string $header
 	 * @return wsclient
 	 */
-	public function gere_header(
-			$header = '') {
+	public function gere_header() {
 		// On ajoute les donnees sur une connexion active uniquement
+		$header = $this->getHttpHeader ();
 		if ($header == '') {
 			$header = "Content-Type: application/json";
 		}
@@ -345,6 +323,50 @@ class wsclient extends abstract_log {
 		}
 		$this->getObjetCurl ()
 			->setHttpHeader ( $header );
+		return $this;
+	}
+
+	/**
+	 * Valide les options fournit en argument
+	 * @return wsclient
+	 */
+	public function gere_curl_options() {
+		// On gere les differents parmetres d'une requete
+		// le besoin d'avoir le header dans la reponse
+		if ($this->getCollectHeader ()) {
+			$this->getObjetCurl ()
+				->setHeader ( true )
+				->setReturnTransfert ( true );
+		}
+		// le Verbose
+		if ($this->getListeOptions ()
+			->getOption ( "verbose" ) == 3) {
+			$this->getObjetCurl ()
+				->setVerbose ();
+		}
+		// le Connect Time Out
+		if ($this->getListeOptions ()
+			->verifie_option_existe ( "curl_connecttimeout" ) !== false) {
+			$this->getObjetCurl ()
+				->curl_connecttimeout ( $this->getListeOptions ()
+				->getOption ( "curl_connecttimeout" ) );
+		}
+		// le Follow header Location:
+		if ($this->getListeOptions ()
+			->verifie_option_existe ( "curl_nofollowlocation" ) === false) {
+			$this->getObjetCurl ()
+				->setLocation ( true );
+		}
+		//gestion des utilisateurs et du proxy
+		$this->gere_request ()
+			->gere_utilisateurs ()
+			->gere_proxy ()
+			->gere_header ();
+		// On invalide le check SSL du certificat si necessaire
+		if ($this->getValidSSL () === false) {
+			$this->getObjetCurl ()
+				->setSslVerifyPeerAndHost ( false );
+		}
 		return $this;
 	}
 
@@ -540,21 +562,21 @@ class wsclient extends abstract_log {
 		$this->http_method = strtoupper ( $http_method );
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function getHttpHeader() {
 		return $this->http_entete;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function &setHttpHeader(
 			$http_entete) {
-				$this->http_entete = $http_entete;
-				return $this;
+		$this->http_entete = $http_entete;
+		return $this;
 	}
 
 	/**
@@ -751,6 +773,9 @@ class wsclient extends abstract_log {
 		$help [__CLASS__] ["text"] [] .= "\t--wsclient_host host de connexion (http://127.0.0.1:8080)";
 		$help [__CLASS__] ["text"] [] .= "\t--wsclient_url url de connexion (/test/ws)";
 		$help [__CLASS__] ["text"] [] .= "\t--no_wsclient n'envoi pas les requetes sur le webservice";
+		$help [__CLASS__] ["text"] [] .= "\t--curl_connecttimeout {time in second} Temps de connection Time Out";
+		$help [__CLASS__] ["text"] [] .= "\t--curl_nofollowlocation Desactive le Follow header Location:";
+		$help [__CLASS__] ["text"] [] .= "\t--verbose 3 pour active le verbose de CuRL";
 		$help = array_merge ( $help, gestion_connexion_url::help () );
 		$help = array_merge ( $help, curl::help () );
 		return $help;

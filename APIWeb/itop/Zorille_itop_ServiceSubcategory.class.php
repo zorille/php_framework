@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class ServiceSubcategory
  *
@@ -39,83 +42,133 @@ class ServiceSubcategory extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return ServiceSubcategory
 	 */
-	static function &creer_ServiceSubcategory(&$liste_option, &$webservice_rest, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_ServiceSubcategory(
+			&$liste_option,
+			&$webservice_rest,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new ServiceSubcategory ( $sort_en_erreur, $entete );
-		$objet ->_initialise ( array ( 
-				"options" => $liste_option, 
-				"wsclient_rest" => $webservice_rest ) );
-		
+		$objet->_initialise ( array (
+				"options" => $liste_option,
+				"wsclient_rest" => $webservice_rest
+		) );
 		return $objet;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * Initialisation de l'objet 
+	 * Initialisation de l'objet
 	 * @param array $liste_class
 	 * @return ServiceSubcategory
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
-		
-		return $this ->setFormat ( 'ServiceSubcategory' ) 
+		return $this->setFormat ( 'ServiceSubcategory' )
+			->champ_obligatoire_standard ()
 			->setObjetItopOrganization ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
-	
 	/**
-	 * Constructeur. 
+	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
 	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_ServiceSubcategory($name) {
-		return $this ->creer_oql ( $name ) 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'name' => false,
+					'org_id' => false,
+					'service_id' => false
+			) );
+		}
+		return $this;
+	}
+
+	public function retrouve_ServiceSubcategory(
+			$name) {
+		return $this->creer_oql ( $name )
 			->retrouve_ci ();
 	}
 
 	/**
-	 *
-	 * @param string $name Nom du CI
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_params_ServiceSubcategory(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		foreach ( $parametres as $champ => $valeur ) {
+			switch ($champ) {
+				case 'service_name' :
+					$params ['service_id'] = $this->getObjetItopService ()
+						->creer_oql ( array (
+							'name' => $valeur
+					) )
+						->getOqlCi ();
+					$this->valide_mandatory_field_filled ( 'service_id', $params ['service_id'] );
+					if (isset ( $params ['service_name'] )) {
+						unset ( $params ['service_name'] );
+					}
+					break;
+			}
+		}
+		return $params;
+	}
+
+	/**
+	 * Fait un requete OQL sur les champs Mandatory
 	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
 	 * @return ServiceSubcategory
 	 */
-	public function creer_oql (
-	    $name,
-	    $fields = array()) {
-		$where = "";
-		if (! empty ( $name )) {
-			$where .= " WHERE name='" . $name . "'";
+	public function creer_oql_ServiceSubcategory(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				case 'org_id' :
+					$filtre ['org_name'] = $fields ['org_name'];
+					break;
+				case 'service_id' :
+					$filtre ['service_name'] = $fields ['service_name'];
+					break;
+				default :
+					$filtre [$field] = $fields [$field];
+			}
 		}
-		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . $where );
+		return parent::creer_oql ( $filtre );
 	}
 
-	public function gestion_ServiceSubcategory($serviceSubcategory_name, $service_name, $org_name, $status) {
-		$this ->onDebug ( __METHOD__, 1 );
-		
-		$params = array ( 
-				'name' => $serviceSubcategory_name, 
-				'status' => $status );
-		$params ['org_id'] = $this ->getObjetItopOrganization () 
-			->creer_oql ( $org_name ) 
-			->getOqlCi ();
-		$params ['service_id'] = $this ->getObjetItopService () 
-			->creer_oql ( $org_name ) 
-			->getOqlCi ();
-		
-		$this ->creer_oql ( $serviceSubcategory_name ) 
-			->creer_ci ( $serviceSubcategory_name, $params );
-		
-		return $this;
+	/**
+	 * Champs standards : name, service_name, org_name, status
+	 * @return ServiceSubcategory
+	 */
+	public function gestion_ServiceSubcategory(
+			$parametres) {
+		$this->onDebug ( __METHOD__, 1 );
+		$params = $this->prepare_params_ServiceSubcategory ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_ServiceSubcategory ( $parametres )
+			->creer_ci ( $params ['name'], $params );
 	}
 
 	/**
@@ -132,9 +185,9 @@ class ServiceSubcategory extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopOrganization(&$Organization) {
+	public function &setObjetItopOrganization(
+			&$Organization) {
 		$this->Organization = $Organization;
-		
 		return $this;
 	}
 
@@ -149,25 +202,22 @@ class ServiceSubcategory extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopService(&$Service) {
+	public function &setObjetItopService(
+			&$Service) {
 		$this->Service = $Service;
-		
 		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
 	static public function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "ServiceSubcategory :";
-		
 		return $help;
 	}
 }

@@ -226,6 +226,11 @@ class Message extends User {
 		return $this;
 	}
 
+	/**
+	 * Integration de la liste des fichiers de moins de 4 Mo
+	 * @param array $liste_fichiers Liste des fichiers (de moins de 4Mo) a envoyer avec leur chemin relatif
+	 * @return \Zorille\o365\Message
+	 */
 	public function attache_fichier(
 			$liste_fichiers) {
 		$this->onDebug ( __METHOD__, 1 );
@@ -248,7 +253,7 @@ class Message extends User {
 		try {
 			$enveloppe = Core\enveloppe::creer_enveloppe ( $this->getListeOptions () );
 		} catch ( Exception $e ) {
-			$this->onWarning($e->getMessage());
+			$this->onWarning ( $e->getMessage () );
 		}
 		return $this->setObjEnveloppe ( $enveloppe );
 	}
@@ -467,7 +472,8 @@ class Message extends User {
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
 	static public function help() {
-		$help = parent::help ();
+		$help = Core\enveloppe::help ();
+		$help = array_merge ( $help, parent::help () );
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Message :";
 		return $help;

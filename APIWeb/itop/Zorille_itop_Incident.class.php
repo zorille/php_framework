@@ -1,10 +1,13 @@
 <?php
+
 /**
  * Gestion de itop.
  * @author dvargas
  */
 namespace Zorille\itop;
+
 use Zorille\framework as Core;
+
 /**
  * class Incident
  *
@@ -31,13 +34,17 @@ class Incident extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Incident
 	 */
-	static function &creer_Incident(&$liste_option, &$webservice_rest, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_Incident(
+			&$liste_option,
+			&$webservice_rest,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Incident ( $sort_en_erreur, $entete );
-		$objet ->_initialise ( array ( 
-				"options" => $liste_option, 
-				"wsclient_rest" => $webservice_rest ) );
-		
+		$objet->_initialise ( array (
+				"options" => $liste_option,
+				"wsclient_rest" => $webservice_rest
+		) );
 		return $objet;
 	}
 
@@ -46,66 +53,118 @@ class Incident extends ci {
 	 * @param array $liste_class
 	 * @return Incident
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
-		
-		return $this ->setFormat ( 'Incident' ) 
+		return $this->setFormat ( 'Incident' )
+			->champ_obligatoire_standard ()
 			->setObjetItopOrganization ( Organization::creer_Organization ( $liste_class ['options'], $liste_class ['wsclient_rest'] ) );
 	}
 
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
-	
 	/**
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
 	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_Incident($name) {
-		return $this ->creer_oql ( $name ) 
+	/**
+	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
+	 * @return Organization
+	 */
+	public function &champ_obligatoire_standard() {
+		if (empty ( $this->getMandatory () )) {
+			$this->setMandatory ( array (
+					'title' => false,
+					'org_id' => false,
+					'caller_id' => false,
+					'description' => false
+			) );
+		}
+		return $this;
+	}
+
+	public function retrouve_Incident(
+			$name) {
+		return $this->creer_oql ( array (
+				'title' => $name
+		) )
 			->retrouve_ci ();
 	}
 
-	public function creer_oql($name, $not_in_status = 'closed') {
-		$where = " WHERE status NOT IN ('" . $not_in_status . "')";
-		if (! empty ( $name )) {
-			$where .= " AND title='" . $name . "'";
+	/**
+	 * Prepare les parametres standards d'un objet
+	 * @param array $parametres
+	 * @return array liste des parametres au format iTop
+	 */
+	public function prepare_params_Incident(
+			$parametres) {
+		$params = $this->prepare_standard_params ( $parametres );
+		foreach ( $parametres as $champ => $valeur ) {
+			switch ($champ) {
+				case 'caller_email' :
+					$params ['caller_id'] = $this->getObjetItopContact ()
+						->creer_oql ( array (
+							'email' => $valeur
+					) )
+						->getOqlCi ();
+					$this->valide_mandatory_field_filled ( 'caller_id', $params ['caller_id'] );
+					if (isset ( $params ['caller_email'] )) {
+						unset ( $params ['caller_email'] );
+					}
+					break;
+			}
 		}
-		return $this ->setOqlCi ( "SELECT " . $this ->getFormat () . $where );
+		return $params;
 	}
 
-	public function gestion_Incident($title, $org_name, $description, $impact, $urgency, $origin='monitoring', $contacts_list = array(), $functionalcis_list = array(), $workorders_list = array()) {
-		$this ->onDebug ( __METHOD__, 1 );
-		
-		$params = array ( 
-				'title' => $title, 
-				'description' => $description, 
-				'impact' => $impact, 
-				'urgency' => $urgency, 
-				'origin' => $origin );
-		$params ['org_id'] = $this ->getObjetItopOrganization () 
-			->creer_oql ( $org_name ) 
-			->getOqlCi ();
-		if (! empty ( $contacts_list )) {
-			$params ['contacts_list'] = $contacts_list;
+	/**
+	 * Fait un requete OQL sur les champs Mandatory
+	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
+	 * @return Change
+	 */
+	public function creer_oql_Incident(
+			$fields = array ()) {
+		$filtre = array ();
+		foreach ( $this->getMandatory () as $field => $inutile ) {
+			switch ($field) {
+				case 'org_id' :
+					$filtre ['org_name'] = $fields ['org_name'];
+					break;
+				case 'caller_id' :
+					$filtre ['caller_email'] = $fields ['caller_email'];
+					break;
+				default :
+					$filtre [$field] = $fields [$field];
+			}
 		}
-		if (! empty ( $functionalcis_list )) {
-			$params ['functionalcis_list'] = $functionalcis_list;
+		if (! isset ( $filtre ['status'] )) {
+			$filtre ['status'] = "NOT IN ('closed')";
 		}
-		if (! empty ( $workorders_list )) {
-			$params ['workorders_list'] = $workorders_list;
-		}
-		
-		$this ->creer_oql ( $title ) 
-			->creer_ci ( $title, $params );
-		
+		return parent::creer_oql ( $filtre );
+	}
+
+	/**
+	 * Champs existants : title, org_name, description, impact, urgency, origin, caller_email, contacts_list, functionalcis_list, workorders_list
+	 * @return Incident
+	 */
+	public function gestion_Incident(
+			$parametres) {
+		$this->onDebug ( __METHOD__, 1 );
+		$params = $this->prepare_params_Incident ( $parametres );
+		$this->onDebug ( $params, 1 );
+		return $this->valide_mandatory_fields ()
+			->creer_oql_Incident ( $parametres )
+			->creer_ci ( $params ['title'], $params );
 		return $this;
 	}
 
@@ -123,25 +182,22 @@ class Incident extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopOrganization(&$Organization) {
+	public function &setObjetItopOrganization(
+			&$Organization) {
 		$this->Organization = $Organization;
-		
 		return $this;
 	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
 	static public function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Incident :";
-		
 		return $help;
 	}
 }
