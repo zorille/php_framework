@@ -1,15 +1,15 @@
 <?php
 /**
- * Gestion de veeam.
+ * Gestion de veamspc.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamspc;
 use Zorille\framework as Core;
 /**
  * class datas
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veamspc
  */
 class datas extends Core\serveur_datas {
 
@@ -65,16 +65,16 @@ class datas extends Core\serveur_datas {
 	 */
 	public function retrouve_param() {
 		$this->onDebug ( __METHOD__, 1 );
-		$donnee_veeam = $this->_valideOption ( array (
+		$donnee_veamspc = $this->_valideOption ( array (
 				"veeam_machines",
 				"serveur" 
 		) );
 		
-		return $this->setServeurData ( $donnee_veeam );
+		return $this->setServeurData ( $donnee_veamspc );
 	}
 
 	/**
-	 * Valide la presence de la definition d'un veeam nomme : $nom
+	 * Valide la presence de la definition d'un veamspc nomme : $nom
 	 *
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
@@ -96,8 +96,8 @@ class datas extends Core\serveur_datas {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "veeam Datas :";
-		$help [__CLASS__] ["text"] [] .= "\t--veeam_machines_serveur {Donnees du/des serveur/s} Donnees contenus dans le fichier de configuration";
+		$help [__CLASS__] ["text"] [] .= "veamspc Datas :";
+		$help [__CLASS__] ["text"] [] .= "\t--veamspc_machines_serveur {Donnees du/des serveur/s} Donnees contenus dans le fichier de configuration";
 		
 		return $help;
 	}

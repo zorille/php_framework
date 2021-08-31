@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework\abstract_log as abstract_log;
 use Zorille\framework\options as options;
@@ -14,7 +14,7 @@ use Exception as Exception;
  * class backupfile
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class backupfile extends ci {
 	/**
@@ -43,7 +43,7 @@ class backupfile extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backupfile
 	 */
-	static function &creer_veeam_backupfile(
+	static function &creer_veeamman_backupfile(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
@@ -173,7 +173,7 @@ class backupfile extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backupfile dans veeam et enregistre les donnees des backupfile dans l'objet
+	 * Permet de trouver la liste des backupfile dans veeamman et enregistre les donnees des backupfile dans l'objet
 	 * @return backupfile
 	 * @throws Exception
 	 */
@@ -190,7 +190,7 @@ class backupfile extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backupfile dans veeam et enregistre les donnees des backupfile dans l'objet
+	 * Permet de trouver la liste des backupfile dans veeamman et enregistre les donnees des backupfile dans l'objet
 	 * @return backupfile
 	 * @throws Exception
 	 */

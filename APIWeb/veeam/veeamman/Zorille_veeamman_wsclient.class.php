@@ -5,7 +5,7 @@
  * @package Lib
  *
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -14,7 +14,7 @@ use SimpleXMLElement as SimpleXMLElement;
 /**
  * class wsclient<br> Renvoi des informations via un webservice.
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class wsclient extends Core\wsclient {
 	/**
@@ -107,7 +107,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * Prepare l'url de connexion au veeam nomme $nom
+	 * Prepare l'url de connexion au veeamman nomme $nom
 	 * @param string $nom
 	 * @return boolean|wsclient
 	 * @throws Exception
@@ -115,27 +115,27 @@ class wsclient extends Core\wsclient {
 	public function prepare_connexion(
 			$nom) {
 		$this->onDebug ( __METHOD__, 1 );
-		$liste_data_veeam = $this->getObjetveeamDatas ()
+		$liste_data_veeamman = $this->getObjetveeamDatas ()
 			->valide_presence_data ( $nom );
-		if ($liste_data_veeam === false) {
-			return $this->onError ( "Aucune definition de veeam pour " . $nom );
+		if ($liste_data_veeamman === false) {
+			return $this->onError ( "Aucune definition de veeamman pour " . $nom );
 		}
-		if (! isset ( $liste_data_veeam ["username"] )) {
-			return $this->onError ( "Il faut un username dans la liste des parametres veeam" );
+		if (! isset ( $liste_data_veeamman ["username"] )) {
+			return $this->onError ( "Il faut un username dans la liste des parametres veeamman" );
 		}
-		if (! isset ( $liste_data_veeam ["password"] )) {
-			return $this->onError ( "Il faut un password dans la liste des parametres veeam" );
+		if (! isset ( $liste_data_veeamman ["password"] )) {
+			return $this->onError ( "Il faut un password dans la liste des parametres veeamman" );
 		}
-		if (! isset ( $liste_data_veeam ["url"] )) {
-			return $this->onError ( "Il faut une url dans la liste des parametres veeam" );
+		if (! isset ( $liste_data_veeamman ["url"] )) {
+			return $this->onError ( "Il faut une url dans la liste des parametres veeamman" );
 		}
 		$this->getGestionConnexionUrl ()
-			->retrouve_connexion_params ( $liste_data_veeam )
-			->prepare_prepend_url ( $liste_data_veeam ["url"] );
+			->retrouve_connexion_params ( $liste_data_veeamman )
+			->prepare_prepend_url ( $liste_data_veeamman ["url"] );
 		// On prepare l'objet utilisateurs de la connexion, car l'objet curl ne connait pas l'objet datas
 		$this->userLogin ( array (
-				'username' => $liste_data_veeam ["username"],
-				'password' => $liste_data_veeam ["password"]
+				'username' => $liste_data_veeamman ["username"],
+				'password' => $liste_data_veeamman ["password"]
 		) );
 		return $this;
 	}
@@ -237,7 +237,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * Sends are prepare_requete_json to the veeam API and returns the response as object.
+	 * Sends are prepare_requete_json to the veeamman API and returns the response as object.
 	 *
 	 * @return string API JSON response.
 	 * @throws Exception
@@ -262,7 +262,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * *********************** API veeam **********************
+	 * *********************** API veeamman **********************
 	 */
 	/**
 	 * Resource: auth/login Method: Post Autentification
@@ -282,6 +282,11 @@ class wsclient extends Core\wsclient {
 			if (isset ( $resultat->SessionId ) && ! empty ( $resultat->SessionId )) {
 				return $this->setAuth ( trim ( $retour [1] ) )
 					->setSession ( ( string ) $resultat->SessionId );
+			}
+		}elseif (preg_match ( '/x-restsvcsessionid: (.*)/', $this->getHeaderData (), $retour ) === 1) {
+			if (isset ( $resultat->SessionId ) && ! empty ( $resultat->SessionId )) {
+				return $this->setAuth ( trim ( $retour [1] ) )
+				->setSession ( ( string ) $resultat->SessionId );
 			}
 		}
 		return $this->onError ( "Erreur durant l'autentification", $resultat );
@@ -615,6 +620,63 @@ class wsclient extends Core\wsclient {
 		$resultat = $this->getMethod ( 'reports/summary/repository', $params );
 		return $resultat;
 	}
+	
+	/**
+	 * List of Backups servers connected
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listReplicaSessions(
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$resultat = $this->getMethod ( 'replicaSessions', $params );
+				return $resultat;
+	}
+	
+	/**
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function ReplicaSessions(
+			$ReplicaSessionsId,
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$resultat = $this->getMethod ( 'replicaSessions/' . $ReplicaSessionsId, $params );
+				return $resultat;
+	}
+	
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listReplicaTasksSessions(
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$resultat = $this->getMethod ( 'replicaTaskSessions', $params );
+				return $resultat;
+	}
+	
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param string $backupTaskSessionsid numero de la task
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function ReplicaTaskSession(
+			$replicaTaskSessionsid,
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$resultat = $this->getMethod ( 'replicaTaskSessions/' . $replicaTaskSessionsid, $params );
+				return $resultat;
+	}
+	
 
 	/**
 	 * @codeCoverageIgnore
@@ -699,7 +761,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * *********************** API veeam **********************
+	 * *********************** API veeamman **********************
 	 */
 	/**
 	 * *********************** Accesseurs **********************
@@ -793,7 +855,7 @@ class wsclient extends Core\wsclient {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "veeam Wsclient :";
+		$help [__CLASS__] ["text"] [] .= "veeamman Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
 		$help = array_merge ( $help, datas::help () );
 		return $help;

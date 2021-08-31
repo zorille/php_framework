@@ -1,16 +1,16 @@
 <?php
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 use Zorille\framework as Core;
 use \Exception as Exception;
 /**
  * class ci
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 abstract class ci extends Core\abstract_log {
 	/**

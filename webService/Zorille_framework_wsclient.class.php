@@ -375,6 +375,7 @@ class wsclient extends abstract_log {
 	 * @return wsclient
 	 */
 	public function gere_request() {
+		$this->onDebug("Method : ".$this->getHttpMethod(), 1);
 		$this->getObjetCurl ()
 			->setRequest ( $this->getHttpMethod () );
 		if ($this->getHttpMethod () != "GET") {

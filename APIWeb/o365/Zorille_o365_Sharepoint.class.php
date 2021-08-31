@@ -15,7 +15,7 @@ use Exception as Exception;
  * @package Lib
  * @subpackage o365
  */
-class Sharepoint extends User {
+class Sharepoint extends Drive {
 	/**
 	 * var privee
 	 *
@@ -23,13 +23,6 @@ class Sharepoint extends User {
 	 * @var string
 	 */
 	private $site_id = null;
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var string
-	 */
-	private $drive_id = null;
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -86,11 +79,6 @@ class Sharepoint extends User {
 	/**
 	 * ******************************* SHAREPOINT *********************************
 	 */
-	public function prepare_nom_pour_url(
-			$recherche) {
-		return str_replace ( " ", "%20", $recherche );
-	}
-
 	public function retrouve_siteid(
 			$nom_site) {
 		$Liste_mgt = $this->sharepoints_chercher_site ( $this->prepare_nom_pour_url ( $nom_site ) );
@@ -103,23 +91,6 @@ class Sharepoint extends User {
 			return $this->setSiteId ( $mgt->id );
 		}
 		return $this->onError ( "Aucun site avec le nom " . $nom_site . " n'a ete trouve", $Liste_mgt, 1 );
-	}
-
-	public function retrouve_driveid(
-			$nom_du_drive = "Documents",
-			$type = "documentLibrary") {
-		$Liste_drive = $this->sharepoints_list_drives ();
-		$this->onDebug ( $Liste_drive, 2 );
-		if (! $this->valide_champ_value ( $Liste_drive )) {
-			return $this;
-		}
-		$this->setWsReponse ( $Liste_drive->value );
-		foreach ( $Liste_drive->value as $mgt ) {
-			if ($mgt->name == $nom_du_drive && $mgt->driveType == $type) {
-				return $this->setDriveId ( $mgt->id );
-			}
-		}
-		return $this->onError ( "Aucun drive avec le nom " . $nom_du_drive . " et le type " . $type . " ont ete trouve", $Liste_drive, 1 );
 	}
 
 	public function recherche_dossier(
@@ -197,7 +168,7 @@ class Sharepoint extends User {
 	 * @return \Zorille\o365\Sharepoint
 	 */
 	public function sharepoints_site_informations(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_siteid () == false) {
 			return $this;
@@ -208,7 +179,7 @@ class Sharepoint extends User {
 
 	public function sharepoints_chercher_site(
 			$site,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->getObjetO365Wsclient ()
 			->getMethod ( '/sites?search=' . $site, $params );
@@ -216,7 +187,7 @@ class Sharepoint extends User {
 
 	// Recupere la liste des items du site
 	public function sharepoints_get_site_items_list(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_siteid () == false) {
 			return $this;
@@ -227,81 +198,81 @@ class Sharepoint extends User {
 
 	// Gestion des drives (sous composant de chaque sharepoint)
 	public function sharepoints_list_drives(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
-			->getMethod ( '/sites/' . $this->getSiteId () . '/drives', $params );
+			->getMethod ( '/sites/' . $this->getSiteId () . $this->list_drives_uri (), $params );
 	}
 
 	// File/Folder mgmt
 	public function sharepoints_create_folder(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false || $this->valide_itemid () == false) {
+		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
-			->jsonPostMethod ( '/sites/' . $this->getSiteId () . '/drive/items/' . $this->getItemId () . '/children', $params );
+			->jsonPostMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri () . '/children', $params );
 	}
 
 	public function sharepoints_rename(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false || $this->valide_itemid () == false) {
+		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		// PATCH /sites/{site-id}/drive/items/{item-id}
 		return $this->getObjetO365Wsclient ()
-			->jsonPatchMethod ( '/sites/' . $this->getSiteId () . '/drive/items/' . $this->getItemId (), $params );
+			->jsonPatchMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri (), $params );
 	}
 
 	public function sharepoints_move(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false || $this->valide_itemid () == false) {
+		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		// PATCH /sites/{site-id}/drive/items/{item-id}
 		/* { "parentReference": { "id": "{new-parent-folder-id}" }, "name": "new-item-name.txt" } */
 		return $this->getObjetO365Wsclient ()
-			->jsonPatchMethod ( '/sites/' . $this->getSiteId () . '/drive/items/' . $this->getItemId (), $params );
+			->jsonPatchMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri (), $params );
 	}
 
 	public function sharepoints_put_to_site_minus_4Mo(
 			$filename,
 			$content) {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false || $this->valide_itemid () == false) {
+		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		// return $this->putContentMethod('/drives/'.$drive_id.'/items/root:/'.$filename.':/content',$content);
 		return $this->getObjetO365Wsclient ()
-			->putContentMethod ( '/sites/' . $this->getSiteId () . '/drive/items/' . $this->getItemId () . ':/' . $filename . ':/content', $content );
+			->putContentMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri () . ':/' . $filename . ':/content', $content );
 	}
 
 	public function sharepoints_search_in_drive(
 			$search,
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
-			->getMethod ( '/sites/' . $this->getSiteId () . '/drive/root/search(q=\'' . $search . "')", $params );
+			->getMethod ( '/sites/' . $this->getSiteId () . $this->drives_search_uri ( $search ), $params );
 	}
 
 	// List
 	public function sharepoints_list_items_enfant(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false || $this->valide_itemid () == false) {
+		if ($this->valide_siteid () == false) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
-			->getMethod ( '/sites/' . $this->getSiteId () . '/drive/items/' . $this->getItemId () . '/children', $params );
+			->getMethod ( '/sites/' . $this->getSiteId () . $this->drives_children_uri (), $params );
 	}
 
 	/**
@@ -320,22 +291,6 @@ class Sharepoint extends User {
 	public function &setSiteId(
 			$site_id) {
 		$this->site_id = $site_id;
-		return $this;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function getDriveId() {
-		return $this->drive_id;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 */
-	public function &setDriveId(
-			$drive_id) {
-		$this->drive_id = $drive_id;
 		return $this;
 	}
 

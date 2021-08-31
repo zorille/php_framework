@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -13,7 +13,7 @@ use Exception as Exception;
  * class jobs
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class jobs extends ci {
 	/**
@@ -43,7 +43,7 @@ class jobs extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return jobs
 	 */
-	static function &creer_veeam_jobs(
+	static function &creer_veeamman_jobs(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
@@ -146,7 +146,7 @@ class jobs extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des jobs dans veeam et enregistre les donnees des jobs dans l'objet
+	 * Permet de trouver la liste des jobs dans veeamman et enregistre les donnees des jobs dans l'objet
 	 * @return jobs
 	 * @throws Exception
 	 */
@@ -163,7 +163,7 @@ class jobs extends ci {
 	}
 
 	/**
-	 * Valide que le jobs existe et est unique dans veeam et enregistre les donnees du jobs dans l'objet s'il est trouve
+	 * Valide que le jobs existe et est unique dans veeamman et enregistre les donnees du jobs dans l'objet s'il est trouve
 	 * @return jobs|null
 	 */
 	public function valide_jobs_existe(

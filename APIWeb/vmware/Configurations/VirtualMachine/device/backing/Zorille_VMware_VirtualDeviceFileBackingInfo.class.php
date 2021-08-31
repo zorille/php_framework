@@ -8,7 +8,7 @@ namespace Zorille\VMware;
 use \Exception as Exception;
 use \ArrayObject as ArrayObject;
 /**
- * class VirtualDeviceFileBackingInfo<br>
+ * class VirtualDeviceFileBackingInfo
  * @package Lib
  * @subpackage VMWare
  */

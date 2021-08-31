@@ -122,7 +122,7 @@ class options extends xml {
 			$limite_haute = 50,
 			$usage = "",
 			$rep_framework = "no") {
-		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( __METHOD__, 2 );
 		if ($argc < $limite_basse || $argc > $limite_haute) {
 			return $this->onError ( "Le nombre de parametres ne correspond pas pour " . $argv [0] . " " . $usage );
 		}
@@ -259,7 +259,7 @@ class options extends xml {
 	 * @throws Exception
 	 */
 	public function &parse_file_option() {
-		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( __METHOD__, 2 );
 		foreach ( $this->getListeFichiersConf () as $fichier ) {
 			if ($fichier ["load"] === false) {
 				$this->open_xml ( $fichier ["nom"] );
@@ -301,7 +301,7 @@ class options extends xml {
 			$argc,
 			$argv,
 			$usage) {
-		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( __METHOD__, 2 );
 		$plusieurs_vars = false;
 		$option = "";
 		for($i = 1; $i < count ( $argv ); $i ++) {
@@ -450,7 +450,6 @@ class options extends xml {
 	 */
 	private function &_trouvePosition0ption(
 			$nom_option) {
-		$this->onDebug ( __METHOD__, 2 );
 		// On cherche l'option en priorite sur la ligne de commande
 		$data = $this->renvoi_donnee ( $nom_option );
 		if (is_string ( $data )) {
@@ -474,7 +473,7 @@ class options extends xml {
 	 */
 	public function dump_liste_option(
 			$fichier) {
-		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( __METHOD__, 2 );
 		if ($fichier != "") {
 			$this->getDomDatas ()
 				->save ( $fichier );
@@ -654,7 +653,7 @@ class options extends xml {
 	public function _valideOption(
 			$chemin_option,
 			$valeur_par_defaut = null) {
-		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( __METHOD__, 2 );
 		if ($this->verifie_variable_standard ( $chemin_option ) === false && $valeur_par_defaut === null) {
 			if (is_array ( $chemin_option )) {
 				$chemin_option = implode ( "_", $chemin_option );

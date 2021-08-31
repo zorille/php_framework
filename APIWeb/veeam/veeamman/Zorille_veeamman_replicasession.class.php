@@ -1,28 +1,28 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
 
 /**
- * class backupsession
+ * class replicasession
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
-class backupsession extends ci {
+class replicasession extends ci {
 	/**
 	 * var privee
 	 *
 	 * @access private
 	 * @var \SimpleXMLElement
 	 */
-	private $liste_backupsession = null;
+	private $liste_replicasession = null;
 	/**
 	 * var privee
 	 *
@@ -35,20 +35,20 @@ class backupsession extends ci {
 	 * ********************* Creation de l'objet ********************
 	 */
 	/**
-	 * Instanbackupsessione un objet de type backupsession. @codeCoverageIgnore
+	 * Instanreplicasessione un objet de type replicasession. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return backupsession
+	 * @return replicasession
 	 */
-	static function &creer_veeam_backupsession(
+	static function &creer_veeamman_replicasession(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new backupsession ( $sort_en_erreur, $entete );
+		$objet = new replicasession ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
 				"wsclient" => $webservice_rest
@@ -59,7 +59,7 @@ class backupsession extends ci {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return backupsession
+	 * @return replicasession
 	 */
 	public function &_initialise(
 			$liste_class) {
@@ -79,59 +79,45 @@ class backupsession extends ci {
 	public function __construct(
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
-		// Gestion de backupsession
+		// Gestion de replicasession
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
-	 * Permet de recuperer les donnees d'un backupsession dans Veeam
-	 * @return backupsession
+	 * Permet de recuperer les donnees d'un replicasession dans Veeam
+	 * @return replicasession
 	 * @throws Exception
 	 */
-	public function recupere_donnees_backupsession() {
-		$backupsession_data = $this->getObjetVeeamWsclientRest ()
-			->BackupSessions ( $this->getId (), array (
+	public function recupere_donnees_replicasession() {
+		$replicasession_data = $this->getObjetVeeamWsclientRest ()
+			->ReplicaSessions ( $this->getId (), array (
 				"format" => "Entity"
 		) );
-		$this->onDebug ( $backupsession_data, 2 );
-		return $this->setDonnees ( $backupsession_data );
+		$this->onDebug ( $replicasession_data, 2 );
+		return $this->setDonnees ( $replicasession_data );
 	}
 
 	/**
-	 * Permet de recuperer la liste des objets d'un backupsession dans Veeam
-	 * @return backupsession
+	 * Recupere l'id du replicasession et l'ajoute à l'objet
+	 * @return replicasession
 	 * @throws Exception
 	 */
-	public function recupere_liste_tasks_du_backupsession() {
-		$backupsession_Tasks = $this->getObjetVeeamWsclientRest ()
-			->BackupTaskSessionReferenceList ( $this->getId () );
-		if (isset ( $backupsession_Tasks->Ref )) {
-			return $this->setListeTasks ( $backupsession_Tasks );
-		}
-		return $this->onError ( "Pas de reference dans le backupsession" );
-	}
-
-	/**
-	 * Recupere l'id du backupsession et l'ajoute à l'objet
-	 * @return backupsession
-	 * @throws Exception
-	 */
-	public function recupere_id_du_backupsession(
-			$backupsession) {
-		if (preg_match ( '/:BackupJobSession:(.*)/', $backupsession->attributes () ['UID'], $resultat ) === false) {
-			return $this->onError ( "Numero de BackupSession introuvable", $resultat );
+	public function recupere_id_du_replicasession(
+			$replicasession) {
+		if (preg_match ( '/:ReplicaJobSession:(.*)/', $replicasession->attributes () ['UID'], $resultat ) === false) {
+			return $this->onError ( "Numero de ReplicaSession introuvable", $resultat );
 		}
 		return $this->setId ( $resultat [1] );
 	}
 
 	/**
-	 * Recupere le nom du backupsession
+	 * Recupere le nom du replicasession
 	 * @return string
 	 * @throws Exception
 	 */
-	public function recupere_nom_du_backupsession(
-			$backupsession) {
-		return $backupsession->attributes () ['Name'];
+	public function recupere_nom_du_replicasession(
+			$replicasession) {
+		return $replicasession->attributes () ['Name'];
 	}
 	
 	/**
@@ -195,38 +181,38 @@ class backupsession extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backupsession dans veeam et enregistre les donnees des backupsession dans l'objet
-	 * @return backupsession
+	 * Permet de trouver la liste des replicasession dans veeamman et enregistre les donnees des replicasession dans l'objet
+	 * @return replicasession
 	 * @throws Exception
 	 */
-	public function retrouve_backupsession() {
+	public function retrouve_replicasession() {
 		$this->onDebug ( __METHOD__, 1 );
-		$backupsession = $this->getObjetVeeamWsclientRest ()
-			->listBackupSessions ();
-		if (! isset ( $backupsession->Ref )) {
-			// Le backupsession n'existe pas donc on emet une exception
-			return $this->onError ( "Probleme avec la recuperation des backupsession." );
+		$replicasession = $this->getObjetVeeamWsclientRest ()
+			->listReplicaSessions ();
+		if (! isset ( $replicasession->Ref )) {
+			// Le replicasession n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la recuperation des replicasession." );
 		}
-		$this->onDebug ( $backupsession, 2 );
-		return $this->setListeBackupSession ( $backupsession );
+		$this->onDebug ( $replicasession, 2 );
+		return $this->setListeReplicaSession ( $replicasession );
 	}
 
 	/**
-	 * Permet de trouver la liste des backupsession par JobId dans veeam et enregistre les donnees des backupsession dans l'objet
-	 * @return backupsession
+	 * Permet de trouver la liste des replicasession par JobId dans veeamman et enregistre les donnees des replicasession dans l'objet
+	 * @return replicasession
 	 * @throws Exception
 	 */
-	public function retrouve_backupsession_par_jobid(
+	public function retrouve_replicasession_par_jobid(
 			$jobid) {
 		$this->onDebug ( __METHOD__, 1 );
-		$backupsession = $this->getObjetVeeamWsclientRest ()
-			->listBackupSessionsParJob ( $jobid );
-		if (! isset ( $backupsession->Ref )) {
-			// Le backupsession n'existe pas donc on emet une exception
-			return $this->onError ( "Probleme avec la recuperation des backupsession." );
+		$replicasession = $this->getObjetVeeamWsclientRest ()
+			->listReplicaSessionsParJob ( $jobid );
+		if (! isset ( $replicasession->Ref )) {
+			// Le replicasession n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la recuperation des replicasession." );
 		}
-		$this->onDebug ( $backupsession, 2 );
-		return $this->setListeBackupSession ( $backupsession );
+		$this->onDebug ( $replicasession, 2 );
+		return $this->setListeReplicaSession ( $replicasession );
 	}
 
 	/**
@@ -235,16 +221,16 @@ class backupsession extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeBackupSession() {
-		return $this->liste_backupsession;
+	public function getListeReplicaSession() {
+		return $this->liste_replicasession;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeBackupSession(
-			$liste_backupsession) {
-		$this->liste_backupsession = $liste_backupsession;
+	public function &setListeReplicaSession(
+			$liste_replicasession) {
+		$this->liste_replicasession = $liste_replicasession;
 		return $this;
 	}
 
@@ -273,7 +259,7 @@ class backupsession extends ci {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "backupsession :";
+		$help [__CLASS__] ["text"] [] .= "replicasession :";
 		return $help;
 	}
 }

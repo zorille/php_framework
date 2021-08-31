@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -13,7 +13,7 @@ use Exception as Exception;
  * class backups
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class backups extends ci {
 	/**
@@ -49,7 +49,7 @@ class backups extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backups
 	 */
-	static function &creer_veeam_backups(
+	static function &creer_veeamman_backups(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
@@ -72,7 +72,7 @@ class backups extends ci {
 			$liste_class) {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] )
-			->setObjetVeeamBackupFile ( backupfile::creer_veeam_backupfile ( $liste_class ["options"], $liste_class ["wsclient"] ) );
+			->setObjetVeeamBackupFile ( backupfile::creer_veeamman_backupfile ( $liste_class ["options"], $liste_class ["wsclient"] ) );
 	}
 
 	/**
@@ -129,7 +129,7 @@ class backups extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backups dans veeam et enregistre les donnees des backups dans l'objet
+	 * Permet de trouver la liste des backups dans veeamman et enregistre les donnees des backups dans l'objet
 	 * @return backups
 	 * @throws Exception
 	 */
@@ -146,7 +146,7 @@ class backups extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backupfile dans veeam et enregistre les donnees des backupfile dans l'objet
+	 * Permet de trouver la liste des backupfile dans veeamman et enregistre les donnees des backupfile dans l'objet
 	 * @return backupfile
 	 * @throws Exception
 	 */

@@ -226,6 +226,8 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/solarw
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam" );
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam/veeamone" );
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam/veeambetr" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam/veeamman" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/veeam/veeamspc" );
 /**
  * Inclue Les class d'appel a bladelogic
  */

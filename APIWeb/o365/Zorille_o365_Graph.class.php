@@ -49,6 +49,11 @@ abstract class Graph extends Core\abstract_log {
 		}
 		return true;
 	}
+	
+	public function prepare_nom_pour_url(
+			$recherche) {
+				return str_replace ( " ", "%20", $recherche );
+	}
 
 	/**
 	 * ***************************** ACCESSEURS *******************************

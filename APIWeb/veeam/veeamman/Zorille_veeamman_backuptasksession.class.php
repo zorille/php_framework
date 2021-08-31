@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -13,7 +13,7 @@ use Exception as Exception;
  * class backuptasksession
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class backuptasksession extends ci {
 	/**
@@ -42,7 +42,7 @@ class backuptasksession extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backuptasksession
 	 */
-	static function &creer_veeam_backuptasksession(
+	static function &creer_veeamman_backuptasksession(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
@@ -121,7 +121,7 @@ class backuptasksession extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backuptasksession dans veeam et enregistre les donnees des backuptasksession dans l'objet
+	 * Permet de trouver la liste des backuptasksession dans veeamman et enregistre les donnees des backuptasksession dans l'objet
 	 * @return backuptasksession
 	 * @throws Exception
 	 */

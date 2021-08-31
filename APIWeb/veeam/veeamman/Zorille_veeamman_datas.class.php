@@ -1,15 +1,15 @@
 <?php
 /**
- * Gestion de veeamone.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeamone;
+namespace Zorille\veeamman;
 use Zorille\framework as Core;
 /**
  * class datas
  *
  * @package Lib
- * @subpackage veeamone
+ * @subpackage veeamman
  */
 class datas extends Core\serveur_datas {
 
@@ -65,16 +65,16 @@ class datas extends Core\serveur_datas {
 	 */
 	public function retrouve_param() {
 		$this->onDebug ( __METHOD__, 1 );
-		$donnee_veeamone = $this->_valideOption ( array (
+		$donnee_veeam = $this->_valideOption ( array (
 				"veeam_machines",
 				"serveur" 
 		) );
 		
-		return $this->setServeurData ( $donnee_veeamone );
+		return $this->setServeurData ( $donnee_veeam );
 	}
 
 	/**
-	 * Valide la presence de la definition d'un veeamone nomme : $nom
+	 * Valide la presence de la definition d'un veeam nomme : $nom
 	 *
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
@@ -96,8 +96,8 @@ class datas extends Core\serveur_datas {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "veeamone Datas :";
-		$help [__CLASS__] ["text"] [] .= "\t--veeamone_machines_serveur {Donnees du/des serveur/s} Donnees contenus dans le fichier de configuration";
+		$help [__CLASS__] ["text"] [] .= "veeamman Datas :";
+		$help [__CLASS__] ["text"] [] .= "\t--veeam_machines_serveur {Donnees du/des serveur/s} Donnees contenus dans le fichier de configuration";
 		
 		return $help;
 	}

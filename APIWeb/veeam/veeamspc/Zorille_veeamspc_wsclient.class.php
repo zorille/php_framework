@@ -5,7 +5,7 @@
  * @package Lib
  *
  */
-namespace Zorille\veeamone;
+namespace Zorille\veeamspc;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -14,7 +14,7 @@ use SimpleXMLElement as SimpleXMLElement;
 /**
  * class wsclient<br> Renvoi des informations via un webservice.
  * @package Lib
- * @subpackage veeamone
+ * @subpackage veeamspc
  */
 class wsclient extends Core\wsclient {
 	/**
@@ -107,7 +107,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * Prepare l'url de connexion au veeamone nomme $nom
+	 * Prepare l'url de connexion au veeamspc nomme $nom
 	 * @param string $nom
 	 * @return boolean|wsclient
 	 * @throws Exception
@@ -115,28 +115,28 @@ class wsclient extends Core\wsclient {
 	public function prepare_connexion(
 			$nom) {
 		$this->onDebug ( __METHOD__, 1 );
-		$liste_data_veeamone = $this->getObjetveeamDatas ()
+		$liste_data_veeamspc = $this->getObjetveeamDatas ()
 			->valide_presence_data ( $nom );
-		if ($liste_data_veeamone === false) {
-			return $this->onError ( "Aucune definition de veeamone pour " . $nom );
+		if ($liste_data_veeamspc === false) {
+			return $this->onError ( "Aucune definition de veeamspc pour " . $nom );
 		}
-		if (! isset ( $liste_data_veeamone ["username"] )) {
-			return $this->onError ( "Il faut un username dans la liste des parametres veeamone" );
+		if (! isset ( $liste_data_veeamspc ["username"] )) {
+			return $this->onError ( "Il faut un username dans la liste des parametres veeamspc" );
 		}
-		if (! isset ( $liste_data_veeamone ["password"] )) {
-			return $this->onError ( "Il faut un password dans la liste des parametres veeamone" );
+		if (! isset ( $liste_data_veeamspc ["password"] )) {
+			return $this->onError ( "Il faut un password dans la liste des parametres veeamspc" );
 		}
-		if (! isset ( $liste_data_veeamone ["url"] )) {
-			return $this->onError ( "Il faut une url dans la liste des parametres veeamone" );
+		if (! isset ( $liste_data_veeamspc ["url"] )) {
+			return $this->onError ( "Il faut une url dans la liste des parametres veeamspc" );
 		}
 		$this->getGestionConnexionUrl ()
-			->retrouve_connexion_params ( $liste_data_veeamone )
-			->prepare_prepend_url ( $liste_data_veeamone ["url"] );
+			->retrouve_connexion_params ( $liste_data_veeamspc )
+			->prepare_prepend_url ( $liste_data_veeamspc ["url"] );
 		// On prepare l'objet utilisateurs de la connexion, car l'objet curl ne connait pas l'objet datas
 		$this->userLogin ( array (
 				'grant_type' => 'password',
-				'username' => $liste_data_veeamone ["username"],
-				'password' => $liste_data_veeamone ["password"]
+				'username' => $liste_data_veeamspc ["username"],
+				'password' => $liste_data_veeamspc ["password"]
 		) );
 		return $this;
 	}
@@ -199,14 +199,14 @@ class wsclient extends Core\wsclient {
 		$tableau_resultat = json_decode ( $retour_json, $return_array );
 		if ($tableau_resultat == null) {
 			return $this->onError ( "Message dans un format inconnu", $retour_json, 1 );
-		} else if (isset ( $tableau_resultat ['status'] ) && $tableau_resultat ['status'] == 0) {
-			return $this->onError ( "Erreur dans le message de retour", $retour_json, 1 );
+		} else if (isset ( $tableau_resultat->status ) && $tableau_resultat->status == 0) {
+			return $this->onError ( "Erreur dans le message de retour", $tableau_resultat, 1 );
 		}
 		return $tableau_resultat;
 	}
 
 	/**
-	 * Sends are prepare_requete_json to the veeamone API and returns the response as object.
+	 * Sends are prepare_requete_json to the veeamspc API and returns the response as object.
 	 *
 	 * @return string API JSON response.
 	 * @throws Exception
@@ -221,7 +221,7 @@ class wsclient extends Core\wsclient {
 			$retour_wsclient = $this->prepare_html_entete ()
 				->envoi_requete ();
 			$this->valide_retour ( $retour_wsclient );
-			$retour = $this->traite_retour_json ( $retour_wsclient );
+			$retour = $this->traite_retour_json ( $retour_wsclient, false );
 			$this->onDebug ( $retour, 2 );
 			return $retour;
 		}
@@ -229,7 +229,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * *********************** API veeamone **********************
+	 * *********************** API veeamspc **********************
 	 */
 	/**
 	 * Resource: auth/login Method: Post Autentification
@@ -243,9 +243,9 @@ class wsclient extends Core\wsclient {
 		$this->onDebug ( __METHOD__, 1 );
 		/* username string Nullable password string <password> rememberMe boolean Nullable Default: false asCurrentUser boolean Nullable Default: false grant_type string Nullable Default: "password" refresh_token string Nullable */
 		$resultat = $this->postMethod ( 'token', $params );
-		if (isset ( $resultat ['access_token'] )) {
-			return $this->setAuth ( $resultat ['access_token'] )
-				->setRefreshToken ( $resultat ['refresh_token'] );
+		if (isset ( $resultat->access_token )) {
+			return $this->setAuth ( $resultat->access_token )
+				->setRefreshToken ( $resultat->refresh_token );
 		}
 		/* { "access_token": "eyJhJGciOiJIUzI1NiIsImtpZCI6IldlYkFwaVNlY3VyaXR5S2V5IiwidHlwIjoiSldUIn0.eyJ1bmlxdWVfbmFtZSI6Ik5cXEFkbWluaXN0cmF0b3IiLCJyb2xlIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9zaWQiOiJTLTEtNS0yMS05MDkwMzQ2MzItMjUzODE0NDM1NS0zNjYwNTU1NjE5LTUwMCIsIkFjY2Vzc1Rva2VuSWQiOiI4MGJhNWI2ZS1hMzAyLTRlMTItYTM4NC02M2M5MjlmY2I0YWEiLCJVc2VySWQiOiIyIiwibmJmIjoxNjEwNjU3OTUyLCJleHAiOjE2MTA2NTg4NTIsImlhdCI6MTYxMDY1Nzk1Mn0.vGt0JwmN7zNCsLS-JeDKoZzkEyP6hVDLoRs5sFtL4Ko", "refresh_token": "d65703e0ef294425badecd9b6b5ac963", "token_type": "Bearer", "expires_in": 899, "user": "onesrv\\administrator", "user_role": "Unknown" } */
 		return $this->onError ( "Erreur durant l'autentification", $resultat );
@@ -261,7 +261,7 @@ class wsclient extends Core\wsclient {
 	final public function userLogout(
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->postMethod ( 'revoke' , array () );
+		$this->postMethod ( '/v2/accounts/logout', array () );
 		return $this;
 	}
 
@@ -316,10 +316,97 @@ class wsclient extends Core\wsclient {
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function listBackups(
+	public function listBackupServers(
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupFiles', $params );
+		$resultat = $this->getMethod ( 'v2/backupServers', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listBackupjobs(
+			$agentid,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'v2/backupAgents/' . $agentid . '/jobs', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listJobs(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'v2/jobs', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function Job(
+			$jobid,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'v2/jobs/' . $jobid, $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listPolicies(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'v2/backupPolicies', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listTenants(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'v2/tenants', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listTenantBackupResources(
+			$tenantid,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'v2/tenants/' . $tenantid . '/backupResources', $params );
 		return $resultat;
 	}
 
@@ -381,7 +468,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * *********************** API veeamone **********************
+	 * *********************** API veeamspc **********************
 	 */
 	/**
 	 * *********************** Accesseurs **********************
@@ -475,7 +562,7 @@ class wsclient extends Core\wsclient {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "veeamone Wsclient :";
+		$help [__CLASS__] ["text"] [] .= "veeamspc Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
 		$help = array_merge ( $help, datas::help () );
 		return $help;

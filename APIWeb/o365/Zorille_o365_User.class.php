@@ -136,6 +136,24 @@ class User extends Item {
 	}
 
 	/**
+	 * ******************************* DRIVE URI ******************************
+	 */
+	public function users_list_uri() {
+		return '/users';
+	}
+
+	public function user_id_uri() {
+		if ($this->valide_userid () == false) {
+			return $this->onError ( "Il n'y pas d'user-id selectionne" );
+		}
+		return '/users/' . $this->getUserId ();
+	}
+	
+	public function users_me_uri() {
+		return '/me';
+	}
+
+	/**
 	 * ******************************* O365 USERS *********************************
 	 */
 	/**
@@ -144,10 +162,10 @@ class User extends Item {
 	 * @return \Zorille\o365\User|false
 	 */
 	public function list_users(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_users_o365 = $this->getObjetO365Wsclient ()
-			->getMethod ( '/users', $params );
+			->getMethod ( $this->users_list_uri (), $params );
 		$this->onDebug ( $liste_users_o365, 2 );
 		if (isset ( $liste_users_o365->value )) {
 			return $this->setListeUser ( $liste_users_o365->value );
@@ -161,13 +179,10 @@ class User extends Item {
 	 * @return \Zorille\o365\User|false
 	 */
 	public function user_license(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
-			return $this;
-		}
 		return $this->getObjetO365Wsclient ()
-			->getMethod ( '/users/' . $this->getUserId () . '/licenseDetails', $params );
+			->getMethod ( $this->user_id_uri () . '/licenseDetails', $params );
 	}
 
 	/**

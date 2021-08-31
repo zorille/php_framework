@@ -163,7 +163,7 @@ class enveloppe extends abstract_log {
 			->prepare_charset ();
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "no_mail" ) !== false) {
-			$mail->setNoMail ( true );
+			$this->setNoMail ( true );
 		} else {
 			$this->setNoMail ( false );
 		}
@@ -202,7 +202,7 @@ class enveloppe extends abstract_log {
 				);
 			}
 		} else {
-			$this->onWarning ( "Mail TO non existant" );
+			$this->onWarning ( "Mail TO non existant en ligne de commande" );
 		}
 		return $this->setMailTo ( $liste_mail );
 	}
@@ -367,12 +367,15 @@ class enveloppe extends abstract_log {
 	 */
 	public function prepare_liste_fichiers_attaches(
 			$liste_fichiers) {
-		if (is_array ( $liste_fichiers ) && ! empty ( $liste_fichiers )) {
-			return $this->setFichierAttache ( $liste_fichiers )
+		if (! empty ( $liste_fichiers )) {
+			if (is_array ( $liste_fichiers )) {
+				return $this->setFichierAttache ( $liste_fichiers )
+					->setFichierAttacheFlag ( true );
+			}
+			return $this->setFichierAttache ( explode ( " ", $liste_fichiers ) )
 				->setFichierAttacheFlag ( true );
 		}
-		return $this->setFichierAttache ( explode ( " ", $liste_fichiers ) )
-			->setFichierAttacheFlag ( true );
+		return $this;
 	}
 
 	/**
@@ -396,7 +399,7 @@ class enveloppe extends abstract_log {
 					$this->getListeOptions ()
 						->getOption ( "force_mail" )
 			);
-			$this->onInfo ( "On force l'email sur : " . $this->mail_to[0] );
+			$this->onInfo ( "On force l'email sur : " . $this->mail_to [0] );
 		} else {
 			$this->mail_to = $mail_to;
 		}

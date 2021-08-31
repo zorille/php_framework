@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -13,7 +13,7 @@ use Exception as Exception;
  * class query
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class query extends ci {
 	/**
@@ -56,7 +56,7 @@ class query extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return query
 	 */
-	static function &creer_veeam_query(
+	static function &creer_veeamman_query(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
@@ -111,7 +111,7 @@ class query extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des query dans veeam et enregistre les donnees des query dans l'objet
+	 * Permet de trouver la liste des query dans veeamman et enregistre les donnees des query dans l'objet
 	 * @return query
 	 * @throws Exception
 	 */

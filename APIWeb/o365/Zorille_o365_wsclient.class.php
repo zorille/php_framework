@@ -32,6 +32,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * var privee
 	 * @access private
+	 * @var string.
+	 */
+	private $ajout_header = '';
+	/**
+	 * var privee
+	 * @access private
 	 * @var array.
 	 */
 	private $defaultParams = array ();
@@ -135,15 +141,23 @@ class wsclient extends Core\wsclient {
 	public function prepare_html_entete() {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
-			return $this->setHttpHeader ( array (
+			$this->setHttpHeader ( array (
 					"Content-Type: " . $this->getContentType (),
 					"Authorization: Bearer " . $this->getAuth (),
 					"Accept: " . $this->getAccept ()
 			) );
+		} else {
+			$this->setHttpHeader ( array (
+					"Accept: " . $this->getAccept ()
+			) );
 		}
-		return $this->setHttpHeader ( array (
-				"Accept: " . $this->getAccept ()
-		) );
+		if (! empty ( $this->getAjoutHeader () )) {
+			$header = $this->getHttpHeader ();
+			$header [] .= $this->getAjoutHeader ();
+			$this->setHttpHeader ( $header );
+		}
+		$this->onDebug ( $this->getHttpHeader (), 1 );
+		return $this;
 	}
 
 	/**
@@ -407,6 +421,23 @@ class wsclient extends Core\wsclient {
 	public function &setAuth(
 			$auth) {
 		$this->auth = $auth;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public function getAjoutHeader() {
+		return $this->ajout_header;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setAjoutHeader(
+			$ajout_header) {
+		$this->ajout_header = $ajout_header;
 		return $this;
 	}
 

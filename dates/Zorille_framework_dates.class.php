@@ -105,7 +105,7 @@ class dates extends abstract_log {
 				"options" => $liste_option 
 		) );
 		abstract_log::onDebug_standard ( "Liste des Dates : ", 2 );
-		abstract_log::onDebug_standard ( $liste_dates, 2 );
+		abstract_log::onDebug_standard ( $liste_dates->getListeDates(), 2 );
 		return $liste_dates;
 	}
 

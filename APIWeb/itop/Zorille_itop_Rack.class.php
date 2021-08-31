@@ -86,7 +86,7 @@ class Rack extends FunctionalCI {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
-					'ord_id' => false
+					'org_id' => false
 			) );
 		}
 		return $this;
@@ -97,7 +97,7 @@ class Rack extends FunctionalCI {
 			$org_name) {
 		return $this->creer_oql ( array (
 				'friendlyname' => $name,
-				'org_name' => $org_name
+				'organization_name' => $org_name
 		) )
 			->retrouve_ci ();
 	}
@@ -148,7 +148,7 @@ class Rack extends FunctionalCI {
 				case 'org_id' :
 					if (isset ( $fields ['organization_name'] )) {
 						$filtre ['organization_name'] = $fields ['organization_name'];
-					} else {
+					} else if (isset ( $fields ['org_name'] )) {
 						$filtre ['organization_name'] = $fields ['org_name'];
 					}
 					break;

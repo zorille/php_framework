@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Gestion de veeam.
+ * Gestion de veeamman.
  * @author dvargas
  */
-namespace Zorille\veeam;
+namespace Zorille\veeamman;
 
 use Zorille\framework as Core;
 use Exception as Exception;
@@ -13,7 +13,7 @@ use Exception as Exception;
  * class backupservers
  *
  * @package Lib
- * @subpackage veeam
+ * @subpackage veeamman
  */
 class backupservers extends ci {
 	/**
@@ -42,7 +42,7 @@ class backupservers extends ci {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backupservers
 	 */
-	static function &creer_veeam_backupservers(
+	static function &creer_veeamman_backupservers(
 			&$liste_option,
 			&$webservice_rest,
 			$sort_en_erreur = false,
@@ -121,7 +121,7 @@ class backupservers extends ci {
 	}
 
 	/**
-	 * Permet de trouver la liste des backupservers dans veeam et enregistre les donnees des backupservers dans l'objet
+	 * Permet de trouver la liste des backupservers dans veeamman et enregistre les donnees des backupservers dans l'objet
 	 * @return backupservers
 	 * @throws Exception
 	 */
@@ -138,7 +138,7 @@ class backupservers extends ci {
 	}
 	
 	/**
-	 * Permet de trouver la liste des JobId par backupservers dans veeam et enregistre les donnees des backupserver dans l'objet
+	 * Permet de trouver la liste des JobId par backupservers dans veeamman et enregistre les donnees des backupserver dans l'objet
 	 * @return \SimpleXMLElement
 	 * @throws Exception
 	 */

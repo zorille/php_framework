@@ -97,7 +97,7 @@ class Item extends Graph {
 		$this->list_items ();
 		foreach ( $this->getListeItem () as $personne ) {
 			if ($personne->displayName == $nom) {
-				$this->onDebug($nom." trouve avec l'id ".$personne->id, 1);
+				$this->onDebug ( $nom . " trouve avec l'id " . $personne->id, 1 );
 				return $this->setItemId ( $personne->id );
 			}
 		}
@@ -120,23 +120,39 @@ class Item extends Graph {
 		}
 		return $this->onError ( "Item " . $mail . " introuvable dans la liste", $this->getListeItem (), 1 );
 	}
-	
+
 	/**
 	 * Verifie qu'un item id est remplit/existe
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_itemid(){
-		if(empty($this->getItemId ())){
-			$this->onDebug($this->getItemId (), 2);
-			$this->onError("Il faut un item id renvoye par O365 pour travailler");
+	public function valide_itemid($error=true) {
+		if (empty ( $this->getItemId () )) {
+			$this->onDebug ( $this->getItemId (), 2 );
+			if($error){
+				$this->onError ( "Il faut un item id renvoye par O365 pour travailler" );
+			}
 			return false;
 		}
 		return true;
-	}	
+	}
 
 	/**
-	 * ******************************* O365 USERS *********************************
+	 * ******************************* DRIVE URI ******************************
+	 */
+	public function items_list_uri() {
+		return '/items';
+	}
+
+	public function item_id_uri() {
+		if ($this->valide_itemid () == false) {
+			return $this->onError ( "Il n'y pas d'item-id selectionne" );
+		}
+		return '/items/' . $this->getItemId ();
+	}
+
+	/**
+	 * ******************************* O365 ITEMS *********************************
 	 */
 	/**
 	 * Recuperer la liste d'utilisateurs O365
@@ -144,10 +160,10 @@ class Item extends Graph {
 	 * @return \Zorille\o365\Item|false
 	 */
 	public function list_items(
-			$params = array()) {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_items_o365 = $this->getObjetO365Wsclient ()
-			->getMethod ( '/items', $params );
+			->getMethod ( $this->items_list_uri (), $params );
 		$this->onDebug ( $liste_items_o365, 2 );
 		if (isset ( $liste_items_o365->value )) {
 			return $this->setListeItem ( $liste_items_o365->value );
@@ -155,6 +171,9 @@ class Item extends Graph {
 		return $this->onError ( "Pas de liste utilisateurs", $liste_items_o365, 1 );
 	}
 
+	/**
+	 * ***************************** ACCESSEURS *******************************
+	 */
 	/**
 	 * @codeCoverageIgnore
 	 */
