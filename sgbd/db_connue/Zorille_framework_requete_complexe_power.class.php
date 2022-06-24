@@ -6,26 +6,26 @@
  */
 namespace Zorille\framework;
 /**
- * class requete_complexe_tools<br>
+ * class requete_complexe_power<br>
 
  *
- * Gere la connexion a une base tools.
+ * Gere la connexion a une base power.
  * @package Lib
  * @subpackage SQL-dbconnue
  */
 
-class requete_complexe_tools extends desc_bd_tools {
+class requete_complexe_power extends desc_bd_power {
 	/*********************** Creation de l'objet *********************/
 	/**
-	 * Instancie un objet de type requete_complexe_tools.
+	 * Instancie un objet de type requete_complexe_power.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return requete_complexe_tools
+	 * @return requete_complexe_power
 	 */
-	static function &creer_requete_complexe_tools(&$liste_option,$sort_en_erreur = true, $entete = __CLASS__) {
-		$objet = new requete_complexe_tools ( $sort_en_erreur, $entete );
+	static function &creer_requete_complexe_power(&$liste_option,$sort_en_erreur = true, $entete = __CLASS__) {
+		$objet = new requete_complexe_power ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
 		) );
@@ -37,7 +37,7 @@ class requete_complexe_tools extends desc_bd_tools {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return requete_complexe_tools
+	 * @return requete_complexe_power
 	 */
 	public function &_initialise($liste_class) {
 		parent::_initialise ( $liste_class );

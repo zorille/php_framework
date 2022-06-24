@@ -197,7 +197,7 @@ class logs {
 		if (! isset ( $fichier_log_unique ))
 			$fichier_log_unique = "oui";
 		if (! isset ( $fichier_log_sort_en_erreur ))
-			$fichier_log_sort_en_erreur = "oui";
+			$fichier_log_sort_en_erreur = "non";
 		if (! isset ( $fichier_log_compresse ))
 			$fichier_log_compresse = "non";
 		if (! isset ( $fichier_log_append ))

@@ -163,7 +163,7 @@ class connexion extends sql {
 		//On valide la connexion avant de continuer
 		$this->test_connexion_active ();
 		
-		$this->onDebug ( "User : " . $this->getDbUsername () . " Password : " . $this->getDbPassword () . " Machine : " . $this->getDbServeur (), 2 );
+		$this->onDebug ( "User : " . $this->getDbUsername () . " Password : *********** Machine : " . $this->getDbServeur (), 2 );
 		return $this;
 	}
 
@@ -192,6 +192,10 @@ class connexion extends sql {
 				break;
 			case "sqlite" :
 				$this->setPdoRequete ( "sqlite:" . $this->getDbServeur () );
+				$this->setDbSelected ( true );
+				break;
+			case "mssql" :
+				$this->setPdoRequete ( "sqlsrv:Server=".$this->getDbServeur () . ",". $this->prepare_port ().";Database=" . $this->getDatabase () );
 				$this->setDbSelected ( true );
 				break;
 			default :

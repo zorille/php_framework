@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use \Exception as Exception;
 /**
  * class moniteur<br>
  * Gere un point de monitoring.
@@ -196,7 +197,7 @@ class moniteur extends abstract_log {
 	 */
 	public function envoi_mail($mail_to, $mail_from = "nobody@no.com") {
 		// On creer un objet options pour creer proprement un objet mail.
-		$liste_option = options::creer_options(1, array( 'moniteur.clas.php'),1,2,"","no",false);
+		$liste_option = options::creer_options(1, array( 'moniteur.class.php'),1,2,"","no",false);
 		
 		$liste_option->setOption ( array (
 				"mail",

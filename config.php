@@ -19,6 +19,8 @@ function my_autoloader(
 				require_once $class . spl_autoload_extensions ();
 			} else if (strpos($class,".php")!==false) {
 				require_once str_replace ( '\\', '/', $class );
+			} else if (strpos($class,"iTop")!==false) {
+				//En cas d'appelle aux namspace iTop
 			} else {
 				require_once str_replace ( '\\', '/', $class ).".php";
 			}

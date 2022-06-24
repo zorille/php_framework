@@ -78,6 +78,18 @@ class enveloppe extends abstract_log {
 	/**
 	 * var privee
 	 * @access private
+	 * @var string
+	 */
+	private $signature = "";
+	/**
+	 * var privee
+	 * @access private
+	 * @var bool
+	 */
+	private $signature_flag = false;
+	/**
+	 * var privee
+	 * @access private
 	 * @var bool
 	 */
 	private $mail_sujet_encode = true;
@@ -162,10 +174,12 @@ class enveloppe extends abstract_log {
 			->prepare_from ()
 			->prepare_charset ();
 		if ($this->getListeOptions ()
+			->verifie_option_existe ( "envoi_par_mail", false ) !== false) {
+			$this->setNoMail ( false );
+		}
+		if ($this->getListeOptions ()
 			->verifie_option_existe ( "no_mail" ) !== false) {
 			$this->setNoMail ( true );
-		} else {
-			$this->setNoMail ( false );
 		}
 		return $this;
 	}
@@ -535,6 +549,38 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
+	public function getSignature() {
+		return $this->signature;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setSignature(
+			$signature) {
+		$this->signature = $signature;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getSignatureFlag() {
+		return $this->signature_flag;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setSignatureFlag(
+			$signature_flag) {
+		$this->signature_flag = $signature_flag;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public function getFichierAttache() {
 		return $this->fichier_attache;
 	}
@@ -647,7 +693,8 @@ class enveloppe extends abstract_log {
 		$help [__CLASS__] ["text"] [] .= "\t--mail_bcc=\"xx xx ... xx\"";
 		$help [__CLASS__] ["text"] [] .= "\t--mail_from=xx";
 		$help [__CLASS__] ["text"] [] .= "\t--mail_charset=UTF8 //optionnel par defaut ISO-8859-1";
-		$help [__CLASS__] ["text"] [] .= "\t--no_mail Permet de desactiver l'envoi du mail";
+		$help [__CLASS__] ["text"] [] .= "\t--envoi_par_mail Active l'envoi par mail";
+		$help [__CLASS__] ["text"] [] .= "\t--no_mail Permet de forcer la desactivation de l'envoi du mail";
 		$help [__CLASS__] ["text"] [] .= "\t--force_mail adresse@domaine.com  Permet de forcer l'envoi du mail sur le mail en parametre (adresse@domaine.com)";
 		return $help;
 	}

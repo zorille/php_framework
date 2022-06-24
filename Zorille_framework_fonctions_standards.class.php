@@ -273,11 +273,12 @@ class fonctions_standards extends abstract_log {
 	 */
 	static public function help_fonctions_standard($fonctions_standards = false, $all_class = true, $class_utilisees = array()) {
 		$class_afficher = array ();
-		
+		abstract_log::onDebug_standard($class_utilisees,1);
 		if ($fonctions_standards) {
 			$class_afficher = array_merge ( $class_afficher, fonctions_standards::help () );
 		}
-		
+		abstract_log::onDebug_standard("class_afficher : fonctions_standards",1);
+		abstract_log::onDebug_standard($class_afficher,1);
 		if ($all_class) {
 			foreach ( get_declared_classes () as $class_locale ) {
 				if ($class_locale == "fonctions_standards") {
@@ -288,13 +289,15 @@ class fonctions_standards extends abstract_log {
 				}
 			}
 		}
-		
+		abstract_log::onDebug_standard("class_afficher : all_class",1);
+		abstract_log::onDebug_standard($class_afficher,1);
 		foreach ( $class_utilisees as $class_locale ) {
 			if (method_exists ( $class_locale, "help" )) {
 				$class_afficher = array_merge ( $class_afficher, call_user_func ( $class_locale . "::help" ) );
 			}
 		}
-		
+		abstract_log::onDebug_standard("class_afficher : class_utilisees",1);
+		abstract_log::onDebug_standard($class_afficher,1);
 		return $class_afficher;
 	}
 
@@ -342,6 +345,7 @@ class fonctions_standards extends abstract_log {
 		}
 		
 		echo abstract_log::colorize ( "Params :\r\n", "BIWhite" );
+		abstract_log::onDebug_standard($help,1);
 		foreach ( $help as $class ) {
 			//On n'affiche pas les exemples sur chaque class
 			if ($class == "exemples") {

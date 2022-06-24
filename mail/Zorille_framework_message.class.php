@@ -242,13 +242,27 @@ class message extends enveloppe {
 	}
 
 	/**
+	 * Compatibilite avec l'objet Message-0365
+	 * @param array $liste_fichiers Liste des fichiers a envoyer avec leur chemin relatif
+	 * @return message
+	 */
+	public function attache_fichier(
+			$liste_fichiers) {
+		$this->onDebug ( __METHOD__, 1 );
+		foreach ( $liste_fichiers as $fichier ) {
+			$this->attache_un_fichier ( $fichier );
+		}
+		return $this;
+	}
+
+	/**
 	 * Attache un fichier.<br>
 	 *
 	 * @param string $fichier Chemin complet du fichier a attacher.
 	 * @param string $mime_type Ajout d'un mime type s'il est connue.
 	 * @return Bool TRUE si tout est OK, FALSE sinon.
 	 */
-	public function attache_fichier(
+	public function attache_un_fichier(
 			$fichier,
 			$mime_type = "application/octet-stream") {
 		$str = @file_get_contents ( $fichier );
@@ -393,7 +407,7 @@ class message extends enveloppe {
 		if ($this->getFichierAttacheFlag ()) {
 			$corp = $this->getCrlf () . "--" . $this->getOneSeparateur ( "mixed" ) . $this->getCrlf () . $corp;
 			// On ajoute les fichiers attaches
-			foreach ( $this->getFichierAttache () as $fichier_attache ){
+			foreach ( $this->getFichierAttache () as $fichier_attache ) {
 				$corp .= $fichier_attache;
 			}
 			$corp .= $this->getCrlf () . $this->getOneMailFooter ( "mixed" ) . $this->getCrlf ();
@@ -473,6 +487,13 @@ class message extends enveloppe {
 			$this->onInfo ( "Envoi de mail desactive." );
 		}
 		return $this;
+	}
+
+	/**
+	 * Compatibilite avec l'objet Message-0365
+	 */
+	public function envoi_message_par_enveloppe() {
+		return $this->envoi ();
 	}
 
 	/**
@@ -699,6 +720,15 @@ class message extends enveloppe {
 	public function &setMailEntete(
 			$mail_entete) {
 		$this->mail_entete = $mail_entete;
+		return $this;
+	}
+
+	/**
+	 * Compatibilite avec l'objet Message-O365
+	 * @codeCoverageIgnore
+	 * @return $this
+	 */
+	public function &getObjEnveloppe() {
 		return $this;
 	}
 

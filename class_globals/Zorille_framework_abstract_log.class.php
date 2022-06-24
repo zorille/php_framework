@@ -153,6 +153,7 @@ abstract class abstract_log {
 		}
 		
 		if ($this ->getSortEnErreur ()) {
+			$this->onWarning("SortEnErreur TRUE/OUI");
 			// @codeCoverageIgnoreStart
 			if (abstract_log::$logs instanceof logs) {
 				abstract_log::$logs ->renvoiExit ();

@@ -1,13 +1,14 @@
 <?php
+
 /**
  * @author dvargas
  * @package Lib
  *
  */
 namespace Zorille\framework;
+
 /**
  * class html<br>
-
  *
  * Gere la creation et l'envoi de html
  * @package Lib
@@ -45,7 +46,9 @@ class html extends abstract_log {
 	 */
 	private $body = "";
 
-	/*********************** Creation de l'objet *********************/
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Instancie un objet de type html.
 	 * @codeCoverageIgnore
@@ -57,12 +60,17 @@ class html extends abstract_log {
 	 * @param string $entete Entete des logs de l'objet
 	 * @return html
 	 */
-	static function &creer_html(&$liste_option, $content = "Damien V.: zorille@free.fr", $description = "", $keywords = "", $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_html(
+			&$liste_option,
+			$content = "Damien V.: zorille@free.fr",
+			$description = "",
+			$keywords = "",
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		$objet = new html ( $content, $description, $keywords, $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
-				"options" => $liste_option 
+				"options" => $liste_option
 		) );
-		
 		return $objet;
 	}
 
@@ -72,13 +80,15 @@ class html extends abstract_log {
 	 * @param array $liste_class
 	 * @return html
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
 
-	/*********************** Creation de l'objet *********************/
-	
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Creer l'objet et prepare l'entete
 	 * @codeCoverageIgnore
@@ -87,15 +97,16 @@ class html extends abstract_log {
 	 * @param string $keywords Keywords dans l'entete META
 	 * @return true
 	 */
-	public function __construct($content = "Damien V.: zorille@free.fr", $description = "", $keywords = "", $sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+			$content = "Damien V.: zorille@free.fr",
+			$description = "",
+			$keywords = "",
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		parent::__construct ( $sort_en_erreur, $entete );
-		
-		
 		$this->setHtmlDoctype ( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//FR\"
 	   \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" );
-		
 		$this->setHtmlOption ( "xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" lang=\"fr\"" );
-		
 		$entete = __CLASS__;
 		$entete .= "<META HTTP-EQUIV=\"Cache-Control\" CONTENT=\"no-cache\">\n";
 		$entete .= "<META http-equiv=\"content-type\" content=\"text/html; charset=UTF-8 \" >\n";
@@ -103,31 +114,28 @@ class html extends abstract_log {
 		$entete .= "<META NAME=\"FORMATTER\" CONTENT=\"" . $content . "\">\n";
 		$entete .= "<META name=\"description\" content=\"" . $description . "\">\n";
 		$entete .= "<META name=\"keywords\" content=\"" . $keywords . "\">\n";
-		
 		return $this;
 	}
 
 	/**
-	 * Accesseur en ecriture<br>
-	 * Ajoute un titre dans l'entete.
+	 * Accesseur en ecriture<br> Ajoute un titre dans l'entete.
 	 *
 	 * @param string $titre Titre a ajouter.
 	 * @return html
 	 */
-	public function &titre($titre) {
+	public function &titre(
+			$titre) {
 		return $this->setAddEntete ( "<TITLE>" . $titre . "</TITLE>\n" );
 	}
 
 	/**
-	 * Cree une ligne de parametre type "GET".<br>
-	 * ligne=?variable1=valeur1&......<br>
-	 * Tableau d'entree :<br>
-	 * case1=variable1,case2=valeur1 .... etc
+	 * Cree une ligne de parametre type "GET".<br> ligne=?variable1=valeur1&......<br> Tableau d'entree :<br> case1=variable1,case2=valeur1 .... etc
 	 *
 	 * @param array $variable Tableau contenant les couples variable/valeur.
 	 * @return string|false Ligne de parametre, FALSE sinon.
 	 */
-	public function creer_liste_variable($variable) {
+	public function creer_liste_variable(
+			$variable) {
 		if (is_array ( $variable ) && sizeof ( $variable ) % 2 == 0) {
 			$ligne = "?" . $variable [0] . "=" . addslashes ( $variable [1] );
 			for($i = 2; $i < sizeof ( $variable ); $i += 2) {
@@ -135,7 +143,6 @@ class html extends abstract_log {
 			}
 		} else
 			$ligne = false;
-		
 		return $ligne;
 	}
 
@@ -149,25 +156,29 @@ class html extends abstract_log {
 	 * @param string $target Cible du href.
 	 * @return string|false HREF complet, FALSE sinon.
 	 */
-	public function creer_lienHTML($fichier, $lien, $variable = "", $option = "", $target = "", $id = "") {
+	public function creer_lienHTML(
+			$fichier,
+			$lien,
+			$variable = "",
+			$option = "",
+			$target = "",
+			$id = "") {
 		if ($id != "") {
 			$id = "id=\"" . $id . "\"";
 		}
-		//On verifie que le lien ne soit pas vide
+		// On verifie que le lien ne soit pas vide
 		if ($lien != "" && $fichier != "") {
-			//On verifie les options
+			// On verifie les options
 			if ($target != "")
 				$target = " TARGET=\"" . $target . "\"";
 			if (is_array ( $variable ) && $variable != "") {
 				$liste_variable = $this->creer_liste_variable ( $variable );
 			} else
 				$liste_variable = $variable;
-				
-				//on creer le lien
+			// on creer le lien
 			$ligne = "<A HREF=\"" . $fichier . $liste_variable . "\" " . $id . " " . $target . " " . $option . ">" . stripslashes ( $lien ) . "</A>";
 		} else
 			$ligne = false;
-		
 		return $ligne;
 	}
 
@@ -179,7 +190,10 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options de input.
 	 * @return string INPUT complet.
 	 */
-	public function input_form($name, $type = "text", $option = "") {
+	public function input_form(
+			$name,
+			$type = "text",
+			$option = "") {
 		$id = str_replace ( "[]", "", $name );
 		return "<input type=\"" . $type . "\" name=\"" . $name . "\" id=\"" . $id . "\" " . $option . ">\n";
 	}
@@ -191,7 +205,10 @@ class html extends abstract_log {
 	 * @param string $selected
 	 * @return string
 	 */
-	public function gere_option_select(&$tableau, &$i, $selected = "") {
+	public function gere_option_select(
+			&$tableau,
+			&$i,
+			$selected = "") {
 		$select = "          <option value=\"" . $tableau [$i] . "\" " . $selected;
 		$i ++;
 		if (is_array ( $tableau [$i] )) {
@@ -201,7 +218,6 @@ class html extends abstract_log {
 				$select .= ">" . $tableau [$i] ["texte"] . "</option>\n";
 		} else
 			$select .= ">" . $tableau [$i] . "</option>\n";
-		
 		return $select;
 	}
 
@@ -211,10 +227,11 @@ class html extends abstract_log {
 	 * @param string $selected_value
 	 * @return string
 	 */
-	public function valide_selected($valeur, $selected_value) {
+	public function valide_selected(
+			$valeur,
+			$selected_value) {
 		if (in_array ( $valeur, $selected_value ))
 			return "SELECTED";
-		
 		return "";
 	}
 
@@ -227,25 +244,26 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options de select.
 	 * @return string|false select complet, FALSE sinon.
 	 */
-	public function select_form($name, $tableau, $selected_value = "", $option = "") {
+	public function select_form(
+			$name,
+			$tableau,
+			$selected_value = "",
+			$option = "") {
 		$size = sizeof ( $tableau );
 		$id = str_replace ( "[]", "", $name );
-		
 		if ($size != 0 && ($size % 2) == 0) {
 			$select = "<select name=\"" . $name . "\" id=\"" . $id . "\" " . $option . ">\n";
 			if (! is_array ( $selected_value ))
 				$selected_value = array (
-						$selected_value 
+						$selected_value
 				);
-			
 			for($i = 0; $i < $size; $i ++) {
-				$selected =$this->valide_selected($tableau [$i], $selected_value);
+				$selected = $this->valide_selected ( $tableau [$i], $selected_value );
 				$select .= $this->gere_option_select ( $tableau, $i, $selected );
 			}
 			$select .= "</select>\n";
 		} else
 			$select = false;
-		
 		return $select;
 	}
 
@@ -257,7 +275,10 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options de textarea.
 	 * @return string TEXTAREA complet.
 	 */
-	public function textearea_form($name, $value = "", $option = "") {
+	public function textearea_form(
+			$name,
+			$value = "",
+			$option = "") {
 		$id = str_replace ( "[]", "", $name );
 		return "<textarea name=\"" . $name . "\" id=\"" . $id . "\" " . $option . ">" . stripslashes ( $value ) . "</textarea>\n";
 	}
@@ -268,14 +289,14 @@ class html extends abstract_log {
 	 * @param string $texte Texte a modifier.
 	 * @return string texte au format HTML.
 	 */
-	public function texte2html($texte) {
+	public function texte2html(
+			$texte) {
 		$tempo = stripslashes ( $texte );
 		$tempo = trim ( $tempo );
 		$tempo = str_replace ( "\n", "<br>", $tempo );
 		$tempo = str_replace ( "\r", "<br>", $tempo );
 		$tempo = str_replace ( "<br><br>", "<br>", $tempo );
 		$tempo = addslashes ( $tempo );
-		
 		return $tempo;
 	}
 
@@ -287,7 +308,10 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options de img.
 	 * @return string IMG complet.
 	 */
-	public function creer_photo($photo, $alt = "photo", $option = "") {
+	public function creer_photo(
+			$photo,
+			$alt = "photo",
+			$option = "") {
 		return "<IMG src=" . $photo . " alt=" . $alt . " " . $option . ">";
 	}
 
@@ -298,22 +322,25 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options pour un tag TD.
 	 * @return string Tableau contenant le titre.
 	 */
-	public function creer_titre($titre, $option = "") {
-		$ligne = $this->creer_entete_tableau ( "width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"2\"" );
+	public function creer_titre(
+			$titre,
+			$option = "",
+			$entete = "") {
+		$ligne = $this->creer_entete_tableau ( "width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"2\" ".$entete );
 		$ligne .= $this->creer_ligne_tableau ( trim ( $titre ), "", $option );
 		$ligne .= $this->creer_end_tableau ();
-		
 		return $ligne;
 	}
-	
-	//Creation des tableaux de donnees
+
+	// Creation des tableaux de donnees
 	/**
-	* Cree une entete de tableau.
-	*
-	* @param string $option Ligne contenant des options pour un tag TABLE.
-	* @return string Entete de tableau.
-	*/
-	public function creer_entete_tableau($option = "") {
+	 * Cree une entete de tableau.
+	 *
+	 * @param string $option Ligne contenant des options pour un tag TABLE.
+	 * @return string Entete de tableau.
+	 */
+	public function creer_entete_tableau(
+			$option = "") {
 		return "<table " . $option . ">\n";
 	}
 
@@ -327,19 +354,18 @@ class html extends abstract_log {
 	}
 
 	/**
-	 * Cree des lignes de tableau.<br>
-	 * $variable doit contenir les tag <td></td> car il ne sont pas ajoutes.<br>
-	 * parametre $type :<br>
-	 * 0=Une case de la ligne du tableau par ligne de $variable.<br>
-	 * 1=Une ligne de tableau par ligne de $variable
+	 * Cree des lignes de tableau.<br> $variable doit contenir les tag <td></td> car il ne sont pas ajoutes.<br> parametre $type :<br> 0=Une case de la ligne du tableau par ligne de $variable.<br> 1=Une ligne de tableau par ligne de $variable
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le code de chaque ligne du tableau.
 	 * @param string $TR_option Ligne contenant des options pour un tag TR.
 	 * @param int $type 0 ou 1.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_ligne_tableau_sans_td($variable, $TR_option = "", $type = 0) {
-		$ligne="";
+	public function creer_ligne_tableau_sans_td(
+			$variable,
+			$TR_option = "",
+			$type = 0) {
+		$ligne = "";
 		if (is_array ( $variable )) {
 			if ($type == 1)
 				for($i = 0; $i < sizeof ( $variable ); $i ++)
@@ -356,15 +382,17 @@ class html extends abstract_log {
 	}
 
 	/**
-	 * Cree une ligne par entree du tableau.<br>
-	 * $variable contient la valeur de chaque case du tableau.
+	 * Cree une ligne par entree du tableau.<br> $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
 	 * @param string $TR_option Ligne contenant des options pour un tag TR.
 	 * @param string $TD_option Ligne contenant des options pour un tag TD.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_ligne_tableau($variable, $TR_option = "", $TD_option = "") {
+	public function creer_ligne_tableau(
+			$variable,
+			$TR_option = "",
+			$TD_option = "") {
 		$ligne = "";
 		if (is_array ( $variable )) {
 			foreach ( $variable as $donnees ) {
@@ -377,94 +405,94 @@ class html extends abstract_log {
 			$ligne .= $this->creer_case_tableau ( $variable, $TD_option );
 			$ligne .= " </TR>\n";
 		}
-		
 		return $ligne;
 	}
-	
+
 	/**
-	 * Cree une ligne de tableau.<br>
-	 * $variable contient la valeur de chaque case du tableau.
+	 * Cree une ligne de tableau.<br> $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
 	 * @param string $TR_option Ligne contenant des options pour un tag TR.
 	 * @param string $TD_option Ligne contenant des options pour un tag TD.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_une_ligne_de_tableau($variable, $TR_option = "", $TD_option = "") {
+	public function creer_une_ligne_de_tableau(
+			$variable,
+			$TR_option = "",
+			$TD_option = "") {
 		$ligne = "";
 		if (is_array ( $variable )) {
-				$ligne .= " <TR " . $TR_option . ">\n";
-				foreach ( $variable as $donnees ) {
-					$ligne .= $this->creer_case_tableau ( $donnees, $TD_option );
-				}
-				$ligne .= " </TR>\n";
+			$ligne .= " <TR " . $TR_option . ">\n";
+			foreach ( $variable as $donnees ) {
+				$ligne .= $this->creer_case_tableau ( $donnees, $TD_option );
+			}
+			$ligne .= " </TR>\n";
 		} else {
 			$ligne .= " <TR " . $TR_option . ">\n";
 			$ligne .= $this->creer_case_tableau ( $variable, $TD_option );
 			$ligne .= " </TR>\n";
 		}
-		
 		return $ligne;
 	}
 
 	/**
-	 * Cree une case ou une liste de cases de tableau.<br>
-	 * $variable contient la valeur de chaque case du tableau.
+	 * Cree une case ou une liste de cases de tableau.<br> $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
 	 * @param string $TD_option Ligne contenant des options pour un tag TD.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_case_tableau($variable, $TD_option = "") {
-		$ligne="";
+	public function creer_case_tableau(
+			$variable,
+			$TD_option = "") {
+		$ligne = "";
 		if (is_array ( $variable ))
 			for($i = 0; $i < sizeof ( $variable ); $i ++)
 				$ligne .= "  <td " . $TD_option . ">" . $variable [$i] . "</td>\n";
 		else
 			$ligne = "  <td " . $TD_option . ">" . $variable . "</td>\n";
-		
 		return $ligne;
 	}
 
 	/**
-	 * Cree une ligne de titre de tableau.<br>
-	 * $variable contient la valeur de chaque case du tableau.
+	 * Cree une ligne de titre de tableau.<br> $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
 	 * @param string $TR_option Ligne contenant des options pour un tag TR.
 	 * @param string $TH_option Ligne contenant des options pour un tag TH.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_titre_tableau($variable, $TR_option = "", $TH_option = "") {
+	public function creer_titre_tableau(
+			$variable,
+			$TR_option = "",
+			$TH_option = "") {
 		$ligne = " <TR " . $TR_option . ">\n";
 		$ligne .= $this->creer_case_titre_tableau ( $variable, $TH_option );
 		$ligne .= " </TR>\n";
-		
 		return $ligne;
 	}
 
 	/**
-	 * Cree une case ou une liste de cases type titre de tableau.<br>
-	 * $variable contient la valeur de chaque case du tableau.
+	 * Cree une case ou une liste de cases type titre de tableau.<br> $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
 	 * @param string $TH_option Ligne contenant des options pour un tag TH.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_case_titre_tableau($variable, $TH_option = "") {
-		$ligne="";
+	public function creer_case_titre_tableau(
+			$variable,
+			$TH_option = "") {
+		$ligne = "";
 		if (is_array ( $variable ))
 			for($i = 0; $i < sizeof ( $variable ); $i ++)
 				$ligne .= "  <th " . $TH_option . ">" . $variable [$i] . "</th>\n";
 		else
 			$ligne = "  <th " . $TH_option . ">" . $variable . "</th>\n";
-		
 		return $ligne;
 	}
 
 	/**
-	 * Cree une ligne de titre de tableau.<br>
-	 * $variable contient la valeur de chaque case du tableau.
+	 * Cree une ligne de titre de tableau.<br> $variable contient la valeur de chaque case du tableau.
 	 *
 	 * @param string|array $variable Ligne ou tableau de ligne contenant le texte de chaque case du tableau.
 	 * @param string $TABLE_option Ligne contenant des options pour un tag TABLE.
@@ -472,7 +500,11 @@ class html extends abstract_log {
 	 * @param string $Th_option Ligne contenant des options pour un tag Th.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_tableau($variable, $TABLE_option = "", $TR_option = "", $TD_option = "") {
+	public function creer_tableau(
+			$variable,
+			$TABLE_option = "",
+			$TR_option = "",
+			$TD_option = "") {
 		$ligne = $this->creer_entete_tableau ( $TABLE_option );
 		$ligne .= $this->creer_ligne_tableau ( $variable, $TR_option, $TD_option );
 		$ligne .= $this->creer_end_tableau ();
@@ -486,27 +518,28 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options pour un tag div.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_div($variable, $name = "", $option = "", $fin_div = true) {
+	public function creer_div(
+			$variable,
+			$name = "",
+			$option = "",
+			$fin_div = true) {
 		$ligne = "";
-		
 		if ($name == "") {
 			$id = "";
 		} else {
 			$id = "id=\"" . $name . "\"";
 		}
-		$entete = "<div ".$id." ".$option.">\n";
+		$entete = "<div " . $id . " " . $option . ">\n";
 		if ($fin_div) {
 			$pied_page = "\n</div>\n";
 		} else {
 			$pied_page = "";
 		}
-		
 		if (is_array ( $variable ))
 			foreach ( $variable as $data )
 				$ligne .= $entete . $data . $pied_page;
 		else
 			$ligne = $entete . $variable . $pied_page;
-		
 		return $ligne;
 	}
 
@@ -517,27 +550,28 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options pour un tag div.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_span($variable, $name = "", $option = "", $fin_span = true) {
+	public function creer_span(
+			$variable,
+			$name = "",
+			$option = "",
+			$fin_span = true) {
 		$ligne = "";
-		
 		if ($name == "") {
 			$id = "";
 		} else {
 			$id = "id=\"" . $name . "\"";
 		}
-		$entete = "<span ".$id." ".$option.">\n";
+		$entete = "<span " . $id . " " . $option . ">\n";
 		if ($fin_span) {
 			$pied_page = "\n</span>\n";
 		} else {
 			$pied_page = "";
 		}
-		
 		if (is_array ( $variable ))
 			foreach ( $variable as $data )
 				$ligne .= $entete . $data . $pied_page;
 		else
 			$ligne = $entete . $variable . $pied_page;
-		
 		return $ligne;
 	}
 
@@ -548,9 +582,14 @@ class html extends abstract_log {
 	 * @param string $option Ligne contenant des options pour un tag div.
 	 * @return string Ligne de tableau.
 	 */
-	public function creer_form($variable, $name = "", $method = "", $action = "", $option = "", $fin_form = true) {
+	public function creer_form(
+			$variable,
+			$name = "",
+			$method = "",
+			$action = "",
+			$option = "",
+			$fin_form = true) {
 		$ligne = "";
-		
 		if ($name == "") {
 			$id = "";
 		} else {
@@ -566,14 +605,12 @@ class html extends abstract_log {
 		} else {
 			$action = "action=\"" . $action . "\"";
 		}
-		
-		$entete = "<form ".$id." ".$method." ".$action." ".$option.">\n";
+		$entete = "<form " . $id . " " . $method . " " . $action . " " . $option . ">\n";
 		if ($fin_form) {
 			$pied_page = "\n</form>\n";
 		} else {
 			$pied_page = "";
 		}
-		
 		if (is_array ( $variable )) {
 			foreach ( $variable as $data ) {
 				$ligne .= $entete . $data . $pied_page;
@@ -581,7 +618,6 @@ class html extends abstract_log {
 		} else {
 			$ligne = $entete . $variable . $pied_page;
 		}
-		
 		return $ligne;
 	}
 
@@ -591,26 +627,27 @@ class html extends abstract_log {
 	 * @param string $file Chemin complet du fichier a ajouter.
 	 * @return html
 	 */
-	public function &importer_fichier_dans_entete($file) {
+	public function &importer_fichier_dans_entete(
+			$file) {
 		$fichier = file ( $file );
 		foreach ( $fichier as $ligne )
 			$this->setAddEntete ( "\n" . $ligne . "\n" );
-		
 		return $this;
 	}
 
 	/**
-	 * Envoi un fichier<br />
-	 * ATTENTION cette fonction envoi le header
+	 * Envoi un fichier<br /> ATTENTION cette fonction envoi le header
 	 * @codeCoverageIgnore
 	 * @param string $file Chemin complet du fichier a ajouter.
 	 * @param string $mimetype Mime Type du fichier
 	 * @return html
 	 */
-	public function &envoyer_fichier($file, $mimetype = "application/octet-stream") {
-		//if($charset!="NO"){
-		//	$header_charset="; charset=".$charset;
-		//}
+	public function &envoyer_fichier(
+			$file,
+			$mimetype = "application/octet-stream") {
+		// if($charset!="NO"){
+		// $header_charset="; charset=".$charset;
+		// }
 		header ( 'charset: UTF-8' );
 		header ( 'Content-Description: File Transfer' );
 		header ( 'Content-Type: ' . $mimetype );
@@ -623,7 +660,6 @@ class html extends abstract_log {
 		ob_clean ();
 		flush ();
 		readfile ( $file );
-		
 		return $this;
 	}
 
@@ -634,7 +670,6 @@ class html extends abstract_log {
 	 */
 	public function &afficher_page_html() {
 		echo $this->construit_page_html ();
-		
 		return $this;
 	}
 
@@ -645,7 +680,6 @@ class html extends abstract_log {
 	 */
 	public function &afficher_json() {
 		echo json_encode ( $this->getBody () );
-		
 		return $this;
 	}
 
@@ -655,7 +689,8 @@ class html extends abstract_log {
 	 * @param string $filename Chemin complet du fichier a remplir.
 	 * @return true
 	 */
-	public function exporter_html_dans_fichier($filename) {
+	public function exporter_html_dans_fichier(
+			$filename) {
 		if (! $handle = fopen ( $filename, 'w' )) {
 			echo "Impossible d'ouvrir le fichier ($filename)";
 			exit ();
@@ -664,7 +699,6 @@ class html extends abstract_log {
 			echo "Impossible d'ecrire dans le fichier (" . $filename . ")";
 			exit ();
 		}
-		
 		fclose ( $handle );
 		return true;
 	}
@@ -682,11 +716,12 @@ class html extends abstract_log {
 		$RETOUR .= " <BODY " . $this->getBodyOption () . " >";
 		$RETOUR .= $this->getBody ();
 		$RETOUR .= " </BODY>\n</HTML>\n";
-		
 		return $RETOUR;
 	}
 
-	/***************** ACCESSEURS *******************/
+	/**
+	 * *************** ACCESSEURS ******************
+	 */
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -697,16 +732,17 @@ class html extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setBody($body_sup) {
+	public function &setBody(
+			$body_sup) {
 		$this->body = $body_sup;
-		
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAddBody($body_sup) {
+	public function &setAddBody(
+			$body_sup) {
 		$this->body .= $body_sup;
 		return $this;
 	}
@@ -721,7 +757,8 @@ class html extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAddEntete($entete_sup) {
+	public function &setAddEntete(
+			$entete_sup) {
 		$this->html_entete .= $entete_sup;
 		return $this;
 	}
@@ -736,7 +773,8 @@ class html extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAddBodyOption($body_option_sup) {
+	public function &setAddBodyOption(
+			$body_option_sup) {
 		$this->body_option .= $body_option_sup;
 		return $this;
 	}
@@ -751,7 +789,8 @@ class html extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHtmlDoctype($html_doctype) {
+	public function &setHtmlDoctype(
+			$html_doctype) {
 		$this->html_doctype = $html_doctype;
 		return $this;
 	}
@@ -766,13 +805,15 @@ class html extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHtmlOption($html_option) {
+	public function &setHtmlOption(
+			$html_option) {
 		$this->html_option = $html_option;
 		return $this;
 	}
 
-	/***************** ACCESSEURS *******************/
-	
+	/**
+	 * *************** ACCESSEURS ******************
+	 */
 	/**
 	 * @static
 	 * @codeCoverageIgnore
@@ -781,12 +822,8 @@ class html extends abstract_log {
 	 */
 	static function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
-		
 		return $help;
 	}
-} //Fin de la class HTML
-
-
+} // Fin de la class HTML
 ?>

@@ -186,7 +186,7 @@ class sql extends abstract_log {
 	 * Creer un requete SQL type FROM .
 	 * . JOIN .. ON ...
 	 *
-	 * @param string|array $fromListe de champ du FROM.
+	 * @param string|array $from Liste de champ du FROM au format array(table1,array("table"=>table2,"type"=>LEFT/RIGHT/BOTH,"champ1"=>champ 1 du ON,"champ2"=>champ 2 du ON))
 	 */
 	public function creer_from_join($from) {
 		$from_join = "";

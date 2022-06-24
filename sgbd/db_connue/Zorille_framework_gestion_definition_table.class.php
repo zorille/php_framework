@@ -1,13 +1,15 @@
 <?php
+
 /**
  * @author dvargas
  * @package Lib
  */
 namespace Zorille\framework;
-use \Exception as Exception;
+
+use Exception as Exception;
+
 /**
- * class gestion_definition_table<br>
- * Gere les abstractions des tables.
+ * class gestion_definition_table<br> Gere les abstractions des tables.
  *
  * @package Lib
  * @subpackage SQL-dbconnue
@@ -28,7 +30,9 @@ class gestion_definition_table extends requete {
 	 */
 	private $champs = array ();
 
-	/*********************** Creation de l'objet *********************/
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Instancie un objet de type gestion_definition_table.
 	 * @codeCoverageIgnore
@@ -37,12 +41,14 @@ class gestion_definition_table extends requete {
 	 * @param string $entete Entete des logs de l'objet
 	 * @return gestion_definition_table
 	 */
-	static function &creer_gestion_definition_table(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_gestion_definition_table(
+			&$liste_option,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		$objet = new gestion_definition_table ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
-				"options" => $liste_option 
+				"options" => $liste_option
 		) );
-		
 		return $objet;
 	}
 
@@ -52,19 +58,24 @@ class gestion_definition_table extends requete {
 	 * @param array $liste_class
 	 * @return gestion_definition_table
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
 
-	/*********************** Creation de l'objet *********************/
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Cree l'objet, prepare la valeur du sort_en_erreur et l'entete des logs.
 	 * @codeCoverageIgnore
 	 * @param string $entete Entete a afficher dans les logs.
 	 * @param string|bool $sort_en_erreur Prend les valeurs oui/non ou true/false.
 	 */
-	public function __construct($sort_en_erreur, $entete) {
+	public function __construct(
+			$sort_en_erreur,
+			$entete) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -78,7 +89,11 @@ class gestion_definition_table extends requete {
 	 * @return gestion_definition_table
 	 * @throws Exception
 	 */
-	public function fabrique_select(&$select, $table, $champ = "", $as = "") {
+	public function fabrique_select(
+			&$select,
+			$table,
+			$champ = "",
+			$as = "") {
 		if ($table != "") {
 			if ($champ != "") {
 				$champ_local = $this->renvoi_champ ( $table, $champ );
@@ -95,7 +110,6 @@ class gestion_definition_table extends requete {
 				}
 			}
 		}
-		
 		return $this;
 	}
 
@@ -105,13 +119,15 @@ class gestion_definition_table extends requete {
 	 * @param string $table
 	 * @return gestion_definition_table
 	 */
-	public function fabrique_from(&$from, $table) {
+	public function fabrique_from(
+			&$from,
+			$table) {
 		if ($table != "") {
 			$reel_table = $this->renvoi_table ( $table );
-			if ($reel_table!==false) {
+			if ($reel_table !== false) {
 				$from [] .= $reel_table;
 			} else {
-				$from[] .= $table;
+				$from [] .= $table;
 			}
 		}
 		return $this;
@@ -128,7 +144,13 @@ class gestion_definition_table extends requete {
 	 * @return gestion_definition_table
 	 * @throws Exception
 	 */
-	public function fabrique_from_jointure(&$from, $table_name1, $champ1, $table_name2, $champ2, $type = "BOTH") {
+	public function fabrique_from_jointure(
+			&$from,
+			$table_name1,
+			$champ1,
+			$table_name2,
+			$champ2,
+			$type = "BOTH") {
 		if ($table_name1 != "" && $table_name2 != "") {
 			$table1 = $this->renvoi_table ( $table_name1 );
 			$champ1 = $this->renvoi_champ ( $table_name1, $champ1 );
@@ -153,7 +175,11 @@ class gestion_definition_table extends requete {
 	 * @return gestion_definition_table
 	 * @throws Exception
 	 */
-	public function fabrique_where(&$liste, $table, $champ, $valeur) {
+	public function fabrique_where(
+			&$liste,
+			$table,
+			$champ,
+			$valeur) {
 		if ($valeur != "" && $table != "" && $champ != "") {
 			$retour = $this->choisie_type_where ( $this->renvoi_champ ( $table, $champ ), $valeur, $this->renvoi_type ( $table, $champ ) );
 			if ($retour != "") {
@@ -172,7 +198,11 @@ class gestion_definition_table extends requete {
 	 * @return gestion_definition_table
 	 * @throws Exception
 	 */
-	public function fabrique_set(&$liste, $table, $champ, $valeur) {
+	public function fabrique_set(
+			&$liste,
+			$table,
+			$champ,
+			$valeur) {
 		if ($table != "" && $champ != "") {
 			$retour = $this->choisie_type_set ( $this->renvoi_champ ( $table, $champ ), $valeur, $this->renvoi_type ( $table, $champ ) );
 			if ($retour != "") {
@@ -191,7 +221,11 @@ class gestion_definition_table extends requete {
 	 * @return gestion_definition_table
 	 * @throws Exception
 	 */
-	public function prepare_valeur_update(&$liste, $table, $champ, $valeur) {
+	public function prepare_valeur_update(
+			&$liste,
+			$table,
+			$champ,
+			$valeur) {
 		if ($table != "" && $champ != "" && $valeur !== "__no_update") {
 			$retour = $this->choisie_type_set ( $this->renvoi_champ ( $table, $champ ), $valeur, $this->renvoi_type ( $table, $champ ) );
 			if ($retour != "") {
@@ -209,7 +243,10 @@ class gestion_definition_table extends requete {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function fabrique_order_by($champ, $table, $fonction = "") {
+	public function fabrique_order_by(
+			$champ,
+			$table,
+			$fonction = "") {
 		$order = array ();
 		if ($champ != "") {
 			$order ["type"] = $this->retrouve_type_order ( $champ );
@@ -220,7 +257,6 @@ class gestion_definition_table extends requete {
 				}
 				$order ["champ"] = $this->renvoi_champ ( $table, $liste [0] );
 			}
-			
 			if ($fonction != "") {
 				$order ["champ"] = $fonction . "(" . $order ["champ"] . ")";
 			}
@@ -233,7 +269,8 @@ class gestion_definition_table extends requete {
 	 * @param string $type ' asc'/' desc' ou ' ASC'/' DESC'
 	 * @return string
 	 */
-	public function retrouve_type_order($type) {
+	public function retrouve_type_order(
+			$type) {
 		if (strripos ( $type, " ASC" ) !== false) {
 			$retour = " ASC";
 		} elseif (strripos ( $type, " DESC" ) !== false) {
@@ -247,31 +284,32 @@ class gestion_definition_table extends requete {
 	/**
 	 * Cree et applique une requete de type select standard.
 	 *
-	 * @param array $liste_champs_where	liste des champs du where
+	 * @param array $liste_champs_where liste des champs du where
 	 * @return array false un tableau de resultat, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function requete_select_standard($table, $liste_champs_where = array(), $order = "ORDER BY", $distinct = true) {
+	public function requete_select_standard(
+			$table,
+			$liste_champs_where = array (),
+			$order = "ORDER BY",
+			$distinct = true) {
 		$from = array ();
 		$this->fabrique_from ( $from, $table );
-		
 		$select = array ();
 		$tab_table = $this->renvoi_donnees_table ( $table );
 		if ($tab_table !== false) {
-			//renvoi les noms virtuel de chaque champ en fonction de leurs definitions
+			// renvoi les noms virtuel de chaque champ en fonction de leurs definitions
 			foreach ( $tab_table as $champ => $valeur ) {
 				$this->fabrique_select ( $select, $table, $champ, $valeur ["as"] );
 			}
 		} else {
-			//Renvoi le nom reel du champ car il n'y a pas de definition
+			// Renvoi le nom reel du champ car il n'y a pas de definition
 			$this->fabrique_select ( $select, $table );
 		}
-		
 		$where = array ();
 		foreach ( $liste_champs_where as $champ => $valeur ) {
 			$this->fabrique_where ( $where, $table, $champ, $valeur );
 		}
-		
 		if ($order == "ORDER BY") {
 			$order = "";
 		} elseif (strripos ( $order, "ORDER BY" ) === false) {
@@ -283,6 +321,9 @@ class gestion_definition_table extends requete {
 		} else {
 			$distinct = "";
 		}
+		$this->onDebug ( $select, 1 );
+		$this->onDebug ( $from, 1 );
+		$this->onDebug ( $where, 1 );
 		$resultat = $this->selectionner ( $select, $from, $where, $order, $distinct );
 		$this->onDebug ( $resultat, 2 );
 		return $resultat;
@@ -295,9 +336,10 @@ class gestion_definition_table extends requete {
 	 * @return array false un tableau de resultat, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function requete_insert_standard($table, $liste_champs_set = array()) {
+	public function requete_insert_standard(
+			$table,
+			$liste_champs_set = array ()) {
 		$liste_champs_table = $this->renvoi_donnees_table ( $table );
-		
 		// On valide que la liste des champs est complete
 		foreach ( $liste_champs_table as $as => $liste_data ) {
 			$liste_data;
@@ -307,42 +349,39 @@ class gestion_definition_table extends requete {
 				// $this->onWarning ( "Le champ " . $as . " n'existe pas dans le tableau liste_champs_set" );
 			}
 		}
-		
 		$from = array ();
 		$this->fabrique_from ( $from, $table );
-		
 		$set = array ();
 		foreach ( $liste_champs_set as $champ => $value ) {
 			$this->fabrique_set ( $set, $table, $champ, $value );
 		}
-		
 		$resultat = $this->ajouter ( $from [0], $set );
 		$this->onDebug ( $resultat, 2 );
 		return $resultat;
 	}
 
 	/**
-	 * Cree et applique une requete de type select standard.
+	 * Cree et applique une requete de type update standard.
 	 *
 	 * @param array $liste_champs_set liste des champs du set
 	 * @param array $liste_champs_where liste des champs du where
 	 * @return array false un tableau de resultat, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function requete_update_standard($table, $liste_champs_set = array(), $liste_champs_where = array()) {
+	public function requete_update_standard(
+			$table,
+			$liste_champs_set = array (),
+			$liste_champs_where = array ()) {
 		$from = array ();
 		$this->fabrique_from ( $from, $table );
-		
 		$set = array ();
 		foreach ( $liste_champs_set as $champ => $value ) {
 			$this->fabrique_set ( $set, $table, $champ, $value );
 		}
-		
 		$where = array ();
 		foreach ( $liste_champs_where as $champ => $valeur ) {
 			$this->fabrique_where ( $where, $table, $champ, $valeur );
 		}
-		
 		$resultat = $this->updater ( $from [0], $set, $where );
 		$this->onDebug ( $resultat, 2 );
 		return $resultat;
@@ -356,15 +395,15 @@ class gestion_definition_table extends requete {
 	 * @return array false un tableau de resultat, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function requete_delete_standard($table, $liste_champs_where = array()) {
+	public function requete_delete_standard(
+			$table,
+			$liste_champs_where = array ()) {
 		$from = array ();
 		$this->fabrique_from ( $from, $table );
-		
 		$where = array ();
 		foreach ( $liste_champs_where as $champ => $valeur ) {
 			$this->fabrique_where ( $where, $table, $champ, $valeur );
 		}
-		
 		$resultat = $this->supprimer ( $from [0], $where );
 		$this->onDebug ( $resultat, 2 );
 		return $resultat;
@@ -377,17 +416,19 @@ class gestion_definition_table extends requete {
 	public function close() {
 	}
 
-	/***************** Accesseurs ************/
+	/**
+	 * *************** Accesseurs ***********
+	 */
 	/**
 	 * Renvoi le nom reel a partir du nom virtuel
 	 * @param string $table_name
 	 * @return string|false
 	 */
-	public function renvoi_table($table_name) {
+	public function renvoi_table(
+			$table_name) {
 		if (isset ( $this->table [$table_name] )) {
 			return $this->table [$table_name];
 		}
-		
 		return false;
 	}
 
@@ -397,11 +438,12 @@ class gestion_definition_table extends requete {
 	 * @param string $table_name
 	 * @return gestion_definition_table
 	 */
-	public function setTable($nom_reel, $table_name) {
+	public function setTable(
+			$nom_reel,
+			$table_name) {
 		if (! isset ( $this->table [$table_name] )) {
 			$this->table [$table_name] = $nom_reel;
 		}
-		
 		return $this;
 	}
 
@@ -411,13 +453,14 @@ class gestion_definition_table extends requete {
 	 * @param string $champ Nom virtuel du champ
 	 * @return array|false
 	 */
-	public function renvoi_donnees_champ($table, $champ) {
+	public function renvoi_donnees_champ(
+			$table,
+			$champ) {
 		if ($table !== false && $table != "" && ! is_array ( $table ) && ! is_array ( $champ )) {
 			if (isset ( $this->champs [$table] ) && isset ( $this->champs [$table] [$champ] )) {
 				return $this->champs [$table] [$champ];
 			}
 		}
-		
 		return false;
 	}
 
@@ -429,7 +472,11 @@ class gestion_definition_table extends requete {
 	 * @param string $type
 	 * @return gestion_definition_table
 	 */
-	public function setChamp($nom_reel, $champ_name, $table_name, $type = "text") {
+	public function setChamp(
+			$nom_reel,
+			$champ_name,
+			$table_name,
+			$type = "text") {
 		$table = $this->renvoi_table ( $table_name );
 		if (! isset ( $this->champs [$table_name] [$champ_name] ) && $table != "") {
 			// Gere les champs avec un espace
@@ -438,22 +485,21 @@ class gestion_definition_table extends requete {
 			$this->champs [$table_name] [$champ_name] ["type"] = $type;
 			$this->champs [$table_name] [$champ_name] ["as"] = $champ_name;
 		}
-		
 		return $this;
 	}
 
 	/**
- 	* Renvoi les donnees d'une table (nom virtuel de la table)
- 	* @param string $table
- 	* @return array|false
- 	*/
-	public function renvoi_donnees_table($table) {
+	 * Renvoi les donnees d'une table (nom virtuel de la table)
+	 * @param string $table
+	 * @return array|false
+	 */
+	public function renvoi_donnees_table(
+			$table) {
 		if ($table !== false && $table != "" && ! is_array ( $table )) {
 			if (isset ( $this->champs [$table] )) {
 				return $this->champs [$table];
 			}
 		}
-		
 		return false;
 	}
 
@@ -463,12 +509,13 @@ class gestion_definition_table extends requete {
 	 * @param string $champ
 	 * @return string|false
 	 */
-	public function renvoi_as($table, $champ) {
+	public function renvoi_as(
+			$table,
+			$champ) {
 		$tab_champ = $this->renvoi_donnees_champ ( $table, $champ );
 		if ($tab_champ !== false && isset ( $tab_champ ["as"] ) && $tab_champ ["as"] != "") {
 			return $tab_champ ["as"];
 		}
-		
 		return false;
 	}
 
@@ -478,12 +525,13 @@ class gestion_definition_table extends requete {
 	 * @param string $champ
 	 * @return string "text" par defaut
 	 */
-	public function renvoi_type($table, $champ) {
+	public function renvoi_type(
+			$table,
+			$champ) {
 		$tab_champ = $this->renvoi_donnees_champ ( $table, $champ );
 		if ($tab_champ !== false && isset ( $tab_champ ["type"] ) && $tab_champ ["type"] != "") {
 			return $tab_champ ["type"];
 		}
-		
 		return "text";
 	}
 
@@ -493,7 +541,8 @@ class gestion_definition_table extends requete {
 	 * @param string $table
 	 * @return array Renvoi "*" par defaut
 	 */
-	public function renvoi_liste_champs($table) {
+	public function renvoi_liste_champs(
+			$table) {
 		$tab_table = $this->renvoi_donnees_table ( $table );
 		if ($tab_table !== false) {
 			$CODE_RETOUR = array ();
@@ -502,27 +551,27 @@ class gestion_definition_table extends requete {
 			}
 			return $CODE_RETOUR;
 		}
-		
 		return array (
-				"*" 
+				"*"
 		);
 	}
 
 	/**
 	 * Renvoi le nom reel et complet (avec la table) d'un champ pour un nom virtuel de table/champ
-	 * 
+	 *
 	 * @param string $table
 	 * @param string $champ
 	 * @return string|false False en cas d'erreur
 	 * @throws Exception
 	 */
-	public function renvoi_champ($table, $champ) {
+	public function renvoi_champ(
+			$table,
+			$champ) {
 		$tab_champ = $this->renvoi_donnees_champ ( $table, $champ );
 		if ($tab_champ !== false && isset ( $tab_champ ["nom"] ) && $tab_champ ["nom"] != "") {
 			return $tab_champ ["nom"];
 		}
-
-		return	$this->onError("Champ ".$champ." introuvable dans la definition de la table ".$table);
+		return $this->onError ( "Champ " . $champ . " introuvable dans la definition de la table " . $table );
 	}
 
 	/**
@@ -531,15 +580,17 @@ class gestion_definition_table extends requete {
 	 * @param string $champ
 	 * @return string "text" par defaut
 	 */
-	public function renvoi_champ_sans_table($table, $champ) {
+	public function renvoi_champ_sans_table(
+			$table,
+			$champ) {
 		$tab_champ = $this->renvoi_donnees_champ ( $table, $champ );
 		if ($tab_champ !== false && isset ( $tab_champ ["nom_sans_table"] ) && $tab_champ ["nom_sans_table"] != "") {
 			return $tab_champ ["nom_sans_table"];
 		}
-		
 		return false;
 	}
-
-/***************** Accesseurs ************/
+/**
+ * *************** Accesseurs ***********
+ */
 }
 ?>

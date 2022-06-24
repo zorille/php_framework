@@ -174,7 +174,7 @@ class dates extends abstract_log {
 	 * @param string $date Date au format YYYYMMDD ou au format anglais US
 	 * @return string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
 	 */
-	public function extraire_date($date) {
+	public static function extraire_date($date) {
 		if (! preg_match ( "/^[0-9]{8}$/", $date )) {
 			$stamp_date = strtotime ( $date );
 			if ($stamp_date !== false)
@@ -746,7 +746,7 @@ class dates extends abstract_log {
 					$CODE_RETOUR = "Janvier";
 					break;
 				case '02' :
-					$CODE_RETOUR = "F&eacute;vrier";
+					$CODE_RETOUR = "Février";
 					break;
 				case '03' :
 					$CODE_RETOUR = "Mars";
@@ -764,7 +764,7 @@ class dates extends abstract_log {
 					$CODE_RETOUR = "Juillet";
 					break;
 				case '08' :
-					$CODE_RETOUR = "Ao&ucirc;t";
+					$CODE_RETOUR = "Août";
 					break;
 				case '09' :
 					$CODE_RETOUR = "Septembre";
@@ -776,7 +776,7 @@ class dates extends abstract_log {
 					$CODE_RETOUR = "Novembre";
 					break;
 				case '12' :
-					$CODE_RETOUR = "D&eacute;cembre";
+					$CODE_RETOUR = "Décembre";
 					break;
 			}
 		}

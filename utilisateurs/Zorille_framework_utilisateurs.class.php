@@ -229,7 +229,7 @@ class utilisateurs extends abstract_log {
 	public function retrouve_utilisateurs_array(
 			$datas) {
 		$this->onDebug ( __METHOD__, 1 );
-		
+		$this->onDebug ( $datas, 1 );
 		if (isset ( $datas ["utilisateur"] )) {
 			$this->retrouve_utilisateur_centralise ( $datas ["utilisateur"] );
 		} else {
