@@ -140,15 +140,7 @@ class Reports extends Graph {
 	 * @return array
 	 */
 	public function liste_licenses_vendues(){
-		$correspondances=array(
-				"WINDOWS_STORE"=>"Microsoft Windows",
-				"ENTERPRISEPACK"=>"Office 365 E3",
-				"ENTERPRISEPREMIUM"=>"Office 365 E5",
-				"PROJECTESSENTIALS"=>"Projects Online Essential",
-				"FLOW_FREE"=>"Microsoft Power Automate Free",
-				"PROJECT_P1"=>"Project (plan 1)",
-				"STANDARDPACK"=>"Office 365 E1",
-		);
+		$correspondances=$this->getTableauLicence();
 		$vendu=array();
 		$lisenses=$this->reports_subscribedLicenses();
 		if($this->valide_champ_value($lisenses)) {

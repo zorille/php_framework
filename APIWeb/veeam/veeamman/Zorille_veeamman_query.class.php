@@ -97,6 +97,11 @@ class query extends ci {
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
+	public function reset_query() {
+		$this->setDernierePage ( false )
+			->setPageActuelle ( null );
+	}
+
 	public function prepare_liste_query(
 			$resultat_querysvc) {
 		$liste_svc = array ();
@@ -133,10 +138,11 @@ class query extends ci {
 	 * @return boolean true si c'est recupere, false si on a atteint la derniere page
 	 * @throws Exception
 	 */
-	public function recupere_query_par_page($params = array ()) {
-		return $this->page_suivante($params);
+	public function recupere_query_par_page(
+			$params = array ()) {
+		return $this->page_suivante ( $params );
 	}
-	
+
 	/**
 	 * Permet de trouver les donnees d'une query en fonction des parametres fournit
 	 * @return query
@@ -154,8 +160,7 @@ class query extends ci {
 	}
 
 	/**
-	 * Recupere la page actuelle a partir de la requete
-	 * Si il n'y a pas de PagingInfo, la valeur est NULL
+	 * Recupere la page actuelle a partir de la requete Si il n'y a pas de PagingInfo, la valeur est NULL
 	 * @return query
 	 * @throws Exception
 	 */
@@ -168,22 +173,20 @@ class query extends ci {
 	}
 
 	/**
-	 * Valide que c'est la dernière page a partir de la Page Actuelle.
-	 * Si la Page Actuelle est a NULL, il n'y a pas de page donc c'est la dernière par defaut
+	 * Valide que c'est la dernière page a partir de la Page Actuelle. Si la Page Actuelle est a NULL, il n'y a pas de page donc c'est la dernière par defaut
 	 * @return query
 	 * @throws Exception
 	 */
 	public function valide_derniere_page() {
-		$donnees = $this->getPageActuelle();
-		if ($donnees==null || (int) $donnees->attributes () ["PageNum"] == (int) $donnees->attributes () ["PagesCount"]) {
+		$donnees = $this->getPageActuelle ();
+		if ($donnees == null || ( int ) $donnees->attributes () ["PageNum"] == ( int ) $donnees->attributes () ["PagesCount"]) {
 			return $this->setDernierePage ( true );
 		}
 		return $this->setDernierePage ( false );
 	}
 
 	/**
-	 * Permet de recupere la page suivante d'une query.
-	 * Recupere la premiere page si aucune page actuelle n'est definit
+	 * Permet de recupere la page suivante d'une query. Recupere la premiere page si aucune page actuelle n'est definit
 	 * @return boolean true si c'est recupere, false si on a atteint la derniere page
 	 * @throws Exception
 	 */
@@ -191,9 +194,9 @@ class query extends ci {
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		if (! $this->getDernierePage ()) {
-			$page=$this->getPageActuelle();
-			if(!is_null($page)){
-				$params ["page"] = (int) $page->attributes()['PageNum']+1;
+			$page = $this->getPageActuelle ();
+			if (! is_null ( $page )) {
+				$params ["page"] = ( int ) $page->attributes () ['PageNum'] + 1;
 			}
 			$this->recupere_resultat_query ( $params );
 			return true;

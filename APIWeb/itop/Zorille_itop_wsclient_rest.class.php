@@ -152,7 +152,7 @@ class wsclient_rest extends Core\wsclient {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setHttpMethod ( "POST" );
 		// build prepare_requete_json array
-		$prepare_requete_json ['version'] = '1.0';
+		$prepare_requete_json ['version'] = '1.3';
 		$prepare_requete_json = array_merge ( $prepare_requete_json, $this->getAuth () );
 		$prepare_requete_json ['json_data'] = json_encode ( $params );
 		if ($this->getListeOptions ()

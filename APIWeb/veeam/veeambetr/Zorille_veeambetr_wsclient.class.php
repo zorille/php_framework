@@ -153,15 +153,13 @@ class wsclient extends Core\wsclient {
 					"Content-Type: " . $this->getContentType (),
 					"Accept: " . $this->getAccept (),
 					"Authorization: Bearer " . $this->getAuth (),
-					"x-api-version: 1.0-rev1",
-					"Connection: close"
+					"x-api-version: 1.0-rev1"
 			) );
 		}
 		return $this->setHttpHeader ( array (
 				"Content-Type: application/x-www-form-urlencoded",
 				"Accept: " . $this->getAccept (),
-				"x-api-version: 1.0-rev1",
-				"Connection: close"
+				"x-api-version: 1.0-rev1"
 		) );
 	}
 
@@ -324,7 +322,21 @@ class wsclient extends Core\wsclient {
 				return $resultat;
 	}
 	
-
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function exportJobs(
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				$resultat = $this->getMethod ( 'v1/automation/jobs/export', $params );
+				return $resultat;
+	}
+	
+	
 	/**
 	 * Resource: auth/login Method: Post Autentification
 	 *

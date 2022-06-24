@@ -136,11 +136,13 @@ class wsclient extends Core\wsclient {
 		if ($this->getAuth ()) {
 			return $this->setHttpHeader ( array (
 					"Content-Type: " . $this->getContentType (),
+					"Accept: " . $this->getAccept (),
 					"X-Auth-Token: " . $this->getAuth ()
 			) );
 		}
 		return $this->setHttpHeader ( array (
-				"Content-Type: " . $this->getContentType ()
+				"Content-Type: " . $this->getContentType (),
+				"Accept: " . $this->getAccept ()
 		) );
 	}
 
@@ -153,9 +155,42 @@ class wsclient extends Core\wsclient {
 	public function prepare_retour(
 			$retour_wsclient) {
 		$this->onDebug ( __METHOD__, 1 );
-		$retour = $this->traite_retour_json ( $retour_wsclient );
-		$this->onDebug ( $retour, 2 );
+		$this->onDebug ( "Accept Method :".$this->getAccept (), 1 );
+		switch ($this->getAccept ()) {
+			case "image/png" :
+				$retour = $this->traite_retour_image ( $retour_wsclient );
+				break;
+			default :
+				$retour = $this->traite_retour_json ( $retour_wsclient );
+				$this->onDebug ( $retour, 2 );
+		}
 		return $retour;
+	}
+
+	/**
+	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
+	 * @param string $retour_json
+	 * @param boolean $return_array
+	 * @return array
+	 */
+	public function traite_retour_image(
+			$retour_image) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( "Retour Image selectionne", 2 );
+		if ($this->is_png ( $retour_image )) {
+			return $retour_image;
+		}
+		return $this->onError ( "Pas d'image en retour" );
+	}
+
+	public function is_jpeg(
+			&$pict) {
+		return (bin2hex ( $pict [0] ) == 'ff' && bin2hex ( $pict [1] ) == 'd8');
+	}
+
+	public function is_png(
+			&$pict) {
+		return (bin2hex ( $pict [0] ) == '89' && $pict [1] == 'P' && $pict [2] == 'N' && $pict [3] == 'G');
 	}
 
 	/**
@@ -219,13 +254,35 @@ class wsclient extends Core\wsclient {
 	 */
 	public function getMethod(
 			$resource,
-			$params = array ()) {
+			$params = array (),
+			$type_mime = "") {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "GET" )
 			->setParams ( $full_params );
 		return $this->prepare_requete ();
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @param string $resource Url Resource
+	 * @param array $params Data to send
+	 * @return SimpleXMLElement
+	 * @throws Exception
+	 */
+	public function getImageMethod(
+			$resource,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$full_params = array_merge ( $this->getDefaultParams (), $params );
+		$this->setUrl ( $resource )
+			->setAccept ( "image/png" )
+			->setHttpMethod ( "GET" )
+			->setParams ( $full_params );
+		$retour = $this->prepare_requete ();
+		$this->setAccept ( "application/json" );
+		return $retour;
 	}
 
 	/**
@@ -285,6 +342,63 @@ class wsclient extends Core\wsclient {
 	/**
 	 * *********************** API librenms **********************
 	 */
+	/**
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function getBilling(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( "/bills", $params );
+		return $resultat;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function getBill(
+			$id,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( "/bills/" . $id, $params );
+		return $resultat;
+	}
+
+	/**
+	 * Return graph for billing
+	 * @param int $id
+	 * @param string $graph_type Must be bits or monthly
+	 * @param array $params Can contain from in timestamp, to in timestamp
+	 * @return SimpleXMLElement
+	 * @throws Exception
+	 */
+	public function getBillGraph(
+			$id,
+			$graph_type,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getImageMethod ( "/bills/" . $id . "/graphs/" . $graph_type, $params );
+		return $resultat;
+	}
+
+	/**
+	 * Return graph data for billing
+	 * @param int $id
+	 * @param array $params can contain from in timestamp, to in timestamp and reducefactor
+	 * @return SimpleXMLElement
+	 * @throws Exception
+	 */
+	public function getBillGraphData(
+			$id,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( "/bills/" . $id . "/graphdata/bits", $params );
+		return $resultat;
+	}
+
 	/**
 	 * *********************** Accesseurs **********************
 	 */

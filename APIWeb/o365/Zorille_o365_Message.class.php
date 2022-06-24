@@ -78,7 +78,7 @@ class Message extends User {
 	public function &_initialise(
 			$liste_class) {
 		parent::_initialise ( $liste_class );
-		return $this;
+		return $this->initialise_ressources ();
 	}
 
 	/**
@@ -95,6 +95,41 @@ class Message extends User {
 			$entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
+	}
+
+	/**
+	 * On valide les variables obligatoires
+	 * @return $this
+	 * @throws Exception
+	 */
+	public function &initialise_ressources() {
+		if ($this->getListeOptions ()
+			->verifie_option_existe ( "envoi_par_mail", false ) !== false) {
+			// Gestion de Office365
+			$this->onInfo ( "On se connecte a o365 pour envoyer un mail" );
+			if ($this->getListeOptions ()
+				->verifie_option_existe ( "o365_serveur_mail", false ) === false) {
+				return $this->onError ( "Il manque le paramettre o365_serveur_mail pour continuer" );
+			}
+			if ($this->getListeOptions ()
+				->verifie_option_existe ( "o365_user_message", false ) === false) {
+				return $this->onError ( "Il manque le paramettre o365_user_message pour continuer" );
+			}
+			// On creer l'objet connecte a O365
+			if ($this->getObjetO365Wsclient ()
+				->getConnected () === false) {
+				$this->getObjetO365Wsclient ()
+					->prepare_connexion ( $this->getListeOptions ()
+					->getOption ( "o365_serveur_mail" ) );
+			}
+			// On connecte un compte existant sur o365
+			$this->retrouve_userid_par_nom ( $this->getListeOptions ()
+				->getOption ( "o365_user_message" ) )
+				->prepare_enveloppe ();
+			return $this;
+		}
+		# $this->onWarning ( "Option envoi_par_mail non active" );
+		return $this;
 	}
 
 	/**
@@ -240,8 +275,155 @@ class Message extends User {
 	}
 
 	/**
-	 * ******************************* O365 MESSAGES *********************************
+	 * ******************************* MESSAGE URI ******************************
 	 */
+	public function messages_source_uri() {
+		return '/messages';
+	}
+
+	public function messages_list_uri() {
+		return $this->user_id_uri () . $this->messages_source_uri ();
+	}
+
+	public function mailfolder_list_uri() {
+		return $this->user_id_uri () . '/mailFolders';
+	}
+
+	public function messages_source_attachments() {
+		return '/attachments';
+	}
+
+	/**
+	 * ******************************* O365 GESTION MESSAGES *********************************
+	 */
+	/**
+	 * Renvoi le contenu du message
+	 * @param string $message_id
+	 * @return SimpleXMLElement
+	 */
+	public function lire_message(
+			$message_id) {
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->messages_list_uri () . "/" . $message_id );
+	}
+
+	/**
+	 * Renvoi le heaser du message
+	 * @param string $message_id
+	 * @param string $chemin
+	 * @return SimpleXMLElement
+	 */
+	public function lire_header_message(
+			$message_id) {
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->messages_list_uri () . "/" . $message_id . '/?$select=internetMessageHeaders' );
+	}
+
+	/**
+	 * Recupere le message en mime
+	 * @param string $message_id
+	 * @param string $chemin
+	 * @return string message au format RAW
+	 */
+	public function lire_mimeType_message(
+			$message_id) {
+		$retour = $this->getObjetO365Wsclient ()
+			->setTypeRetour ( 'raw' )
+			->GetMethod ( $this->messages_list_uri () . "/" . $message_id . '/$value' );
+		$this->getObjetO365Wsclient ()
+			->setTypeRetour ( 'json' );
+		return $retour;
+	}
+
+	/**
+	 * Supprime le message
+	 * @param string $message_id
+	 * @return SimpleXMLElement
+	 */
+	public function supprime_message(
+			$message_id) {
+		if(empty($message_id)){
+			return $this->onError("Il faut un Message Id pour supprimer le message : ".$message_id);
+		}
+		return $this->getObjetO365Wsclient ()
+			->DeleteMethod ( $this->messages_list_uri () . "/" . $message_id );
+	}
+
+	/**
+	 * ******************************* O365 DOSSIER MESSAGES *********************************
+	 */
+	/**
+	 * Retrouve le nombre de message dans la boite
+	 * @param string $chemin
+	 * @return int
+	 */
+	public function compte_message(
+			$chemin) {
+		$details = $this->lire_donnees_dossier ( $chemin );
+		return $details->totalItemCount;
+	}
+
+	public function retrouve_id_dossier(
+			$chemin = 'Preprod') {
+		$liste_dossier = $this->retrouve_liste_dossier ();
+		foreach ( $liste_dossier->value as $dossier ) {
+			if ($dossier->displayName == $chemin) {
+				return $dossier->id;
+			}
+		}
+		return NULL;
+	}
+
+	public function retrouve_liste_dossier() {
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->mailfolder_list_uri () . '?$top=50' );
+	}
+
+	public function recupere_id_dossier(
+			$chemin) {
+		if ($chemin != "Inbox") {
+			$id = $this->retrouve_id_dossier ( $chemin );
+			if ($id == NULL) {
+				return $this->onError ( "Pas d'ID correspondant au dossier " . $chemin );
+			}
+		} else {
+			$id = $chemin;
+		}
+		return $id;
+	}
+
+	public function lire_donnees_dossier(
+			$chemin = 'Inbox') {
+		$id = $this->recupere_id_dossier ( $chemin );
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->mailfolder_list_uri () . '/' . $id );
+	}
+
+	public function lire_liste_message(
+			$chemin = 'Inbox',
+			$param = array ()) {
+		$id = $this->recupere_id_dossier ( $chemin );
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->mailfolder_list_uri () . '/' . $id . $this->messages_source_uri (), $param );
+	}
+
+	/**
+	 * ******************************* O365 ATTACHEMENTS MESSAGES *********************************
+	 */
+	public function liste_attachments(
+			$messageId,
+			$param = array ()) {
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->messages_list_uri () . '/' . $messageId . $this->messages_source_attachments (), $param );
+	}
+
+	public function proprietes_attachment(
+			$attachmentId,
+			$param = array ()) {
+		return $this->getObjetO365Wsclient ()
+			->GetMethod ( $this->messages_list_uri () . '/' . $messageId . $this->messages_source_attachments () . '/' . $attachmentId, $param );
+	}
+
 	/**
 	 * ******************************* MESSAGES PAR Enveloppe *********************************
 	 */
@@ -289,6 +471,11 @@ class Message extends User {
 			);
 		}
 		if ($this->getObjEnveloppe ()
+			->getSignatureFlag ()) {
+			$message ['body'] ["content"] .= $this->getObjEnveloppe ()
+				->getSignature ();
+		}
+		if ($this->getObjEnveloppe ()
 			->getFichierAttacheFlag ()) {
 			$message ["hasAttachments"] = true;
 		}
@@ -314,11 +501,20 @@ class Message extends User {
 			return $this;
 		}
 		foreach ( $this->getObjEnveloppe ()
-			->getFichierAttache () as $fichier ) {
-			$str = @file_get_contents ( $fichier );
+			->getFichierAttache () as $name => $fichier ) {
+			if (is_numeric ( $name )) {
+				// Si $name est un numeric, alors on a une liste de fichiers sur le disk
+				$str = @file_get_contents ( $fichier );
+				$nom = $fichier;
+			} else {
+				// Si $name contient un nom de fichier, le contenu du fichier est dans $fichier
+				$str = $fichier;
+				$nom = $name;
+			}
+			$this->onDebug ( "Filename : " . $nom, 1 );
 			$donnees = array (
 					"@odata.type" => "#microsoft.graph.fileAttachment",
-					"name" => basename ( $fichier ),
+					"name" => basename ( $nom ),
 					"contentBytes" => base64_encode ( $str )
 			);
 			$this->onDebug ( $donnees, 1 );
@@ -451,6 +647,7 @@ class Message extends User {
 
 	/**
 	 * @codeCoverageIgnore
+	 * return Core\enveloppe
 	 */
 	public function &getObjEnveloppe() {
 		return $this->obj_enveloppe;
@@ -475,7 +672,10 @@ class Message extends User {
 		$help = Core\enveloppe::help ();
 		$help = array_merge ( $help, parent::help () );
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "Message :";
+		$help [__CLASS__] ["text"] [] .= "Message O365 :";
+		$help [__CLASS__] ["text"] [] .= "	--envoi_par_mail Active l'envoi par mail sur Office365";
+		$help [__CLASS__] ["text"] [] .= "	--o365_serveur_mail Nom du serveur Outlook dans les fichiers de conf";
+		$help [__CLASS__] ["text"] [] .= "	--o365_user_message 'Damien Vargas' Nom de l'utilisateur o365 autorise a envoyer un email";
 		return $help;
 	}
 }

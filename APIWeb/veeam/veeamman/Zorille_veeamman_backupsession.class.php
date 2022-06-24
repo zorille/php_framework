@@ -30,7 +30,7 @@ class backupsession extends ci {
 	 * @var \SimpleXMLElement
 	 */
 	private $liste_tasks = null;
-	
+
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
@@ -47,15 +47,15 @@ class backupsession extends ci {
 			&$webservice_rest,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
-				Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
-				$objet = new backupsession ( $sort_en_erreur, $entete );
-				$objet->_initialise ( array (
-						"options" => $liste_option,
-						"wsclient" => $webservice_rest
-				) );
-				return $objet;
+		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
+		$objet = new backupsession ( $sort_en_erreur, $entete );
+		$objet->_initialise ( array (
+				"options" => $liste_option,
+				"wsclient" => $webservice_rest
+		) );
+		return $objet;
 	}
-	
+
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
@@ -63,10 +63,10 @@ class backupsession extends ci {
 	 */
 	public function &_initialise(
 			$liste_class) {
-				parent::_initialise ( $liste_class );
-				return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
+		parent::_initialise ( $liste_class );
+		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
-	
+
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
@@ -79,10 +79,10 @@ class backupsession extends ci {
 	public function __construct(
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
-				// Gestion de backupsession
-				parent::__construct ( $sort_en_erreur, $entete );
+		// Gestion de backupsession
+		parent::__construct ( $sort_en_erreur, $entete );
 	}
-	
+
 	/**
 	 * Permet de recuperer les donnees d'un backupsession dans Veeam
 	 * @return backupsession
@@ -90,13 +90,13 @@ class backupsession extends ci {
 	 */
 	public function recupere_donnees_backupsession() {
 		$backupsession_data = $this->getObjetVeeamWsclientRest ()
-		->BackupSessions ( $this->getId (), array (
+			->BackupSessions ( $this->getId (), array (
 				"format" => "Entity"
 		) );
 		$this->onDebug ( $backupsession_data, 2 );
 		return $this->setDonnees ( $backupsession_data );
 	}
-	
+
 	/**
 	 * Permet de recuperer la liste des objets d'un backupsession dans Veeam
 	 * @return backupsession
@@ -104,13 +104,13 @@ class backupsession extends ci {
 	 */
 	public function recupere_liste_tasks_du_backupsession() {
 		$backupsession_Tasks = $this->getObjetVeeamWsclientRest ()
-		->BackupTaskSessionReferenceList ( $this->getId () );
+			->listBackupTaskSessionParBackup ( $this->getId () );
 		if (isset ( $backupsession_Tasks->Ref )) {
 			return $this->setListeTasks ( $backupsession_Tasks );
 		}
 		return $this->onError ( "Pas de reference dans le backupsession" );
 	}
-	
+
 	/**
 	 * Recupere l'id du backupsession et l'ajoute à l'objet
 	 * @return backupsession
@@ -118,12 +118,12 @@ class backupsession extends ci {
 	 */
 	public function recupere_id_du_backupsession(
 			$backupsession) {
-				if (preg_match ( '/:BackupJobSession:(.*)/', $backupsession->attributes () ['UID'], $resultat ) === false) {
-					return $this->onError ( "Numero de BackupSession introuvable", $resultat );
-				}
-				return $this->setId ( $resultat [1] );
+		if (preg_match ( '/:BackupJobSession:(.*)/', $backupsession->attributes () ['UID'], $resultat ) === false) {
+			return $this->onError ( "Numero de BackupSession introuvable", $resultat );
+		}
+		return $this->setId ( $resultat [1] );
 	}
-	
+
 	/**
 	 * Recupere le nom du backupsession
 	 * @return string
@@ -131,9 +131,9 @@ class backupsession extends ci {
 	 */
 	public function recupere_nom_du_backupsession(
 			$backupsession) {
-				return $backupsession->attributes () ['Name'];
+		return $backupsession->attributes () ['Name'];
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -143,9 +143,9 @@ class backupsession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->JobName;
+		return ( string ) $this->getDonnees ()->JobName;
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -155,9 +155,21 @@ class backupsession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->Result;
+		return ( string ) $this->getDonnees ()->Result;
 	}
-	
+
+	/**
+	 * Extrait le nom du job dans le backup session
+	 * @return string renvoie le nom du job
+	 * @throws Exception
+	 */
+	public function recupere_progress() {
+		if (! $this->valide_donnees_existe ()) {
+			return $this->onError ( "Pas de donnees de backup session" );
+		}
+		return ( string ) $this->getDonnees ()->Progress;
+	}
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie true ou false
@@ -167,9 +179,9 @@ class backupsession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->IsRetry;
+		return ( string ) $this->getDonnees ()->IsRetry;
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -179,9 +191,9 @@ class backupsession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->CreationTimeUTC;
+		return ( string ) $this->getDonnees ()->CreationTimeUTC;
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -191,9 +203,9 @@ class backupsession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->EndTimeUTC;
+		return ( string ) $this->getDonnees ()->EndTimeUTC;
 	}
-	
+
 	/**
 	 * Permet de trouver la liste des backupsession dans veeamman et enregistre les donnees des backupsession dans l'objet
 	 * @return backupsession
@@ -202,7 +214,7 @@ class backupsession extends ci {
 	public function retrouve_backupsession() {
 		$this->onDebug ( __METHOD__, 1 );
 		$backupsession = $this->getObjetVeeamWsclientRest ()
-		->listBackupSessions ();
+			->listBackupSessions ();
 		if (! isset ( $backupsession->Ref )) {
 			// Le backupsession n'existe pas donc on emet une exception
 			return $this->onError ( "Probleme avec la recuperation des backupsession." );
@@ -210,7 +222,7 @@ class backupsession extends ci {
 		$this->onDebug ( $backupsession, 2 );
 		return $this->setListeBackupSession ( $backupsession );
 	}
-	
+
 	/**
 	 * Permet de trouver la liste des backupsession par JobId dans veeamman et enregistre les donnees des backupsession dans l'objet
 	 * @return backupsession
@@ -218,17 +230,17 @@ class backupsession extends ci {
 	 */
 	public function retrouve_backupsession_par_jobid(
 			$jobid) {
-				$this->onDebug ( __METHOD__, 1 );
-				$backupsession = $this->getObjetVeeamWsclientRest ()
-				->listBackupSessionsParJob ( $jobid );
-				if (! isset ( $backupsession->Ref )) {
-					// Le backupsession n'existe pas donc on emet une exception
-					return $this->onError ( "Probleme avec la recuperation des backupsession." );
-				}
-				$this->onDebug ( $backupsession, 2 );
-				return $this->setListeBackupSession ( $backupsession );
+		$this->onDebug ( __METHOD__, 1 );
+		$backupsession = $this->getObjetVeeamWsclientRest ()
+			->listBackupSessionsParJob ( $jobid );
+		if (! isset ( $backupsession->Ref )) {
+			// Le backupsession n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la recuperation des backupsession." );
+		}
+		$this->onDebug ( $backupsession, 2 );
+		return $this->setListeBackupSession ( $backupsession );
 	}
-	
+
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
@@ -238,32 +250,32 @@ class backupsession extends ci {
 	public function getListeBackupSession() {
 		return $this->liste_backupsession;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeBackupSession(
 			$liste_backupsession) {
-				$this->liste_backupsession = $liste_backupsession;
-				return $this;
+		$this->liste_backupsession = $liste_backupsession;
+		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function getListeTasks() {
 		return $this->liste_tasks;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeTasks(
 			$liste_tasks) {
-				$this->liste_tasks = $liste_tasks;
-				return $this;
+		$this->liste_tasks = $liste_tasks;
+		return $this;
 	}
-	
+
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */

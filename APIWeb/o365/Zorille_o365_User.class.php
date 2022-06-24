@@ -89,7 +89,7 @@ class User extends Item {
 	/**
 	 * Retrouve l'ID d'un utilisateur dans le champ displayname
 	 * @param string $nom
-	 * @return \Zorille\o365\User|false
+	 * @return $this|false
 	 */
 	public function retrouve_userid_par_nom(
 			$nom) {
@@ -136,7 +136,7 @@ class User extends Item {
 	}
 
 	/**
-	 * ******************************* DRIVE URI ******************************
+	 * ******************************* USER URI ******************************
 	 */
 	public function users_list_uri() {
 		return '/users';
@@ -183,6 +183,30 @@ class User extends Item {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->getObjetO365Wsclient ()
 			->getMethod ( $this->user_id_uri () . '/licenseDetails', $params );
+	}
+	
+	/**
+	 * Recuperer la liste de rôles O365
+	 * @param array $params
+	 * @return \Zorille\o365\User|false
+	 */
+	public function user_memberOf(
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				return $this->getObjetO365Wsclient ()
+				->getMethod ( $this->user_id_uri () . '/memberOf', $params );
+	}
+	
+	/**
+	 * Recuperer la liste des sites suivis (etoile) sur O365
+	 * @param array $params
+	 * @return \Zorille\o365\User|false
+	 */
+	public function user_followedSites(
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				return $this->getObjetO365Wsclient ()
+				->getMethod ( $this->user_id_uri () . '/followedSites', $params );
 	}
 
 	/**

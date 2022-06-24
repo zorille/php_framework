@@ -30,6 +30,20 @@ class replicasession extends ci {
 	 * @var \SimpleXMLElement
 	 */
 	private $liste_tasks = null;
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $id_task = "";
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $task_donnees = "";
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -119,7 +133,7 @@ class replicasession extends ci {
 			$replicasession) {
 		return $replicasession->attributes () ['Name'];
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -129,9 +143,9 @@ class replicasession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->JobName;
+		return ( string ) $this->getDonnees ()->JobName;
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -141,9 +155,21 @@ class replicasession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->Result;
+		return ( string ) $this->getDonnees ()->Result;
 	}
-	
+
+	/**
+	 * Extrait le nom du job dans le backup session
+	 * @return string renvoie le nom du job
+	 * @throws Exception
+	 */
+	public function recupere_progress() {
+		if (! $this->valide_donnees_existe ()) {
+			return $this->onError ( "Pas de donnees de backup session" );
+		}
+		return ( string ) $this->getDonnees ()->Progress;
+	}
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie true ou false
@@ -153,9 +179,9 @@ class replicasession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->IsRetry;
+		return ( string ) $this->getDonnees ()->IsRetry;
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -165,9 +191,9 @@ class replicasession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->CreationTimeUTC;
+		return ( string ) $this->getDonnees ()->CreationTimeUTC;
 	}
-	
+
 	/**
 	 * Extrait le nom du job dans le backup session
 	 * @return string renvoie le nom du job
@@ -177,7 +203,7 @@ class replicasession extends ci {
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
-		return (string) $this->getDonnees ()->EndTimeUTC;
+		return ( string ) $this->getDonnees ()->EndTimeUTC;
 	}
 
 	/**
@@ -189,7 +215,7 @@ class replicasession extends ci {
 		$this->onDebug ( __METHOD__, 1 );
 		$replicasession = $this->getObjetVeeamWsclientRest ()
 			->listReplicaSessions ();
-		if (! isset ( $replicasession->Ref )) {
+		if (! empty ( ( array ) $replicasession ) && ! isset ( $replicasession->Ref )) {
 			// Le replicasession n'existe pas donc on emet une exception
 			return $this->onError ( "Probleme avec la recuperation des replicasession." );
 		}
@@ -207,12 +233,86 @@ class replicasession extends ci {
 		$this->onDebug ( __METHOD__, 1 );
 		$replicasession = $this->getObjetVeeamWsclientRest ()
 			->listReplicaSessionsParJob ( $jobid );
-		if (! isset ( $replicasession->Ref )) {
+		if (! empty ( ( array ) $replicasession ) && ! isset ( $replicasession->Ref )) {
 			// Le replicasession n'existe pas donc on emet une exception
 			return $this->onError ( "Probleme avec la recuperation des replicasession." );
 		}
 		$this->onDebug ( $replicasession, 2 );
 		return $this->setListeReplicaSession ( $replicasession );
+	}
+
+	/**
+	 * ***************************** Tasks *******************************
+	 */
+	/**
+	 * Permet de trouver la liste des replicasession dans veeamman et enregistre les donnees des replicasession dans l'objet
+	 * @return replicasession
+	 * @throws Exception
+	 */
+	public function retrouve_replicatasksession() {
+		$this->onDebug ( __METHOD__, 1 );
+		$replicatasksession = $this->getObjetVeeamWsclientRest ()
+			->listReplicaTasksSessions ( $this->recupere_id_du_replicasession ( $this->getDonnees () )
+			->getId () );
+			if (! empty ( ( array ) $replicatasksession ) && ! isset ( $replicatasksession->Ref )) {
+			// Le replicasession n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la recuperation des replicatasksession." );
+		}
+		$this->onDebug ( $replicatasksession, 2 );
+		return $this->setListeTasks ( $replicatasksession );
+	}
+
+	/**
+	 * Recupere l'id du replicasession et l'ajoute à l'objet
+	 * @return replicasession
+	 * @throws Exception
+	 */
+	public function recupere_id_du_replicatasksession(
+			$replicatasksession) {
+		if (preg_match ( '/:ReplicaTaskSession:(.*)/', $replicatasksession->attributes () ['UID'], $resultat ) === false) {
+			return $this->onError ( "Numero de ReplicaTaskSession introuvable", $resultat );
+		}
+		return $this->setIdTask ( $resultat [1] );
+	}
+
+	/**
+	 * Recupere le nom du replicasession
+	 * @return string
+	 * @throws Exception
+	 */
+	public function recupere_nom_du_replicatasksession(
+			$replicatasksession) {
+		return $replicatasksession->attributes () ['Name'];
+	}
+
+	/**
+	 * Recupere le nom du replicasession
+	 * @return string
+	 * @throws Exception
+	 */
+	public function recupere_VmDisplayName_du_replicatasksession(
+			$replicatasksession) {
+		return $replicatasksession->attributes () ['VmDisplayName'];
+	}
+
+	/**
+	 * Permet de trouver la liste des replicasession dans veeamman et enregistre les donnees des replicasession dans l'objet
+	 * @return replicasession
+	 * @throws Exception
+	 */
+	public function retrouve_replicatasksessiondata() {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( $this->getIdTask (), 2 );
+		$replicatasksession = $this->getObjetVeeamWsclientRest ()
+			->ReplicaTaskSession ( $this->getIdTask (), array (
+				'format' => 'Entity'
+		) );
+		$this->onDebug ( $replicatasksession, 2 );
+		if (! isset ( $replicatasksession->Links )) {
+			// Le replicasession n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la recuperation des replicatasksessiondata." );
+		}
+		return $this->setTaskDonnees ( $replicatasksession );
 	}
 
 	/**
@@ -247,6 +347,38 @@ class replicasession extends ci {
 	public function &setListeTasks(
 			$liste_tasks) {
 		$this->liste_tasks = $liste_tasks;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getIdTask() {
+		return $this->id_task;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setIdTask(
+			$id_task) {
+		$this->id_task = $id_task;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getTaskDonnees() {
+		return $this->task_donnees;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setTaskDonnees(
+			$task_donnees) {
+		$this->task_donnees = $task_donnees;
 		return $this;
 	}
 

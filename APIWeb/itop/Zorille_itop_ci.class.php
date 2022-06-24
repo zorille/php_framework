@@ -130,7 +130,9 @@ class ci extends Core\abstract_log {
 			if (! $liste_fields == "") {
 				$liste_fields .= " AND ";
 			}
-			if (preg_match ( '/( IN | LIKE )/', $valeur )) {
+			if($champ=='org_id' && is_array($valeur)){
+				$liste_fields .= $champ. " IN (SELECT Organization WHERE Organization.name='" . str_replace ( "'", "\'", $valeur['name'] ) . "')";
+			} else if (preg_match ( '/( IN | LIKE )/', $valeur )) {
 				$liste_fields .= $champ . $valeur;
 			} else {
 				$liste_fields .= $champ . "='" . str_replace ( "'", "\'", $valeur ) . "'";
@@ -310,7 +312,7 @@ class ci extends Core\abstract_log {
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
 				case 'org_name' :
-				case 'organisation_name' :
+				case 'organization_name' :
 					$params ['org_id'] = $this->getObjetItopOrganization ()
 						->prepare_params_obligatoire ( array (
 							'name' => $valeur

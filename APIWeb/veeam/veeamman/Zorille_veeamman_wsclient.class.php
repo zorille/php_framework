@@ -283,10 +283,10 @@ class wsclient extends Core\wsclient {
 				return $this->setAuth ( trim ( $retour [1] ) )
 					->setSession ( ( string ) $resultat->SessionId );
 			}
-		}elseif (preg_match ( '/x-restsvcsessionid: (.*)/', $this->getHeaderData (), $retour ) === 1) {
+		} elseif (preg_match ( '/x-restsvcsessionid: (.*)/', $this->getHeaderData (), $retour ) === 1) {
 			if (isset ( $resultat->SessionId ) && ! empty ( $resultat->SessionId )) {
 				return $this->setAuth ( trim ( $retour [1] ) )
-				->setSession ( ( string ) $resultat->SessionId );
+					->setSession ( ( string ) $resultat->SessionId );
 			}
 		}
 		return $this->onError ( "Erreur durant l'autentification", $resultat );
@@ -407,7 +407,7 @@ class wsclient extends Core\wsclient {
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function BackupTaskSessionReferenceList(
+	public function listBackupTaskSessionParBackup(
 			$backupSessionsid,
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
@@ -620,7 +620,7 @@ class wsclient extends Core\wsclient {
 		$resultat = $this->getMethod ( 'reports/summary/repository', $params );
 		return $resultat;
 	}
-	
+
 	/**
 	 * List of Backups servers connected
 	 * @codeCoverageIgnore
@@ -629,11 +629,11 @@ class wsclient extends Core\wsclient {
 	 */
 	public function listReplicaSessions(
 			$params = array ()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$resultat = $this->getMethod ( 'replicaSessions', $params );
-				return $resultat;
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'replicaSessions', $params );
+		return $resultat;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
@@ -642,11 +642,11 @@ class wsclient extends Core\wsclient {
 	public function ReplicaSessions(
 			$ReplicaSessionsId,
 			$params = array ()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$resultat = $this->getMethod ( 'replicaSessions/' . $ReplicaSessionsId, $params );
-				return $resultat;
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'replicaSessions/' . $ReplicaSessionsId, $params );
+		return $resultat;
 	}
-	
+
 	/**
 	 * Resource: auth/login Method: Post Autentification
 	 *
@@ -655,12 +655,13 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listReplicaTasksSessions(
+			$replicaSessionId,
 			$params = array ()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$resultat = $this->getMethod ( 'replicaTaskSessions', $params );
-				return $resultat;
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'replicaSessions/' . $replicaSessionId . '/replicaTaskSessions', $params );
+		return $resultat;
 	}
-	
+
 	/**
 	 * Resource: auth/login Method: Post Autentification
 	 *
@@ -672,11 +673,40 @@ class wsclient extends Core\wsclient {
 	public function ReplicaTaskSession(
 			$replicaTaskSessionsid,
 			$params = array ()) {
-				$this->onDebug ( __METHOD__, 1 );
-				$resultat = $this->getMethod ( 'replicaTaskSessions/' . $replicaTaskSessionsid, $params );
-				return $resultat;
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'replicaTaskSessions/' . $replicaTaskSessionsid, $params );
+		return $resultat;
 	}
-	
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listCatalogVms(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'catalog/vms', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param string $backupTaskSessionsid numero de la task
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function CatalogVm(
+			$vmname,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$resultat = $this->getMethod ( 'catalog/vms/' . $vmname, $params );
+		return $resultat;
+	}
 
 	/**
 	 * @codeCoverageIgnore

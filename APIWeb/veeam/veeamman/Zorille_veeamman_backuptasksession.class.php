@@ -90,7 +90,7 @@ class backuptasksession extends ci {
 	 */
 	public function recupere_donnees_backuptasksession() {
 		$backuptasksession_data = $this->getObjetVeeamWsclientRest ()
-			->BackupTaskSession( $this->getId (), array (
+			->BackupTaskSession ( $this->getId (), array (
 				"format" => "Entity"
 		) );
 		$this->onDebug ( $backuptasksession_data, 2 );
@@ -121,6 +121,16 @@ class backuptasksession extends ci {
 	}
 
 	/**
+	 * Recupere le nom du backupsession
+	 * @return string
+	 * @throws Exception
+	 */
+	public function recupere_VmDisplayName_du_backuptasksession(
+			$backuptasksession) {
+		return $backuptasksession->attributes () ['VmDisplayName'];
+	}
+
+	/**
 	 * Permet de trouver la liste des backuptasksession dans veeamman et enregistre les donnees des backuptasksession dans l'objet
 	 * @return backuptasksession
 	 * @throws Exception
@@ -138,9 +148,26 @@ class backuptasksession extends ci {
 	}
 
 	/**
+	 * Permet de trouver la liste des backuptasksession dans veeamman et enregistre les donnees des backuptasksession dans l'objet
+	 * @return backuptasksession
+	 * @throws Exception
+	 */
+	public function retrouve_backuptasksessionparbackup(
+			$backupSessionId) {
+		$this->onDebug ( __METHOD__, 1 );
+		$backuptasksession = $this->getObjetVeeamWsclientRest ()
+			->listBackupTaskSessionParBackup ( $backupSessionId );
+		if (! empty ( (array) $backuptasksession ) && ! isset ( $backuptasksession->Ref )) {
+			// Le backuptasksession n'existe pas donc on emet une exception
+			return $this->onError ( "Probleme avec la recuperation des backuptasksessionparbackup." );
+		}
+		$this->onDebug ( $backuptasksession, 2 );
+		return $this->setListeTasks ( $backuptasksession );
+	}
+
+	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-
 	/**
 	 * @codeCoverageIgnore
 	 */

@@ -41,6 +41,18 @@ class wsclient extends Core\wsclient {
 	 * @var array.
 	 */
 	private $defaultParams = array ();
+	/**
+	 * var privee
+	 * @access private
+	 * @var boolean.
+	 */
+	private $connected = false;
+	/**
+	 * var privee
+	 * @access private
+	 * @var string.
+	 */
+	private $type_retour = "json";
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -130,7 +142,7 @@ class wsclient extends Core\wsclient {
 		$this->getGestionConnexionUrl ()
 			->retrouve_connexion_params ( $liste_data_o365 )
 			->prepare_prepend_url ( $liste_data_o365 ["url"] );
-		return $this;
+		return $this->setConnected ( true );
 	}
 
 	/**
@@ -170,6 +182,7 @@ class wsclient extends Core\wsclient {
 			$retour_wsclient) {
 		$this->onDebug ( __METHOD__, 1 );
 		if (isset ( $retour_wsclient->error )) {
+			$this->onDebug ( "Error Detectee", 2 );
 			$this->onDebug ( $retour_wsclient, 2 );
 			if (is_object ( $retour_wsclient->error ) && isset ( $retour_wsclient->error->message )) {
 				return $this->onError ( $retour_wsclient->error->message, $retour_wsclient->error->code, 1 );
@@ -211,8 +224,13 @@ class wsclient extends Core\wsclient {
 		} else {
 			$retour_wsclient = $this->prepare_html_entete ()
 				->envoi_requete ();
-			$retour = $this->traite_retour_json ( $retour_wsclient );
-			$this->valide_retour ( $retour );
+			if ($this->getTypeRetour () == "json") {
+				$retour = $this->traite_retour_json ( $retour_wsclient );
+				$this->valide_retour ( $retour );
+			} else {
+				//En cas de retour MIME pour les mail par exemple
+				$retour=$retour_wsclient;
+			}
 			$this->onDebug ( $retour, 2 );
 			return $retour;
 		}
@@ -461,6 +479,40 @@ class wsclient extends Core\wsclient {
 			$this->defaultParams = $defaultParams;
 		else
 			throw new Exception ( 'The argument defaultParams on setDefaultParams() has to be an array.' );
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public function getConnected() {
+		return $this->connected;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setConnected(
+			$connected) {
+		$this->connected = $connected;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public function getTypeRetour() {
+		return $this->type_retour;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setTypeRetour(
+			$type_retour) {
+		$this->type_retour = $type_retour;
 		return $this;
 	}
 

@@ -127,6 +127,10 @@ class Drive extends Item {
 	public function drives_children_uri() {
 		return $this->drive_item_uri () . '/children';
 	}
+	
+	public function drives_permissions_uri() {
+		return $this->drive_item_uri () . '/permissions';
+	}
 
 	public function drives_search_uri(
 			$search) {
@@ -142,6 +146,22 @@ class Drive extends Item {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->getObjetO365Wsclient ()
 			->getMethod ( $this->list_drives_uri (), $params );
+	}
+	
+	// Recupere la liste des items du site
+	public function get_drive_permissions(
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				return $this->getObjetO365Wsclient ()
+				->getMethod ( $this->drives_permissions_uri (), $params );
+	}
+	
+	// Recupere la liste des items du site
+	public function get_details_permission($permissionId,
+			$params = array ()) {
+				$this->onDebug ( __METHOD__, 1 );
+				return $this->getObjetO365Wsclient ()
+				->getMethod ( $this->drives_permissions_uri ()."/".$permissionId, $params );
 	}
 
 	/**

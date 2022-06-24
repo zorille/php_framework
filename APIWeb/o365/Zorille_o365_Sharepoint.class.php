@@ -196,6 +196,17 @@ class Sharepoint extends Drive {
 			->getMethod ( '/sites/' . $this->getSiteId () . "/lists", $params );
 	}
 
+	// Recupere la liste des items du site
+	public function sharepoints_get_site_permissions(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		if ($this->valide_siteid () == false) {
+			return $this;
+		}
+		return $this->getObjetO365Wsclient ()
+		->getMethod ( '/sites/' . $this->getSiteId () . "/permissions", $params );
+	}
+
 	// Gestion des drives (sous composant de chaque sharepoint)
 	public function sharepoints_list_drives(
 			$params = array ()) {
