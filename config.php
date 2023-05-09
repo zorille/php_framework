@@ -211,6 +211,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/doliba
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/pipedrive" );
 /**
+ * Inclue Les class d'appel a Pipedrive
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/coservit" );
+/**
  * Inclue Les class d'appel a Splunk
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/splunk" );

@@ -7,6 +7,7 @@
  */
 namespace Zorille\veeamspc;
 
+use Aws\S3\Enum\StorageClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
@@ -41,6 +42,20 @@ class wsclient extends Core\wsclient {
 	 * @var string.
 	 */
 	private $refresh_token = '';
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var \SimpleXMLElement
+	 */
+	private $current_page_info = null;
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var boolean
+	 */
+	private $last_page = false;
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -197,12 +212,63 @@ class wsclient extends Core\wsclient {
 			$return_array = true) {
 		$this->onDebug ( __METHOD__, 1 );
 		$tableau_resultat = json_decode ( $retour_json, $return_array );
-		if ($tableau_resultat == null) {
+		if ($tableau_resultat === null) {
 			return $this->onError ( "Message dans un format inconnu", $retour_json, 1 );
 		} else if (isset ( $tableau_resultat->status ) && $tableau_resultat->status == 0) {
 			return $this->onError ( "Erreur dans le message de retour", $tableau_resultat, 1 );
 		}
 		return $tableau_resultat;
+	}
+
+	public function reset_pages() {
+		$this->setDernierePage ( false )
+			->setPageActuelle ( null );
+	}
+
+	/**
+	 * Recupere la page actuelle a partir de la requete Si il n'y a pas de PagingInfo, la valeur est NULL
+	 * @param object $donnees stdClass renvoye par json_decode
+	 * @return $this
+	 * @throws Exception
+	 */
+	public function recupere_page_info(
+			&$donnees) {
+		if (isset ( $donnees->meta )) {
+			return $this->setPageActuelle ( $donnees->meta->pagingInfo );
+		}
+		return $this->setPageActuelle ( null );
+	}
+
+	/**
+	 * Valide que c'est la dernière page a partir de la Page Actuelle. Si la Page Actuelle est a NULL, il n'y a pas de page donc c'est la dernière par defaut "total": 4, "count": 4, "offset": 0
+	 * @return $this
+	 * @throws Exception
+	 */
+	public function valide_derniere_page() {
+		if (! empty ( $this->getPageActuelle () ) && ( int ) $this->getPageActuelle ()->total <= (( int ) $this->getPageActuelle ()->offset + ( int ) $this->getPageActuelle ()->count)) {
+			return $this->setDernierePage ( true );
+		}
+		return $this->setDernierePage ( false );
+	}
+
+	/**
+	 * Permet de recupere la page suivante d'une query. Recupere la premiere page si aucune page actuelle n'est definit
+	 * @return boolean true si c'est recupere, false si on a atteint la derniere page
+	 * @throws Exception
+	 */
+	public function page_suivante() {
+		$this->onDebug ( __METHOD__, 1 );
+		if (! $this->getDernierePage ()) {
+			$page = $this->getPageActuelle ();
+			if (! is_null ( $page )) {
+				$full_params = array_merge ( $this->getParams (), array (
+						'offset' => $page->offset + $page->count
+				) );
+				$this->setParams ( $full_params );
+			}
+			return $this->prepare_requete ();
+		}
+		return null;
 	}
 
 	/**
@@ -223,6 +289,8 @@ class wsclient extends Core\wsclient {
 			$this->valide_retour ( $retour_wsclient );
 			$retour = $this->traite_retour_json ( $retour_wsclient, false );
 			$this->onDebug ( $retour, 2 );
+			$this->recupere_page_info ( $retour )
+				->valide_derniere_page ();
 			return $retour;
 		}
 		return "";
@@ -241,13 +309,12 @@ class wsclient extends Core\wsclient {
 	public function userLogin(
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		/* username string Nullable password string <password> rememberMe boolean Nullable Default: false asCurrentUser boolean Nullable Default: false grant_type string Nullable Default: "password" refresh_token string Nullable */
-		$resultat = $this->postMethod ( 'token', $params );
+		// $this->onDebug ( $params, 1 );
+		$resultat = $this->postMethod ( '/token', $params );
 		if (isset ( $resultat->access_token )) {
 			return $this->setAuth ( $resultat->access_token )
 				->setRefreshToken ( $resultat->refresh_token );
 		}
-		/* { "access_token": "eyJhJGciOiJIUzI1NiIsImtpZCI6IldlYkFwaVNlY3VyaXR5S2V5IiwidHlwIjoiSldUIn0.eyJ1bmlxdWVfbmFtZSI6Ik5cXEFkbWluaXN0cmF0b3IiLCJyb2xlIjoiQWRtaW4iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9zaWQiOiJTLTEtNS0yMS05MDkwMzQ2MzItMjUzODE0NDM1NS0zNjYwNTU1NjE5LTUwMCIsIkFjY2Vzc1Rva2VuSWQiOiI4MGJhNWI2ZS1hMzAyLTRlMTItYTM4NC02M2M5MjlmY2I0YWEiLCJVc2VySWQiOiIyIiwibmJmIjoxNjEwNjU3OTUyLCJleHAiOjE2MTA2NTg4NTIsImlhdCI6MTYxMDY1Nzk1Mn0.vGt0JwmN7zNCsLS-JeDKoZzkEyP6hVDLoRs5sFtL4Ko", "refresh_token": "d65703e0ef294425badecd9b6b5ac963", "token_type": "Bearer", "expires_in": 899, "user": "onesrv\\administrator", "user_role": "Unknown" } */
 		return $this->onError ( "Erreur durant l'autentification", $resultat );
 	}
 
@@ -261,7 +328,7 @@ class wsclient extends Core\wsclient {
 	final public function userLogout(
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->postMethod ( '/v2/accounts/logout', array () );
+		// $this->postMethod ( '/v2/accounts/logout', array () );
 		return $this;
 	}
 
@@ -348,7 +415,8 @@ class wsclient extends Core\wsclient {
 	public function listJobs(
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v2/jobs', $params );
+		// $resultat = $this->getMethod ( 'v2/jobs', $params );
+		$resultat = $this->getMethod ( '/infrastructure/backupServers/jobs', $params );
 		return $resultat;
 	}
 
@@ -363,7 +431,8 @@ class wsclient extends Core\wsclient {
 			$jobid,
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v2/jobs/' . $jobid, $params );
+		// $resultat = $this->getMethod ( 'v2/jobs/' . $jobid, $params );
+		$resultat = $this->getMethod ( '/infrastructure/backupServers/jobs', $params );
 		return $resultat;
 	}
 
@@ -382,31 +451,65 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * Resource: auth/login Method: Post Autentification
+	 * Liste les organisation de type companies uniquement
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function listTenants(
+	public function listCompanies(
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v2/tenants', $params );
+		// $resultat = $this->getMethod ( 'v2/tenants', $params );
+		$resultat = $this->getMethod ( '/organizations/companies', $params );
 		return $resultat;
 	}
 
 	/**
-	 * Resource: auth/login Method: Post Autentification
+	 * Liste les sites de chaque companie
 	 *
 	 * @codeCoverageIgnore
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function listTenantBackupResources(
-			$tenantid,
+	public function listSitesByCompanie(
+			$org_id,
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v2/tenants/' . $tenantid . '/backupResources', $params );
+		// $resultat = $this->getMethod ( 'v2/tenants', $params );
+		$resultat = $this->getMethod ( '/organizations/companies/' . $org_id . '/sites', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Liste les ressources alloues a un site d'une companie
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listCompanieSiteAllocatedResources(
+			$org_id,
+			$site_id,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		// $resultat = $this->getMethod ( 'v2/tenants/' . $tenantid . '/backupResources', $params );
+		$resultat = $this->getMethod ( '/organizations/companies/' . $org_id . '/sites/' . $site_id . '/backupResources', $params );
+		return $resultat;
+	}
+
+	/**
+	 * Liste les ressources utilisee par site pour toutes les companies
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	public function listCompaniesUsedResources(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		// $resultat = $this->getMethod ( 'v2/tenants/' . $tenantid . '/backupResources', $params );
+		$resultat = $this->getMethod ( '/organizations/companies/sites/backupResources/usage', $params );
 		return $resultat;
 	}
 
@@ -422,13 +525,17 @@ class wsclient extends Core\wsclient {
 	 */
 	public function getMethod(
 			$resource,
-			$params = array ()) {
+			$params = array (),
+			$reset_pages = false) {
 		$this->onDebug ( __METHOD__, 1 );
+		if ($reset_pages) {
+			$this->reset_pages ();
+		}
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "GET" )
 			->setParams ( $full_params );
-		return $this->prepare_requete ();
+		return $this->page_suivante ();
 	}
 
 	/**
@@ -440,13 +547,17 @@ class wsclient extends Core\wsclient {
 	 */
 	public function postMethod(
 			$resource,
-			$params = array ()) {
+			$params = array (),
+			$reset_pages = false) {
 		$this->onDebug ( __METHOD__, 1 );
+		if ($reset_pages) {
+			$this->reset_pages ();
+		}
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "POST" )
 			->setPostDatas ( http_build_query ( $full_params ) );
-		return $this->prepare_requete ();
+		return $this->page_suivante ();
 	}
 
 	/**
@@ -549,6 +660,38 @@ class wsclient extends Core\wsclient {
 			$this->defaultParams = $defaultParams;
 		else
 			return $this->onError ( 'The argument defaultParams on setDefaultParams() has to be an array.' );
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getPageActuelle() {
+		return $this->current_page_info;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setPageActuelle(
+			$current_page_info) {
+		$this->current_page_info = $current_page_info;
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getDernierePage() {
+		return $this->last_page;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setDernierePage(
+			$last_page) {
+		$this->last_page = $last_page;
 		return $this;
 	}
 

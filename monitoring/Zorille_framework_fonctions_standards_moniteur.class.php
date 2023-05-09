@@ -116,13 +116,13 @@ class fonctions_standards_moniteur extends abstract_log {
 					$this->onDebug ( "On a un warning.", 2 );
 					$this->getMoniteur ()
 						->yellow ()
-						->ecrit ( $ligne . "<br/>\n" );
+						->ecrit ( $ligne . "<br/>" );
 				}
 			} elseif (strpos ( $ligne, "[Error]" ) === 0) {
 				$this->onDebug ( "On a une erreur.", 2 );
 				$this->getMoniteur ()
 					->red ()
-					->ecrit ( $ligne . "<br/>\n" );
+					->ecrit ( $ligne . "<br/>" );
 			} elseif (strpos ( $ligne, "[Exit]" ) === 0) {
 				// si on traite le code Exit
 				$code_retour = trim ( substr ( $ligne, strlen ( "[Exit]" ) ) );
@@ -134,7 +134,7 @@ class fonctions_standards_moniteur extends abstract_log {
 						break;
 					default :
 						$this->getMoniteur ()
-							->ecrit ( $message_false." ".$code_retour );
+							->ecrit ( $message_false . " " . $code_retour );
 				}
 				return true;
 			}
@@ -163,7 +163,7 @@ class fonctions_standards_moniteur extends abstract_log {
 			$fichier_en_cours->ouvrir ();
 		} catch ( Exception $e ) {
 			$this->getMoniteur ()
-				->ecrit ( "Le fichier : " . $fichier . " n'a pas pu &ecirc;tre ouvert\n" );
+				->ecrit ( "Le fichier : " . $fichier . " n'a pas pu &ecirc;tre ouvert<br/>" );
 			return false;
 		}
 		$ligne = $fichier_en_cours->lit_une_ligne ( $nb_caracteres, $fin_de_ligne );
@@ -201,7 +201,7 @@ class fonctions_standards_moniteur extends abstract_log {
 			$fichier_en_cours->ouvrir ();
 		} catch ( Exception $e ) {
 			$this->getMoniteur ()
-				->ecrit ( "Le fichier : " . $fichier . " n'a pas pu &ecirc;tre ouvert\n" );
+				->ecrit ( "Le fichier : " . $fichier . " n'a pas pu &ecirc;tre ouvert<br/>" );
 			return false;
 		}
 		$ligne = $fichier_en_cours->lit_une_ligne ( $nb_caracteres, $fin_de_ligne );
@@ -251,7 +251,8 @@ class fonctions_standards_moniteur extends abstract_log {
 	 */
 	public function check_processus(
 			$nom_processus,
-			$type = "linux") {
+			$type = "linux",
+			$processus_monitoring = "parser_log.php") {
 		if ($nom_processus == "no_process") {
 			return array (
 					"1"
@@ -265,14 +266,14 @@ class fonctions_standards_moniteur extends abstract_log {
 			// @codeCoverageIgnoreEnd
 			case "linux" :
 			default :
-				$cmd = "ps ax -eo pid,args | grep " . $nom_processus . "|grep -v grep |grep -v parser_log.php";
+				$cmd = "ps ax -eo pid,args | grep " . $nom_processus . "|grep -v grep |grep -v " . $processus_monitoring;
 		}
 		$liste_ps = fonctions_standards::applique_commande_systeme ( $cmd, "non" );
 		// Si il y en a un, on l'affiche
 		if (count ( $liste_ps ) > 1 && is_array ( $liste_ps )) {
 			for($i = 1; $i < count ( $liste_ps ); $i ++) {
 				$this->getMoniteur ()
-					->ecrit ( $liste_ps [$i] . "<br/>\n" );
+					->ecrit ( $liste_ps [$i] . "<br/>" );
 			}
 		}
 		$this->onDebug ( $liste_ps, 1 );
@@ -300,7 +301,7 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @param array $job
 	 * @param string $type_traitement
 	 */
-	/* public function valide_job(&$mongo, &$job, $type_traitement = "") { // On valide que le traitement est ok if ($type_traitement == "" || $job ["type"] == $type_traitement) { $entete = __CLASS__; $this->onDebug ( $entete . " est en etat " . $job ["etat"], 1 ); $validation = $mongo->valide_etat_traitement ( $job ); $this->onDebug ( "validation : " . $validation, 2 ); switch ($validation) { case 1 : // Job en erreur $this->getMoniteur () ->ecrit ( $entete . " est en erreur &agrave; la date : " . date ( "d-m-Y H:i:s", $job ["date_fin"]->sec ) . "\n", "red" ); return false; break; case 154 : // job en cours d'e traitement if ($this->getHoraire () ->setTimestampJour ( time () ) ->valideHeureFinGlobal ()) { $this->getMoniteur () ->ecrit ( $entete . " n'est pas termin&eacute; apr&eacute;s " . $this->getHoraire () ->getHoraireFinMax () . "\n" ); return false; } $this->getMoniteur () ->ecrit ( $entete . " est en cours.\n" ); break; case 155 : // job en cours d'attribution if ($this->getHoraire () ->setTimestampJour ( time () ) ->valideHeureFinGlobal ()) { $this->getMoniteur () ->ecrit ( $entete . " n'est pas attribu&eacute; par slurm apr&eacute;s " . $this->getHoraire () ->getHoraireFinMax () . "\n" ); return false; } $this->getMoniteur () ->ecrit ( $entete . " est distribution.\n" ); break; case 156 : // job est en warning $this->getMoniteur () ->ecrit ( $entete . " est en warning par slurm.\n" ); case 0 : default : // Tout est ok } } return true; } */
+	/* public function valide_job(&$mongo, &$job, $type_traitement = "") { // On valide que le traitement est ok if ($type_traitement == "" || $job ["type"] == $type_traitement) { $entete = __CLASS__; $this->onDebug ( $entete . " est en etat " . $job ["etat"], 1 ); $validation = $mongo->valide_etat_traitement ( $job ); $this->onDebug ( "validation : " . $validation, 2 ); switch ($validation) { case 1 : // Job en erreur $this->getMoniteur () ->ecrit ( $entete . " est en erreur &agrave; la date : " . date ( "d-m-Y H:i:s", $job ["date_fin"]->sec ) . "<br/>", "red" ); return false; break; case 154 : // job en cours d'e traitement if ($this->getHoraire () ->setTimestampJour ( time () ) ->valideHeureFinGlobal ()) { $this->getMoniteur () ->ecrit ( $entete . " n'est pas termin&eacute; apr&eacute;s " . $this->getHoraire () ->getHoraireFinMax () . "<br/>" ); return false; } $this->getMoniteur () ->ecrit ( $entete . " est en cours.<br/>" ); break; case 155 : // job en cours d'attribution if ($this->getHoraire () ->setTimestampJour ( time () ) ->valideHeureFinGlobal ()) { $this->getMoniteur () ->ecrit ( $entete . " n'est pas attribu&eacute; par slurm apr&eacute;s " . $this->getHoraire () ->getHoraireFinMax () . "<br/>" ); return false; } $this->getMoniteur () ->ecrit ( $entete . " est distribution.<br/>" ); break; case 156 : // job est en warning $this->getMoniteur () ->ecrit ( $entete . " est en warning par slurm.<br/>" ); case 0 : default : // Tout est ok } } return true; } */
 	/**
 	 * Retrouve le jobs dans la MongoDB.
 	 * @codeCoverageIgnore
@@ -308,7 +309,7 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @param dates $liste_dates
 	 * @param string $type_traitement
 	 */
-	/* public function retrouve_jobs_par_type(&$mongo, &$liste_dates, $type_traitement) { // /Si il y a des fichier et il n'y a pas de traitement a un horaire donnee, alors on alerte $resultat_runtime_slurm = $mongo->retrouve_liste_jobs ( $liste_dates->recupere_premier_jour () . " 00:00:00", $liste_dates->recupere_dernier_jour () . " 23:59:59", $type_traitement ); if ($resultat_runtime_slurm) { if ($resultat_runtime_slurm->count () === 0) { // On valide l'heure if ($this->getHoraire () ->activeAlarme ()) { $this->getMoniteur () ->ecrit ( "Il n'y a aucun traitements de type " . $type_traitement . " &agrave; " . $this->getHoraire () ->getHoraireDebutMax () . ".\n", "red" ); } else { $this->getMoniteur () ->ecrit ( "Il n'y a pas encore de " . $type_traitement . ".\n" ); } return false; } } return $resultat_runtime_slurm; } */
+	/* public function retrouve_jobs_par_type(&$mongo, &$liste_dates, $type_traitement) { // /Si il y a des fichier et il n'y a pas de traitement a un horaire donnee, alors on alerte $resultat_runtime_slurm = $mongo->retrouve_liste_jobs ( $liste_dates->recupere_premier_jour () . " 00:00:00", $liste_dates->recupere_dernier_jour () . " 23:59:59", $type_traitement ); if ($resultat_runtime_slurm) { if ($resultat_runtime_slurm->count () === 0) { // On valide l'heure if ($this->getHoraire () ->activeAlarme ()) { $this->getMoniteur () ->ecrit ( "Il n'y a aucun traitements de type " . $type_traitement . " &agrave; " . $this->getHoraire () ->getHoraireDebutMax () . ".<br/>", "red" ); } else { $this->getMoniteur () ->ecrit ( "Il n'y a pas encore de " . $type_traitement . ".<br/>" ); } return false; } } return $resultat_runtime_slurm; } */
 	/**
 	 * Valide l'etat d'un job pour chaque fichier dans la MongoDB.
 	 * @codeCoverageIgnore
@@ -316,7 +317,7 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @param array $resultat_fichiers
 	 * @param string $type_traitement
 	 */
-	/* public function valide_tous_les_fichiers(&$mongo, &$resultat_fichiers, $type_traitement) { $liste_job_connu = array (); $this->onDebug ( "Nombre de fichier a valider :" . $resultat_fichiers->count (), 1 ); foreach ( $resultat_fichiers as $fichier ) { if (isset ( $fichier ["nom"] )) { $nom = $fichier ["nom"]; } elseif (isset ( $fichier ["serial"] )) { $nom = $fichier ["serial"]; } else { $nom = 'unknow'; } if (isset ( $fichier ["jobs"] ) && is_array ( $fichier ["jobs"] )) { foreach ( $fichier ["jobs"] as $refjob ) { // On evite plusieurs fois le meme traitement if (isset ( $liste_job_connu [( string ) $refjob ['$id']] )) { continue; } $job = $mongo->getDb () ->getDBRef ( $refjob ); // Si le job correspond au type de traitement recherche $liste_job_connu [( string ) $refjob ['$id']] = $job ['etat']; if ($this->valide_job ( $mongo, $moniteur, $horaire, $job, $type_traitement ) === false) { $this->onDebug ( $nom . " (" . ( string ) $fichier ["_id"] . ") a un job en etat " . $liste_job_connu [( string ) $refjob ['$id']], 1 ); } } } else { // Si il n'y a pas de traitement pour ce fichier $this->onDebug ( $nom . " (" . ( string ) $fichier ["_id"] . ") n'a pas de job", 1 ); if ($this->getHoraire () ->valideHeureFinGlobal ()) { $this->getMoniteur () ->ecrit ( "Le fichier " . $nom . " ( " . ( string ) $fichier ["_id"] . ") n'a pas de job\n" ); } } } return true; } */
+	/* public function valide_tous_les_fichiers(&$mongo, &$resultat_fichiers, $type_traitement) { $liste_job_connu = array (); $this->onDebug ( "Nombre de fichier a valider :" . $resultat_fichiers->count (), 1 ); foreach ( $resultat_fichiers as $fichier ) { if (isset ( $fichier ["nom"] )) { $nom = $fichier ["nom"]; } elseif (isset ( $fichier ["serial"] )) { $nom = $fichier ["serial"]; } else { $nom = 'unknow'; } if (isset ( $fichier ["jobs"] ) && is_array ( $fichier ["jobs"] )) { foreach ( $fichier ["jobs"] as $refjob ) { // On evite plusieurs fois le meme traitement if (isset ( $liste_job_connu [( string ) $refjob ['$id']] )) { continue; } $job = $mongo->getDb () ->getDBRef ( $refjob ); // Si le job correspond au type de traitement recherche $liste_job_connu [( string ) $refjob ['$id']] = $job ['etat']; if ($this->valide_job ( $mongo, $moniteur, $horaire, $job, $type_traitement ) === false) { $this->onDebug ( $nom . " (" . ( string ) $fichier ["_id"] . ") a un job en etat " . $liste_job_connu [( string ) $refjob ['$id']], 1 ); } } } else { // Si il n'y a pas de traitement pour ce fichier $this->onDebug ( $nom . " (" . ( string ) $fichier ["_id"] . ") n'a pas de job", 1 ); if ($this->getHoraire () ->valideHeureFinGlobal ()) { $this->getMoniteur () ->ecrit ( "Le fichier " . $nom . " ( " . ( string ) $fichier ["_id"] . ") n'a pas de job<br/>" ); } } } return true; } */
 	/**
 	 * ******************* MongoDB **************************
 	 */

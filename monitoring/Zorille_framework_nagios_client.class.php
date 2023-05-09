@@ -1,13 +1,14 @@
 <?php
+
 /**
  * @author dvargas
  * @package Lib
  *
  */
 namespace Zorille\framework;
+
 /**
- * class nagios_client<br>
- * Gere un point de monitoring.
+ * class nagios_client<br> Gere un point de monitoring.
  *
  * @package Lib
  * @subpackage Monitoring
@@ -19,28 +20,28 @@ class nagios_client extends moniteur {
 	 * @access private
 	 * @var string
 	 */
-	private $green = "green";
+	private $green = "OK";
 	/**
 	 * var privee
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $yellow = "yellow";
+	private $yellow = "WARNING";
 	/**
 	 * var privee
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $red = "red";
+	private $red = "CRITICAL";
 	/**
 	 * var privee
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $bb_client_cmd = "/usr/bin/nagios";
+	private $grey = "UNKNOWN";
 	/**
 	 * var privee
 	 *
@@ -62,8 +63,17 @@ class nagios_client extends moniteur {
 	 * @var string
 	 */
 	private $status;
+	/**
+	 * var privee
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $entete;
 
-	/*********************** Creation de l'objet *********************/
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Instancie un objet de type nagios_client.
 	 * @codeCoverageIgnore
@@ -73,13 +83,15 @@ class nagios_client extends moniteur {
 	 * @param string $entete Entete des logs de l'objet
 	 * @return nagios_client
 	 */
-	static function &creer_nagios_client(&$liste_option, $nagios_client_titre = "", $entete = __CLASS__) {
+	static function &creer_nagios_client(
+			&$liste_option,
+			$nagios_client_titre = "",
+			$entete = __CLASS__) {
 		$nagios_client = new nagios_client ( $liste_option->verifie_parametre_standard ( "nagios_client[@sort_en_erreur='oui']" ), $entete );
 		$nagios_client->_initialise ( array (
 				"options" => $liste_option,
-				"titre" => $nagios_client_titre 
+				"titre" => $nagios_client_titre
 		) );
-		
 		return $nagios_client;
 	}
 
@@ -89,27 +101,28 @@ class nagios_client extends moniteur {
 	 * @param array $liste_class
 	 * @return nagios_client
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+			$liste_class) {
 		parent::_initialise ( $liste_class );
-		
 		$this->retrouve_nagios_client_param ( $liste_class ["titre"] );
 		return $this;
 	}
 
-	/*********************** Creation de l'objet *********************/
-	
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param string $status Temps en minutes entre deux points de monitoring.
 	 * @param string $bb_client Chemin du programme bbClient.
 	 */
-	public function __construct($sort_en_erreur = "oui", $entete = __CLASS__) {
+	public function __construct(
+			$sort_en_erreur = "oui",
+			$entete = __CLASS__) {
 		parent::__construct ( $sort_en_erreur, $entete );
-		
 		// Par defaut tout est "vert"
 		$this->setCouleurEnCours ( $this->getGreen () );
-		
 		return $this;
 	}
 
@@ -117,43 +130,35 @@ class nagios_client extends moniteur {
 	 * Ajoute du texte au moniteur en cours.<br>
 	 * @return moniteur
 	 */
-	public function retrouve_nagios_client_param($nagios_client_titre) {
+	public function retrouve_nagios_client_param(
+			$nagios_client_titre) {
 		$this->setStatus ( $this->getListeOptions ()
 			->renvoi_variables_standard ( array (
 				"nagios_client",
-				"status" 
+				"status"
 		), 30 ) );
-		$this->setBbClientBin ( $this->getListeOptions ()
-			->renvoi_variables_standard ( array (
-				"nagios_client",
-				"bin" 
-		), "bb" ) );
 		$this->setTypeOS ( $this->getListeOptions ()
 			->renvoi_variables_standard ( array (
 				"nagios_client",
-				"type_os" 
+				"type_os"
 		), "linux" ) );
-		
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( array (
 				"nagios_client",
-				"titre" 
+				"titre"
 		) ) !== false && $nagios_client_titre == "") {
 			$nagios_client_titre = $this->getListeOptions ()
 				->renvoi_variables_standard ( array (
 					"nagios_client",
-					"titre" 
+					"titre"
 			) );
 		}
-		$this->ecrit ( "<div align=center><font>" . $nagios_client_titre . "</font></div>\n\n" );
-		
+		$this->setEntete ( $nagios_client_titre );
 		return $this;
 	}
 
 	/**
-	 * Accesseur en lecture<br>
-	 * Renvoi la couleur en cours de la page du nagios_client
-	 * (pas d'une ligne).
+	 * Accesseur en lecture<br> Renvoi la couleur en cours de la page du nagios_client (pas d'une ligne).
 	 *
 	 * @return string Couleur en cours (green,yellow,red).
 	 */
@@ -173,35 +178,33 @@ class nagios_client extends moniteur {
 	}
 
 	/**
-	 * Accesseur en ecriture<br>
-	 * Ajoute du texte au nagios_client en cours.<br>
-	 * On peut ajouter une couleur specifique pour les donnees ajoutees
-	 * grace a $ajoute_couleur
+	 * Accesseur en ecriture<br> Ajoute du texte au nagios_client en cours.<br> On peut ajouter une couleur specifique pour les donnees ajoutees grace a $ajoute_couleur
 	 *
 	 * @param string $donnees Texte a ajouter dans le nagios_client.
 	 * @param string|false $ajoute_couleur Couleur a ajouter (green,yellow,red), FALSE sinon.
 	 * @return nagios_client
 	 */
-	public function ecrit($donnees, $ajoute_couleur = false) {
+	public function ecrit(
+			$donnees,
+			$ajoute_couleur = false) {
 		switch ($ajoute_couleur) {
 			case "green" :
-				$donnees = "&" . $this->getGreen () . " " . $donnees;
+				// $donnees = " " . $donnees."(".$this->getGreen ().")<br/>";
+				$donnees = "";
 				break;
 			case "yellow" :
-				$donnees = "&" . $this->getYellow () . " " . $donnees;
+				$donnees = " " . $donnees . "(" . $this->getYellow () . ")<br/>";
 				break;
 			case "red" :
-				$donnees = "&" . $this->getRed () . " " . $donnees;
+				$donnees = " " . $donnees . "(" . $this->getRed () . ")<br/>";
 				break;
 		}
 		parent::ecrit ( $donnees );
-		
 		return $this;
 	}
 
 	/**
-	 * Accesseur en ecriture<br>
-	 * Met la couleur de la page de monitoring a vert.
+	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a vert.
 	 * @return nagios_client
 	 */
 	public function green() {
@@ -209,21 +212,30 @@ class nagios_client extends moniteur {
 	}
 
 	/**
-	 * Accesseur en ecriture<br>
-	 * Met la couleur de la page de monitoring a orange.
+	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a orange.
 	 * @return nagios_client
 	 */
 	public function yellow() {
+		abstract_log::$logs->setExit ( 1 );
 		return $this->setCouleurEnCours ( $this->getYellow () );
 	}
 
 	/**
-	 * Accesseur en ecriture<br>
-	 * Met la couleur de la page de monitoring a rouge.
+	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a rouge.
 	 * @return nagios_client
 	 */
 	public function red() {
+		abstract_log::$logs->setExit ( 2 );
 		return $this->setCouleurEnCours ( $this->getRed () );
+	}
+
+	/**
+	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a rouge.
+	 * @return nagios_client
+	 */
+	public function grey() {
+		abstract_log::$logs->setExit ( 3 );
+		return $this->setCouleurEnCours ( $this->getGrey () );
 	}
 
 	/**
@@ -231,7 +243,8 @@ class nagios_client extends moniteur {
 	 * @param string $CMD
 	 * @return array
 	 */
-	public function applique_commande($CMD) {
+	public function applique_commande(
+			$CMD) {
 		$this->onDebug ( "applique_commande", 1 );
 		if ($this->getUpdate () == "oui") {
 			$retour = fonctions_standards::applique_commande_systeme ( $CMD, true );
@@ -239,23 +252,21 @@ class nagios_client extends moniteur {
 			$this->onWarning ( "Le update est a NON." );
 			$retour = array (
 					0,
-					"Le update est a NON." 
+					"Le update est a NON."
 			);
 		}
-		
 		$this->onDebug ( $retour, 2 );
 		return $retour;
 	}
 
 	/**
-	 * Retrouve la valeur du status ou met 30  par defaut
+	 * Retrouve la valeur du status ou met 30 par defaut
 	 * @return string
 	 */
 	public function retrouve_status() {
 		if ($this->getStatus () != "30") {
 			return "status+" . $this->getStatus ();
 		}
-		
 		return "status";
 	}
 
@@ -264,7 +275,8 @@ class nagios_client extends moniteur {
 	 * @param string $CMD
 	 * @return nagios_client
 	 */
-	public function send_via_ssh($CMD) {
+	public function send_via_ssh(
+			$CMD) {
 		$this->getObjetSSH ()
 			->setMachineDistante ( $this->getHost () );
 		$retour_connexion = $this->getObjetSSH ()
@@ -280,7 +292,6 @@ class nagios_client extends moniteur {
 			$this->getObjetSSH ()
 				->ssh_close ();
 		}
-		
 		return $this;
 	}
 
@@ -289,21 +300,18 @@ class nagios_client extends moniteur {
 	 *
 	 * @return nagios_client
 	 */
-	public function send_linux($donnees) {
+	public function send_linux(
+			$donnees) {
 		$this->onDebug ( "Type : Linux", 2 );
 		$status = $this->retrouve_status ();
-		
 		$CMD = $this->getBbClientBin () . " " . $this->getHost () . ":" . $this->getPort () . " ";
 		$CMD .= "\"" . $status . " " . $this->getCI () . "." . $this->getMoniteur () . " " . $this->getCouleurEnCours () . " " . $donnees . "\"";
-		
 		$this->onDebug ( $CMD, 1 );
-		
 		if ($this->getActiveSSH () === true) {
-			$this->send_via_ssh($CMD);
+			$this->send_via_ssh ( $CMD );
 		} else {
 			$this->applique_commande ( $CMD );
 		}
-		
 		return $this;
 	}
 
@@ -312,12 +320,11 @@ class nagios_client extends moniteur {
 	 *
 	 * @return true.
 	 */
-	public function send_win($donnees) {
+	public function send_win(
+			$donnees) {
 		$this->onDebug ( "Type : Windows", 2 );
 		$status = $this->retrouve_status ();
-		
 		$donnees = str_replace ( "\n", "<br/>", $donnees );
-		
 		$CMD = "\"" . $this->getBbClientBin () . "\" " . $this->getHost () . ":" . $this->getPort () . " ";
 		$CMD .= "status " . $this->getCI () . " " . $this->getMoniteur () . " " . $this->getCouleurEnCours () . " \"" . $donnees . "\" " . $status;
 		// @codeCoverageIgnoreStart
@@ -326,9 +333,7 @@ class nagios_client extends moniteur {
 			$CMD = mb_convert_encoding ( $CMD, "Windows-1252" );
 		}
 		// @codeCoverageIgnoreEnd
-		
 		$this->applique_commande ( $CMD );
-		
 		return $this;
 	}
 
@@ -337,10 +342,9 @@ class nagios_client extends moniteur {
 	 *
 	 * @return true.
 	 */
-	public function send($mail_to, $mail_from) {
-		//output = array ();
-		//flag = false;
-		
+	public function send(
+			$mail_to,
+			$mail_from) {
 		if (strlen ( $this->getDatas () ) > 32000) {
 			$donnees = "&" . $this->getYellow () . " Argument list too long\n";
 			$this->envoi_mail ( $mail_to, $mail_from );
@@ -352,11 +356,22 @@ class nagios_client extends moniteur {
 		} elseif ($this->getTypeOS () == "win") {
 			$this->send_win ( $donnees );
 		}
-		
 		return true;
 	}
 
-	/************************* Accesseurs ************************/
+	public function affiche_status() {
+		if ($this->getListeOptions ()
+			->verifie_option_existe ( "console" ) !== false) {
+			echo $this->getEntete () . " " . $this->getCouleurEnCours () . " - " . str_replace ( "<br/>", "\n", $this->getDatas () );
+		} else {
+			echo $this->getEntete () . " " . $this->getCouleurEnCours () . " - " . $this->getDatas ();
+		}
+		return $this;
+	}
+
+	/**
+	 * *********************** Accesseurs ***********************
+	 */
 	/**
 	 * @codeCoverageIgnore
 	 */
@@ -367,9 +382,9 @@ class nagios_client extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGreen($green) {
+	public function &setGreen(
+			$green) {
 		$this->green = $green;
-		
 		return $this;
 	}
 
@@ -383,9 +398,9 @@ class nagios_client extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setYellow($yellow) {
+	public function &setYellow(
+			$yellow) {
 		$this->yellow = $yellow;
-		
 		return $this;
 	}
 
@@ -399,9 +414,25 @@ class nagios_client extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRed($red) {
+	public function &setRed(
+			$red) {
 		$this->red = $red;
-		
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function getGrey() {
+		return $this->grey;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 */
+	public function &setGrey(
+			$grey) {
+		$this->grey = $grey;
 		return $this;
 	}
 
@@ -415,9 +446,9 @@ class nagios_client extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCouleurEnCours($couleur_en_cours) {
+	public function &setCouleurEnCours(
+			$couleur_en_cours) {
 		$this->couleur_en_cours = $couleur_en_cours;
-		
 		return $this;
 	}
 
@@ -431,9 +462,9 @@ class nagios_client extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStatus($status) {
+	public function &setStatus(
+			$status) {
 		$this->status = $status;
-		
 		return $this;
 	}
 
@@ -447,30 +478,31 @@ class nagios_client extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTypeOS($type_os) {
+	public function &setTypeOS(
+			$type_os) {
 		$this->type_os = $type_os;
-		
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getBbClientBin() {
-		return $this->bb_client_cmd;
+	public function getEntete() {
+		return $this->entete;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setBbClientBin($bb_client_cmd) {
-		$this->bb_client_cmd = $bb_client_cmd;
-		
+	public function &setEntete(
+			$entete) {
+		$this->entete = $entete;
 		return $this;
 	}
 
-	/************************* Accesseurs ************************/
-	
+	/**
+	 * *********************** Accesseurs ***********************
+	 */
 	/**
 	 * @static
 	 * @codeCoverageIgnore
@@ -479,14 +511,13 @@ class nagios_client extends moniteur {
 	 */
 	static function help() {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Gestion d'un nagios_client";
 		$help [__CLASS__] ["text"] [] .= "\t--nagios_client_bin /usr/bin/bb  chemin de la commande bb on bbwin";
 		$help [__CLASS__] ["text"] [] .= "\t--nagios_client_status 30              Temps en minutes";
 		$help [__CLASS__] ["text"] [] .= "\t--nagios_client_type_os linux/win      defini l'os utilise par client de monitoring";
 		$help [__CLASS__] ["text"] [] .= "\t--nagios_client_titre \"titre\"        Titre affiche dans le nagios_client";
-		
+		$help [__CLASS__] ["text"] [] .= "\t--console                              affiche le texte preformatte pour une console";
 		return $help;
 	}
 }

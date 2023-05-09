@@ -273,6 +273,11 @@ class fonctions_standards_sgbd extends abstract_log {
 						case "power_dev" :
 							$CODE_RETOUR [$nom_base] = requete_complexe_power::creer_requete_complexe_power ( $liste_option, $liste_variables ["sort_en_erreur"] );
 							break;
+						case "itop_prod" :
+						case "itop_preprod" :
+						case "itop_dev" :
+							$CODE_RETOUR [$nom_base] = requete_complexe_itop::creer_requete_complexe_itop ( $liste_option, $liste_variables ["sort_en_erreur"] );
+							break;
 						default :
 							$CODE_RETOUR [$nom_base] = requete::creer_requete ( $liste_option, $liste_variables ["sort_en_erreur"] );
 					}
@@ -463,6 +468,20 @@ class fonctions_standards_sgbd extends abstract_log {
 			$sort_en_erreur = false) {
 				return fonctions_standards_sgbd::recupere_db ( $connexion, "fmanager", $sort_en_erreur );
 	}
+	
+	/**
+	 * Set le $db_itop avec la base itop standard.
+	 *
+	 * @param array $connexion
+	 * @param bool $sort_en_erreur
+	 * @return requete_complexe_itop false renvoi l'objet requete_complexe_itop, false en cas d'erreur.
+	 */
+	static public function recupere_db_itop(
+			&$connexion,
+			$sort_en_erreur = false) {
+				return fonctions_standards_sgbd::recupere_db ( $connexion, "itop", $sort_en_erreur );
+	}
+	
 
 	/**
 	 * @static @codeCoverageIgnore

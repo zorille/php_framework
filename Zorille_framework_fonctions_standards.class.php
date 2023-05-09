@@ -128,6 +128,37 @@ class fonctions_standards extends abstract_log {
 		
 		return $facteur;
 	}
+	
+	/**
+	 * Renvoi la valeur texte au format To, Go, Mo, ko ou octets
+	 * @param integer $valeur La valeur a convertir en texte
+	 * @return string
+	 */
+	public function retrouve_valeur_octet($valeur){
+		if($valeur/$this->renvoi_coef_octet('To')>=1){
+			return round($valeur/$this->renvoi_coef_octet('To'),2). " To";
+		}
+		if($valeur/$this->renvoi_coef_octet('Go')>=1){
+			return round($valeur/$this->renvoi_coef_octet('Go'),2). " Go";
+		}
+		if($valeur/$this->renvoi_coef_octet('Mo')>=1){
+			return round($valeur/$this->renvoi_coef_octet('Mo'),2). " Mo";
+		}
+		if($valeur/$this->renvoi_coef_octet('ko')>=1){
+			return round($valeur/$this->renvoi_coef_octet('ko'),2). " ko";
+		}
+		return $valeur . " octets";
+	}
+	
+	/**
+	 * Renvoi la valeur d'octet passe en paramettre au format choisi
+	 * @param integer $valeur Nombre d'octet a convertir
+	 *  @param string $format doit être un format de type ko, Mo, Go, To
+	 * @return string
+	 */
+	public function retrouve_valeur_format_definit($valeur,$format){
+		return round($valeur/$this->renvoi_coef_octet($format),2). " ".$format;
+	}
 
 	/**
 	 * Parse les options passees en ligne de commande ou par xml
@@ -292,6 +323,7 @@ class fonctions_standards extends abstract_log {
 		abstract_log::onDebug_standard("class_afficher : all_class",1);
 		abstract_log::onDebug_standard($class_afficher,1);
 		foreach ( $class_utilisees as $class_locale ) {
+			abstract_log::onDebug_standard($class_locale,1);
 			if (method_exists ( $class_locale, "help" )) {
 				$class_afficher = array_merge ( $class_afficher, call_user_func ( $class_locale . "::help" ) );
 			}

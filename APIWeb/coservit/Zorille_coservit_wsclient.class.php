@@ -5,16 +5,17 @@
  * @package Lib
  *
  */
-namespace Zorille\librenms;
+namespace Zorille\coservit;
 
 use Zorille\framework as Core;
 use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
 
 /**
- * class wsclient<br> Renvoi des informations via un webservice.
+ * class wsclient<br> Renvoi des informations via un webservice. https://coservit.readme.io/docs/core-api-concepts-requests Endpoints : Activities ActivityFields ActivityTypes CallLogs Currencies Deals DealFields Files Filters GlobalMessages Goals ItemSearch MailMessages MailThreads Notes NoteFields OrganizationFields Organizations OrganizationRelationships PermissionSets Persons PersonFields Pipelines Products ProductFields Recents Roles SearchResults Stages Teams Users UserConnections UserSettings
+ *
  * @package Lib
- * @subpackage librenms
+ * @subpackage coservit
  */
 class wsclient extends Core\wsclient {
 	/**
@@ -51,7 +52,7 @@ class wsclient extends Core\wsclient {
 	 */
 	static function &creer_wsclient(
 			&$liste_option,
-			&$datas = NULL,
+			&$datas = null,
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
@@ -77,8 +78,8 @@ class wsclient extends Core\wsclient {
 			$this->onError ( "il faut un objet de type datas" );
 			return false;
 		}
-		$this->setObjetLibrenmsDatas ( $liste_class ["datas"] )
-			->setContentType ( 'application/json-rpc' )
+		$this->setObjetcoservitDatas ( $liste_class ["datas"] )
+			->setContentType ( 'application/json' )
 			->setAccept ( 'application/json' );
 		return $this;
 	}
@@ -101,7 +102,7 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * Prepare l'url de connexion au librenms nomme $nom
+	 * Prepare l'url de connexion au coservit nomme $nom
 	 * @param string $nom
 	 * @return boolean|wsclient
 	 * @throws Exception
@@ -109,41 +110,42 @@ class wsclient extends Core\wsclient {
 	public function prepare_connexion(
 			$nom) {
 		$this->onDebug ( __METHOD__, 1 );
-		$liste_data_librenms = $this->getObjetlibrenmsDatas ()
+		$liste_data_coservit = $this->getObjetcoservitDatas ()
 			->valide_presence_data ( $nom );
-		if ($liste_data_librenms === false) {
-			return $this->onError ( "Aucune definition de librenms pour " . $nom );
+		if ($liste_data_coservit === false) {
+			return $this->onError ( "Aucune definition de coservit pour " . $nom );
 		}
-		if (! isset ( $liste_data_librenms ["url"] )) {
-			return $this->onError ( "Il faut une url dans la liste des parametres librenms" );
+		if (! isset ( $liste_data_coservit ["username"] )) {
+			return $this->onError ( "Il faut un username dans la liste des parametres coservit" );
 		}
-		if (isset ( $liste_data_librenms ["password"] )) {
-			$this->setAuth ( $liste_data_librenms ["password"] );
+		if (! isset ( $liste_data_coservit ["password"] )) {
+			return $this->onError ( "Il faut un password dans la liste des parametres coservit" );
+		}
+		if (! isset ( $liste_data_coservit ["url"] )) {
+			return $this->onError ( "Il faut une url dans la liste des parametres coservit" );
 		}
 		$this->getGestionConnexionUrl ()
-			->retrouve_connexion_params ( $liste_data_librenms )
-			->prepare_prepend_url ( $liste_data_librenms ["url"] );
+			->retrouve_connexion_params ( $liste_data_coservit )
+			->prepare_prepend_url ( $liste_data_coservit ["url"] );
+		// On prepare l'objet utilisateurs de la connexion, car l'objet curl ne connait pas l'objet datas
+		$this->userLogin ( array (
+				'login' => $liste_data_coservit ["username"],
+				'password' => $liste_data_coservit ["password"]
+		) );
 		return $this;
 	}
 
 	/**
-	 * Http Librenms header creator
+	 * Http coservit params creator
 	 *
-	 * @return string Http Header
+	 * @return wsclient
 	 */
-	public function prepare_html_entete() {
+	public function prepare_params() {
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->getAuth ()) {
-			return $this->setHttpHeader ( array (
-					"Content-Type: " . $this->getContentType (),
-					"Accept: " . $this->getAccept (),
-					"X-Auth-Token: " . $this->getAuth ()
-			) );
-		}
-		return $this->setHttpHeader ( array (
-				"Content-Type: " . $this->getContentType (),
-				"Accept: " . $this->getAccept ()
-		) );
+		// if ( $this ->getAuth () ) {
+		// $this ->setParams ( 'output_mode', 'xml', true );
+		// }
+		return $this;
 	}
 
 	/**
@@ -155,73 +157,67 @@ class wsclient extends Core\wsclient {
 	public function prepare_retour(
 			$retour_wsclient) {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->onDebug ( "Accept Method :" . $this->getAccept (), 1 );
-		switch ($this->getAccept ()) {
-			case "image/png" :
-				$retour = $this->traite_retour_image ( $retour_wsclient );
-				break;
-			default :
-				$retour = $this->traite_retour_json ( $retour_wsclient );
-				$this->onDebug ( $retour, 2 );
-		}
-		return $retour;
+		return $this->traite_retour_json ( $retour_wsclient, false );
 	}
 
 	/**
-	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
-	 * @param string $retour_json
-	 * @param boolean $return_array
-	 * @return array
+	 * Http O365 header creator
+	 *
+	 * @return $this
 	 */
-	public function traite_retour_image(
-			$retour_image) {
+	public function prepare_html_entete() {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->onDebug ( "Retour Image selectionne", 2 );
-		if ($this->is_png ( $retour_image )) {
-			return $retour_image;
+		if (! empty ( $this->getAuth () )) {
+			$this->setHttpHeader ( array (
+					"Content-Type: " . $this->getContentType (),
+					"Authorization: Bearer " . $this->getAuth (),
+					"Accept: " . $this->getAccept ()
+			) );
 		}
-		return $this->onError ( "Pas d'image en retour" );
-	}
-
-	public function is_jpeg(
-			&$pict) {
-		return (bin2hex ( $pict [0] ) == 'ff' && bin2hex ( $pict [1] ) == 'd8');
-	}
-
-	public function is_png(
-			&$pict) {
-		return (bin2hex ( $pict [0] ) == '89' && $pict [1] == 'P' && $pict [2] == 'N' && $pict [3] == 'G');
+		$this->onDebug ( $this->getHttpHeader (), 1 );
+		return $this;
 	}
 
 	/**
-	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
-	 * @param string $retour_json
-	 * @param boolean $return_array
-	 * @return array
+	 * Valide le code retour dans une page HTML
+	 * @param string $retour_wsclient
+	 * @return boolean
+	 * @throws Exception
 	 */
-	public function traite_retour_json(
-			$retour_json,
-			$return_array = true) {
+	public function valide_retour(
+			$retour_wsclient) {
 		$this->onDebug ( __METHOD__, 1 );
-		$this->onDebug ( "Retour JSON selectionne", 2 );
-		$this->onDebug ( $retour_json, 2 );
-		// si le retour est en JSON, on le decode
-		$tableau_resultat = json_decode ( $retour_json, $return_array );
-		$this->onDebug ( "tableau JSON de retour :", 2 );
-		$this->onDebug ( $tableau_resultat, 2 );
-		foreach ( $tableau_resultat as $entete => $donnees ) {
-			if ($entete == "status") {
-				if ($donnees != "ok") {
-					return $this->onError ( "Erreur durant la requete sur LibreNMS", $tableau_resultat, 1 );
+		// En cas de retour avec un code erreur
+		if (isset ( $retour_wsclient->code )) {
+			$this->onDebug ( "Code retour " . $retour_wsclient->code, 2 );
+			$this->onDebug ( $retour_wsclient, 2 );
+			return $this->onError ( $retour_wsclient->code . " : " . $retour_wsclient->message, "", $retour_wsclient->code );
+		}
+		// En cas de retour avec un code HTTP
+		if (isset ( $retour_wsclient->httpStatusCode )) {
+			$this->onDebug ( "Code retour " . $retour_wsclient->httpStatusCode, 2 );
+			$this->onDebug ( $retour_wsclient, 0 );
+			//return $this->onError ( $retour_wsclient->messageCode . " : " . $retour_wsclient->messageCode . " DETAILS : " . $retour_wsclient->developerMessage, "", $retour_wsclient->httpStatusCode );
+		}
+		// En cas de retour
+		if (isset ( $retour_wsclient->errors )) {
+			$this->onDebug ( "Retour en erreur :", 2 );
+			$this->onDebug ( $retour_wsclient, 2 );
+			$message = "";
+			if (is_array ( $retour_wsclient->errors )) {
+				foreach ( $retour_wsclient->errors as $titre => $valeur ) {
+					$message .= $titre . " : " . $valeur [0] . ", ";
 				}
-				continue;
+			} else {
+				$message = print_r ( $retour_wsclient->errors, true );
 			}
+			return $this->onError ( $message, $retour_wsclient, 1 );
 		}
-		return $tableau_resultat;
+		return true;
 	}
 
 	/**
-	 * Sends are prepare_requete_json to the librenms API and returns the response as object.
+	 * Sends are prepare_requete_json to the coservit API and returns the response as object.
 	 *
 	 * @return string API JSON response.
 	 * @throws Exception
@@ -237,14 +233,55 @@ class wsclient extends Core\wsclient {
 				->envoi_requete ();
 			$retour = $this->prepare_retour ( $retour_wsclient );
 			$this->onDebug ( $retour, 2 );
+			$this->valide_retour ( $retour );
 			return $retour;
 		}
 		return "";
 	}
 
 	/**
-	 * *********************** API librenms **********************
+	 * @param string $param
+	 * @param string|integer|boolean $valeur
+	 * @return wsclient
 	 */
+	public function modifie_default_param(
+			$param,
+			$valeur) {
+		$default_params = $this->getDefaultParams ();
+		$default_params [$param] = $valeur;
+		return $this->setDefaultParams ( $default_params );
+	}
+
+	/**
+	 * *********************** API coservit **********************
+	 */
+	/**
+	 * Resource: auth/login Method: Post Autentification
+	 *
+	 * @codeCoverageIgnore
+	 * @param array $params Request Parameters
+	 * @throws Exception
+	 */
+	final public function userLogin(
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		if (isset ( $params ['password'] )) {
+			$this->onDebug ( $params, 1 );
+			$resultat = $this->postMethod ( "/servicenav/auth/token", array (
+					"username" => $params ['login'],
+					"password" => $params ['password']
+			) );
+			$this->onDebug ( $resultat, 1 );
+			foreach ( $resultat as $titre => $valeur ) {
+				if ($titre == "token") {
+					$this->setAuth ( $valeur );
+				}
+			}
+			return $this;
+		}
+		return $this->onError ( "Erreur durant l'autentification", $resultat );
+	}
+
 	/**
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
@@ -254,8 +291,7 @@ class wsclient extends Core\wsclient {
 	 */
 	public function getMethod(
 			$resource,
-			$params = array (),
-			$type_mime = "") {
+			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -271,35 +307,15 @@ class wsclient extends Core\wsclient {
 	 * @return SimpleXMLElement
 	 * @throws Exception
 	 */
-	public function getImageMethod(
-			$resource,
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$full_params = array_merge ( $this->getDefaultParams (), $params );
-		$this->setUrl ( $resource )
-			->setAccept ( "image/png" )
-			->setHttpMethod ( "GET" )
-			->setParams ( $full_params );
-		$retour = $this->prepare_requete ();
-		$this->setAccept ( "application/json" );
-		return $retour;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
 	public function postMethod(
 			$resource,
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "POST" )
-			->setPostDatas ( http_build_query ( $full_params ) );
+			->setParams ( $this->getDefaultParams () )
+			->setPostDatas ( json_encode ( $params ) );
+		$this->onDebug ( $this->getPostDatas (), 2 );
 		return $this->prepare_requete ();
 	}
 
@@ -314,10 +330,31 @@ class wsclient extends Core\wsclient {
 			$resource,
 			$params = array ()) {
 		$this->onDebug ( __METHOD__, 1 );
-		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "PUT" )
-			->setPostDatas ( http_build_query ( $full_params ) );
+			->setParams ( $this->getDefaultParams () )
+			->setForceParamInUrl ( true )
+			->setPostDatas ( json_encode ( $params ) );
+		$this->onDebug ( json_encode ( $params ), 2 );
+		return $this->prepare_requete ();
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @param string $resource Url Resource
+	 * @param array $params Data to send
+	 * @return SimpleXMLElement
+	 * @throws Exception
+	 */
+	public function patchMethod(
+			$resource,
+			$params = array ()) {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->setUrl ( $resource )
+			->setHttpMethod ( "PATCH" )
+			->setParams ( $this->getDefaultParams () )
+			->setForceParamInUrl ( true )
+			->setPostDatas ( json_encode ( $params ) );
 		return $this->prepare_requete ();
 	}
 
@@ -340,78 +377,8 @@ class wsclient extends Core\wsclient {
 	}
 
 	/**
-	 * *********************** API librenms **********************
+	 * *********************** API coservit **********************
 	 */
-	/**
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function getBilling(
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills", $params );
-		return $resultat;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function getBill(
-			$id,
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills/" . $id, $params );
-		return $resultat;
-	}
-
-	/**
-	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
-	 * @throws Exception
-	 */
-	public function getBillHistory(
-			$id,
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills/" . $id . "/history", $params );
-		return $resultat;
-	}
-
-	/**
-	 * Return graph for billing
-	 * @param int $id
-	 * @param string $graph_type Must be bits or monthly
-	 * @param array $params Can contain from in timestamp, to in timestamp
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
-	public function getBillGraph(
-			$id,
-			$graph_type,
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getImageMethod ( "/bills/" . $id . "/graphs/" . $graph_type, $params );
-		return $resultat;
-	}
-
-	/**
-	 * Return graph data for billing
-	 * @param int $id
-	 * @param array $params can contain from in timestamp, to in timestamp and reducefactor
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
-	public function getBillGraphData(
-			$id,
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills/" . $id . "/graphdata/bits", $params );
-		return $resultat;
-	}
-
 	/**
 	 * *********************** Accesseurs **********************
 	 */
@@ -419,14 +386,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return datas
 	 */
-	public function &getObjetLibrenmsDatas() {
+	public function &getObjetcoservitDatas() {
 		return $this->datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetLibrenmsDatas(
+	public function &setObjetcoservitDatas(
 			&$datas) {
 		$this->datas = $datas;
 		return $this;
@@ -487,7 +454,7 @@ class wsclient extends Core\wsclient {
 	static public function help() {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "librenms Wsclient :";
+		$help [__CLASS__] ["text"] [] .= "coservit Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
 		$help = array_merge ( $help, datas::help () );
 		return $help;

@@ -116,11 +116,18 @@ class backupfile extends ci {
 		}
 		$filepath = trim ( $this->getDonnees ()->FilePath );
 		$this->onDebug ( "FilePath : " . $filepath, 1 );
-		if (preg_match ( '/(.*)\.vm-/', $filepath, $recherche ) != 0) {
+		if (preg_match ( '/^([0-9]{5}-[a-zA-Z0-9-]+\.[0-9]{5})D[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{6}_[a-zA-Z0-9]{4}\.[a-zA-Z0-9]{3}$/', $filepath, $recherche ) != 0) {
+			return $recherche [1];
+		} else if (preg_match ( '/^([a-zA-Z0-9\. _-]+)D[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{6}_[a-zA-Z0-9]{4}\.[a-zA-Z0-9]{3}$/', $filepath, $recherche ) != 0) {
+			return $recherche [1];
+		} else if (preg_match ( '/^\/[a-zA-Z0-9\. \/_-]+\/([a-zA-Z0-9\. _-]+)D[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{6}_[a-zA-Z0-9]{4}\.[a-zA-Z0-9]{3}$/', $filepath, $recherche ) != 0) {
+			return $recherche [1];
+		} else if (preg_match ( '/(.*)\.vm-/', $filepath, $recherche ) != 0) {
 			return $recherche [1];
 		} else if (preg_match ( '/.* _ ([a-zA-Z0-9_-]+) .*/', $filepath, $recherche ) != 0) {
 			return $recherche [1];
 		}
+		
 		$this->onWarning ( "Nom introuvable dans : " . $filepath );
 		return $filepath;
 	}

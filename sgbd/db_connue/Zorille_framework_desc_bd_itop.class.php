@@ -68,147 +68,86 @@ class desc_bd_itop extends gestion_definition_table {
 	}
 
 	private function charge_table() {
-		$this->setTable ( 'rack', "rack" );
-		$this->setTable ( 'wago_new', "wago" );
-		$this->setTable ( 'customer_DC2', "customer_DC2" );
-		$this->setTable ( 'consoDC2', "consoDC2" );
-		$this->setTable ( 'customer_DC5', "customer_DC5" );
-		$this->setTable ( 'consoDC5', "consoDC5" );
-		$this->setTable ( 'customer_DC6', "customer_DC6" );
-		$this->setTable ( 'consoDC6', "consoDC6" );
+		$this->setTable ( 'INFORMATION_SCHEMA.TABLES', "INFORMATION_SCHEMA.TABLES" );
+		$this->setTable ( 'key_value_store', "key_value_store" );
+		$this->setTable ( 'ticket', "ticket" );
 	}
 
 	private function charge_champs() {
-		$this->charge_champs_rack ();
-		$this->charge_champs_wago ();
-		$this->charge_champs_customer_DC2();
-		$this->charge_champs_consoDC2();
-		$this->charge_champs_customer_DC5();
-		$this->charge_champs_consoDC5();
-		$this->charge_champs_customer_DC6();
-		$this->charge_champs_consoDC6();
+		$this->charge_champs_key_value_store ();
+		$this->charge_champs_ticket ();
+		$this->charge_champs_schema ();
 		return true;
 	}
 
 	/*
-| compteur | int(10)      | YES  | MUL | NULL    |                |
-| row      | varchar(10)  | YES  |     | NULL    |                |
-| col      | varchar(10)  | YES  |     | NULL    |                |
-| path     | varchar(10)  | YES  |     | NULL    |                |
-| customer | varchar(100) | YES  | MUL | NULL    |                |
-| phase    | varchar(10)  | YES  |     | NULL    |                |
-| oldcoef  | varchar(5)   | YES  |     | NULL    |                |
-| coef     | int(5)       | YES  |     | NULL    |                |
-| building | varchar(10)  | YES  |     | NULL    |                |
-| room     | varchar(10)  | YES  |     | NULL    |                |
-| order    | varchar(10)  | YES  |     | NULL    |                |
-| status   | varchar(5)   | YES  |     | NULL    |                |
-| id       | int(11)      | NO   | PRI | NULL    | auto_increment |
-| coeftmp  | varchar(5)   | YES  |     | NULL    |                |
+| id        | int(11)      | NO   | PRI | NULL    | auto_increment |
+| namespace | varchar(255) | YES  |     |         |                |
+| key_name  | varchar(255) | YES  | MUL |         |                |
+| value     | varchar(255) | YES  |     | 0       |                |
 
 	 */
-	private function charge_champs_rack() {
-		$this->setChamp ( "compteur", "compteur", "rack", "numeric" );
-		$this->setChamp ( "row", "row", "rack", "text" );
-		$this->setChamp ( "col", "col", "rack", "text" );
-		$this->setChamp ( "path", "path", "rack", "text" );
-		$this->setChamp ( "customer", "customer", "rack", "text" );
-		$this->setChamp ( "phase", "phase", "rack", "text" );
-		$this->setChamp ( "oldcoef", "oldcoef", "rack", "text" );
-		$this->setChamp ( "coef", "coef", "rack", "numeric" );
-		$this->setChamp ( "building", "building", "rack", "text" );
-		$this->setChamp ( "room", "room", "rack", "text" );
-		$this->setChamp ( "order", "order", "rack", "text" );
-		$this->setChamp ( "status", "status", "rack", "text" );
-		$this->setChamp ( "id", "id", "rack", "numeric" );
-		$this->setChamp ( "coeftmp", "coeftmp", "rack", "text" );
+	private function charge_champs_key_value_store() {
+		$this->setChamp ( "id", "id", "key_value_store", "numeric" );
+		$this->setChamp ( "namespace", "namespace", "key_value_store", "text" );
+		$this->setChamp ( "key_name", "key_name", "key_value_store", "text" );
+		$this->setChamp ( "value", "value", "key_value_store", "text" );
 		return true;
 	}
-
 	/*
-| num      | int(10)    | YES  | MUL | NULL    |       |
-| amount   | bigint(20) | YES  |     | NULL    |       |
-| date     | datetime   | YES  | MUL | NULL    |       |
-| building | varchar(5) | YES  |     | NULL    |       |
-| room     | varchar(5) | YES  |     | NULL    |       |
-	 */
-	private function charge_champs_wago() {
-		$this->setChamp ( "num", "num", "wago", "numeric" );
-		$this->setChamp ( "amount", "amount", "wago", "numeric" );
-		$this->setChamp ( "date", "date", "wago", "date" );
-		$this->setChamp ( "building", "building", "wago", "text" );
-		$this->setChamp ( "room", "room", "wago", "text" );
-		return true;
-	}
-	
-	/*
-	 customer_DC2;
-+----------+--------------+------+-----+---------+-------+
-| Field    | Type         | Null | Key | Default | Extra |
-+----------+--------------+------+-----+---------+-------+
-| name     | varchar(100) | NO   | PRI | NULL    |       |
-| customer | varchar(100) | NO   | PRI | NULL    |       |
-| pdpm     | varchar(20)  | NO   | PRI | NULL    |       |
+| id                 | int(11)                             | NO   | PRI | NULL    | auto_increment |
+| operational_status | enum('closed','ongoing','resolved') | YES  | MUL | ongoing |                |
+| ref                | varchar(255)                        | YES  | MUL |         |                |
+| org_id             | int(11)                             | YES  | MUL | 0       |                |
+| caller_id          | int(11)                             | YES  | MUL | 0       |                |
+| team_id            | int(11)                             | YES  | MUL | 0       |                |
+| agent_id           | int(11)                             | YES  | MUL | 0       |                |
+| title              | varchar(255)                        | YES  |     |         |                |
+| description        | text                                | YES  |     | NULL    |                |
+| description_format | enum('text','html')                 | YES  |     | text    |                |
+| start_date         | datetime                            | YES  |     | NULL    |                |
+| end_date           | datetime                            | YES  |     | NULL    |                |
+| last_update        | datetime                            | YES  |     | NULL    |                |
+| close_date         | datetime                            | YES  |     | NULL    |                |
+| private_log        | longtext                            | YES  |     | NULL    |                |
+| private_log_index  | blob                                | YES  |     | NULL    |                |
+| finalclass         | varchar(255)                        | YES  | MUL | Ticket  |                |
+| archive_flag       | tinyint(1)                          | YES  | MUL | 0       |                |
+| archive_date       | date                                | YES  |     | NULL    |                |
+| related_project_id | int(11)                             | YES  | MUL | 0       |                |
 
 	 */
-	private function charge_champs_customer_DC2() {
-		$this->setChamp ( "name", "name", "customer_DC2", "text" );
-		$this->setChamp ( "customer", "customer", "customer_DC2", "text" );
-		$this->setChamp ( "pdpm", "pdpm", "customer_DC2", "text" );
+	private function charge_champs_ticket() {
+		$this->setChamp ( "id", "id", "ticket", "numeric" );
+		$this->setChamp ( "operational_status", "operational_status", "ticket", "text" );
+		$this->setChamp ( "ref", "ref", "ticket", "text" );
+		$this->setChamp ( "org_id", "org_id", "ticket", "numeric" );
+		$this->setChamp ( "caller_id", "caller_id", "ticket", "numeric" );
+		$this->setChamp ( "team_id", "team_id", "ticket", "numeric" );
+		$this->setChamp ( "agent_id", "agent_id", "ticket", "numeric" );
+		$this->setChamp ( "title", "title", "ticket", "text" );
+		$this->setChamp ( "description", "description", "ticket", "text" );
+		$this->setChamp ( "description_format", "description_format", "ticket", "text" );
+		$this->setChamp ( "start_date", "start_date", "ticket", "date" );
+		$this->setChamp ( "end_date", "end_date", "ticket", "date" );
+		$this->setChamp ( "last_update", "last_update", "ticket", "date" );
+		$this->setChamp ( "close_date", "close_date", "ticket", "date" );
+		$this->setChamp ( "private_log", "private_log", "ticket", "text" );
+		$this->setChamp ( "private_log_index", "private_log_index", "ticket", "numeric" );
+		$this->setChamp ( "finalclass", "finalclass", "ticket", "text" );
+		$this->setChamp ( "archive_flag", "archive_flag", "ticket", "numeric" );
+		$this->setChamp ( "archive_date", "archive_date", "ticket", "date" );
+		$this->setChamp ( "related_project_id", "related_project_id", "ticket", "numeric" );
+		$this->setChamp ( "AUTO_INCREMENT", "AUTO_INCREMENT", "ticket", "numeric" );
 		return true;
 	}
 	
-	/*
-| pdpm     | varchar(100) | NO   | PRI |         |       |
-| customer | varchar(100) | NO   | PRI | NULL    |       |
-| location | varchar(100) | YES  | MUL | NULL    |       |
-| date     | varchar(100) | NO   | PRI |         |       |
-| datets   | datetime     | YES  | MUL | NULL    |       |
-| amount   | varchar(100) | YES  |     | NULL    |       |
+	private function charge_champs_schema() {
+		$this->setChamp ( "AUTO_INCREMENT", "AUTO_INCREMENT", "INFORMATION_SCHEMA.TABLES", "numeric" );
+		$this->setChamp ( "TABLE_SCHEMA", "TABLE_SCHEMA", "INFORMATION_SCHEMA.TABLES", "text" );
+		$this->setChamp ( "TABLE_NAME", "TABLE_NAME", "INFORMATION_SCHEMA.TABLES", "text" );
+		return true;
+	}
 
-	 */
-	private function charge_champs_consoDC2() {
-		$this->setChamp ( "pdpm", "pdpm", "consoDC2", "text" );
-		$this->setChamp ( "customer", "customer", "consoDC2", "text" );
-		$this->setChamp ( "location", "location", "consoDC2", "text" );
-		$this->setChamp ( "date", "date", "consoDC2", "text" );
-		$this->setChamp ( "datets", "datets", "consoDC2", "date" );
-		$this->setChamp ( "amount", "amount", "consoDC2", "text" );
-		return true;
-	}
-	
-	private function charge_champs_customer_DC5() {
-		$this->setChamp ( "name", "name", "customer_DC5", "text" );
-		$this->setChamp ( "customer", "customer", "customer_DC5", "text" );
-		$this->setChamp ( "pdpm", "pdpm", "customer_DC5", "text" );
-		return true;
-	}
-	
-	private function charge_champs_consoDC5() {
-		$this->setChamp ( "pdpm", "pdpm", "consoDC5", "text" );
-		$this->setChamp ( "customer", "customer", "consoDC5", "text" );
-		$this->setChamp ( "location", "location", "consoDC5", "text" );
-		$this->setChamp ( "date", "date", "consoDC5", "text" );
-		$this->setChamp ( "datets", "datets", "consoDC5", "date" );
-		$this->setChamp ( "amount", "amount", "consoDC5", "text" );
-		return true;
-	}
-	
-	private function charge_champs_customer_DC6() {
-		$this->setChamp ( "name", "name", "customer_DC6", "text" );
-		$this->setChamp ( "customer", "customer", "customer_DC6", "text" );
-		$this->setChamp ( "pdpm", "pdpm", "customer_DC6", "text" );
-		return true;
-	}
-	
-	private function charge_champs_consoDC6() {
-		$this->setChamp ( "pdpm", "pdpm", "consoDC6", "text" );
-		$this->setChamp ( "customer", "customer", "consoDC6", "text" );
-		$this->setChamp ( "location", "location", "consoDC6", "text" );
-		$this->setChamp ( "date", "date", "consoDC6", "text" );
-		$this->setChamp ( "datets", "datets", "consoDC6", "date" );
-		$this->setChamp ( "amount", "amount", "consoDC6", "text" );
-		return true;
-	}
 }
 ?>

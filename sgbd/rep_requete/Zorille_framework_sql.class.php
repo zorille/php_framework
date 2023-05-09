@@ -323,6 +323,7 @@ class sql extends abstract_log {
 	 */
 	public function creer_alter($table, $spec, $variable) {
 		$sql = "ALTER TABLE $table $spec $variable";
+		$this->onDebug("REQUETE ALTER : ".$sql, 1);
 		$this->setSql ( $sql );
 		
 		return true;

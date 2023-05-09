@@ -178,6 +178,8 @@ class ci extends Core\abstract_log {
 	 * @throws Exception
 	 */
 	public function recupere_ci_dans_itop() {
+		$this->onDebug ( __METHOD__, 1 );
+		$this->onDebug ( $this->getFormat ()." ".$this->getOqlCi () , 2 );
 		// Sinon, on requete iTop
 		return $this->getObjetItopWsclientRest ()
 			->core_get ( $this->getFormat (), $this->getOqlCi () );
@@ -195,6 +197,7 @@ class ci extends Core\abstract_log {
 		}
 		// Sinon, on requete iTop
 		$ci = $this->recupere_ci_dans_itop ();
+		$this->onDebug ( $ci, 1 );
 		if ($ci ['message'] != 'Found: 1') {
 			// Le ci n'existe pas donc on emet une exception
 			return $this->onError ( "Probleme avec la requete : " . $this->getOqlCi () . " : " . $ci ['message'] );
@@ -207,6 +210,7 @@ class ci extends Core\abstract_log {
 	 * @return $this|null
 	 */
 	public function valide_ci_existe() {
+		$this->onDebug ( __METHOD__, 1 );
 		// Si il y a deja un objet ci, alors le ci existe
 		if ($this->getDonnees ()) {
 			return $this;
@@ -247,7 +251,7 @@ class ci extends Core\abstract_log {
 	}
 
 	/**
-	 * Creer un CI dans itop du format de l'objet
+	 * Update un CI dans itop du format de l'objet
 	 * @param string $name
 	 * @param array $params
 	 * @return $this
@@ -258,7 +262,7 @@ class ci extends Core\abstract_log {
 			$params) {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_ci_existe ()) {
-			$this->onInfo ( "Update de : " . $name );
+			$this->onInfo ( "Update de : " . $name . " ID = ".$this->getId () );
 			$ci = $this->getObjetItopWsclientRest ()
 				->core_update ( $this->getFormat (), $this->getId (), $params );
 			$this->enregistre_ci_a_partir_rest ( $ci );

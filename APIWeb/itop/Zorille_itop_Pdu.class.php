@@ -95,6 +95,7 @@ class Pdu extends FunctionalCI {
 			$this->setMandatory ( array (
 					'name' => false,
 					'org_id' => false,
+					'location_id' => false,
 					'rack_id' => false
 			) );
 		}
