@@ -1,0 +1,6 @@
+.idea/
+.buildpath
+.project
+php_depot/Euclyde/itop/plugins/Synchronisation/**/data/*.csv
+php_depot/Euclyde/itop/plugins/Synchronisation/**/data/*.txt
+php_depot/Euclyde/itop/plugins/Synchronisation/**/conf/params.local.xml

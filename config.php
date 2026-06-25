@@ -237,7 +237,7 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/pipedr
 /**
  * Inclue Les class d'appel a Pipedrive
  */
-set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/coservit" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/evobserve" );
 /**
  * Inclue Les class d'appel a Splunk
  */
