@@ -89,7 +89,7 @@ class xymon_client extends moniteur {
 	 * @param array $liste_class
 	 * @return xymon_client
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_xymon_client_param ( $liste_class ["titre"] );
@@ -477,7 +477,8 @@ class xymon_client extends moniteur {
 	 * @param string $echo Affiche le help
 	 * @return string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

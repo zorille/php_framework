@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -30,15 +31,16 @@ class Rack extends FunctionalCI {
 	 * Instancie un objet de type Rack. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Rack
 	 */
 	static function &creer_Rack(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): Rack
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Rack ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -54,7 +56,7 @@ class Rack extends FunctionalCI {
 	 * @return Rack
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Rack' )
 			->champ_obligatoire_standard ()
@@ -69,7 +71,6 @@ class Rack extends FunctionalCI {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -80,9 +81,10 @@ class Rack extends FunctionalCI {
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return Rack
 	 */
-	public function champ_obligatoire_standard() {
+	public function champ_obligatoire_standard(): Rack
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -92,9 +94,13 @@ class Rack extends FunctionalCI {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Rack(
 			$name,
-			$org_name) {
+			$org_name): ci|bool|Rack
+	{
 		return $this->creer_oql ( array (
 				'friendlyname' => $name,
 				'organization_name' => $org_name
@@ -108,7 +114,8 @@ class Rack extends FunctionalCI {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_Rack(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = $this->prepare_standard_params ( $parametres );
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
@@ -141,7 +148,8 @@ class Rack extends FunctionalCI {
 	 * @return Rack
 	 */
 	public function creer_oql_Rack(
-			$fields = array ()) {
+		array $fields = array ()): Rack
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -163,12 +171,14 @@ class Rack extends FunctionalCI {
 	}
 
 	/**
-	 * Champs standards : name, organization_name/org_name, location_name, contacts_list
+	 * **Champs standards**: name, organization_name/org_name, location_name, contacts_list, power_reading_value, power_reading_date
 	 * @param array $parametres
-	 * @return \Zorille\itop\Rack
+	 * @return Rack
+	 * @throws Exception
 	 */
 	public function gestion_Rack(
-			$parametres) {
+		array $parametres): Rack
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Rack ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -182,9 +192,10 @@ class Rack extends FunctionalCI {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return Location
+	 * @return Location|null
 	 */
-	public function &getObjetItopLocation() {
+	public function &getObjetItopLocation(): ?Location
+	{
 		return $this->Location;
 	}
 
@@ -192,7 +203,8 @@ class Rack extends FunctionalCI {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopLocation(
-			&$Location) {
+			&$Location): static
+	{
 		$this->Location = $Location;
 		return $this;
 	}
@@ -203,11 +215,11 @@ class Rack extends FunctionalCI {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Rack :";
 		return $help;
 	}
 }
-?>

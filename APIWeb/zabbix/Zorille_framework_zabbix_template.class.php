@@ -43,11 +43,12 @@ class zabbix_template extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_template
 	 */
-	static function &creer_zabbix_template(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_template(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_template
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_template ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -60,9 +61,9 @@ class zabbix_template extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_template
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -74,7 +75,6 @@ class zabbix_template extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -83,10 +83,11 @@ class zabbix_template extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|zabbix_template True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		//Gestion des template
 		$template = $this->_valideOption ( array (
@@ -103,26 +104,27 @@ class zabbix_template extends zabbix_fonctions_standard {
 	 * 
 	 * @return array;
 	 */
-	public function creer_definition_template_create_ws() {
+	public function creer_definition_template_create_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$name = $this->getName ();
 		if ($name == "") {
 			$name = $this->getHost ();
 		}
-		$template = array (
+		return array (
 				"host" => $this->getHost (),
-				"name" => $name 
+				"name" => $name
 		);
-		
-		return $template;
 	}
 
 	/**
 	 * Creer un template dans zabbix
-	 * 
+	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_template() {
+	public function creer_template(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_template_create_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -134,14 +136,16 @@ class zabbix_template extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTemplateId() {
+	public function getTemplateId(): string
+	{
 		return $this->templateid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTemplateId($templateid) {
+	public function &setTemplateId($templateid): static
+	{
 		$this->templateid = $templateid;
 		return $this;
 	}
@@ -149,14 +153,16 @@ class zabbix_template extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getName() {
+	public function getName(): string
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setName($name) {
+	public function &setName($name): static
+	{
 		$this->name = $name;
 		return $this;
 	}
@@ -164,14 +170,16 @@ class zabbix_template extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHost() {
+	public function getHost(): string
+	{
 		return $this->host;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHost($host) {
+	public function &setHost($host): static
+	{
 		$this->host = $host;
 		return $this;
 	}
@@ -182,7 +190,8 @@ class zabbix_template extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -192,4 +201,3 @@ class zabbix_template extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

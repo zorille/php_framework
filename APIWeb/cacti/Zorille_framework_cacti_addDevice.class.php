@@ -205,11 +205,15 @@ class cacti_addDevice extends cacti_hosts {
 	 * Instancie un objet de type cacti_addDevice.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_addDevice
+	 * @throws Exception
 	 */
-	static function &creer_cacti_addDevice(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_addDevice(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_addDevice {
 		$objet = new cacti_addDevice ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -224,19 +228,19 @@ class cacti_addDevice extends cacti_hosts {
 	 * @param array $liste_class
 	 * @return cacti_addDevice
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
 	}
 
 	/*********************** Creation de l'objet *********************/
-	
+
 	/**
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -250,7 +254,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * Prepare la liste des variables specifique au merge.
 	 * @throws Exception
 	 */
-	public function prepareVariablescacti_addDevice() {
+	public function prepareVariablescacti_addDevice(): bool {
 		$this->onDebug ( "prepareVariablescacti_addDevice", 1 );
 		
 		// $this->setCommunity ( read_config_option ( "snmp_community" ) );
@@ -282,7 +286,7 @@ class cacti_addDevice extends cacti_hosts {
 	 *
 	 * @return boolean True le host existe, false le host n'existe pas.
 	 */
-	public function valide_host_description() {
+	public function valide_host_description(): bool {
 		if ($this->valide_host_by_description ( $this->getDescription () )) {
 			$this->onDebug ( "Host existe, on renvoi l'id de la machine.", 1 );
 			$this->setHostId ( $this->renvoi_hostid_by_description ( $this->getDescription () ) );
@@ -297,7 +301,7 @@ class cacti_addDevice extends cacti_hosts {
 	 *
 	 * @return boolean True le host existe, false le host n'existe pas.
 	 */
-	public function valide_host_ip() {
+	public function valide_host_ip(): bool {
 		$id = $this->renvoi_hostid_by_ip ( $this->getIp () );
 		if ($id !== false) {
 			$this->onDebug ( "IP existe, on renvoi l'id de la machine : " . $id, 1 );
@@ -314,7 +318,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @return boolean true tout est OK, false sinon
 	 * @throws Exception
 	 */
-	public function valide_SNMP() {
+	public function valide_SNMP(): bool {
 		if ($this->getSnmpVersion () < 1 || $this->getSnmpVersion () > 3) {
 			return $this->onError ( "Mauvaise version de SNMP : " . $this->getSnmpVersion (), "", 5006 );
 		} elseif ($this->getSnmpVersion () > 0) {
@@ -342,7 +346,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @return Integer/false Renvoi l'id du device, false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function executeCacti_AddDevice($update = false, $update_ref = "none") {
+	public function executeCacti_AddDevice($update = false, $update_ref = "none"): int {
 		// La description est oligatoire
 		if ($this->getDescription () == "") {
 			return $this->onError ( "Il faut une description.", "", 5003 );
@@ -358,16 +362,10 @@ class cacti_addDevice extends cacti_hosts {
 		if ($update) {
 			// Si le CI n'existe pas, on stoppe l'update
 			// La validation ajoute le numero du CI dans le HOSTId
-			switch ($update_ref) {
-				case "description" :
-					$valide = $this->valide_host_description ();
-					break;
-				case "ip" :
-				default :
-					//Par defaut on test l'ip
-					$valide = $this->valide_host_ip ();
-					break;
-			}
+			$valide = match ($update_ref) {
+				"description" => $this->valide_host_description(),
+				default => $this->valide_host_ip(),
+			};
 			if (! $valide) {
 				return $this->onError ( "Ce CI n'existe pas en base. Donc pas d'update possible", "", 5000 );
 			}
@@ -406,31 +404,31 @@ class cacti_addDevice extends cacti_hosts {
 	 * @return boolean true
 	 * @throws Exception
 	 */
-	public function reset_host() {
-		$this->setHostId ( - 1 );
-		$this->setDescription ( "ND" );
-		$this->setIp ( "ND" );
-		$this->setTemplate_id ( 0 );
-		$this->setSnmpVersion ( 1 );
-		$this->setCommunity ( "public" );
-		$this->setSnmpUsername ( "ND" );
-		$this->setSnmpPassword ( "ND" );
-		$this->setAuthproto ( "MD5" );
-		$this->setPrivpass ( "ND" );
-		$this->setPrivproto ( "DES" );
-		$this->setSNMPContext ( "" );
-		$this->setSNMPPort ( 161 );
-		$this->setSNMPTimeout ( 500 );
-		$this->setSnmpRetries ( 3 );
-		$this->setAvailability ( "snmp" );
-		$this->setDisabled ( 0 );
-		$this->setNote ( "" );
-		$this->setPingMethod ( "udp" );
-		$this->setPingPort ( 23 );
-		$this->setPingTimeout ( 400 );
+	public function reset_host(): bool {
+		$this->setHostId ( - 1 )
+			->setDescription ( "ND" )
+			->setIp ( "ND" )
+			->setTemplate_id ( 0 )
+			->setSnmpVersion ( 1 )
+			->setCommunity ( "public" )
+			->setSnmpUsername ( "ND" )
+			->setSnmpPassword ( "ND" )
+			->setAuthproto ( "MD5" )
+			->setPrivpass ( "ND" )
+			->setPrivproto ( "DES" )
+			->setSNMPContext ( "" )
+			->setSNMPPort ( 161 )
+			->setSNMPTimeout ( 500 )
+			->setSnmpRetries ( 3 )
+			->setAvailability ( "snmp" )
+			->setDisabled ( 0 )
+			->setNote ( "" )
+			->setPingMethod ( "udp" )
+			->setPingPort ( 23 )
+			->setPingTimeout ( 400 );
 		$this->setPingRetries ( 1 );
-		$this->setMaxOids ( 10 );
-		$this->setDeviceThreads ( 1 );
+		$this->setMaxOids ( 10 )
+			 ->setDeviceThreads ( 1 );
 		
 		return true;
 	}
@@ -441,14 +439,14 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHostId() {
+	public function getHostId(): int {
 		return $this->host_id;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostId($host_id) {
+	public function &setHostId($host_id): static {
 		if (is_numeric ( $host_id )) {
 			$this->host_id = $host_id;
 		}
@@ -459,7 +457,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDescription() {
+	public function getDescription(): string {
 		return $this->description;
 	}
 
@@ -467,7 +465,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setDescription($description) {
+	public function &setDescription($description): bool|static {
 		if ($description != "") {
 			if ($description == "ND") {
 				$this->description = "";
@@ -475,7 +473,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->description = $description;
 			}
 		} else {
-			return $this->onError ( "le CI est obligatoire." );
+			$r = $this->onError ( "le CI est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -484,7 +483,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIp() {
+	public function getIp(): string {
 		return $this->ip;
 	}
 
@@ -492,7 +491,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setIp($ip) {
+	public function &setIp($ip): bool|static {
 		if ($ip != "") {
 			if ($ip == "ND") {
 				$this->ip = "";
@@ -500,7 +499,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->ip = $ip;
 			}
 		} else {
-			return $this->onError ( "l'IP est obligatoire." );
+			$r = $this->onError ( "l'IP est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -509,7 +509,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTemplate_id() {
+	public function getTemplate_id(): int|string {
 		return $this->template_id;
 	}
 
@@ -517,11 +517,12 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setTemplate_id($Template) {
+	public function &setTemplate_id($Template): bool|static {
 		if ($Template !== "") {
 			$this->template_id = $Template;
 		} else {
-			return $this->onError ( "le template_id est obligatoire." );
+			$r = $this->onError ( "le template_id est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -530,7 +531,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpVersion() {
+	public function getSnmpVersion(): int|string {
 		return $this->snmp_vers;
 	}
 
@@ -538,7 +539,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSnmpVersion($version) {
+	public function &setSnmpVersion($version): bool|static {
 		if ($version !== "") {
 			if ($version == "ND") {
 				$this->snmp_vers = "";
@@ -546,7 +547,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->snmp_vers = $version;
 			}
 		} else {
-			return $this->onError ( "la version SNMP est obligatoire." );
+			$r = $this->onError ( "la version SNMP est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -555,7 +557,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCommunity() {
+	public function getCommunity(): string {
 		return $this->community;
 	}
 
@@ -563,7 +565,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setCommunity($community) {
+	public function &setCommunity($community): bool|static {
 		if ($community !== "") {
 			if ($community == "ND") {
 				$this->community = "";
@@ -571,7 +573,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->community = $community;
 			}
 		} else {
-			return $this->onError ( "la community est obligatoire." );
+			$r = $this->onError ( "la community est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -580,7 +583,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpUsername() {
+	public function getSnmpUsername(): string {
 		return $this->snmp_username;
 	}
 
@@ -588,7 +591,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSnmpUsername($username) {
+	public function &setSnmpUsername($username): bool|static {
 		if ($username != "") {
 			if ($username == "ND") {
 				$this->snmp_username = "";
@@ -596,7 +599,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->snmp_username = $username;
 			}
 		} else {
-			return $this->onError ( "la username est obligatoire." );
+			$r = $this->onError ( "la username est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -605,7 +609,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpPassword() {
+	public function getSnmpPassword(): string {
 		return $this->snmp_password;
 	}
 
@@ -613,7 +617,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSnmpPassword($password) {
+	public function &setSnmpPassword($password): bool|static {
 		if ($password != "") {
 			if ($password == "ND") {
 				$this->snmp_password = "";
@@ -621,7 +625,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->snmp_password = $password;
 			}
 		} else {
-			return $this->onError ( "la password est obligatoire." );
+			$r = $this->onError ( "la password est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -630,7 +635,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAuthproto() {
+	public function getAuthproto(): string {
 		return $this->authproto;
 	}
 
@@ -638,7 +643,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setAuthproto($authproto) {
+	public function &setAuthproto($authproto): bool|static {
 		if ($authproto != "") {
 			if ($authproto == "ND") {
 				$this->authproto = "";
@@ -646,7 +651,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->authproto = $authproto;
 			}
 		} else {
-			return $this->onError ( "la authproto est obligatoire." );
+			$r = $this->onError ( "la authproto est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -655,7 +661,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrivproto() {
+	public function getPrivproto(): string {
 		return $this->privproto;
 	}
 
@@ -663,7 +669,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setPrivproto($privproto) {
+	public function &setPrivproto($privproto): bool|static {
 		if ($privproto !== "") {
 			if ($privproto == "ND") {
 				$this->privproto = "";
@@ -671,7 +677,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->privproto = $privproto;
 			}
 		} else {
-			return $this->onError ( "la privproto est obligatoire." );
+			$r = $this->onError ( "la privproto est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -680,7 +687,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrivpass() {
+	public function getPrivpass(): string {
 		return $this->privpass;
 	}
 
@@ -688,7 +695,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setPrivpass($privpass) {
+	public function &setPrivpass($privpass): bool|static {
 		if ($privpass !== "") {
 			if ($privpass == "ND") {
 				$this->privpass = "";
@@ -696,7 +703,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->privpass = $privpass;
 			}
 		} else {
-			return $this->onError ( "la privpass est obligatoire." );
+			$r = $this->onError ( "la privpass est obligatoire." );
+			return $r;
 		}
 		
 		return $this;
@@ -705,14 +713,14 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpContext() {
+	public function getSnmpContext(): string {
 		return $this->snmp_context;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSNMPContext($context) {
+	public function &setSNMPContext($context): static {
 		$this->snmp_context = $context;
 		
 		return $this;
@@ -721,7 +729,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpPort() {
+	public function getSnmpPort(): int {
 		return $this->snmp_port;
 	}
 
@@ -729,11 +737,12 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSNMPPort($port) {
+	public function &setSNMPPort($port): bool|static {
 		if (is_numeric ( $port )) {
 			$this->snmp_port = $port;
 		} else {
-			return $this->onError ( "Le port est de type integer" );
+			$r = $this->onError ( "Le port est de type integer" );
+			return $r;
 		}
 		
 		return $this;
@@ -742,7 +751,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpRetries() {
+	public function getSnmpRetries(): int {
 		return $this->snmp_retries;
 	}
 
@@ -750,11 +759,12 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSnmpRetries($snmp_retries) {
+	public function &setSnmpRetries($snmp_retries): bool|static {
 		if (is_numeric ( $snmp_retries )) {
 			$this->snmp_retries = $snmp_retries;
 		} else {
-			return $this->onError ( "SNMP retries doit etre de type integer." );
+			$r = $this->onError ( "SNMP retries doit etre de type integer." );
+			return $r;
 		}
 		
 		return $this;
@@ -763,7 +773,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpTimeout() {
+	public function getSnmpTimeout(): int {
 		return $this->snmp_timeout;
 	}
 
@@ -771,11 +781,12 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSNMPTimeout($snmp_timeout) {
+	public function &setSNMPTimeout($snmp_timeout): bool|static {
 		if (is_numeric ( $snmp_timeout )) {
 			$this->snmp_timeout = $snmp_timeout;
 		} else {
-			return $this->onError ( "Le timeout est de type integer" );
+			$r = $this->onError ( "Le timeout est de type integer" );
+			return $r;
 		}
 		
 		return $this;
@@ -784,7 +795,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAvailability() {
+	public function getAvailability(): string {
 		return $this->availability;
 	}
 
@@ -792,7 +803,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function setAvailability($availability) {
+	public function setAvailability($availability): bool|static {
 		switch ($availability) {
 			case "none" :
 			case "AVAIL_NONE" :
@@ -826,7 +837,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDisabled() {
+	public function getDisabled(): string {
 		return $this->disabled;
 	}
 
@@ -834,10 +845,11 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setDisabled($disable) {
+	public function &setDisabled($disable): bool|static {
 		/* validate the disable state */
 		if ($disable != 1 && $disable != 0) {
-			return $this->onError ( "Le flag est 0 ou 1 ($disable)" );
+			$r = $this->onError ( "Le flag est 0 ou 1 ($disable)" );
+			return $r;
 		}
 		
 		if ($disable == 0) {
@@ -852,14 +864,14 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNote() {
+	public function getNote(): string {
 		return $this->note;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNote($note) {
+	public function &setNote($note): static {
 		$this->note = $note;
 		
 		return $this;
@@ -868,14 +880,14 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMaxOids() {
+	public function getMaxOids(): string {
 		return $this->max_oids;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMaxOids($max_oids) {
+	public function &setMaxOids($max_oids): static {
 		$this->max_oids = $max_oids;
 		
 		return $this;
@@ -887,7 +899,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPingMethod() {
+	public function getPingMethod(): string {
 		return $this->ping_method;
 	}
 
@@ -895,7 +907,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setPingMethod($ping_method) {
+	public function &setPingMethod($ping_method): bool|static {
 		switch (strtolower ( $ping_method )) {
 			case "icmp" :
 				$this->ping_method = PING_ICMP;
@@ -907,7 +919,8 @@ class cacti_addDevice extends cacti_hosts {
 				$this->ping_method = PING_UDP;
 				break;
 			default :
-				return $this->onError ( "Ping method inconnue : " . $ping_method );
+				$r = $this->onError ( "Ping method inconnue : " . $ping_method );
+				return $r;
 		}
 		return $this;
 	}
@@ -915,7 +928,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPingPort() {
+	public function getPingPort(): int {
 		return $this->ping_port;
 	}
 
@@ -923,11 +936,12 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setPingPort($ping_port) {
+	public function &setPingPort($ping_port): bool|static {
 		if (is_numeric ( $ping_port )) {
 			$this->ping_port = $ping_port;
 		} else {
-			return $this->onError ( "Ping port doit etre de type integer." );
+			$r = $this->onError ( "Ping port doit etre de type integer." );
+			return $r;
 		}
 		return $this;
 	}
@@ -935,7 +949,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPingTimeout() {
+	public function getPingTimeout(): int {
 		return $this->ping_timeout;
 	}
 
@@ -943,7 +957,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function setPingTimeout($ping_timeout) {
+	public function setPingTimeout($ping_timeout): bool {
 		if (is_numeric ( $ping_timeout )) {
 			$this->ping_timeout = $ping_timeout;
 		} else {
@@ -955,7 +969,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPingRetries() {
+	public function getPingRetries(): int {
 		return $this->ping_retries;
 	}
 
@@ -963,7 +977,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function setPingRetries($ping_retries) {
+	public function setPingRetries($ping_retries): bool {
 		if (is_numeric ( $ping_retries )) {
 			$this->ping_retries = $ping_retries;
 		} else {
@@ -975,7 +989,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDeviceThreads() {
+	public function getDeviceThreads(): int {
 		return $this->device_threads;
 	}
 
@@ -983,7 +997,7 @@ class cacti_addDevice extends cacti_hosts {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function setDeviceThreads($device_threads) {
+	public function setDeviceThreads($device_threads): bool {
 		if (is_numeric ( $device_threads )) {
 			$this->device_threads = $device_threads;
 		} else {
@@ -995,7 +1009,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getHostTemplatesData() {
+	public function &getHostTemplatesData(): ?cacti_hostsTemplates {
 		if (is_null ( $this->templates_data )) {
 			$this->setHostTemplatesData ( cacti_hostsTemplates::creer_cacti_hostsTemplates ( $this->getListeOptions (), $this->getSortEnErreur () ) );
 		}
@@ -1005,7 +1019,7 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostTemplatesData($hostTemplates_data) {
+	public function &setHostTemplatesData($hostTemplates_data): static {
 		if ($hostTemplates_data instanceof cacti_hostsTemplates) {
 			$this->templates_data = $hostTemplates_data;
 		}
@@ -1016,14 +1030,13 @@ class cacti_addDevice extends cacti_hosts {
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -1034,4 +1047,3 @@ class cacti_addDevice extends cacti_hosts {
 		return $help;
 	}
 }
-?>

@@ -23,11 +23,13 @@ class vmwareDatacenter extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareDatacenter
+	 * @throws Exception
 	 */
-	static function &creer_vmwareDatacenter(&$liste_option, &$ObjectVmwareWsclient, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareDatacenter(options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwareDatacenter
+	{
 		$objet = new vmwareDatacenter ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -43,7 +45,7 @@ class vmwareDatacenter extends vmwareManagedEntity {
 	 * @return vmwareDatacenter
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -56,7 +58,6 @@ class vmwareDatacenter extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -68,11 +69,12 @@ class vmwareDatacenter extends vmwareManagedEntity {
 	/**
 	 * Fait un PowerOn sur une liste de VMs de type VirtualMachine
 	 * @param array $VMs liste de ManagedObjectReference de type VirtualMachine
-	 * @param DrsBehavior $OverrideAutomationLevel Default value: current behavior ou fullyAutomated/partiallyAutomated/manual
+	 * @param string|DrsBehavior $OverrideAutomationLevel Default value: current behavior ou fullyAutomated/partiallyAutomated/manual
 	 * @param boolean $ReserveResources
-	 * @return array|false
+	 * @return bool
 	 */
-	public function PowerOnMultiVM_Task($VMs, $OverrideAutomationLevel = "current behavior ", $ReserveResources = false) {
+	public function PowerOnMultiVM_Task(array $VMs, DrsBehavior|string $OverrideAutomationLevel = "current behavior ", bool $ReserveResources = false): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this();
@@ -94,23 +96,24 @@ class vmwareDatacenter extends vmwareManagedEntity {
 
 	/**
 	 * Prepare les optionValue pour le MultiPowerOn
-	 * @param DrsBehavior $OverrideAutomationLevel Default value: current behavior ou fullyAutomated/partiallyAutomated/manual
+	 * @param string|DrsBehavior $OverrideAutomationLevel Default value: current behavior ou fullyAutomated/partiallyAutomated/manual
 	 * @param boolean $ReserveResources
 	 * @return array (OptionValue)
 	 */
-	public function prepare_ClusterPowerOnVmOption($OverrideAutomationLevel = "current behavior ", $ReserveResources = false) {
+	public function prepare_ClusterPowerOnVmOption(DrsBehavior|string $OverrideAutomationLevel = "current behavior ", bool $ReserveResources = false): array
+	{
 		$options = array ();
 		if ($OverrideAutomationLevel != "current behavior ") {
-			array_push ( $options, array (
-					"key" => "OverrideAutomationLevel",
-					"value" => $OverrideAutomationLevel 
-			) );
+			$options[] = array(
+				"key" => "OverrideAutomationLevel",
+				"value" => $OverrideAutomationLevel
+			);
 		}
-		if ($ReserveResources != false) {
-			array_push ( $options, array (
-					"key" => "ReserveResources",
-					"value" => $ReserveResources 
-			) );
+		if ($ReserveResources) {
+			$options[] = array(
+				"key" => "ReserveResources",
+				"value" => $ReserveResources
+			);
 		}
 		return $options;
 	}
@@ -122,14 +125,16 @@ class vmwareDatacenter extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getDatacenter() {
+	public function &getDatacenter(): stdClass
+	{
 		return $this->getManagedObject();
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDatacenter($Datacenter) {
+	public function &setDatacenter($Datacenter): vmwareDatacenter
+	{
 		return $this->setManagedObject($Datacenter);
 	}
 
@@ -139,7 +144,7 @@ class vmwareDatacenter extends vmwareManagedEntity {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -147,5 +152,3 @@ class vmwareDatacenter extends vmwareManagedEntity {
 		return $help;
 	}
 }
-
-?>

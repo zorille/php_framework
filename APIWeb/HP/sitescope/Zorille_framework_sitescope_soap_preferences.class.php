@@ -57,7 +57,7 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * @param array $liste_class
 	 * @return sitescope_soap_preferences
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -70,7 +70,6 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet 
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de sitescope_datas
@@ -82,8 +81,10 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 *
 	 * @param string $nom nom du sitescope a connecter
 	 * @return bool TRUE si connexion ok, FALSE sinon
+	 * @throws Exception
 	 */
-	public function connect($nom = "") {
+	public function connect(string $nom = ""): bool
+	{
 		return $this->connexion ( $nom, $this->getWsdlNom () );
 	}
 
@@ -95,7 +96,8 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * @param array $arbre_machines tableau a mettre a jour avec les informations recoltees
 	 * @return sitescope_soap_preferences
 	 */
-	public function retrouve_donnees_machine(&$liste_OS, $OS, $flag_credentials, &$arbre_machines) {
+	public function retrouve_donnees_machine(stdClass &$liste_OS, string $OS, bool $flag_credentials, array &$arbre_machines): static
+	{
 		$liste_creds = $this->getArbreCredentials ();
 		
 		if (is_object ( $liste_OS ) && isset ( $liste_OS->item )) {
@@ -121,10 +123,11 @@ class sitescope_soap_preferences extends sitescope_datas {
 	/**
 	 * Permet de recuperer la liste des machines dans sitescope
 	 *
-	 * @return sitescope_soap_preferences|False en cas d'erreur
+	 * @return sitescope_soap_preferences en cas d'erreur
 	 * @throws Exception
 	 */
-	public function retrouve_arbre_machines() {
+	public function retrouve_arbre_machines(): static
+	{
 		$credentials = $this->retrouve_arbre_credentials ();
 		$arbre_machines = array ();
 		
@@ -155,10 +158,11 @@ class sitescope_soap_preferences extends sitescope_datas {
 	/**
 	 *
 	 * @param stdClass $liste_credentials
-	 * @param array $arbre_machines tableau a mettre a jour avec les informations recoltees
+	 * @param $arbre_credentials
 	 * @return sitescope_soap_preferences
 	 */
-	public function retrouve_donnees_credentials(&$liste_credentials, &$arbre_credentials) {
+	public function retrouve_donnees_credentials(stdClass &$liste_credentials, &$arbre_credentials): static
+	{
 		// Pour chaque machine, on retrouve le detail des informations
 		if (is_object ( $liste_credentials ) && isset ( $liste_credentials->item )) {
 			if (isset ( $liste_credentials->item ["_id"] )) {
@@ -179,7 +183,8 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function retrouve_arbre_credentials() {
+	public function retrouve_arbre_credentials(): bool
+	{
 		$liste_credential = $this->applique_requete_soap ( "getInstances", array (
 				"CredentialsInstancePreferences",
 				"",
@@ -199,11 +204,10 @@ class sitescope_soap_preferences extends sitescope_datas {
 	/**
 	 * Permet de recuperer la liste des preferences dans sitescope
 	 *
-	 * @param soap $soapClient_preferences
 	 * @return false|array
-	 * @throws Exception
 	 */
-	public function retrouve_liste_preferences() {
+	public function retrouve_liste_preferences(): bool|array
+	{
 		$liste_Preferences = $this->applique_requete_soap ( "getPreferenceTypes", array () );
 		
 		$arbre_Preferences = array ();
@@ -222,7 +226,8 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * @param array $arbre_de_sortie tableau a mettre a jour avec les informations recoltees
 	 * @return sitescope_soap_preferences
 	 */
-	public function retrouve_donnees_instances(&$liste_donnees, &$arbre_de_sortie) {
+	public function retrouve_donnees_instances(stdClass &$liste_donnees, array &$arbre_de_sortie): static
+	{
 		// Pour chaque machine, on retrouve le detail des informations
 		if (is_object ( $liste_donnees ) && isset ( $liste_donnees->item )) {
 			if (! isset ( $liste_donnees->item [0] )) {
@@ -250,7 +255,8 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * @return boolean|array
 	 * @throws Exception
 	 */
-	public function retrouve_toutes_les_preferences() {
+	public function retrouve_toutes_les_preferences(): bool|array
+	{
 		$liste_preferences = $this->retrouve_liste_preferences ();
 		
 		$liste_prefs = array ();
@@ -286,14 +292,16 @@ class sitescope_soap_preferences extends sitescope_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getArbreMachines() {
+	public function getArbreMachines(): array
+	{
 		return $this->arbre_machines;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setArbreMachines($arbre_machines) {
+	public function &setArbreMachines($arbre_machines): static
+	{
 		$this->arbre_machines = $arbre_machines;
 		
 		return $this;
@@ -302,14 +310,16 @@ class sitescope_soap_preferences extends sitescope_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getArbreCredentials() {
+	public function getArbreCredentials(): array
+	{
 		return $this->arbre_credentials;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setArbreCredentials($arbre_credentials) {
+	public function &setArbreCredentials($arbre_credentials): static
+	{
 		$this->arbre_credentials = $arbre_credentials;
 		
 		return $this;
@@ -318,7 +328,8 @@ class sitescope_soap_preferences extends sitescope_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsdlNom() {
+	public function getWsdlNom(): string
+	{
 		return $this->wsdl;
 	}
 
@@ -330,7 +341,8 @@ class sitescope_soap_preferences extends sitescope_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -338,4 +350,4 @@ class sitescope_soap_preferences extends sitescope_datas {
 		return $help;
 	}
 }
-?>
+

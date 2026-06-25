@@ -6,6 +6,8 @@
  */
 namespace Zorille\veeamspc;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -27,14 +29,14 @@ class organizations extends ci {
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
 	private $liste_organizations = null;
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
 	private $liste_includes = null;
 
@@ -45,15 +47,16 @@ class organizations extends ci {
 	 * Instanorganizationse un objet de type organizations. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return organizations
 	 */
 	static function &creer_veeamspc_organizations(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): organizations
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new organizations ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -69,7 +72,7 @@ class organizations extends ci {
 	 * @return organizations
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -79,45 +82,49 @@ class organizations extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de organizations
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Recupere l'id du organization, l'ajoute à l'objet et renvoi l'Id
-	 * @return string
+	 * @param $organization
+	 * @return string|null
 	 * @throws Exception
 	 */
 	public function recupere_id_de_organization(
-			$organization) {
+			$organization): ?string
+	{
 		$this->setOrganizationId ( $this->recupere_instanceUid ( $organization ) );
 		return $this->getOrganizationId ();
 	}
 
 	/**
 	 * Recupere le nom du organization
+	 * @param $organization
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_du_organization(
-			$organization) {
+			$organization): string
+	{
 		return ( string ) $organization->name;
 	}
 
 	/**
 	 * Permet de trouver la liste des organizations dans veeamspc et enregistre les donnees des organizations dans l'objet
+	 * @param array $params
 	 * @return organizations
 	 * @throws Exception
 	 */
 	public function retrouve_organizations(
-			$params = array ()) {
+		array $params = array ()): organizations
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$organizations = array ();
 		while ( ! $this->getObjetVeeamWsclientRest ()
@@ -142,11 +149,11 @@ class organizations extends ci {
 	 * @throws Exception
 	 */
 	public function listOrganizations(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|array|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getObjetVeeamWsclientRest ()
+		return $this->getObjetVeeamWsclientRest ()
 			->getMethod ( $this->organizations_list_uri (), $params );
-		return $resultat;
 	}
 
 	/**
@@ -154,11 +161,13 @@ class organizations extends ci {
 	 */
 	/**
 	 * Verifie qu'un organization id est rempli/existe
+	 * @param bool $error
 	 * @return boolean
 	 * @throws Exception
 	 */
 	public function valide_organizationid(
-			$error = true) {
+			$error = true): bool
+	{
 		if (empty ( $this->getOrganizationId () )) {
 			$this->onDebug ( $this->getOrganizationId (), 2 );
 			if ($error) {
@@ -169,12 +178,17 @@ class organizations extends ci {
 		return true;
 	}
 
-	public function organizations_list_uri() {
+	public function organizations_list_uri(): string
+	{
 		return '/organizations';
 	}
 
-	public function organization_id_uri() {
-		if ($this->valide_organizationid () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function organization_id_uri(): bool|string
+	{
+		if (!$this->valide_organizationid()) {
 			return $this->onError ( "Il n'y pas d'id d'organization selectionne" );
 		}
 		return $this->organizations_list_uri () . '/' . $this->getOrganizationId ();
@@ -186,7 +200,8 @@ class organizations extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOrganizationId() {
+	public function getOrganizationId(): ?string
+	{
 		return $this->organization_id;
 	}
 
@@ -194,7 +209,8 @@ class organizations extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setOrganizationId(
-			$organization_id) {
+			$organization_id): static
+	{
 		$this->organization_id = $organization_id;
 		return $this;
 	}
@@ -202,7 +218,8 @@ class organizations extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeOrganizations() {
+	public function getListeOrganizations(): SimpleXMLElement|null|array
+	{
 		return $this->liste_organizations;
 	}
 
@@ -210,7 +227,8 @@ class organizations extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeOrganizations(
-			$liste_organizations) {
+			$liste_organizations): static
+	{
 		$this->liste_organizations = $liste_organizations;
 		return $this;
 	}
@@ -221,11 +239,10 @@ class organizations extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "organizations :";
 		return $help;
 	}
 }
-?>

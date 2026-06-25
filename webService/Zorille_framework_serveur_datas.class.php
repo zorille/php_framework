@@ -51,7 +51,7 @@ class serveur_datas extends abstract_log {
 	 * @param array $liste_class
 	 * @return serveur_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetUtilisateurs ( utilisateurs::creer_utilisateurs ( $liste_class ["options"] ) );
@@ -76,9 +76,9 @@ class serveur_datas extends abstract_log {
 	 * Extrait des parametres d'un liste d'option
 	 * @codeCoverageIgnore
 	 * @param string|array $chemin_option        	
-	 * @return boolean string array
+	 * @return boolean|string|array
 	 */
-	protected function _valideOption($chemin_option) {
+	protected function _valideOption($chemin_option): mixed {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( $chemin_option ) === false) {
@@ -180,7 +180,8 @@ class serveur_datas extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

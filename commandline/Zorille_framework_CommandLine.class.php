@@ -4,7 +4,9 @@
  * @author dvargas
  */
 namespace Zorille\framework;
+
 use Zorille\framework\relation_fichier_machine as relation_fichier_machine;
+use Exception;
 /**
  * class CommandLine
  * @package Lib
@@ -59,11 +61,16 @@ class CommandLine extends abstract_log {
 	 * Instancie un objet de type CommandLine.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return CommandLine
+	 * @throws Exception
 	 */
-	static function &creer_CommandLine(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_CommandLine(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): CommandLine
+	{
 		$objet = new CommandLine ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -77,8 +84,10 @@ class CommandLine extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return CommandLine
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -90,14 +99,10 @@ class CommandLine extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
 	 * @param string $entete entete pour les logs.
-	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct($sort_en_erreur = false, string $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
-		
-		
-		return true;
 	}
 
 	/**
@@ -107,9 +112,10 @@ class CommandLine extends abstract_log {
 	 * @param array $liste_fichiers
 	 * @param string $separateur separateur en tre les fichier.
 	 * @param Bool $is_file_exist le fichier de la liste doit exister, sinon (false) il est remplace par un nom automatique.
-	 * @return string Lignes contenant la liste des fichiers separe par $separateur.
+	 * @return bool|string Lignes contenant la liste des fichiers separe par $separateur.
 	 */
-	public function creerListeFichiers($liste_fichiers, $separateur = ",", $is_file_exist = false) {
+	public function creerListeFichiers(array $liste_fichiers, string $separateur = ",", bool $is_file_exist = false): bool|string
+	{
 		$liste_ligne_commande = false;
 		$taille_liste_fichier = count ( $liste_fichiers );
 		
@@ -146,9 +152,10 @@ class CommandLine extends abstract_log {
 	 * Par defaut, renvoi "fichier_{pid}_{random}" si le nom est vide.
 	 *
 	 * @param string|relation_fichier_machine $fichier Nom du fichier.
-	 * @return string nom du fichier.
+	 * @return relation_fichier_machine|string nom du fichier.
 	 */
-	public function renvoieNomFichier($fichier) {
+	public function renvoieNomFichier($fichier): \Zorille\framework\relation_fichier_machine|string
+	{
 		$nom_final = $this->extraireFichier ( $fichier );
 		
 		if ($nom_final === "") {
@@ -163,9 +170,10 @@ class CommandLine extends abstract_log {
 	 * sinon renvoi le fichier donne en argument.
 	 *
 	 * @param string|relation_fichier_machine $fichier Nom du fichier.
-	 * @return string nom du fichier.
+	 * @return relation_fichier_machine|string nom du fichier.
 	 */
-	public function extraireFichier($fichier) {
+	public function extraireFichier($fichier): \Zorille\framework\relation_fichier_machine|string
+	{
 		//On accepte une structure standard de fichier
 		if ($fichier instanceof relation_fichier_machine) {
 			$nom_final = $fichier->renvoi_parametre_fichier ( "dossier" ) . "/" . $fichier->renvoi_parametre_fichier ( "nom" );
@@ -180,10 +188,13 @@ class CommandLine extends abstract_log {
 	 * Separe les objet de la liste par un separateur.
 	 *
 	 * @param array $liste Liste des valeurs.
-	 * @param string $param Parametre de separation, par defaut "," .
+	 * @param string $separateur
+	 * @param bool $ajoute_guillement
 	 * @return string ligne forme avec le parametre.
+	 * @throws Exception
 	 */
-	public function ConcatDataWithValue($liste, $separateur = ",", $ajoute_guillement = true) {
+	public function ConcatDataWithValue(array $liste, string $separateur = ",", bool $ajoute_guillement = true): string
+	{
 		$retour = "";
 		if (is_array ( $liste )) {
 			foreach ( $liste as $data ) {
@@ -213,9 +224,11 @@ class CommandLine extends abstract_log {
 	 * @param string $valeur
 	 * @param Bool $mandatory parametre obligatoire ou non.
 	 * @param String $separateur separateur entre le parametre et la valeur
-	 * @return String
+	 * @return string|null
+	 * @throws Exception
 	 */
-	public function AddParam($param, $valeur, $mandatory = false, $separateur = " ") {
+	public function AddParam(string $param, string $valeur, bool $mandatory = false, string $separateur = " "): ?string
+	{
 		if ($valeur !== false && $valeur !== "") {
 			return " " . $param . $separateur . $valeur;
 		} elseif ($mandatory) {
@@ -232,8 +245,10 @@ class CommandLine extends abstract_log {
 	 *
 	 * @param string $service nom du service.
 	 * @return int|false le code retour systeme de l'execution, false en cas d'erreur php.
+	 * @throws Exception
 	 */
-	public function executeCommandLine($service) {
+	public function executeCommandLine(string $service): bool|int
+	{
 		$this->onInfo ( "Execute CMD : " . $this->getCmd () );
 		if ($this->getCmd () === "") {
 			$this->onDebug ( "CommandLine vide, retour FALSE", 2 );
@@ -262,7 +277,8 @@ class CommandLine extends abstract_log {
 	 * @param array &$tableau_output Pointeur sur les logs de merge.
 	 * @return Bool true si OK, false sinon.
 	 */
-	public function AfficheLogs($tableau_output) {
+	public function AfficheLogs(array $tableau_output): bool
+	{
 		if (is_array ( $tableau_output )) {
 			foreach ( $tableau_output as $ligne ) {
 				$this->onInfo ( $ligne );
@@ -278,14 +294,15 @@ class CommandLine extends abstract_log {
 	 * @param array &$tableau_output Pointeur sur les logs de merge.
 	 * @return Bool true si OK, false sinon.
 	 */
-	public function recupereInfoDesLogs(&$tableau_output) {
+	public function recupereInfoDesLogs(array &$tableau_output): bool
+	{
 		if (is_array ( $tableau_output )) {
 			foreach ( $tableau_output as $ligne ) {
-				if (strpos ( $ligne, "[Ram]" ) !== false) {
+				if (str_contains($ligne, "[Ram]")) {
 					$this->setRamMo ( str_replace ( "[Ram]", "", $ligne ) );
-				} elseif (strpos ( $ligne, "[Lines]" ) !== false) {
+				} elseif (str_contains($ligne, "[Lines]")) {
 					$this->setNbLigne ( str_replace ( "[Lines]", "", $ligne ) );
-				} elseif (strpos ( $ligne, "[Time]" ) !== false) {
+				} elseif (str_contains($ligne, "[Time]")) {
 					$this->setTime ( str_replace ( "[Time]", "", $ligne ) );
 				}
 			}
@@ -310,14 +327,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNbLigne() {
+	public function getNbLigne(): array|int
+	{
 		return $this->nb_ligne_merged;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNbLigne($nb_ligne_merged, $serial = "NoSerial") {
+	public function &setNbLigne($nb_ligne_merged, $serial = "NoSerial"): static
+	{
 		$this->nb_ligne_merged [$serial] = $nb_ligne_merged;
 		
 		return $this;
@@ -326,14 +345,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRam() {
+	public function getRam(): int
+	{
 		return $this->ram_Mo;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRamMo($ram) {
+	public function &setRamMo($ram): static
+	{
 		if ($ram > $this->ram_Mo) {
 			$this->ram_Mo = $ram;
 		}
@@ -344,7 +365,8 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRamOctet($ram) {
+	public function &setRamOctet($ram): static
+	{
 		$fonctions_standards = new fonctions_standards ();
 		$coef = $fonctions_standards->renvoi_coef_octet ( $ram );
 		$ram_tempo = ceil ( ($ram [0] * $coef) / (1024 * 1024) );
@@ -356,14 +378,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTime() {
+	public function getTime(): int
+	{
 		return $this->time;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTime($time) {
+	public function &setTime($time): static
+	{
 		if ($time == "0") {
 			$this->time = "1";
 		} else {
@@ -376,14 +400,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNumbers() {
+	public function getNumbers(): array
+	{
 		return $this->numbers;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNumbers($nom, $numbers) {
+	public function &setNumbers($nom, $numbers): static
+	{
 		if ($nom != "") {
 			$this->numbers [$nom] = $numbers;
 		}
@@ -394,14 +420,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWorkspace() {
+	public function getWorkspace(): string
+	{
 		return $this->workspace;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setWorkspace($workspace) {
+	public function &setWorkspace($workspace): static
+	{
 		if ($workspace != "") {
 			$this->workspace = $workspace;
 		}
@@ -412,14 +440,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCmd() {
+	public function getCmd(): string
+	{
 		return $this->cmd;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCmd($cmd) {
+	public function &setCmd($cmd): static
+	{
 		$this->cmd = $cmd;
 		
 		return $this;
@@ -428,14 +458,16 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getlogs() {
+	public function getlogs(): string
+	{
 		return $this->log_retour;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setlogs($logs) {
+	public function &setlogs($logs): static
+	{
 		$this->log_retour = $logs;
 		
 		return $this;
@@ -444,7 +476,8 @@ class CommandLine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &addToCmd($cmd) {
+	public function &addToCmd($cmd): static
+	{
 		if ($cmd != "") {
 			$this->cmd .= $cmd;
 		}
@@ -453,14 +486,14 @@ class CommandLine extends abstract_log {
 	}
 
 	/******************************* ACCESSEURS ********************************/
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -469,4 +502,3 @@ class CommandLine extends abstract_log {
 		return $help;
 	}
 }
-?>

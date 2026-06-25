@@ -6,6 +6,7 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -23,15 +24,16 @@ class Host extends Hosts {
 	 * Instancie un objet de type Host. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return $this
+	 * @throws Exception
 	 */
 	static function &creer_Host(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Host|static {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Host ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -45,9 +47,10 @@ class Host extends Hosts {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->champ_obligatoire_standard ()
 			->setFormat ( 'Host' );
@@ -58,13 +61,12 @@ class Host extends Hosts {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -76,7 +78,7 @@ class Host extends Hosts {
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
 	 * @return $this
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'host_alias' => false,
@@ -99,21 +101,19 @@ class Host extends Hosts {
 	 * @return array liste des parametres au format coservit
 	 */
 	public function prepare_params_Host(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				default :
-			}
-		}
-		return $params;
+		array $parametres): array {
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
 	 * ******************************* Host URI ******************************
 	 */
-	public function host_id_uri() {
-		if ($this->valide_item_id () == false) {
+
+	/**
+	 * @throws Exception
+	 */
+	public function host_id_uri(): bool|string {
+		if (!$this->valide_item_id()) {
 			return $this->onError ( "Il n'y pas d'id de Host selectionne" );
 		}
 		return $this->hosts_list_uri () . '/' . $this->getId ();
@@ -122,11 +122,15 @@ class Host extends Hosts {
 	/**
 	 * ******************************* Coservit Host *********************************
 	 */
+
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_host(
-			$params = array ()) {
+			$params = array ()): Host|bool {
 		$this->onDebug ( __METHOD__, 1 );
 		if (empty ( $this->getId () )) {
-			return $this->onError ( "Il faut un ID pour recuperer les donnees d'un host", "", 1 );
+			return $this->onError ( "Il faut un ID pour recuperer les donnees d'un host" );
 		}
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->host_id_uri (), $params );
@@ -140,9 +144,10 @@ class Host extends Hosts {
 	 * Creer un host la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande host. (parametres obligatoires) : 'host_alias',"host_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function creerHost(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Host ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -159,9 +164,10 @@ class Host extends Hosts {
 	 * Update un host de la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande host. (parametres obligatoires) : 'host_alias',"host_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function updateHost(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Host ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -173,11 +179,12 @@ class Host extends Hosts {
 	/**
 	 * Delete un host
 	 * @return $this
+	 * @throws Exception
 	 */
-	public function deleteHost() {
+	public function deleteHost(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
-			->deleteMethod ( $this->host_id_uri (), array () );
+			->deleteMethod ( $this->host_id_uri () );
 		return $this->setDonnees ( $resultat );
 	}
 
@@ -190,11 +197,11 @@ class Host extends Hosts {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "Host :";
+		$help [__CLASS__] ["text"] = [
+			'Host :'
+		];
 		return $help;
 	}
 }
-?>

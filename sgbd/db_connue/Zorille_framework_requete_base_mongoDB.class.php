@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
 use \MongoCursor as MongoCursor;
 use \MongoDate as MongoDate;
 /**
@@ -34,11 +35,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * Instancie un objet de type requete_base_mongoDB.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param string $machine
+	 * @param string $user
+	 * @param string $password
+	 * @param int $port
+	 * @param array $options
+	 * @param string $maj_bd
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return requete_base_mongoDB
 	 */
-	static function &creer_requete_base_mongoDB(&$liste_option, $machine = "", $user = "", $password = "",$port=27017,$options=array(),$maj_bd="oui", $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_requete_base_mongoDB(options &$liste_option, string $machine = "", string $user = "", string $password = "", int $port=27017, array $options=array(), $maj_bd="oui", bool|string $sort_en_erreur = false, string $entete = __CLASS__): requete_base_mongoDB
+	{
 		$objet = new requete_base_mongoDB ( $machine, $user, $password, $port, $options,$maj_bd, $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -53,7 +61,7 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * @param array $liste_class
 	 * @return requete_base_mongoDB
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -67,13 +75,14 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * @param string $user User de connexion.
 	 * @param string $password Password pour le user.
 	 * @param int $port Port de connexion. Par defaut : 27017
-	 * @param array $options Options de connexion.
 	 * @param string $database Nom de la base a connecter.
-	 * @param string|bool $maj_bd Prend les valeurs oui/non
-	 * @param string $stop_en_erreur Prend les valeurs oui/non
+	 * @param array $options Options de connexion.
 	 * @param string $maj_bd Prend les valeurs oui/non
+	 * @param string $stop_on_erreur
+	 * @param string $entete
+	 * @throws Exception
 	 */
-	public function __construct($machine="",$user="",$password="",$port=27017,$database="",$options=array(),$maj_bd="oui",$stop_on_erreur="oui", $entete = __CLASS__)
+	public function __construct($machine="", $user="", $password="", $port=27017, $database="", $options=array(), $maj_bd="oui", string $stop_on_erreur="oui", string $entete = __CLASS__)
 	{
 		//Gestion de abstract_log
 		parent::__construct($machine,$user,$password,$port,$options,$stop_on_erreur, $entete);
@@ -96,18 +105,20 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getextractsCollection(){
+	public function getextractsCollection(): string
+	{
 		return 'extracts';
 	}
 	/**
 	 * Cree et applique une requete de type select sur la collection extracts.
 	 *
-	 * @param int $id Valeur du champ clientid si necessaire.
+	 * @param int|string $id Valeur du champ clientid si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_extracts($id="",$nom='',
-			$date="",$serial="",$format="",$order="") {
+	public function requete_select_extracts(int|string $id="", $nom='',
+	                                                   $date="", $serial="", $format="", $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -133,14 +144,15 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection extracts.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $date    Date du fichier
-	 * @param string $serial  Serial du fichier
-	 * @param string $format  Peut-etre day/week/month/quarter
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param string $nom Nom du fichier
+	 * @param string $date Date du fichier
+	 * @param string $serial Serial du fichier
+	 * @param string $format Peut-etre day/week/month/quarter
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function requete_insere_dans_extracts($nom,$date,
-			$serial,$format) {
+	public function requete_insere_dans_extracts(string $nom, string $date,
+	                                             string $serial, string $format): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"nom",(string) $nom);
@@ -168,7 +180,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 */
 	public function requete_update_dans_extracts($id="",
 			$date="__no_update",$serial="__no_update",
-			$format="__no_update") {
+			$format="__no_update"): bool|int
+	{
 
 		$set=array();
 		if($date!=="__no_update"){
@@ -197,10 +210,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection extracts.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_extracts($id="") {
+	public function vide_extracts(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -220,7 +234,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getmergedsCollection(){
+	public function getmergedsCollection(): string
+	{
 		return 'mergeds';
 	}
 	/**
@@ -231,7 +246,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
 	public function requete_select_mergeds($id="",$nom='',
-			$date="",$num_rotate="",$serial="",$nblignes="",$order="") {
+			$date="",$num_rotate="",$serial="",$nblignes="",$order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -265,7 +281,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * @return int 1 vaut OK, 0 vaut false.
 	 */
 	public function requete_insere_dans_mergeds($nom,$date,$num_rotate,
-			$serial,$nblignes) {
+			$serial,$nblignes): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"nom",(string) $nom);
@@ -290,11 +307,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection mergeds.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $date
+	 * @param string $num_rotate
+	 * @param string $serial
+	 * @param string $nblignes
+	 * @param bool $insertNotExist
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_mergeds($id="",
-			$date="__no_update",$num_rotate="__no_update",$serial="__no_update",
-			$nblignes="__no_update",$insertNotExist=false) {
+	public function requete_update_dans_mergeds(string $id="",
+	                                            string $date="__no_update", $num_rotate="__no_update", $serial="__no_update",
+	                                            string $nblignes="__no_update", $insertNotExist=false): bool|int
+	{
 
 		$set=array();
 		if($date!=="__no_update"){
@@ -324,10 +348,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection mergeds.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_mergeds($id="") {
+	public function vide_mergeds($id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -347,7 +372,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getnoeudsCollection(){
+	public function getnoeudsCollection(): string
+	{
 		return 'noeuds';
 	}
 	/**
@@ -358,7 +384,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
 	public function requete_select_noeuds($id="",$nom='',
-			$date="",$num_rotate="",$noeud="",$service="",$type="noeud",$order="") {
+			$date="",$num_rotate="",$noeud="",$service="",$type="noeud",$order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -386,15 +413,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection noeuds.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $date    Date du fichier
+	 * @param string $nom Nom du fichier
+	 * @param string $date Date du fichier
 	 * @param int $num_rotate Numero de rotate du fichier
-	 * @param string $noeud   Noeud du fichier
+	 * @param string $noeud Noeud du fichier
 	 * @param string $service Service du fichier
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param string $type
+	 * @param int $nblignes
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function requete_insere_dans_noeuds($nom,$date,$num_rotate,
-			$noeud,$service,$type="noeud",$nblignes=1) {
+	public function requete_insere_dans_noeuds(string $nom, string $date, int $num_rotate,
+	                                           string $noeud, string $service, string $type="noeud", int $nblignes=1): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"nom",(string) $nom);
@@ -425,7 +455,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 */
 	public function requete_update_dans_noeuds($id="",
 			$date="__no_update",$num_rotate="__no_update",$noeud="__no_update",
-			$service="__no_update",$type="__no_update") {
+			$service="__no_update",$type="__no_update"): bool|int
+	{
 
 		$set=array();
 		if($date!=="__no_update"){
@@ -456,10 +487,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection noeuds.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_noeuds($id="") {
+	public function vide_noeuds(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -479,18 +511,20 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getreportsCollection(){
+	public function getreportsCollection(): string
+	{
 		return 'reports';
 	}
 	/**
 	 * Cree et applique une requete de type select sur la collection reports.
 	 *
-	 * @param int $id Valeur du champ clientid si necessaire.
+	 * @param int|string $id Valeur du champ clientid si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_reports($id="",$nom='',
-			$date="",$serial="",$type_fichier="",$order="") {
+	public function requete_select_reports(int|string $id="", $nom='',
+	                                                  $date="", $serial="", $type_fichier="", string $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -516,14 +550,15 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection reports.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $date    Date du fichier
-	 * @param string $serial  Serial du fichier
-	 * @param string $type_fichier  Peut-etre day/week/month/quarter
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param string $nom Nom du fichier
+	 * @param string $date Date du fichier
+	 * @param string $serial Serial du fichier
+	 * @param string $type_fichier Peut-etre day/week/month/quarter
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function requete_insere_dans_reports($nom,$date,
-			$serial,$type_fichier) {
+	public function requete_insere_dans_reports(string $nom, string $date,
+	                                            string $serial, string $type_fichier): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"nom",(string) $nom);
@@ -547,12 +582,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection reports.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $nom
+	 * @param string $date
+	 * @param string $serial
+	 * @param string $type_fichier
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_reports($id=""
-			,$nom="__no_update"
-			,$date="__no_update",$serial="__no_update"
-			,$type_fichier="__no_update") {
+	public function requete_update_dans_reports(string $id=""
+			, string                                   $nom="__no_update"
+			, string                                   $date="__no_update", string $serial="__no_update"
+			, string                                   $type_fichier="__no_update"): bool|int
+	{
 
 		$set=array();
 		$this->prepare_valeur_update($set,"nom",(string) $nom);
@@ -582,10 +623,12 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection reports.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @param string $serial
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_reports($id="",$serial="") {
+	public function vide_reports(int|string $id="", string $serial=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 		$this->fabrique_where($where,"serial",(string) $serial,"text");
@@ -606,20 +649,22 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getsegmentationsCollection(){
+	public function getsegmentationsCollection(): string
+	{
 		return 'segmentations';
 	}
 	/**
 	 * Cree et applique une requete de type select sur la collection segmentations.
 	 *
-	 * @param int $id Valeur du champ clientid si necessaire.
+	 * @param int|string $id Valeur du champ clientid si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_segmentations($id="",$seg_id='',$type=''
-			, $etat='', $date_debut="", $date_fin=""
-			,$serial_source="",$serial_destination=""
-			,$identitaire="",$comportemental="",$order="") {
+	public function requete_select_segmentations(int|string $id="", $seg_id='', $type=''
+			,                                               $etat='', $date_debut="", $date_fin=""
+			,                                               $serial_source="", $serial_destination=""
+			,                                               $identitaire="", $comportemental="", string $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -650,16 +695,21 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection segmentations.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $date    Date du fichier
-	 * @param string $serial  Serial du fichier
-	 * @param string $type_fichier  Peut-etre day/week/month/quarter
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param $seg_id
+	 * @param $type
+	 * @param $date_debut
+	 * @param $date_fin
+	 * @param $serial_source
+	 * @param $serial_destination
+	 * @param $identitaire
+	 * @param $comportemental
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
 	public function requete_insere_dans_segmentations($seg_id, $type
 			,$date_debut,$date_fin
 			,$serial_source,$serial_destination
-			,$identitaire,$comportemental) {
+			,$identitaire,$comportemental): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"seg_id",(string) $seg_id);
@@ -688,13 +738,24 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection segmentations.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $seg_id
+	 * @param string $etat
+	 * @param string $type
+	 * @param string $date_debut
+	 * @param string $date_fin
+	 * @param string $serial_source
+	 * @param string $serial_destination
+	 * @param string $identitaire
+	 * @param string $comportemental
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_segmentations($id=""
-			,$seg_id="__no_update", $etat="__no_update", $type="__no_update"
-			,$date_debut="__no_update",$date_fin="__no_update"
-			,$serial_source="__no_update",$serial_destination="__no_update"
-			,$identitaire="__no_update",$comportemental="__no_update") {
+	public function requete_update_dans_segmentations(string $id=""
+			, string                                         $seg_id="__no_update", string $etat="__no_update", string $type="__no_update"
+			, string                                         $date_debut="__no_update", string $date_fin="__no_update"
+			, string                                         $serial_source="__no_update", string $serial_destination="__no_update"
+			, string                                         $identitaire="__no_update", string $comportemental="__no_update"): bool|int
+	{
 
 		$set=array();
 		$this->prepare_valeur_update($set,"seg_id",(string) $seg_id);
@@ -731,10 +792,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection segmentations.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_segmentations($id="") {
+	public function vide_segmentations(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -754,18 +816,20 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getsplitedsCollection(){
+	public function getsplitedsCollection(): string
+	{
 		return 'spliteds';
 	}
 	/**
 	 * Cree et applique une requete de type select sur la collection spliteds.
 	 *
-	 * @param int $id Valeur du champ clientid si necessaire.
+	 * @param int|string $id Valeur du champ clientid si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_spliteds($id="",$nom='',
-			$date="",$serial="",$num_rotate="",$noeud="",$service="",$order="") {
+	public function requete_select_spliteds(int|string $id="", $nom='',
+	                                                   $date="", $serial="", $num_rotate="", $noeud="", $service="", string $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -793,16 +857,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection spliteds.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $date    Date du fichier
+	 * @param string $nom Nom du fichier
+	 * @param string $date Date du fichier
+	 * @param $serial
 	 * @param int $num_rotate Numero de rotate du fichier
-	 * @param string $noeud   Noeud du fichier
+	 * @param string $noeud Noeud du fichier
 	 * @param string $service Service du fichier
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function requete_insere_dans_spliteds($nom
-			,$date,$serial,$num_rotate,
-			$noeud,$service) {
+	public function requete_insere_dans_spliteds(string $nom
+			, string                                    $date, $serial, int $num_rotate,
+			                                     string $noeud, string $service): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"nom",(string) $nom);
@@ -828,12 +894,19 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection spliteds.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $date
+	 * @param string $serial
+	 * @param string $num_rotate
+	 * @param string $noeud
+	 * @param string $service
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_spliteds($id="",
-			$date="__no_update",$serial="__no_update"
-			,$num_rotate="__no_update",$noeud="__no_update",
-			$service="__no_update") {
+	public function requete_update_dans_spliteds(string $id="",
+	                                             string $date="__no_update", string $serial="__no_update"
+			, string                                    $num_rotate="__no_update", string $noeud="__no_update",
+			                                     string $service="__no_update"): bool|int
+	{
 
 		$set=array();
 		if($date!=="__no_update"){
@@ -864,10 +937,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection spliteds.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_spliteds($id="") {
+	public function vide_spliteds(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -887,7 +961,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getstreaminglinesCollection(){
+	public function getstreaminglinesCollection(): string
+	{
 		return 'streaminglines';
 	}
 	/**
@@ -898,7 +973,8 @@ class requete_base_mongoDB extends requeteMongoDB {
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
 	public function requete_select_streaminglines($id="",$serial=''
-			, $date="", $nblines='',$order="") {
+			, $date="", $nblines='',$order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -923,14 +999,13 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection streaminglines.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $date    Date du fichier
-	 * @param int $num_rotate Numero de rotate du fichier
-	 * @param string $noeud   Noeud du fichier
-	 * @param string $service Service du fichier
+	 * @param $serial
+	 * @param string $date Date du fichier
+	 * @param int $nblines
 	 * @return int 1 vaut OK, 0 vaut false.
 	 */
-	public function requete_insere_dans_streaminglines($serial,$date,$nblines=0) {
+	public function requete_insere_dans_streaminglines($serial, string $date, int $nblines=0): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"serial",(string) $serial);
@@ -953,10 +1028,15 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection streaminglines.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $serial
+	 * @param string $date
+	 * @param string $nblines
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_streaminglines($id=""
-			,$serial="__no_update", $date="__no_update",$nblines="__no_update") {
+	public function requete_update_dans_streaminglines(string $id=""
+			, string                                          $serial="__no_update", string $date="__no_update", string $nblines="__no_update"): bool|int
+	{
 
 		$set=array();
 		if($date!=="__no_update"){
@@ -985,10 +1065,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection streaminglines.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_streaminglines($id="") {
+	public function vide_streaminglines(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -1010,19 +1091,21 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getRessourcesUsageCollection(){
+	public function getRessourcesUsageCollection(): string
+	{
 		return 'RessourcesUsage';
 	}
 
 	/**
 	 * Cree et applique une requete de type select sur la collection RessourcesUsage.
 	 *
-	 * @param int $id Valeur du champ clientid si necessaire.
+	 * @param int|string $id Valeur du champ clientid si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_RessourcesUsage($id="",$service='',
-			$serial="",$order="") {
+	public function requete_select_RessourcesUsage(int|string $id="", $service='',
+	                                                          $serial="", string $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -1046,14 +1129,16 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection services.
 	 *
-	 * @param string $nom	  Nom du fichier
-	 * @param string $serial  Serial du fichier
-	 * @param int $ram  Ram utilisee.
-	 * @param int $time  Time utilise.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param $service
+	 * @param string $serial Serial du fichier
+	 * @param int $ram Ram utilisee.
+	 * @param int $time Time utilise.
+	 * @param $cpu
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
 	public function requete_insere_dans_RessourcesUsage($service,
-			$serial,$ram,$time,$cpu) {
+	                                                    string $serial, int $ram, int $time, $cpu): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"service",(string) $service);
@@ -1077,11 +1162,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection services.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $service
+	 * @param string $serial
+	 * @param string $ram
+	 * @param string $time
+	 * @param string $cpu
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_RessourcesUsage($id="",
-			$service="__no_update",$serial="__no_update",
-			$ram="__no_update",$time="__no_update",$cpu="__no_update") {
+	public function requete_update_dans_RessourcesUsage(string $id="",
+	                                                    string $service="__no_update", string $serial="__no_update",
+	                                                    string $ram="__no_update", string $time="__no_update", string $cpu="__no_update"): bool|int
+	{
 
 		$set=array();
 		$this->prepare_valeur_update($set,"service",(string) $service);
@@ -1110,10 +1202,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection services.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_RessourcesUsage($id="") {
+	public function vide_RessourcesUsage(string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -1133,20 +1226,22 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getJobsCollection(){
+	public function getJobsCollection(): string
+	{
 		return 'jobs';
 	}
 
 	/**
 	 * Cree et applique une requete de type select sur la collection jobs.
 	 *
-	 * @param int $id Valeur du champ _id si necessaire.
+	 * @param int|string $id Valeur du champ _id si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_jobs($id=""
-			,$type_traitement="",$slurmid="",$etat="",$code_retour=""
-			,$ref="",$date_ref="",$date_debut="",$date_fin="",$order="") {
+	public function requete_select_jobs(int|string $id=""
+			,                                      $type_traitement="", $slurmid="", $etat="", $code_retour=""
+			,                                      $ref="", $date_ref="", $date_debut="", $date_fin="", string $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -1176,10 +1271,19 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection jobs.
 	 *
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param $type_traitement
+	 * @param $slurmid
+	 * @param $etat
+	 * @param $ref
+	 * @param $date_ref
+	 * @param $date_debut
+	 * @param $date_fin
+	 * @param int $code_retour
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function requete_insere_dans_jobs($type_traitement,$slurmid
-			,$etat,$ref,$date_ref,$date_debut,$date_fin,$code_retour=0) {
+	public function requete_insere_dans_jobs($type_traitement, $slurmid
+			,                                $etat, $ref, $date_ref, $date_debut, $date_fin, int $code_retour=0): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"type",(string) $type_traitement);
@@ -1206,12 +1310,21 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection jobs.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $type_traitement
+	 * @param string $slurmid
+	 * @param string $etat
+	 * @param string $code_retour
+	 * @param string $ref
+	 * @param string $date_debut
+	 * @param string $date_fin
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_jobs($id="",
-			$type_traitement="__no_update",$slurmid="__no_update",
-			$etat="__no_update",$code_retour="__no_update",$ref="__no_update",
-			$date_debut="__no_update",$date_fin="__no_update") {
+	public function requete_update_dans_jobs(string $id="",
+	                                         string $type_traitement="__no_update", string $slurmid="__no_update",
+	                                         string $etat="__no_update", string $code_retour="__no_update", string $ref="__no_update",
+	                                         string $date_debut="__no_update", string $date_fin="__no_update"): bool|int
+	{
 
 		$set=array();
 		$this->prepare_valeur_update($set,"type",(string) $type_traitement);
@@ -1246,10 +1359,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection jobs.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_jobs($id="") {
+	public function vide_jobs(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -1269,21 +1383,23 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * ACCESSEURS get
 	 */
-	public function getPiloteCollection(){
+	public function getPiloteCollection(): string
+	{
 		return 'pilotes';
 	}
 
 	/**
 	 * Cree et applique une requete de type select sur la collection pilotes.
 	 *
-	 * @param int $id Valeur du champ _id si necessaire.
+	 * @param int|string $id Valeur du champ _id si necessaire.
 	 * @param string $order Champ pour le ORDER BY.
 	 * @return MongoCursor|false Renvoi un tableau de resultat, FALSE sinon.
 	 */
-	public function requete_select_pilotes($id=""
-			,$type_traitement="",$chaine_prod="",$nbjobs="",$etat=""
-			,$date_traitement="",$date_debut="",$date_fin=""
-			,$order="") {
+	public function requete_select_pilotes(int|string $id=""
+			,                                         $type_traitement="", $chaine_prod="", $nbjobs="", $etat=""
+			,                                         $date_traitement="", $date_debut="", $date_fin=""
+			, string                                  $order=""): bool|MongoCursor
+	{
 
 		$select=array();
 		$where=array();
@@ -1312,10 +1428,18 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Insere une entree dans la collection pilotes.
 	 *
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param $type_traitement
+	 * @param $chaineprod
+	 * @param $nbjobs
+	 * @param $etat
+	 * @param $date_traitement
+	 * @param $date_debut
+	 * @param $date_fin
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
 	public function requete_insere_dans_pilotes($type_traitement,$chaineprod,$nbjobs,$etat
-			,$date_traitement,$date_debut,$date_fin) {
+			,$date_traitement,$date_debut,$date_fin): bool|int
+	{
 
 		$set=array();
 		$this->fabrique_insert($set,"type",(string) $type_traitement);
@@ -1341,12 +1465,21 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Cree et applique cette requete de type update sur la collection pilotes.
 	 *
-	 * @return int nb ligne updated,false si not OK.
+	 * @param string $id
+	 * @param string $type_traitement
+	 * @param string $chaine_prod
+	 * @param string $nbjobs
+	 * @param string $etat
+	 * @param string $date_traitement
+	 * @param string $date_debut
+	 * @param string $date_fin
+	 * @return bool|int nb ligne updated,false si not OK.
 	 */
-	public function requete_update_dans_pilotes($id=""
-			,$type_traitement="__no_update",$chaine_prod="__no_update",$nbjobs="__no_update"
-			,$etat="__no_update",$date_traitement="__no_update"
-			,$date_debut="__no_update",$date_fin="__no_update") {
+	public function requete_update_dans_pilotes(string $id=""
+			, string                                   $type_traitement="__no_update", string $chaine_prod="__no_update", string $nbjobs="__no_update"
+			, string                                   $etat="__no_update", string $date_traitement="__no_update"
+			, string                                   $date_debut="__no_update", string $date_fin="__no_update"): bool|int
+	{
 
 		$set=array();
 		$this->prepare_valeur_update($set,"type",(string) $type_traitement);
@@ -1383,10 +1516,11 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * Vide la collection pilotes.
 	 *
-	 * @param int $id id a vider.
-	 * @return int 1 vaut OK, 0 vaut false.
+	 * @param int|string $id id a vider.
+	 * @return bool|int 1 vaut OK, 0 vaut false.
 	 */
-	public function vide_pilotes($id="") {
+	public function vide_pilotes(int|string $id=""): bool|int
+	{
 		$where=array();
 		$this->fabrique_where($where,"_id",$id);
 
@@ -1407,11 +1541,9 @@ class requete_base_mongoDB extends requeteMongoDB {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help()
-	{
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -1419,4 +1551,3 @@ class requete_base_mongoDB extends requeteMongoDB {
 		return $help;
 	}
 }
-?>

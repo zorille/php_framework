@@ -45,15 +45,17 @@ class zabbix_wsclient extends wsclient {
 	 * @param options $liste_option Reference sur un objet options
 	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param zabbix_datas &$zabbix_datas Reference sur un objet zabbix_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return zabbix_wsclient
+	 * @throws Exception
 	 */
 	static function &creer_zabbix_wsclient(
-			&$liste_option,
-			&$zabbix_datas,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options      &$liste_option,
+		zabbix_datas &$zabbix_datas,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): zabbix_wsclient
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -67,14 +69,15 @@ class zabbix_wsclient extends wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return zabbix_wsclient
+	 * @return bool|zabbix_wsclient
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["zabbix_datas"] )) {
-			return $this->onError ( "il faut un objet de type zabbix_datas" );
+			$r = $this->onError ( "il faut un objet de type zabbix_datas" );
+			return $r;
 		}
 		$this->setObjetZabbixDatas ( $liste_class ["zabbix_datas"] )
 			->setContentType ( 'application/json-rpc' )
@@ -88,13 +91,12 @@ class zabbix_wsclient extends wsclient {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -106,7 +108,8 @@ class zabbix_wsclient extends wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): zabbix_wsclient|bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_zabbix = $this->getObjetZabbixDatas ()
 			->valide_presence_zabbix_data ( $nom );
@@ -134,14 +137,15 @@ class zabbix_wsclient extends wsclient {
 
 	/**
 	 * @param string $method
-	 * @param string|array $params
+	 * @param array|string $params
 	 * @param boolean $auth
 	 * @return string entete json
 	 */
 	public function encode_json(
-			$method,
-			$params,
-			$auth) {
+		string       $method,
+		array|string $params,
+		bool         $auth): string
+	{
 		// sanity check and conversion for params array
 		if (! $params)
 			$params = array ();
@@ -159,24 +163,25 @@ class zabbix_wsclient extends wsclient {
 		if ($auth) {
 			$prepare_requete_json ['auth'] = $this->getAuth ();
 		}
-		$json_prepare_requete_json = json_encode ( $prepare_requete_json );
-		return $json_prepare_requete_json;
+		return json_encode ( $prepare_requete_json );
 	}
 
 	/**
 	 * Sends are prepare_requete_json to the zabbix API and returns the response as object.
 	 *
 	 * @param string $method Name of the API method.
-	 * @param array $params Additional parameters.
+	 * @param array|null $params Additional parameters.
+	 * @param string $resultArrayKey
 	 * @param boolean $auth Enable auth string (default TRUE).
-	 * @return stdClass API JSON response.
+	 * @return array|string|stdClass API JSON response.
 	 * @throws Exception
 	 */
 	public function prepare_requete_json(
-			$method,
-			$params = NULL,
-			$resultArrayKey = '',
-			$auth = TRUE) {
+		string $method,
+		array  $params = NULL,
+		string $resultArrayKey = '',
+		bool   $auth = TRUE): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setHttpMethod ( "POST" );
 		$json_prepare_requete_json = $this->encode_json ( $method, $params, $auth );
@@ -198,14 +203,15 @@ class zabbix_wsclient extends wsclient {
 
 	/**
 	 * Gere les retours : convertie si c'est OK ou emet une exception en cas d'erreur
-	 * @param string|array $retour
+	 * @param array|string $retour
 	 * @param array $resultArrayKey
 	 * @return string|array
 	 * @throws Exception
 	 */
 	public function gestion_retour(
-			$retour,
-			$resultArrayKey) {
+		array|string $retour,
+		array        $resultArrayKey): array|string
+	{
 		if (is_array ( $retour )) {
 			if (isset ( $retour ["error"] )) {
 				$message = $retour ["error"] ["message"];
@@ -230,13 +236,15 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Convertes an indexed array to an associative array.
 	 *
-	 * @param object $indexedArray Indexed array with objects.
+	 * @param $objectArray
 	 * @param object $useObjectProperty Object property to use as array key.
+	 * @return mixed
 	 * @retval  associative Array
 	 */
 	private function __getPrepareRequeteJsonParamsArray(
-			$objectArray,
-			$useObjectProperty) {
+		$objectArray,
+		object $useObjectProperty): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		// sanity check
 		if (count ( $objectArray ) == 0 || ! property_exists ( $objectArray [0], $useObjectProperty ))
@@ -274,7 +282,8 @@ class zabbix_wsclient extends wsclient {
 	 * @retval  Array
 	 */
 	private function _getPrepareRequeteJsonParamsArray(
-			$params) {
+		array $params): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		// if params is a scalar value, turn it into an array
 		if (is_scalar ( $params ))
@@ -308,14 +317,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	final public function userLogin(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		$this->setAuth ( $this->prepare_requete_json ( 'user.login', $params, $arrayKeyProperty, FALSE ) );
@@ -338,14 +348,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	final public function userLogout(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		$this->setAuth ( '' );
@@ -367,14 +378,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -396,14 +408,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -425,14 +438,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -454,14 +468,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -483,14 +498,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -512,14 +528,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionValidateOperations(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -541,14 +558,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionValidateConditions(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -570,14 +588,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function actionValidateOperationConditions(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -599,14 +618,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function alertGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -628,14 +648,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function apiinfoVersion(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -657,14 +678,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -686,14 +708,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -715,14 +738,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationCheckInput(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -744,14 +768,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -773,14 +798,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -802,14 +828,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -831,14 +858,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function applicationMassAdd(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -860,14 +888,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function configurationExport(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -889,14 +918,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function configurationImport(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -918,14 +948,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function dcheckGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -947,14 +978,16 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param object|string $arrayKeyProperty Object property for key of array.
+	 * @return array|string|stdClass
+	 * @throws Exception
 	 * @retval  stdClass
 	 *
-	 * @throws Exception
 	 */
 	public function dcheckIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -976,14 +1009,16 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param object|string $arrayKeyProperty Object property for key of array.
+	 * @return array|string|stdClass
+	 * @throws Exception
 	 * @retval  stdClass
 	 *
-	 * @throws Exception
 	 */
 	public function dcheckIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1005,14 +1040,16 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param object|string $arrayKeyProperty Object property for key of array.
+	 * @return array|string|stdClass
+	 * @throws Exception
 	 * @retval  stdClass
 	 *
-	 * @throws Exception
 	 */
 	public function dhostGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1034,14 +1071,16 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param object|string $arrayKeyProperty Object property for key of array.
+	 * @return array|string|stdClass
+	 * @throws Exception
 	 * @retval  stdClass
 	 *
-	 * @throws Exception
 	 */
 	public function dhostExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1063,14 +1102,16 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param object|string $arrayKeyProperty Object property for key of array.
+	 * @return array|string|stdClass
+	 * @throws Exception
 	 * @retval  stdClass
 	 *
-	 * @throws Exception
 	 */
 	public function discoveryruleGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1092,14 +1133,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1121,14 +1163,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1150,14 +1193,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1179,14 +1223,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1208,14 +1253,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleCopy(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1237,14 +1283,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1266,14 +1313,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1295,14 +1343,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1324,14 +1373,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function discoveryruleFindInterfaceForItem(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1353,14 +1403,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1382,14 +1433,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1411,14 +1463,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleCheckInput(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1440,14 +1493,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1469,14 +1523,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1498,14 +1553,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1527,14 +1583,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1556,14 +1613,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function druleIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1585,14 +1643,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function dserviceGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1614,14 +1673,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function dserviceExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1643,14 +1703,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function eventGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1672,14 +1733,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function eventAcknowledge(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1701,14 +1763,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1730,14 +1793,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1759,14 +1823,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1788,14 +1853,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1817,14 +1883,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1846,14 +1913,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1875,14 +1943,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1904,14 +1973,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphitemGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1933,14 +2003,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1962,14 +2033,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -1991,14 +2063,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2020,14 +2093,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2049,14 +2123,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2078,14 +2153,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2107,14 +2183,14 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function graphprototypeGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = '') {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2136,14 +2212,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2165,14 +2242,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2194,14 +2272,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2223,14 +2302,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2252,14 +2332,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2281,14 +2362,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostMassAdd(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2310,14 +2392,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostMassUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2339,14 +2422,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostMassRemove(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2368,14 +2452,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2397,14 +2482,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2426,14 +2512,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2455,14 +2542,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2484,14 +2572,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2513,14 +2602,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2542,14 +2632,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2571,14 +2662,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2600,14 +2692,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2629,14 +2722,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupMassAdd(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2658,14 +2752,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupMassRemove(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2716,14 +2811,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2745,14 +2841,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostgroupIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2774,14 +2871,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2803,14 +2901,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2832,14 +2931,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2861,14 +2961,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2890,14 +2991,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2919,14 +3021,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2948,14 +3051,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostprototypeIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -2977,14 +3081,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function historyGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3006,14 +3111,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3035,14 +3141,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3064,14 +3171,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceCheckInput(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3093,14 +3201,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3122,14 +3231,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3151,14 +3261,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3180,14 +3291,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceMassAdd(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3238,14 +3350,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function hostinterfaceReplaceHostInterfaces(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3267,14 +3380,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function imageGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3296,14 +3410,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function imageGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3325,14 +3440,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function imageExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3354,14 +3470,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function imageCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3383,14 +3500,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function imageUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3412,14 +3530,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function imageDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3441,14 +3560,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function iconmapGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3470,14 +3590,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function iconmapCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3499,14 +3620,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function iconmapUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3528,14 +3650,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function iconmapDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3557,14 +3680,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function iconmapIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3586,14 +3710,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function iconmapIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3615,14 +3740,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3644,14 +3770,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3673,14 +3800,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3702,14 +3830,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3731,14 +3860,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3760,14 +3890,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3789,14 +3920,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3818,14 +3950,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemValidateInventoryLinks(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3847,14 +3980,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemAddRelatedObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3876,14 +4010,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemFindInterfaceForItem(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3905,14 +4040,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3934,14 +4070,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3963,14 +4100,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -3992,14 +4130,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4021,14 +4160,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4050,14 +4190,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4079,14 +4220,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4108,14 +4250,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4137,14 +4280,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeAddRelatedObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4166,14 +4310,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeFindInterfaceForItem(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4195,14 +4340,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4224,14 +4370,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function itemprototypeIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4253,14 +4400,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function maintenanceGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4282,14 +4430,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function maintenanceExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4311,14 +4460,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function maintenanceCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4340,14 +4490,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function maintenanceUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4369,14 +4520,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function maintenanceDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4398,14 +4550,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4427,14 +4580,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4456,14 +4610,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4485,14 +4640,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapCheckInput(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4514,14 +4670,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4543,14 +4700,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4572,14 +4730,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4601,14 +4760,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4630,14 +4790,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4659,14 +4820,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mapCheckCircleSelementsLink(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4688,14 +4850,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mediatypeGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4717,14 +4880,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mediatypeCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4746,14 +4910,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mediatypeUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4775,14 +4940,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function mediatypeDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4804,14 +4970,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function proxyGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4862,14 +5029,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function proxyUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4891,14 +5059,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function proxyDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4920,14 +5089,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function proxyIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4949,14 +5119,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function proxyIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -4978,14 +5149,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5007,14 +5179,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5036,14 +5209,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceValidateUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5065,14 +5239,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5094,14 +5269,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceValidateDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5123,14 +5299,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5152,14 +5329,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceAddDependencies(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5181,14 +5359,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceDeleteDependencies(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5210,14 +5389,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceValidateAddTimes(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5239,14 +5419,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceAddTimes(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5268,14 +5449,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceGetSla(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5297,14 +5479,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceDeleteTimes(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5326,14 +5509,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5355,14 +5539,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5384,14 +5569,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function serviceExpandPeriodicalTimes(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5413,14 +5599,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5442,14 +5629,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5471,14 +5659,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5500,14 +5689,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5529,14 +5719,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5558,14 +5749,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5587,14 +5779,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5616,14 +5809,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5645,14 +5839,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemUpdateByPosition(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5674,14 +5869,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5703,14 +5899,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5732,14 +5929,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function screenitemIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5761,14 +5959,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function scriptGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5790,14 +5989,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function scriptCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5819,14 +6019,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function scriptUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5848,14 +6049,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function scriptDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5877,14 +6079,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function scriptExecute(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5906,14 +6109,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function scriptGetScriptsByHosts(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5935,14 +6139,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatePkOption(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5964,14 +6169,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -5993,14 +6199,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6022,14 +6229,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6051,14 +6259,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6080,14 +6289,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6109,14 +6319,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6138,14 +6349,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateMassAdd(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6167,14 +6379,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateMassUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6196,14 +6409,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateMassRemove(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6225,14 +6439,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6254,14 +6469,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templateIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6283,14 +6499,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6312,14 +6529,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6341,14 +6559,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenCopy(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6370,14 +6589,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6399,14 +6619,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6428,14 +6649,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6457,14 +6679,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function templatescreenitemGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6486,14 +6709,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6515,14 +6739,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6544,14 +6769,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6573,14 +6799,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerCheckInput(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6602,14 +6829,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6631,14 +6859,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6660,14 +6889,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6689,14 +6919,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerAddDependencies(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6718,14 +6949,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerDeleteDependencies(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6747,14 +6979,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6776,14 +7009,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerSyncTemplateDependencies(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6805,14 +7039,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6834,14 +7069,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6863,14 +7099,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerprototypeGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6892,14 +7129,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerprototypeCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6921,14 +7159,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerprototypeUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6950,14 +7189,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerprototypeDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -6979,14 +7219,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function triggerprototypeSyncTemplates(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7008,14 +7249,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7037,14 +7279,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7066,14 +7309,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7095,14 +7339,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userUpdateProfile(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7124,14 +7369,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7153,14 +7399,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userAddMedia(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7182,14 +7429,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userUpdateMedia(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7211,14 +7459,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userDeleteMedia(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7240,14 +7489,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userDeleteMediaReal(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7269,14 +7519,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userCheckAuthentication(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7298,14 +7549,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7327,14 +7579,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function userIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7356,14 +7609,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7385,14 +7639,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupGetObjects(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7414,14 +7669,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupExists(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7443,14 +7699,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7472,14 +7729,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7501,14 +7759,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupMassAdd(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7530,14 +7789,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupMassUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7559,14 +7819,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7588,14 +7849,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7617,14 +7879,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usergroupIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7646,14 +7909,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7675,14 +7939,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroCreateGlobal(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7704,14 +7969,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroUpdateGlobal(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7733,14 +7999,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroDeleteGlobal(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7762,14 +8029,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7791,14 +8059,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7820,14 +8089,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7849,14 +8119,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermacroReplaceMacros(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7878,14 +8149,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function usermediaGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7907,14 +8179,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function httptestGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7936,14 +8209,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function httptestCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7965,14 +8239,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function httptestUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -7994,14 +8269,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function httptestDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8023,14 +8299,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function httptestIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8052,14 +8329,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function httptestIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8081,14 +8359,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function webcheckGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8110,14 +8389,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function webcheckCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8139,14 +8419,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function webcheckUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8168,14 +8449,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function webcheckDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8197,14 +8479,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function webcheckIsReadable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8226,14 +8509,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function webcheckIsWritable(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8255,14 +8539,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function valuemappingGet(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8284,14 +8569,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function valuemappingCreate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8313,14 +8599,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function valuemappingUpdate(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8342,14 +8629,15 @@ class zabbix_wsclient extends wsclient {
 	 * (e.g. name, host, hostid, graphid, screenitemid).
 	 *
 	 * @param array $params Parameters to pass through.
-	 * @param $arrayKeyProperty Object property for key of array.
+	 * @param $arrayKeyProperty Object|string property for key of array.
 	 * @retval  stdClass
 	 *
 	 * @throws Exception
 	 */
 	public function valuemappingDelete(
-			$params = array (),
-			$arrayKeyProperty = '') {
+		array         $params = array (),
+		object|string $arrayKeyProperty = ''): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->_getPrepareRequeteJsonParamsArray ( $params );
 		// prepare_requete_json
@@ -8366,7 +8654,8 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * @return zabbix_datas
 	 */
-	public function &getObjetZabbixDatas() {
+	public function &getObjetZabbixDatas(): ?zabbix_datas
+	{
 		return $this->zabbix_datas;
 	}
 
@@ -8374,7 +8663,8 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetZabbixDatas(
-			&$zabbix_datas) {
+			&$zabbix_datas): static
+	{
 		$this->zabbix_datas = $zabbix_datas;
 		return $this;
 	}
@@ -8383,7 +8673,8 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string
+	{
 		return $this->auth;
 	}
 
@@ -8391,7 +8682,8 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static
+	{
 		$this->auth = $auth;
 		return $this;
 	}
@@ -8402,7 +8694,8 @@ class zabbix_wsclient extends wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array
+	{
 		return $this->defaultParams;
 	}
 
@@ -8410,13 +8703,14 @@ class zabbix_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retval  ZabbixApiAbstract
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): static
+	{
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -8431,13 +8725,11 @@ class zabbix_wsclient extends wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Zabbix Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, zabbix_datas::help () );
-		return $help;
+		return array_merge ( $help, zabbix_datas::help () );
 	}
 }
-?>

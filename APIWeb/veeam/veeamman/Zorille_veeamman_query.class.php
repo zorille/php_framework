@@ -52,15 +52,16 @@ class query extends ci {
 	 * Instanquerye un objet de type query. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return query
 	 */
 	static function &creer_veeamman_query(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): query
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new query ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -74,9 +75,10 @@ class query extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return query
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -86,24 +88,25 @@ class query extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de query
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function reset_query() {
+	public function reset_query(): void
+	{
 		$this->setDernierePage ( false )
 			->setPageActuelle ( null );
 	}
 
 	public function prepare_liste_query(
-			$resultat_querysvc) {
+			$resultat_querysvc): static
+	{
 		$liste_svc = array ();
 		foreach ( $resultat_querysvc->Links->Link as $svc ) {
 			parse_str ( parse_url ( $svc->attributes ()->Href, PHP_URL_QUERY ), $params );
@@ -117,10 +120,11 @@ class query extends ci {
 
 	/**
 	 * Permet de trouver la liste des query dans veeamman et enregistre les donnees des query dans l'objet
-	 * @return query
+	 * @return query|bool
 	 * @throws Exception
 	 */
-	public function retrouve_querysvc() {
+	public function retrouve_querysvc(): query
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$query = $this->getObjetVeeamWsclientRest ()
 			->querySvc ();
@@ -139,7 +143,8 @@ class query extends ci {
 	 * @throws Exception
 	 */
 	public function recupere_query_par_page(
-			$params = array ()) {
+			$params = array ()): bool
+	{
 		return $this->page_suivante ( $params );
 	}
 
@@ -149,7 +154,8 @@ class query extends ci {
 	 * @throws Exception
 	 */
 	public function recupere_resultat_query(
-			$params = array ()) {
+			$params = array ()): query
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$query = $this->getObjetVeeamWsclientRest ()
 			->query ( $params );
@@ -164,7 +170,8 @@ class query extends ci {
 	 * @return query
 	 * @throws Exception
 	 */
-	public function recupere_page_info() {
+	public function recupere_page_info(): static
+	{
 		$donnees = $this->getDonnees ();
 		if (isset ( $donnees->PagingInfo )) {
 			return $this->setPageActuelle ( $donnees->PagingInfo );
@@ -177,7 +184,8 @@ class query extends ci {
 	 * @return query
 	 * @throws Exception
 	 */
-	public function valide_derniere_page() {
+	public function valide_derniere_page(): static
+	{
 		$donnees = $this->getPageActuelle ();
 		if ($donnees == null || ( int ) $donnees->attributes () ["PageNum"] == ( int ) $donnees->attributes () ["PagesCount"]) {
 			return $this->setDernierePage ( true );
@@ -191,7 +199,8 @@ class query extends ci {
 	 * @throws Exception
 	 */
 	public function page_suivante(
-			$params = array ()) {
+			$params = array ()): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! $this->getDernierePage ()) {
 			$page = $this->getPageActuelle ();
@@ -210,7 +219,8 @@ class query extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeQuery() {
+	public function getListeQuery(): ?\SimpleXMLElement
+	{
 		return $this->liste_query;
 	}
 
@@ -218,7 +228,8 @@ class query extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeQuery(
-			$liste_query) {
+			$liste_query): static
+	{
 		$this->liste_query = $liste_query;
 		return $this;
 	}
@@ -226,7 +237,8 @@ class query extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeServices() {
+	public function getListeServices(): array
+	{
 		return $this->liste_svc;
 	}
 
@@ -234,7 +246,8 @@ class query extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeServices(
-			$liste_svc) {
+			$liste_svc): static
+	{
 		$this->liste_svc = $liste_svc;
 		return $this;
 	}
@@ -242,7 +255,8 @@ class query extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPageActuelle() {
+	public function getPageActuelle(): ?\SimpleXMLElement
+	{
 		return $this->current_page_info;
 	}
 
@@ -250,7 +264,8 @@ class query extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setPageActuelle(
-			$current_page_info) {
+			$current_page_info): static
+	{
 		$this->current_page_info = $current_page_info;
 		return $this;
 	}
@@ -258,7 +273,8 @@ class query extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDernierePage() {
+	public function getDernierePage(): bool
+	{
 		return $this->last_page;
 	}
 
@@ -266,7 +282,8 @@ class query extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setDernierePage(
-			$last_page) {
+			$last_page): static
+	{
 		$this->last_page = $last_page;
 		return $this;
 	}
@@ -277,11 +294,10 @@ class query extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "query :";
 		return $help;
 	}
 }
-?>

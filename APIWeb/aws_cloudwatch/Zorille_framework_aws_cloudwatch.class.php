@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class aws_cloudwatch<br>
  *
@@ -19,13 +21,18 @@ class aws_cloudwatch extends aws_wsclient {
 	 * Instancie un objet de type aws_cloudwatch.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param aws_datas &$aws_datas Reference sur un objet aws_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return aws_cloudwatch
+	 * @throws Exception
 	 */
-	static function &creer_aws_cloudwatch(&$liste_option, &$aws_datas, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_aws_cloudwatch(
+		options     &$liste_option,
+		aws_datas   &$aws_datas,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): aws_cloudwatch
+	{
 		$objet = new aws_cloudwatch ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -38,13 +45,16 @@ class aws_cloudwatch extends aws_wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return aws_cloudwatch
+	 * @return bool|aws_cloudwatch
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["aws_datas"] )) {
-			return $this->onError ( "il faut un objet de type aws_datas" );
+			$r = $this->onError ( "il faut un objet de type aws_datas" );
+			return $r;
 		}
 		$this->setObjetAwsDatas ( $liste_class ["aws_datas"] );
 		return $this;
@@ -67,11 +77,12 @@ class aws_cloudwatch extends aws_wsclient {
 
 	/************************* GESTION Aws HOST ****************************/
 	/**
-	 * 
+	 *
 	 * @param array $reponse
 	 * @return boolean
+	 * @throws Exception
 	 */
-	public function valide_requete($reponse) {
+	public function valide_requete(array $reponse): bool {
 		if (isset ( $reponse ["Error"] )) {
 			return $this->onError ( $reponse ["Error"] ["Code"], $reponse ["Error"] ["Message"] );
 		}
@@ -83,7 +94,7 @@ class aws_cloudwatch extends aws_wsclient {
 		} else {
 			return $this->onError ( "Le Requestid est absent" );
 		}
-		if (is_null ( $requestId ) or empty ( $requestId )) {
+		if (is_null ( $requestId ) || empty ( $requestId )) {
 			return $this->onError ( "Le Requestid est faux", $requestId );
 		}
 		
@@ -93,14 +104,15 @@ class aws_cloudwatch extends aws_wsclient {
 	/**
 	 * Recupere la liste des types de metrique
 	 * @return array|boolean resultat ou false
+	 * @throws Exception
 	 */
-	public function ListMetrics() {
+	public function ListMetrics(): bool|array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', "ListMetrics" );
 		$this->setParams ( 'Version', "2010-08-01", true );
 		$resultat = $this->execute_requete_aws ();
-		if ($this->valide_requete ( $resultat ) == false) {
+		if (!$this->valide_requete($resultat)) {
 			return false;
 		}
 		
@@ -129,21 +141,20 @@ class aws_cloudwatch extends aws_wsclient {
 	/**
 	 * Recupere la liste des types de metrique
 	 * @return array|boolean resultat ou false
+	 * @throws Exception
 	 */
-	public function DescribeAlarms() {
+	public function DescribeAlarms(): bool|array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', "DescribeAlarms" );
 		$this->setParams ( 'Version', "2010-08-01", true );
 		$resultat = $this->execute_requete_aws ();
-		if ($this->valide_requete ( $resultat ) == false) {
+		if (!$this->valide_requete($resultat)) {
 			return false;
 		}
 		
 		foreach ( $resultat ["DescribeAlarmsResult"] ["MetricAlarms"] ["member"] as $name => $metrics ) {
-			if (is_integer ( $name )) {
-				//pas de test pour le moment
-			} else {
+			if (!is_integer ( $name )) {
 				$retour [$name] = $metrics;
 			}
 		}
@@ -155,17 +166,18 @@ class aws_cloudwatch extends aws_wsclient {
 	/**
 	 * Recupere la liste des types de metrique
 	 * @return array|boolean resultat ou false
+	 * @throws Exception
 	 */
-	public function GetMetricStatistics() {
+	public function GetMetricStatistics(): bool|array {
 		$retour = array ();
 		
 		/**
-		 * The parameter Namespace is required.
-The parameter MetricName is required.
-The parameter StartTime is required.
-The parameter EndTime is required.
-The parameter Period is required.
-The parameter Statistics is required.
+		 *  The parameter Namespace is required.
+			The parameter MetricName is required.
+			The parameter StartTime is required.
+			The parameter EndTime is required.
+			The parameter Period is required.
+			The parameter Statistics is required.
 		 */
 		$this->setParams ( 'Action', "GetMetricStatistics" );
 		$this->setParams ( 'Version', "2010-08-01", true );
@@ -177,7 +189,7 @@ The parameter Statistics is required.
 		//Statistique : Average | Sum | SampleCount | Maximum | Minimum
 		$this->setParams ( 'Statistics', 'Maximum', true );
 		$resultat = $this->execute_requete_aws ();
-		if ($this->valide_requete ( $resultat ) == false) {
+		if (!$this->valide_requete($resultat)) {
 			return false;
 		}
 		$retour = &$resultat;
@@ -193,13 +205,11 @@ The parameter Statistics is required.
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
-		$help [__CLASS__] ["text"] = array ();
+		$help [__CLASS__] ["text"] = [];
 		
 		return $help;
 	}
 }
-
-?>

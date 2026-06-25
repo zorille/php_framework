@@ -39,7 +39,8 @@ abstract class ci extends Core\abstract_log {
 	 * Valide qu'un objet est instancie dans les donnees
 	 * @return boolean
 	 */
-	public function valide_donnees_existe() {
+	public function valide_donnees_existe(): bool
+	{
 		if (is_object ( $this->getDonnees () )) {
 			return true;
 		}
@@ -53,7 +54,8 @@ abstract class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getId() {
+	public function getId(): string
+	{
 		return $this->id;
 	}
 
@@ -61,7 +63,8 @@ abstract class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setId(
-			$id) {
+			$id): static
+	{
 		$this->id = $id;
 		return $this;
 	}
@@ -69,7 +72,8 @@ abstract class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDonnees() {
+	public function getDonnees(): ?\SimpleXMLElement
+	{
 		return $this->donnees;
 	}
 
@@ -77,7 +81,8 @@ abstract class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setDonnees(
-			$donnees) {
+			$donnees): static
+	{
 		$this->donnees = $donnees;
 		return $this;
 	}
@@ -86,7 +91,8 @@ abstract class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @return wsclient
 	 */
-	public function &getObjetVeeamWsclientRest() {
+	public function &getObjetVeeamWsclientRest(): ?wsclient
+	{
 		return $this->wsclient;
 	}
 	
@@ -94,7 +100,8 @@ abstract class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetVeeamWsclientRest(
-			&$wsclient) {
+			&$wsclient): static
+	{
 				$this->wsclient = $wsclient;
 				return $this;
 	}
@@ -105,11 +112,10 @@ abstract class ci extends Core\abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "ci :";
 		return $help;
 	}
 }
-?>

@@ -6,6 +6,7 @@
  */
 namespace Zorille\o365;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -62,7 +63,7 @@ class Drive extends Item {
 	 * @return Drive
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -74,7 +75,6 @@ class Drive extends Item {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -140,25 +140,41 @@ class Drive extends Item {
 	/**
 	 * ******************************* O365 DRIVE *********************************
 	 */
+	/**
+	 * @param array $params
+	 * @return bool|array|string|stdClass
+	 * @throws Exception
+	 */
 	// Gestion des drives (sous composant de chaque drive)
 	public function list_drives(
-			$params = array ()) {
+		array $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->getObjetO365Wsclient ()
 			->getMethod ( $this->list_drives_uri (), $params );
 	}
 	
 	// Recupere la liste des items du site
+
+	/**
+	 * @throws Exception
+	 */
 	public function get_drive_permissions(
-			$params = array ()) {
+			$params = array ()): bool|array|string|stdClass
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				return $this->getObjetO365Wsclient ()
 				->getMethod ( $this->drives_permissions_uri (), $params );
 	}
 	
 	// Recupere la liste des items du site
+
+	/**
+	 * @throws Exception
+	 */
 	public function get_details_permission($permissionId,
-			$params = array ()) {
+	                                       $params = array ()): bool|array|string|stdClass
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				return $this->getObjetO365Wsclient ()
 				->getMethod ( $this->drives_permissions_uri ()."/".$permissionId, $params );
@@ -205,7 +221,7 @@ class Drive extends Item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Drive :";

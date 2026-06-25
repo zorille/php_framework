@@ -43,11 +43,13 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
 	 * @param vmwareServiceInstance $ObjectServiceInstance Reference sur un objet vmwareServiceInstance
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwarePropertyCollector
+	 * @throws Exception
 	 */
-	static function &creer_vmwarePropertyCollector(&$liste_option, &$ObjectVmwareWsclient, &$ObjectServiceInstance, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwarePropertyCollector(Core\options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, vmwareServiceInstance &$ObjectServiceInstance, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwarePropertyCollector
+	{
 		$objet = new vmwarePropertyCollector ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -64,7 +66,7 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * @return vmwarePropertyCollector
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjectVmwareWsclient ( $liste_class ['vmwareWsclient'] )
@@ -77,12 +79,11 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -90,10 +91,11 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	/**
 	 * creer l'objet contenant _this
 	 * @param stdClass $auth Reponse contenant la liste des ServiceInstances
-	 * @return stdClass objet contenant le _this charge customFieldsManager.
+	 * @return bool|vmwarePropertyCollector objet contenant le _this charge customFieldsManager.
 	 * @throws Exception
 	 */
-	public function retrouve_propertyCollector($auth) {
+	public function retrouve_propertyCollector(stdClass $auth): bool|vmwarePropertyCollector|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		if (! isset ( $auth->propertyCollector )) {
@@ -108,7 +110,8 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge propertyCollector.
 	 */
-	public function creer_entete_propertyCollector_this() {
+	public function creer_entete_propertyCollector_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$soap_message = new stdClass ();
@@ -119,7 +122,8 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	/**
 	 * Recupere la liste des proprietes par ManagedObjectReference
 	 */
-	public function retrouve_donnees_par_ManagedObject($ManagedObjectReference, $all = true, $pathSet = array(), $options = "") {
+	public function retrouve_donnees_par_ManagedObject($ManagedObjectReference, $all = true, $pathSet = array(), $options = ""): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setObjectSpec ( array (
 				'obj' => $ManagedObjectReference,
@@ -140,7 +144,8 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * Recupere la liste des proprietes dans un resultat de recherche
 	 * @return array|false
 	 */
-	public function retrouve_propset($ManagedObjectReference, $all = true, $pathSet = array(), $options = "") {
+	public function retrouve_propset($ManagedObjectReference, $all = true, $pathSet = array(), $options = ""): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat_recherche_soap = $this->retrouve_donnees_par_ManagedObject ( $ManagedObjectReference, $all, $pathSet, $options );
 		
@@ -161,9 +166,14 @@ class vmwarePropertyCollector extends Core\abstract_log {
 
 	/**
 	 * Recupere la liste des DataCenters et leurs donnees
-	 * @return array|false
+	 * @param $PropertyFilterSpec_type
+	 * @param bool $PropertyFilterSpec_all
+	 * @param array $PropertyFilterSpec_pathSet
+	 * @param string $options
+	 * @return bool
 	 */
-	public function RetrievePropertiesEx($PropertyFilterSpec_type, $PropertyFilterSpec_all = true, $PropertyFilterSpec_pathSet = array(), $options = "") {
+	public function RetrievePropertiesEx($PropertyFilterSpec_type, bool $PropertyFilterSpec_all = true, array $PropertyFilterSpec_pathSet = array(), string $options = ""): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_propertyCollector_this ();
@@ -185,9 +195,10 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	/**
 	 * 
 	 * @param string $token
-	 * @return array|false
+	 * @return bool
 	 */
-	public function ContinueRetrievePropertiesEx($token) {
+	public function ContinueRetrievePropertiesEx(string $token): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_propertyCollector_this ();
@@ -208,7 +219,8 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * @param array $pathSet
 	 * @return array
 	 */
-	public function PropertyFilterSpec($type, $all, $pathSet) {
+	public function PropertyFilterSpec(string $type, bool $all, array $pathSet): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				//array (
@@ -227,10 +239,11 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	/**
 	 * @param stdClass $ManagedObjectReference	Objet contenant une variable _this.
 	 * @param Boolean $skip
-	 * @param Array $selectSet
+	 * @param array $selectSet
 	 * @return vmwarePropertyCollector
 	 */
-	public function ObjectSpec($ManagedObjectReference, $skip = false, $selectSet = array()) {
+	public function ObjectSpec(stdClass $ManagedObjectReference, bool $skip = false, array $selectSet = array()): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->setObjectSpec ( array (
 				'obj' => $ManagedObjectReference->_this,
@@ -238,12 +251,14 @@ class vmwarePropertyCollector extends Core\abstract_log {
 				'selectSet' => $selectSet 
 		) );
 	}
-	
+
 	/**
 	 * Vreer une session de type containerView
-	 * @return array|false
+	 * @param $PropertyContainerView
+	 * @return bool
 	 */
-	public function CreateContainerView($PropertyContainerView) {
+	public function CreateContainerView($PropertyContainerView): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjectVmwareWsclient ()
 			->applique_requete_soap ( "CreateContainerView", array($PropertyContainerView));
@@ -257,46 +272,52 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getPropertyCollector() {
+	public function &getPropertyCollector(): ?stdClass
+	{
 		return $this->propertyCollector;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPropertyCollector($propertyCollector) {
+	public function &setPropertyCollector($propertyCollector): static
+	{
 		$this->propertyCollector = $propertyCollector;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array|string
 	 */
-	public function getObjectSpec() {
+	public function getObjectSpec(): array|string
+	{
 		return $this->ObjectSpec;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectSpec($ObjectSpec) {
+	public function &setObjectSpec($ObjectSpec): static
+	{
 		$this->ObjectSpec = $ObjectSpec;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return vmwareWsclient
+	 * @return vmwareWsclient|null
 	 */
-	public function &getObjectVmwareWsclient() {
+	public function &getObjectVmwareWsclient(): ?vmwareWsclient
+	{
 		return $this->objetVmwareWsclient;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareWsclient($objetVmwareWsclient) {
+	public function &setObjectVmwareWsclient($objetVmwareWsclient): static
+	{
 		$this->objetVmwareWsclient = $objetVmwareWsclient;
 		return $this;
 	}
@@ -307,7 +328,7 @@ class vmwarePropertyCollector extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -315,5 +336,3 @@ class vmwarePropertyCollector extends Core\abstract_log {
 		return $help;
 	}
 }
-
-?>

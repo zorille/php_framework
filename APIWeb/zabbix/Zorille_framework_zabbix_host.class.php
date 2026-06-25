@@ -147,11 +147,12 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_host
+	 * @return abstract_log|zabbix_host
 	 */
-	static function &creer_zabbix_host(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_host(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): abstract_log|zabbix_host
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_host ( $sort_en_erreur, $entete );
 		return $objet ->_initialise ( array ( 
@@ -163,9 +164,9 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_host
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -177,7 +178,6 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -186,10 +186,11 @@ class zabbix_host extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return bool True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): bool|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//Gestion d'un $host
 		$this ->setHost ( $this ->_valideOption ( array ( 
@@ -212,7 +213,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer la definition JSON a transmettre au serveur Zabbix
 	 * @return array
 	 */
-	public function creer_definition_host_ws() {
+	public function creer_definition_host_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$host = array ( 
 				"host" => $this ->getHost (), 
@@ -233,10 +235,12 @@ class zabbix_host extends zabbix_fonctions_standard {
 
 	/**
 	 * Creer un host dans zabbix
-	 * 
+	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_host() {
+	public function creer_host(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_host_ws ();
 		$this ->onDebug ( $datas, 1 );
@@ -250,7 +254,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * @param zabbix_host $zabbix_host_compare
 	 * @return boolean True si les hosts correspondent, false sinon
 	 */
-	public function compare_host($zabbix_host_compare) {
+	public function compare_host(zabbix_host $zabbix_host_compare): bool
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		if ($this ->getHostId () !== "" && $zabbix_host_compare ->getHostId () != "" && $zabbix_host_compare ->getHostId () != $this ->getHostId ()) {
 			return false;
@@ -266,7 +271,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un definition d'un host sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_host_delete_ws() {
+	public function creer_definition_host_delete_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = array ();
 		
@@ -280,8 +286,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * supprime un host dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprime_host() {
+	public function supprime_host(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_host_delete_ws ();
 		$this ->onDebug ( $datas, 1 );
@@ -297,7 +305,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un definition d'un host sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_hostByName_get_ws() {
+	public function creer_definition_hostByName_get_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		return array ( 
 				"output" => "hostid", 
@@ -308,8 +317,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * recherche un host dans zabbix a partir de son sendto
 	 * @return zabbix_host
+	 * @throws Exception
 	 */
-	public function recherche_hostid_by_Name() {
+	public function recherche_hostid_by_Name(): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_hostByName_get_ws ();
 		$this ->onDebug ( $datas, 2 );
@@ -326,7 +337,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un definition d'un host sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_hostNameByHostId_get_ws() {
+	public function creer_definition_hostNameByHostId_get_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		return array ( 
 				"output" => array ( 
@@ -339,8 +351,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * recherche un host dans zabbix a partir de son sendto
 	 * @return zabbix_host
+	 * @throws Exception
 	 */
-	public function recherche_Name_by_hostid() {
+	public function recherche_Name_by_hostid(): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_hostNameByHostId_get_ws ();
 		$this ->onDebug ( $datas, 2 );
@@ -352,13 +366,14 @@ class zabbix_host extends zabbix_fonctions_standard {
 		
 		return $this;
 	}
-	
+
 	/**
 	 * Valide qu'un hostid est present
-	 * @return zabbix_host
-	 * @throws Exception 
+	 * @return bool|zabbix_host
+	 * @throws Exception
 	 */
-	public function valide_hostid_present(){
+	public function valide_hostid_present(): bool|static
+	{
 		if (empty ( $this ->getHostId () )) {
 			return $this ->onError ( "Il faut un host valide : " . $this ->getHost () );
 		}
@@ -371,7 +386,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un tableau de recuperation de liste des hostgroups d'un host
 	 * @return array
 	 */
-	public function creer_definition_hostListeGroups_ws() {
+	public function creer_definition_hostListeGroups_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_hostByName_get_ws ();
 		$datas ["selectGroups"] = array ( 
@@ -385,8 +401,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve la liste des hostgroup d'un host
 	 * @return false|array
+	 * @throws Exception
 	 */
-	public function retrouve_liste_groups_par_host() {
+	public function retrouve_liste_groups_par_host(): bool|array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//On recupere la liste des hostgroups du host
 		$liste_hostgroups_host = $this ->getObjetZabbixWsclient () 
@@ -404,8 +422,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Ajoute un groupe existant dans zabbix au host
 	 * Pré-requis : Le groupe existe dans Zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function ajouter_groups_au_host() {
+	public function ajouter_groups_au_host(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_hostgroups_host = $this ->retrouve_liste_groups_par_host ();
 		if ($liste_hostgroups_host !== false) {
@@ -426,8 +446,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Supprime un groupe du host
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprimer_groups_au_host() {
+	public function supprimer_groups_au_host(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_hostgroups_host = $this ->retrouve_liste_groups_par_host ();
 		if ($liste_hostgroups_host !== false) {
@@ -450,7 +472,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function creer_definition_hostUpdate_manageGroups_ws() {
+	public function creer_definition_hostUpdate_manageGroups_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this->valide_hostid_present();
 		$host = array ( 
@@ -468,7 +491,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un tableau de recuperation de liste des templates d'un host
 	 * @return array
 	 */
-	public function creer_definition_hostListeTemplates_ws() {
+	public function creer_definition_hostListeTemplates_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = array ( 
 				"output" => "hostid", 
@@ -484,8 +508,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve la liste des template d'un host
 	 * @return false|array
+	 * @throws Exception
 	 */
-	public function retrouve_liste_template_par_host() {
+	public function retrouve_liste_template_par_host(): bool|array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//On recupere la liste des templates du host
 		$liste_templates_host = $this ->getObjetZabbixWsclient () 
@@ -502,8 +528,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Creer un tableau de recuperation de liste des templates d'un host
 	 * @return array
+	 * @throws Exception
 	 */
-	public function ajouter_templates_au_host() {
+	public function ajouter_templates_au_host(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_templates_host = $this ->retrouve_liste_template_par_host ();
 		if ($liste_templates_host !== false) {
@@ -524,8 +552,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Creer un tableau de recuperation de liste des templates d'un host
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprimer_templates_au_host() {
+	public function supprimer_templates_au_host(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this ->getObjetTemplates () 
 			->valide_liste_templates ();
@@ -539,7 +569,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function creer_definition_hostUpdate_addTemplate_ws() {
+	public function creer_definition_hostUpdate_addTemplate_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this->valide_hostid_present();
 		$host = array ( 
@@ -555,7 +586,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * @return array
 	 * @throws Exception
 	 */
-	public function creer_definition_hostUpdate_clearTemplate_ws() {
+	public function creer_definition_hostUpdate_clearTemplate_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this->valide_hostid_present();
 		$host = array ( 
@@ -578,7 +610,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un tableau de recuperation de liste des interfaces d'un host
 	 * @return array
 	 */
-	public function creer_definition_hostListeInterfaces_ws() {
+	public function creer_definition_hostListeInterfaces_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = array ( 
 				"output" => "hostid", 
@@ -600,8 +633,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve la liste des interfaces d'un host
 	 * @return false|array
+	 * @throws Exception
 	 */
-	public function retrouve_liste_interfaces_par_host() {
+	public function retrouve_liste_interfaces_par_host(): bool|array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//On recupere la liste des templates du host
 		$liste_interfaces_host = $this ->getObjetZabbixWsclient () 
@@ -618,8 +653,10 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * Ajoute une ou plusieurs interfaces au host
 	 * @return array
+	 * @throws Exception
 	 */
-	public function ajouter_interfaces_au_host() {
+	public function ajouter_interfaces_au_host(): array|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_interfaces_host = $this ->retrouve_liste_interfaces_par_host ();
 		if ($liste_interfaces_host !== false) {
@@ -635,9 +672,11 @@ class zabbix_host extends zabbix_fonctions_standard {
 
 	/**
 	 * Supprime une ou plusieurs interfaces au host
-	 * @return array
+	 * @return zabbix_host
+	 * @throws Exception
 	 */
-	public function supprimer_interfaces_au_host() {
+	public function supprimer_interfaces_au_host(): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_interfaces_host = $this ->retrouve_liste_interfaces_par_host ();
 		if ($liste_interfaces_host !== false) {
@@ -655,7 +694,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un tableau d'ajout d'interface a un host
 	 * @return array
 	 */
-	public function creer_definition_hostUpdate_addInterface_ws() {
+	public function creer_definition_hostUpdate_addInterface_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$host = array ( 
 				"hostid" => $this ->getHostId () );
@@ -672,7 +712,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Creer un tableau de definition d'inventory pour un host
 	 * @return array
 	 */
-	public function creer_definition_inventory_ws() {
+	public function creer_definition_inventory_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		return array ();
 	}
@@ -683,36 +724,35 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * 0 - monitored;
 	 * 1 - unmonitored;
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Status($type) {
+	public function retrouve_Status($type): float|int|string
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "unmonitored" :
-				return 1;
-				break;
-			case "monitored" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"unmonitored" => 1,
+			default => 0,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHost() {
+	public function getHost(): string
+	{
 		return $this->host;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHost($host) {
+	public function &setHost($host): static
+	{
 		$this->host = $host;
 		return $this;
 	}
@@ -720,14 +760,16 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVisibleName() {
+	public function getVisibleName(): string
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVisibleName($name) {
+	public function &setVisibleName($name): static
+	{
 		$this->name = $name;
 		return $this;
 	}
@@ -735,14 +777,16 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getProxyId() {
+	public function getProxyId(): string
+	{
 		return $this->proxy_hostid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setProxyId($proxy_hostid) {
+	public function &setProxyId($proxy_hostid): static
+	{
 		$this->proxy_hostid = $proxy_hostid;
 		return $this;
 	}
@@ -750,62 +794,70 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHostId() {
+	public function getHostId(): int|string
+	{
 		return $this->hostId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostId($hostId) {
+	public function &setHostId($hostId): static
+	{
 		$this->hostId = $hostId;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_host_interfaces
+	 * @return zabbix_host_interfaces|null
 	 */
-	public function &getObjetInterfaces() {
+	public function &getObjetInterfaces(): ?zabbix_host_interfaces
+	{
 		return $this->host_interfaces;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetInterfaces(&$HostInterfaces) {
+	public function &setObjetInterfaces(&$HostInterfaces): static
+	{
 		$this->host_interfaces = $HostInterfaces;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_hostgroups
+	 * @return zabbix_hostgroups|null
 	 */
-	public function &getObjetGroups() {
+	public function &getObjetGroups(): ?zabbix_hostgroups
+	{
 		return $this->host_groups;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetGroups(&$HostGroups) {
+	public function &setObjetGroups(&$HostGroups): static
+	{
 		$this->host_groups = $HostGroups;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_templates
+	 * @return zabbix_templates|null
 	 */
-	public function &getObjetTemplates() {
+	public function &getObjetTemplates(): ?zabbix_templates
+	{
 		return $this->host_templates;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetTemplates(&$HostTemplates) {
+	public function &setObjetTemplates(&$HostTemplates): static
+	{
 		$this->host_templates = $HostTemplates;
 		return $this;
 	}
@@ -813,14 +865,16 @@ class zabbix_host extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getStatus() {
+	public function getStatus(): int
+	{
 		return $this->status;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStatus($status) {
+	public function &setStatus($status): static
+	{
 		$this->status = $this ->retrouve_Status ( $status );
 		return $this;
 	}
@@ -831,7 +885,8 @@ class zabbix_host extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -846,4 +901,3 @@ class zabbix_host extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

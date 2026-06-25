@@ -40,7 +40,7 @@ class splunk_services_admin_summarization extends splunk_services_admin {
 	 * @param array $liste_class
 	 * @return splunk_services_admin_summarization
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this ->reset_resource ();
@@ -54,7 +54,6 @@ class splunk_services_admin_summarization extends splunk_services_admin {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion du parent
@@ -97,7 +96,8 @@ class splunk_services_admin_summarization extends splunk_services_admin {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

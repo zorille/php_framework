@@ -7,9 +7,10 @@
  */
 namespace Zorille\dolibarr;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
-use SimpleXMLElement as SimpleXMLElement;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des informations via un webservice.
@@ -42,18 +43,18 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param datas &$datas Reference sur un objet datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null $datas &$datas Reference sur un objet datas
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = null,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = null,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): wsclient {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -67,15 +68,15 @@ class wsclient extends Core\wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return self|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this->setObjetdolibarrDatas ( $liste_class ["datas"] )
 			->setContentType ( 'application/x-www-form-urlencoded' )
@@ -91,7 +92,6 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -107,11 +107,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): wsclient|bool|static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_dolibarr = $this->getObjetdolibarrDatas ()
 			->valide_presence_data ( $nom );
-		if ($liste_data_dolibarr === false) {
+		if (!$liste_data_dolibarr) {
 			return $this->onError ( "Aucune definition de dolibarr pour " . $nom );
 		}
 		if (! isset ( $liste_data_dolibarr ["username"] )) {
@@ -137,9 +137,10 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Http dolibarr header creator
 	 *
-	 * @return string Http Header
+	 * @return wsclient Http Header
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
 			return $this->setHttpHeader ( array (
@@ -157,7 +158,7 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @return wsclient
 	 */
-	public function prepare_params() {
+	public function prepare_params(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		// if ( $this ->getAuth () ) {
 		// $this ->setParams ( 'output_mode', 'xml', true );
@@ -168,11 +169,11 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Convert return data to array
 	 *
-	 * @return array
-	 * @throws Exception
+	 * @param $retour_wsclient
+	 * @return array|stdClass
 	 */
 	public function prepare_retour(
-			$retour_wsclient) {
+			$retour_wsclient): array|stdClass {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->traite_retour_json ( $retour_wsclient );
 	}
@@ -180,10 +181,10 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Sends are prepare_requete_json to the dolibarr API and returns the response as object.
 	 *
-	 * @return string API JSON response.
+	 * @return array|string API JSON response.
 	 * @throws Exception
 	 */
-	public function prepare_requete() {
+	public function prepare_requete(): array|string {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
@@ -205,12 +206,13 @@ class wsclient extends Core\wsclient {
 
 	/**
 	 * @param string $param
-	 * @param string|integer|boolean $valeur
+	 * @param boolean|integer|string $valeur
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	public function modifie_default_param(
-			$param,
-			$valeur) {
+		string          $param,
+		bool|int|string $valeur): static {
 		$default_params = $this->getDefaultParams ();
 		$default_params [$param] = $valeur;
 		return $this->setDefaultParams ( $default_params );
@@ -227,7 +229,7 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	final public function userLogin(
-			$params = array ()) {
+		array $params = array ()): bool|static {
 		$this->onDebug ( __METHOD__, 1 );
 		// $resultat = $this ->postMethod ( 'login', $params );
 		// if (isset ( $resultat["success"] ) && isset($resultat["success"]['code']) && $resultat["success"]['code']=='200') {
@@ -243,12 +245,12 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function getMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): array|string {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -261,12 +263,12 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function postMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -279,12 +281,12 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function putMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): array|string {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -297,12 +299,12 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function deleteMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): array|string {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -319,9 +321,9 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return datas
+	 * @return datas|null
 	 */
-	public function &getObjetDolibarrDatas() {
+	public function &getObjetDolibarrDatas(): ?datas {
 		return $this->datas;
 	}
 
@@ -329,7 +331,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetDolibarrDatas(
-			&$datas) {
+			&$datas): static {
 		$this->datas = $datas;
 		return $this;
 	}
@@ -338,7 +340,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string {
 		return $this->auth;
 	}
 
@@ -346,7 +348,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static {
 		$this->auth = $auth;
 		return $this;
 	}
@@ -357,7 +359,7 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array {
 		return $this->defaultParams;
 	}
 
@@ -365,13 +367,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retrun wsclient
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): bool|static {
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -386,13 +388,12 @@ class wsclient extends Core\wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "dolibarr Wsclient :";
-		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, datas::help () );
-		return $help;
+		$help [__CLASS__] ["text"] = [
+			'dolibarr Wsclient :',
+			"\t--dry-run n'applique pas les changements"
+		];
+		return array_merge ( $help, datas::help () );
 	}
 }
-?>

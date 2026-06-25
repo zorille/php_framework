@@ -26,13 +26,18 @@ class cacti_wsclient extends wsclient {
 	 * Instancie un objet de type cacti_wsclient.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param cacti_datas &$cacti_datas Reference sur un objet cacti_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return cacti_wsclient
+	 * @throws Exception
 	 */
-	static function &creer_cacti_wsclient(&$liste_option, &$cacti_datas, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_wsclient(
+		options     &$liste_option,
+		cacti_datas &$cacti_datas,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_wsclient
+	{
 		$objet = new cacti_wsclient ( $sort_en_erreur, $entete );
 		$objet ->_initialise ( array (
 				"options" => $liste_option,
@@ -44,13 +49,16 @@ class cacti_wsclient extends wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return cacti_wsclient
+	 * @return self|bool
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["cacti_datas"] )) {
-			return $this ->onError ( "il faut un objet de type cacti_datas" );
+			$r = $this ->onError ( "il faut un objet de type cacti_datas" );
+			return $r;
 		}
 		$this ->setObjetCactiDatas ( $liste_class ["cacti_datas"] );
 		return $this;
@@ -63,7 +71,6 @@ class cacti_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de abstract_log
@@ -76,10 +83,11 @@ class cacti_wsclient extends wsclient {
 	 * @return boolean|cacti_wsclient
 	 * @throws Exception
 	 */
-	public function prepare_connexion($nom) {
+	public function prepare_connexion(string $nom): bool|cacti_wsclient|static
+	{
 		$liste_data_cacti = $this ->getObjetCactiDatas () 
 			->valide_presence_cacti_data ( $nom );
-		if ($liste_data_cacti === false) {
+		if (!$liste_data_cacti) {
 			return $this ->onError ( "Aucune definition de cacti pour " . $nom );
 		}
 		$this ->getGestionConnexionUrl () 
@@ -95,7 +103,8 @@ class cacti_wsclient extends wsclient {
 	 * @return array|false tableau de retour ou false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function appel_listeDevices() {
+	public function appel_listeDevices(): bool|array
+	{
 		if (count ( $this ->getParams () ) == 0) {
 			return $this ->onError ( "Il faut des parametres pour cette appel au Webservice" );
 		}
@@ -111,7 +120,8 @@ class cacti_wsclient extends wsclient {
 	 * @return array|false tableau de retour ou false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function appel_ajouteDevice() {
+	public function appel_ajouteDevice(): bool|array
+	{
 		if (count ( $this ->getParams () ) == 0) {
 			return $this ->onError ( "Il faut des parametres pour cette appel au Webservice" );
 		}
@@ -126,7 +136,8 @@ class cacti_wsclient extends wsclient {
 	 * @return array|false tableau de retour ou false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function appel_udateDevice() {
+	public function appel_udateDevice(): bool|array
+	{
 		if (count ( $this ->getParams () ) == 0) {
 			return $this ->onError ( "Il faut des parametres pour cette appel au Webservice" );
 		}
@@ -144,7 +155,8 @@ class cacti_wsclient extends wsclient {
 	 * @return array|false tableau de retour ou false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function appel_supprimeDevice() {
+	public function appel_supprimeDevice(): bool|array
+	{
 		if (count ( $this ->getParams () ) == 0) {
 			return $this ->onError ( "Il faut des parametres pour cette appel au Webservice" );
 		}
@@ -155,13 +167,15 @@ class cacti_wsclient extends wsclient {
 	}
 
 	/************************* GESTION CACTI HOST ****************************/
-	
+
 	/**
 	 * Applique une requete au webservice
 	 * @codeCoverageIgnore
 	 * @return array|false tableau de retour ou false en cas d'erreur.
+	 * @throws Exception
 	 */
-	public function appel_exempleAppel() {
+	public function appel_exempleAppel(): bool|array
+	{
 		$this ->setParams ( array () );
 		$this ->setUrl ( "/cacti" );
 		
@@ -173,16 +187,18 @@ class cacti_wsclient extends wsclient {
 	/************************* Accesseurs ***********************/
 	/**
 	 * @codeCoverageIgnore
-	 * @return cacti_datas
+	 * @return cacti_datas|null
 	 */
-	public function &getObjetCactiDatas() {
+	public function &getObjetCactiDatas(): ?cacti_datas
+	{
 		return $this->cacti_datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetCactiDatas(&$cacti_datas) {
+	public function &setObjetCactiDatas(&$cacti_datas): static
+	{
 		$this->cacti_datas = $cacti_datas;
 		return $this;
 	}
@@ -193,7 +209,7 @@ class cacti_wsclient extends wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -201,5 +217,3 @@ class cacti_wsclient extends wsclient {
 		return $help;
 	}
 }
-
-?>

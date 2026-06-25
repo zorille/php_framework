@@ -40,11 +40,12 @@ class requete extends connexion {
      * Instancie un objet de type requete.
      * @codeCoverageIgnore
      * @param options $liste_option Reference sur un objet options
-     * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+     * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
      * @param string $entete Entete des logs de l'objet
      * @return requete
      */
-	static function &creer_requete(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_requete(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): requete
+	{
 		$objet = new requete ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -59,21 +60,18 @@ class requete extends connexion {
      * @param array $liste_class
      * @return requete
      */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
 
 	/*********************** Creation de l'objet *********************/
 	/**
-     * Creer l'objet et cree la connexion a la base.
-     * @codeCoverageIgnore
-     * @param string $machine Nom de la machine ayant la base.
-     * @param string $user Nom de l'utilisateur de connexion.
-     * @param string $password Mot de passe de l'utilisateur.
-     * @param string $type Type de base : mysql/sqlite ...
-     * @param string $sort_en_erreur Prend les valeurs oui/non ou true/false.
-     */
+	 * Creer l'objet et cree la connexion a la base.
+	 * @codeCoverageIgnore
+	 * @param string $sort_en_erreur Prend les valeurs oui/non ou true/false.
+	 * @param string $entete
+	 */
 	public function __construct($sort_en_erreur = "oui", $entete = __CLASS__) {
 		parent::__construct ( $sort_en_erreur, $entete );
 		$this->resultat = false;
@@ -88,7 +86,8 @@ class requete extends connexion {
      * @param PDOStatement $PDO_result resultat de la requete select.
      * @return bool true si OK, false sinon.
      */
-	protected function _prepareResultat($PDO_result) {
+	protected function _prepareResultat(PDOStatement $PDO_result): bool
+	{
 		$pos = 0;
 		if ($PDO_result instanceof PDOStatement) {
 			if ($this->getRenvoiePDO () === true) {
@@ -118,7 +117,8 @@ class requete extends connexion {
      *
      * @return bool true si OK, false sinon.
      */
-	public function nettoie_resultat() {
+	public function nettoie_resultat(): bool
+	{
 		$this->resultat = false;
 		$this->nb_lignes_traitees = 0;
 		
@@ -126,15 +126,16 @@ class requete extends connexion {
 	}
 
 	/**
-     * Creer un requete SQL type INSERT et l'applique a la base.
-     *
-     * @param string $table Table pour l'insertion.
-     * @param string|array $values Liste des valeurs du VALUES.
-     * @param string $ignore Option supplementaire (IGNORE ...).
-     * @throws Exception
-     * @throws PDOException
-     */
-	public function ajouter($table, $value, $ignore = "") {
+	 * Creer un requete SQL type INSERT et l'applique a la base.
+	 *
+	 * @param string $table Table pour l'insertion.
+	 * @param $value
+	 * @param string $ignore Option supplementaire (IGNORE ...).
+	 * @return false|int
+	 * @throws Exception
+	 */
+	public function ajouter(string $table, $value, string $ignore = ""): bool|int
+	{
 		//Si il n'y a pas de connexion et de droit a l'update a la base, alors pas de requete possible
 		if (! $this->test_database_active ( true ))
 			return false;
@@ -151,18 +152,18 @@ class requete extends connexion {
 	}
 
 	/**
-     * Creer un requete SQL type SELECT...FROM...WHERE et l'applique a la base.
-     *
-     * @param string|array $select Liste de champ du SELECT.
-     * @param string|array $from Liste de champ du FROM.
-     * @param string|array $where Liste de champ du WHERE.
-     * @param string $option Option supplementaire (ORDER BY, GROUP BY ...).
-     * @param string $distinct mettre DISTINCT si on active le distinct
-     * @return PDO Renvoi le resultat au format PDO.
-     * @throws Exception
-     * @throws PDOException
-     */
-	public function selectionner($select, $from, $where = "", $option = "", $distinct = "") {
+	 * Creer un requete SQL type SELECT...FROM...WHERE et l'applique a la base.
+	 *
+	 * @param array|string $select Liste de champ du SELECT.
+	 * @param array|string $from Liste de champ du FROM.
+	 * @param array|string $where Liste de champ du WHERE.
+	 * @param string $option Option supplementaire (ORDER BY, GROUP BY ...).
+	 * @param string $distinct mettre DISTINCT si on active le distinct
+	 * @return bool|PDO|array Renvoi le resultat au format PDO.
+	 * @throws Exception
+	 */
+	public function selectionner(array|string $select, array|string $from, array|string $where = "", string $option = "", string $distinct = ""): bool|PDO|array
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ())
 			return false;
@@ -181,31 +182,32 @@ class requete extends connexion {
 	}
 
 	/**
-     * Creer un requete SQL type SELECT...FROM...WHERE et l'applique a la base.
-     *
-     * @param string|array $select Liste de champ du SELECT.
-     * @param string|array $from Liste de champ du FROM.
-     * @param string|array $where Liste de champ du WHERE.
-     * @param string $option Option supplementaire (ORDER BY, GROUP BY ...).
-     * @param string $distinct mettre DISTINCT si on active le distinct
-     * @return PDO Renvoi le resultat au format PDO.
-     * @throws Exception
-     * @throws PDOException
-     */
-	public function selectionner_avec_jointure($select, $from, $where = "", $option = "", $distinct = "") {
+	 * Creer un requete SQL type SELECT...FROM...WHERE et l'applique a la base.
+	 *
+	 * @param array|string $select Liste de champ du SELECT.
+	 * @param array|string $from Liste de champ du FROM.
+	 * @param array|string $where Liste de champ du WHERE.
+	 * @param string $option Option supplementaire (ORDER BY, GROUP BY ...).
+	 * @param string $distinct mettre DISTINCT si on active le distinct
+	 * @return PDO|bool|array Renvoi le resultat au format PDO.
+	 * @throws Exception
+	 */
+	public function selectionner_avec_jointure(array|string $select, array|string $from, array|string $where = "", string $option = "", string $distinct = ""): PDO|bool|array
+	{
 		$from_join = $this->creer_from_join ( $from );
 		return $this->selectionner ( $select, $from_join, $where, $option, $distinct );
 	}
 
 	/**
-     * Creer un requete SQL type DELETE et l'applique a la base.
-     *
-     * @param string $table Table pour la suppression.
-     * @param string|array $supprimer Liste des conditions du WHERE.
-     * @throws Exception
-     * @throws PDOException
-     */
-	public function supprimer($table, $where) {
+	 * Creer un requete SQL type DELETE et l'applique a la base.
+	 *
+	 * @param string $table Table pour la suppression.
+	 * @param $where
+	 * @return false|int
+	 * @throws Exception
+	 */
+	public function supprimer(string $table, $where): bool|int
+	{
 		//Si il n'y a pas de connexion et de droit a l'update a la base, alors pas de requete possible
 		if (! $this->test_database_active ( true ))
 			return false;
@@ -227,13 +229,14 @@ class requete extends connexion {
      * Creer un requete SQL type UPDATE et l'applique a la base.
      *
      * @param string $table Table pour l'insertion.
-     * @param string|array $set Liste de champ=valeur a updater.
-     * @param string|array $where Liste des conditions du WHERE.
-     * @return PDO Renvoi le resultat au format PDO.
+     * @param array|string $set Liste de champ=valeur a updater.
+     * @param array|string $where Liste des conditions du WHERE.
+     * @return false|int Renvoi le resultat au format PDO.
      * @throws Exception
      * @throws PDOException
      */
-	public function updater($table, $set, $where = "") {
+	public function updater(string $table, array|string $set, array|string $where = ""): bool|int
+	{
 		//Si il n'y a pas de connexion et de droit a l'update a la base, alors pas de requete possible
 		if (! $this->test_database_active ( true ))
 			return false;
@@ -252,18 +255,16 @@ class requete extends connexion {
 	}
 
 	/**
-     * Creer un requete SQL type SELECT...FROM...WHERE et l'applique a la base.
-     *
-     * @param string|array $select Liste de champ du SELECT.
-     * @param string|array $from Liste de champ du FROM.
-     * @param string|array $where Liste de champ du WHERE.
-     * @param string $option Option supplementaire (ORDER BY, GROUP BY ...).
-     * @param int $type_result Deprecated
-     * @return PDO Renvoi le resultat au format PDO.
-     * @throws Exception
-     * @throws PDOException
-     */
-	public function updater_avec_jointure($from, $set, $where = "") {
+	 * Creer un requete SQL type SELECT...FROM...WHERE et l'applique a la base.
+	 *
+	 * @param array|string $from Liste de champ du FROM.
+	 * @param $set
+	 * @param string $where Liste de champ du WHERE.
+	 * @return bool|PDO|array Renvoi le resultat au format PDO.
+	 * @throws Exception
+	 */
+	public function updater_avec_jointure(array|string $from, $set, $where = ""): bool|PDO|array
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ( true ))
 			return false;
@@ -283,12 +284,13 @@ class requete extends connexion {
 
 	/**
      * Creer un requete SQL type SHOW DATABASES.
-     * @param int $local_sql Deprecated
-     * @return PDO Renvoi le resultat au format PDO.
+     * @param int|string $local_sql Deprecated
+     * @return array|false Renvoi le resultat au format PDO.
      * @throws Exception
      * @throws PDOException
      */
-	public function liste_db($local_sql = "") {
+	public function liste_db(int|string $local_sql = ""): bool|array
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ())
 			return false;
@@ -309,47 +311,44 @@ class requete extends connexion {
 	/**
 	 * Retourne le "Last Inserted Id".
 	 * @param string $name Nom de la sequence d'objet
-	 * @return string Last Inserted Id.
+	 * @return bool|string Last Inserted Id.
 	 * @throws Exception
-	 * @throws PDOException
 	 */
-	public function recupere_last_id($name = "") {
+	public function recupere_last_id(string $name = ""): bool|string
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ())
 			return false;
-		$PDO_result = $this->getDbConnexion ()
+		return $this->getDbConnexion ()
 			->getPDOConnexion ()
 			->lastInsertId ( $name );
-		
-		return $PDO_result;
 	}
 
 	/**
 	 * Retourne le "Last Inserted Id".
-	 * @param string $name Nom de la sequence d'objet
+	 * @param $data
 	 * @return string Last Inserted Id.
 	 * @throws Exception
-	 * @throws PDOException
 	 */
-	public function escape_string($data) {
+	public function escape_string($data): bool|string
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ())
 			return false;
-		$PDO_result = $this->getDbConnexion ()
+		return $this->getDbConnexion ()
 			->getPDOConnexion ()
 			->quote ( $data );
-		
-		return $PDO_result;
 	}
 
 	/**
      * Creer un requete SQL type SHOW TABLES.
-     * @param int $local_sql Deprecated
-     * @return PDO Renvoi le resultat au format PDO.
+     * @param int|string $local_sql Deprecated
+     * @return array|false Renvoi le resultat au format PDO.
      * @throws Exception
      * @throws PDOException
      */
-	public function liste_table($local_sql = "non") {
+	public function liste_table(int|string $local_sql = "non"): bool|array
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ())
 			return false;
@@ -377,7 +376,8 @@ class requete extends connexion {
      * @throws Exception
      * @throws PDOException
      */
-	public function verifier_champ_in_database($table, $champ, $valeur) {
+	public function verifier_champ_in_database(string $table, string $champ, string $valeur): bool
+	{
 		//Si il n'y a pas de connexion a la base, alors pas de requete possible
 		if (! $this->test_database_active ())
 			return false;
@@ -395,28 +395,32 @@ class requete extends connexion {
 	/**
      * @codeCoverageIgnore
      */
-	public function getResultat() {
+	public function getResultat(): bool|array
+	{
 		return $this->resultat;
 	}
 
 	/**
      * @codeCoverageIgnore
      */
-	public function getNbLignesTraitees() {
+	public function getNbLignesTraitees(): int
+	{
 		return $this->nb_lignes_traitees;
 	}
 
 	/**
      * @codeCoverageIgnore
      */
-	public function getRenvoiePDO() {
+	public function getRenvoiePDO(): bool|array
+	{
 		return $this->renvoi_PDO;
 	}
 
 	/**
      * @codeCoverageIgnore
      */
-	public function &setRenvoiePDO($renvoi_PDO) {
+	public function &setRenvoiePDO($renvoi_PDO): static
+	{
 		$this->renvoi_PDO = $renvoi_PDO;
 		return $this;
 	}
@@ -427,7 +431,8 @@ class requete extends connexion {
  	* @param string|array $arg
  	* @return boolean
  	*/
-	private function _testArgument($arg) {
+	private function _testArgument($arg): bool
+	{
 		$flag = false;
 		if (is_array ( $arg )) {
 			if (count ( $arg ) > 0 && $arg [0] != "") {
@@ -440,13 +445,13 @@ class requete extends connexion {
 		return $flag;
 	}
 	//Fin d'execution des requetes
+
 	/**
-     * @static
-     * @codeCoverageIgnore
-     * @param string $echo Affiche le help
-     * @return string Renvoi le help
-     */
-	static function help() {
+	 * @static
+	 * @codeCoverageIgnore
+	 * @return array|string Renvoi le help
+	 */
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -475,4 +480,3 @@ class requete extends connexion {
 		return $help;
 	}
 }
-?>

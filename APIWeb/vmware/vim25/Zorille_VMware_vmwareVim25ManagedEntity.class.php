@@ -1,15 +1,18 @@
 <?php
+
 /**
  * @author dvargas
  * @package Lib
  *
  */
 namespace Zorille\VMware;
+
 use Zorille\framework\options as options;
-use \Exception as Exception;
-use \ArrayObject as ArrayObject;
-use \soapvar as soapvar;
-use \stdClass as stdClass;
+use Exception as Exception;
+use ArrayObject as ArrayObject;
+use soapvar as soapvar;
+use stdClass as stdClass;
+
 /**
  * class vmwareVim25ManagedEntity<br>
  * @package Lib
@@ -80,7 +83,9 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 */
 	private $objetVmwareVirtualMachine = null;
 
-	/*********************** Creation de l'objet *********************/
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Instancie un objet de type vmwareVim25ManagedEntity.
 	 * @codeCoverageIgnore
@@ -90,11 +95,15 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareVim25ManagedEntity
 	 */
-	static function &creer_vmwareVim25ManagedEntity(&$liste_option, &$vmware_webservice, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareVim25ManagedEntity(
+			&$liste_option,
+			&$vmware_webservice,
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
 		$objet = new vmwareVim25ManagedEntity ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
-				"vmwareWsclient" => $vmware_webservice 
+				"vmwareWsclient" => $vmware_webservice
 		) );
 		return $objet;
 	}
@@ -106,14 +115,15 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareVim25ManagedEntity
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
-		
 		return $this;
 	}
 
-	/*********************** Creation de l'objet *********************/
-	
+	/**
+	 * ********************* Creation de l'objet ********************
+	 */
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
@@ -122,8 +132,10 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return true
 	 * @throws Exception
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
-		//Gestion de abstract_log
+	public function __construct(
+			$sort_en_erreur = false,
+			$entete = __CLASS__) {
+		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
@@ -132,94 +144,112 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @param stdClass $resultat_recherche_soap Resultat d'une requete SOAP vcenter
 	 * @return array
 	 */
-	public function renvoi_obj($resultat_recherche_soap) {
+	public function renvoi_obj(
+			$resultat_recherche_soap) {
 		$liste_finale = $this->getObjectVmwareWsclient ()
 			->convertit_donnees ( $resultat_recherche_soap, "xml" );
 		$liste_obj = $liste_finale->renvoi_donnee ( "obj" );
 		if (! isset ( $liste_obj [0] )) {
 			$liste_obj = array (
-					$liste_obj 
+					$liste_obj
 			);
 		}
-		
 		$this->onDebug ( $liste_obj, 2 );
 		return $liste_obj;
 	}
 
 	/**
-	 * 
 	 * @param soapvar|string $TraversalSpec
 	 * @return ArrayObject
 	 */
 	public function &creer_Folder_spec() {
-		$array = new ArrayObject ( array (
+		// $array = new ArrayObject ( array (
+		// 'name' => 'FolderTraversalSpec',
+		// 'type' => 'Folder',
+		// 'path' => 'childEntity',
+		// 'skip' => false
+		// ) );
+		$array = array (
 				'name' => 'FolderTraversalSpec',
 				'type' => 'Folder',
 				'path' => 'childEntity',
-				'skip' => false 
-		) );
-		
+				'skip' => false
+		);
 		return $array;
 	}
 
 	/**
-	 *
 	 * @param soapvar|string $TraversalSpec
 	 * @return ArrayObject
 	 */
-	public function &creer_Datacenter_spec($path = 'hostFolder', $skip = false) {
-		$array = new ArrayObject ( array (
+	public function &creer_Datacenter_spec(
+			$path = 'hostFolder',
+			$skip = false) {
+		// $array = new ArrayObject ( array (
+		// 'name' => 'DataCenterTraversalSpec',
+		// 'type' => 'Datacenter',
+		// 'path' => $path,
+		// 'skip' => $skip
+		// ) );
+		$array = array (
 				'name' => 'DataCenterTraversalSpec',
 				'type' => 'Datacenter',
 				'path' => $path,
-				'skip' => $skip 
-		) );
-		
+				'skip' => $skip
+		);
 		return $array;
 	}
-	
+
 	/**
-	 *
 	 * @param soapvar|string $TraversalSpec
 	 * @return ArrayObject
 	 */
-	public function &creer_ClusterRessource_spec($path = 'host', $skip = false) {
+	public function &creer_ClusterRessource_spec(
+			$path = 'host',
+			$skip = false) {
 		$array = new ArrayObject ( array (
 				'name' => 'ComputeResourceHostTraversalSpec',
 				'type' => 'ComputeResource',
 				'path' => $path,
-				'skip' => $skip 
+				'skip' => $skip
 		) );
-		
 		return $array;
 	}
-	
+
 	/**
-	 *
 	 * @param soapvar|string $TraversalSpec
 	 * @return ArrayObject
 	 */
-	public function &creer_traverseView_spec($path = 'view', $skip = false) {
-		$array = new ArrayObject ( array (
+	public function &creer_traverseView_spec(
+			$path = 'view',
+			$skip = false) {
+		// $array = new ArrayObject ( array (
+		// 'name' => 'traverseView',
+		// 'type' => 'ContainerView',
+		// 'path' => $path,
+		// 'skip' => $skip
+		// ) );
+		$array = array (
 				'name' => 'traverseView',
 				'type' => 'ContainerView',
 				'path' => $path,
-				'skip' => $skip 
-		) );
-		
+				'skip' => $skip
+		);
 		return $array;
 	}
-	
-	public function creer_ContainerView($Ressource) {
-		$ContainerView=$this->getObjectVmwareWsclient ()
+
+	public function creer_ContainerView(
+			$Ressource) {
+		$ContainerView = $this->getObjectVmwareWsclient ()
 			->getObjectServiceInstance ()
-			->CreateContainerView ($Ressource);
-			
-		return $this->getObjectVmwarePropertyCollector () 
-			->CreateContainerView($ContainerView);	
+			->CreateContainerView ( $Ressource );
+		return $this->getObjectVmwarePropertyCollector ()
+			->CreateContainerView ( $ContainerView );
 	}
 
-	/************************* Methodes Cluster ***********************/
+	/**
+	 * *********************** Methodes Cluster **********************
+	 */
 	/**
 	 * Fait un Destroy_task
 	 *
@@ -227,11 +257,11 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_Cluster($name) {
+	public function Del_Cluster(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		// 		return $this->Get_Cluster_Name ( $name )
-		// 		->Destroy_Task ();
+		// return $this->Get_Cluster_Name ( $name )
+		// ->Destroy_Task ();
 		return $this->onError ( "NOT Implemented" );
 	}
 
@@ -242,24 +272,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_Cluster($options = array (
-			"maxObjects" => "50"
-	), $full=true) {
+	public function Get_Cluster(
+			$options = array (
+					"maxObjects" => "50"
+			),
+			$full = true) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des Cluster
-		$session=$this->creer_ContainerView('ClusterComputeResource');
+		// On retrouve la liste des Cluster
+		$session = $this->creer_ContainerView ( 'ClusterComputeResource' );
 		$a = $this->creer_traverseView_spec ();
-			
-		$objectref= new stdClass ();
+		$objectref = new stdClass ();
 		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
 			->ObjectSpec ( $objectref, false, array (
 				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
-		
 		$resultat_recherche = $this->retrouve_objets ( 'ClusterComputeResource', array (), $options, $full );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -270,9 +298,12 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareClusterComputeResource|false
 	 * @throws Exception
 	 */
-	public function Get_Cluster_Datas($cluster_name, $all = true, $pathSet = array(), $options = "") {
+	public function Get_Cluster_Datas(
+			$cluster_name,
+			$all = true,
+			$pathSet = array (),
+			$options = "") {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		$Cluster = $this->Get_Cluster_Name ( $cluster_name );
 		if ($Cluster instanceof vmwareClusterComputeResource) {
 			$Cluster_datas = $Cluster->getClusterComputeResource ();
@@ -281,7 +312,6 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 		}
 		$resources_cluster = $this->getObjectVmwarePropertyCollector ()
 			->retrouve_propset ( $Cluster_datas, $all, $pathSet, $options );
-		
 		return $resources_cluster;
 	}
 
@@ -292,18 +322,18 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareClusterComputeResource|false
 	 * @throws Exception
 	 */
-	public function Get_Cluster_Name($name) {
+	public function Get_Cluster_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_Cluster ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le Cluster
+				// On a trouve le Cluster
 				if ($obj ["type"] == "ClusterComputeResource") {
 					return $this->getObjectVmwareClusterComputeResource ()
 						->setClusterComputeResource ( $obj );
@@ -312,27 +342,28 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 					->setComputeResource ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de Cluster/Standalone nomme " . $name );
 	}
 
 	/**
-	 * Fait un CreateCluster
-	 * Necessite le rootFolder de reference
+	 * Fait un CreateCluster Necessite le rootFolder de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_Cluster($name) {
+	public function Set_Cluster(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->onError ( "NOT Implemented" );
 	}
 
-	/************************* Methodes Cluster ***********************/
-	
-	/************************* Methodes Datacenter ***********************/
+	/**
+	 * *********************** Methodes Cluster **********************
+	 */
+	/**
+	 * *********************** Methodes Datacenter **********************
+	 */
 	/**
 	 * Fait un Destroy_task
 	 *
@@ -340,9 +371,9 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_Datacenter($name) {
+	public function Del_Datacenter(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->Get_Datacenter_Name ( $name )
 			->Destroy_Task ();
 	}
@@ -356,12 +387,11 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 */
 	public function Get_Datacenter() {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		$resultat_recherche = $this->getObjectVmwarePropertyCollector ()
 			->retrouve_propset ( ( array ) $this->getObjectVmwareWsclient ()
 			->getObjectServiceInstance ()
 			->getRootFolder (), false, array (
-				"childEntity" 
+				"childEntity"
 		) );
 		$liste_finale = array ();
 		foreach ( $resultat_recherche as $obj ) {
@@ -369,7 +399,6 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 				$liste_finale = &$obj ['ManagedObjectReference'];
 			}
 		}
-		
 		$this->onDebug ( $liste_finale, 2 );
 		return $liste_finale;
 	}
@@ -381,58 +410,58 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareDatacenter|false
 	 * @throws Exception
 	 */
-	public function Get_Datacenter_Name($name) {
+	public function Get_Datacenter_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_Datacenter ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le datacenter
+				// On a trouve le datacenter
 				return $this->getObjectVmwareDatacenter ()
 					->setDatacenter ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de Datacenter nomme " . $name );
 	}
 
 	/**
-	 * Fait un CreateDatacenter
-	 * Necessite le rootFolder de reference
+	 * Fait un CreateDatacenter Necessite le rootFolder de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_Datacenter($name) {
+	public function Set_Datacenter(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve le rootFolder (celui qui n'a pas de parent)
+		// On retrouve le rootFolder (celui qui n'a pas de parent)
 		$resultat_recherche = $this->Get_Folder ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"parent" 
+					"parent"
 			) );
 			if (! isset ( $donnees ["parent"] )) {
-				//Si il n'y a pas de parent, on est au rootFolder
+				// Si il n'y a pas de parent, on est au rootFolder
 				return $this->getObjectVmwareFolder ()
 					->setMoIDFolder ( $obj )
 					->CreateDatacenter ( $name );
 			}
 		}
-		
 		return $this->onError ( "Pas de rootFolder pour le creer le Datacenter " . $name );
 	}
 
-	/************************* Methodes Datacenter ***********************/
-	
-	/************************* Methodes Datastore ***********************/
+	/**
+	 * *********************** Methodes Datacenter **********************
+	 */
+	/**
+	 * *********************** Methodes Datastore **********************
+	 */
 	/**
 	 * Fait un Destroy_task
 	 *
@@ -440,11 +469,11 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_Datastore($name) {
+	public function Del_Datastore(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		// 		return $this->Get_Datastore_Name ( $name )
-		// 		->Destroy_Task ();
+		// return $this->Get_Datastore_Name ( $name )
+		// ->Destroy_Task ();
 		return $this->onError ( "NOT Implemented" );
 	}
 
@@ -455,31 +484,21 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_Datastore($options = array (
-			"maxObjects" => "50"
-	)) {
+	public function Get_Datastore(
+			$options = array (
+					"maxObjects" => "50"
+			)) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des datastores
-		$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$b = $this->creer_Datacenter_spec ( 'datastore' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
+		// On retrouve la liste des datastores
+		$session = $this->creer_ContainerView ( 'Datastore' );
+		$a = $this->creer_traverseView_spec ();
+		$objectref = new stdClass ();
+		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
+			->ObjectSpec ( $objectref, false, array (
+				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
 		$resultat_recherche = $this->retrouve_objets ( 'Datastore', array (), $options );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -490,54 +509,54 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareDatastore|false
 	 * @throws Exception
 	 */
-	public function Get_Datastore_Name($name) {
+	public function Get_Datastore_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_Datastore ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le datacenter
+				// On a trouve le datacenter
 				return $this->getObjectVmwareDatastore ()
 					->setDatastore ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de Datastore nomme " . $name );
 	}
 
 	/**
-	 * Fait un CreateDatastore
-	 * Necessite le rootFolder de reference
+	 * Fait un CreateDatastore Necessite le rootFolder de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_Datastore($name) {
+	public function Set_Datastore(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->onError ( "NOT Implemented" );
 	}
 
-	/************************* Methodes Datastore ***********************/
-	
-	/************************* Methodes Folder ***********************/
 	/**
-	 * Fait un Destroy_task
-	 * Necessite le rootFolder de reference
+	 * *********************** Methodes Datastore **********************
+	 */
+	/**
+	 * *********************** Methodes Folder **********************
+	 */
+	/**
+	 * Fait un Destroy_task Necessite le rootFolder de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_Folder($name) {
+	public function Del_Folder(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->Get_Folder_Name ( $name )
 			->Destroy_Task ();
 	}
@@ -549,34 +568,20 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_Folder($options = array (
-			"maxObjects" => "50"
-	)) {
+	public function Get_Folder(
+			$options = array (
+					"maxObjects" => "50"
+			)) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des Folders
-		$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		$a->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$b = $this->creer_Datacenter_spec ( 'vmFolder' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
+		$session = $this->creer_ContainerView ( 'Folder' );
+		$a = $this->creer_traverseView_spec ();
+		$objectref = new stdClass ();
+		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
+			->ObjectSpec ( $objectref, false, array (
+				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
 		$resultat_recherche = $this->retrouve_objets ( 'Folder', array (), $options );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -587,54 +592,54 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareFolder|false
 	 * @throws Exception
 	 */
-	public function Get_Folder_Name($name) {
+	public function Get_Folder_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_Folder ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le datacenter
+				// On a trouve le datacenter
 				return $this->getObjectVmwareFolder ()
 					->setMoIDFolder ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de Folder nomme " . $name );
 	}
 
 	/**
-	 * Fait un CreateFolder
-	 * Necessite le rootFolder de reference
+	 * Fait un CreateFolder Necessite le rootFolder de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_Folder($name) {
+	public function Set_Folder(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->onError ( "NOT Implemented" );
 	}
 
-	/************************* Methodes Folder ***********************/
-	
-	/************************* Methodes HostSystem ***********************/
 	/**
-	 * Fait un Destroy_task
-	 * Necessite le rootHostSystem de reference
+	 * *********************** Methodes Folder **********************
+	 */
+	/**
+	 * *********************** Methodes HostSystem **********************
+	 */
+	/**
+	 * Fait un Destroy_task Necessite le rootHostSystem de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_HostSystem($name) {
+	public function Del_HostSystem(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->Get_HostSystem_Name ( $name )
 			->Destroy_Task ();
 	}
@@ -646,24 +651,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_HostSystem($options = array (
-			"maxObjects" => "50"
-	), $full=true) {
+	public function Get_HostSystem(
+			$options = array (
+					"maxObjects" => "50"
+			),
+			$full = true) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des HostSystems
-		$session=$this->creer_ContainerView('HostSystem');
+		// On retrouve la liste des HostSystems
+		$session = $this->creer_ContainerView ( 'HostSystem' );
 		$a = $this->creer_traverseView_spec ();
-		
-		$objectref= new stdClass ();
+		$objectref = new stdClass ();
 		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-		->ObjectSpec ( $objectref, false, array (
+			->ObjectSpec ( $objectref, false, array (
 				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
-		
 		$resultat_recherche = $this->retrouve_objets ( 'HostSystem', array (), $options, $full );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -674,23 +677,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareHostSystem|false
 	 * @throws Exception
 	 */
-	public function Get_HostSystem_Name($name) {
+	public function Get_HostSystem_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_HostSystem ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le datacenter
+				// On a trouve le datacenter
 				return $this->getObjectVmwareHostSystem ()
 					->setHostSystem ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de HostSystem nomme " . $name );
 	}
 
@@ -701,15 +703,18 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_HostSystem($name) {
+	public function Set_HostSystem(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->onError ( "NOT Implemented" );
 	}
 
-	/************************* Methodes HostSystem ***********************/
-	
-	/************************* Methodes Network ***********************/
+	/**
+	 * *********************** Methodes HostSystem **********************
+	 */
+	/**
+	 * *********************** Methodes Network **********************
+	 */
 	/**
 	 * Fait un Destroy_Task
 	 *
@@ -717,9 +722,9 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_Network($name) {
+	public function Del_Network(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->Get_Network_Name ( $name )
 			->Destroy_Task ();
 	}
@@ -731,31 +736,21 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_Network($options = array (
-			"maxObjects" => "50"
-	)) {
+	public function Get_Network(
+			$options = array (
+					"maxObjects" => "50"
+			)) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des datacenters
-		$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$b = $this->creer_Datacenter_spec ( 'networkFolder' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
+		// On retrouve la liste des datacenters
+		$session = $this->creer_ContainerView ( 'Network' );
+		$a = $this->creer_traverseView_spec ();
+		$objectref = new stdClass ();
+		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
+			->ObjectSpec ( $objectref, false, array (
+				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
 		$resultat_recherche = $this->retrouve_objets ( 'Network', array (), $options );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -766,23 +761,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareNetwork|false
 	 * @throws Exception
 	 */
-	public function Get_Network_Name($name) {
+	public function Get_Network_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_Network ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le network
+				// On a trouve le network
 				return $this->getObjectVmwareNetwork ()
 					->setNetwork ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de Network nomme " . $name );
 	}
 
@@ -795,28 +789,32 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_Network($NetworkConfigSpec, $ResourcePool, $host) {
+	public function Set_Network(
+			$NetworkConfigSpec,
+			$ResourcePool,
+			$host) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		// 		return $this->getObjectVmwareFolder ()
-		// 		->CreateVM_Task ( $NetworkConfigSpec, $ResourcePool, $host );
+		// return $this->getObjectVmwareFolder ()
+		// ->CreateVM_Task ( $NetworkConfigSpec, $ResourcePool, $host );
 		return $this->onError ( "NOT Implemented" );
 	}
 
-	/************************* Methodes Network ***********************/
-	
-	/************************* Methodes ResourcePool ***********************/
 	/**
-	 * Fait un Destroy_task
-	 * Necessite le rootResourcePool de reference
+	 * *********************** Methodes Network **********************
+	 */
+	/**
+	 * *********************** Methodes ResourcePool **********************
+	 */
+	/**
+	 * Fait un Destroy_task Necessite le rootResourcePool de reference
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_ResourcePool($name) {
+	public function Del_ResourcePool(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->Get_ResourcePool_Name ( $name )
 			->Destroy_Task ();
 	}
@@ -828,53 +826,20 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_ResourcePool($options = array (
-			"maxObjects" => "50"
-	)) {
+	public function Get_ResourcePool(
+			$options = array (
+					"maxObjects" => "50"
+			)) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des ResourcePools
-		$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		$a->append ( new soapvar ( array (
-				'name' => 'hostFolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$b = $this->creer_Datacenter_spec ( 'hostFolder' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$c = new ArrayObject ( array (
-				'name' => 'hostFolderTraversalSpec',
-				'type' => 'ComputeResource',
-				'path' => 'resourcePool',
-				'skip' => false,
-				new soapvar ( array (
-						'name' => 'ResourcePoolTraversalSpec' 
-				), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) 
-		) );
-		
-		$d = new ArrayObject ( array (
-				'name' => 'ResourcePoolTraversalSpec',
-				'type' => 'ResourcePool',
-				'path' => 'resourcePool',
-				'skip' => false 
-		) );
-		
+		$session = $this->creer_ContainerView ( 'ResourcePool' );
+		$a = $this->creer_traverseView_spec ();
+		$objectref = new stdClass ();
+		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $c, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $d, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
+			->ObjectSpec ( $objectref, false, array (
+				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
 		$resultat_recherche = $this->retrouve_objets ( 'ResourcePool', array (), $options );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -885,23 +850,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareResourcePool|false
 	 * @throws Exception
 	 */
-	public function Get_ResourcePool_Name($name) {
+	public function Get_ResourcePool_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_ResourcePool ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le datacenter
+				// On a trouve le datacenter
 				return $this->getObjectVmwareResourcePool ()
 					->setResourcePool ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de ResourcePool nomme " . $name );
 	}
 
@@ -911,16 +875,17 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @param string $nomResource
 	 * @return boolean true si vrai, false sinon
 	 */
-	public function valide_nom_resourcePool($moid_resourcePool, $nomResource) {
+	public function valide_nom_resourcePool(
+			$moid_resourcePool,
+			$nomResource) {
 		$donnees_resourcePool = $this->getObjectVmwarePropertyCollector ()
 			->retrouve_propset ( $moid_resourcePool, false, array (
-				"name" 
+				"name"
 		) );
 		if (isset ( $donnees_resourcePool ["name"] ) && $donnees_resourcePool ["name"] == $nomResource) {
-			//On a trouve le resourcePool
+			// On a trouve le resourcePool
 			return true;
 		}
-		
 		return false;
 	}
 
@@ -931,22 +896,23 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareResourcePool|false
 	 * @throws Exception
 	 */
-	public function Get_ResourcePool_From_Clusters($cluster_name, $nomResource = "Resources") {
+	public function Get_ResourcePool_From_Clusters(
+			$cluster_name,
+			$nomResource = "Resources") {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		$resources_cluster = $this->Get_Cluster_Datas ( $cluster_name, false, array (
-				"resourcePool" 
+				"resourcePool"
 		) );
 		if (isset ( $resources_cluster ["resourcePool"] )) {
-			//Si on cherche le container de resourcePool du cluster (nomme "Resources")
+			// Si on cherche le container de resourcePool du cluster (nomme "Resources")
 			if ($this->valide_nom_resourcePool ( $resources_cluster ["resourcePool"], $nomResource )) {
 				return $this->getObjectVmwareResourcePool ()
 					->setResourcePool ( $resources_cluster ["resourcePool"] );
 			}
-			//Sinon on cherche dans les resourcePools du container "Resources" du Cluster s'il y en a
+			// Sinon on cherche dans les resourcePools du container "Resources" du Cluster s'il y en a
 			$liste_resourcePools = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $resources_cluster ["resourcePool"], false, array (
-					"resourcePool" 
+					"resourcePool"
 			) );
 			if (isset ( $liste_resourcePools ["resourcePool"] )) {
 				foreach ( $liste_resourcePools ["resourcePool"] as $obj ) {
@@ -959,27 +925,28 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 			}
 		}
 		// @codeCoverageIgnoreEnd
-		
-
 		return $this->onError ( "Pas de ResourcePool nomme " . $nomResource );
 	}
 
 	/**
-	 * Fait un 
+	 * Fait un
 	 *
 	 * @param string $name
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Set_ResourcePool($name) {
+	public function Set_ResourcePool(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->onError ( "NOT Implemented" );
 	}
 
-	/************************* Methodes ResourcePool ***********************/
-	
-	/************************* Methodes VirtualMachine ***********************/
+	/**
+	 * *********************** Methodes ResourcePool **********************
+	 */
+	/**
+	 * *********************** Methodes VirtualMachine **********************
+	 */
 	/**
 	 * Fait un Destroy_Task
 	 *
@@ -987,9 +954,9 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Del_VirtualMachine($name) {
+	public function Del_VirtualMachine(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->Get_VirtualMachine_Name ( $name )
 			->Destroy_Task ();
 	}
@@ -1001,47 +968,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array|false
 	 * @throws Exception
 	 */
-	public function Get_VirtualMachine($options = array (
-			"maxObjects" => "50"
-	),$full=true) {
+	public function Get_VirtualMachine(
+			$options = array (
+					"maxObjects" => "50"
+			),
+			$full = true) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des VirtualMachines
-		/*$a = $this->creer_Folder_spec ();
-		$a->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		$a->append ( new soapvar ( array (
-				'name' => 'DataCenterTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$b = $this->creer_Datacenter_spec ( 'vmFolder' );
-		$b->append ( new soapvar ( array (
-				'name' => 'FolderTraversalSpec' 
-		), SOAP_ENC_OBJECT, null, null, 'selectSet', null ) );
-		
-		$this->getObjectVmwarePropertyCollector ()
-			->ObjectSpec ( $this->getObjectVmwareWsclient ()
-			->getObjectServiceInstance ()
-			->creer_entete_rootFolder_this (), false, array (
-				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' ),
-				new soapvar ( $b, SOAP_ENC_OBJECT, 'TraversalSpec' ) 
-		) );
-		$resultat_recherche = $this->retrouve_objets ( 'VirtualMachine', array (), $options );
-		
-		return $this->renvoi_obj ( $resultat_recherche );*/
-		$session=$this->creer_ContainerView('VirtualMachine');
+		// On retrouve la liste des VirtualMachines
+		$session = $this->creer_ContainerView ( 'VirtualMachine' );
 		$a = $this->creer_traverseView_spec ();
-		
-		$objectref= new stdClass ();
+		$objectref = new stdClass ();
 		$objectref->_this = $session;
 		$this->getObjectVmwarePropertyCollector ()
-		->ObjectSpec ( $objectref, false, array (
+			->ObjectSpec ( $objectref, false, array (
 				new soapvar ( $a, SOAP_ENC_OBJECT, 'TraversalSpec' )
 		) );
-		
 		$resultat_recherche = $this->retrouve_objets ( 'VirtualMachine', array (), $options, $full );
-		
 		return $this->renvoi_obj ( $resultat_recherche );
 	}
 
@@ -1052,23 +994,22 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return vmwareVirtualMachine|false
 	 * @throws Exception
 	 */
-	public function Get_VirtualMachine_Name($name) {
+	public function Get_VirtualMachine_Name(
+			$name) {
 		$this->onDebug ( __METHOD__, 1 );
-		
-		//On retrouve la liste des nom de datacenters
+		// On retrouve la liste des nom de datacenters
 		$resultat_recherche = $this->Get_VirtualMachine ();
 		foreach ( $resultat_recherche as $obj ) {
 			$donnees = $this->getObjectVmwarePropertyCollector ()
 				->retrouve_propset ( $obj, false, array (
-					"name" 
+					"name"
 			) );
 			if (isset ( $donnees ["name"] ) && $donnees ["name"] == $name) {
-				//On a trouve le datacenter
+				// On a trouve le datacenter
 				return $this->getObjectVmwareVirtualMachine ()
 					->setMoIDVirtualMachine ( $obj );
 			}
 		}
-		
 		return $this->onError ( "Pas de VirtualMachine nomme " . $name );
 	}
 
@@ -1081,16 +1022,21 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	 * @return array (Task)|false
 	 * @throws Exception
 	 */
-	public function Set_VirtualMachine($VirtualMachineConfigSpec, $ResourcePool, $host) {
+	public function Set_VirtualMachine(
+			$VirtualMachineConfigSpec,
+			$ResourcePool,
+			$host) {
 		$this->onDebug ( __METHOD__, 1 );
-		
 		return $this->getObjectVmwareFolder ()
 			->CreateVM_Task ( $VirtualMachineConfigSpec, $ResourcePool, $host );
 	}
 
-	/************************* Methodes VirtualMachine ***********************/
-	
-	/************************* Accesseurs ***********************/
+	/**
+	 * *********************** Methodes VirtualMachine **********************
+	 */
+	/**
+	 * *********************** Accesseurs **********************
+	 */
 	/**
 	 * @codeCoverageIgnore
 	 * @return vmwareClusterComputeResource
@@ -1105,7 +1051,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareClusterComputeResource(&$objetVmwareClusterComputeResource) {
+	public function &setObjectVmwareClusterComputeResource(
+			&$objetVmwareClusterComputeResource) {
 		$this->objetVmwareClusterComputeResource = $objetVmwareClusterComputeResource;
 		return $this;
 	}
@@ -1124,7 +1071,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareComputeResource(&$objetVmwareComputeResource) {
+	public function &setObjectVmwareComputeResource(
+			&$objetVmwareComputeResource) {
 		$this->objetVmwareComputeResource = $objetVmwareComputeResource;
 		return $this;
 	}
@@ -1143,7 +1091,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareDatacenter(&$objetVmwareDatacenter) {
+	public function &setObjectVmwareDatacenter(
+			&$objetVmwareDatacenter) {
 		$this->objetVmwareDatacenter = $objetVmwareDatacenter;
 		return $this;
 	}
@@ -1162,7 +1111,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareDatastore(&$objetVmwareDatastore) {
+	public function &setObjectVmwareDatastore(
+			&$objetVmwareDatastore) {
 		$this->objetVmwareDatastore = $objetVmwareDatastore;
 		return $this;
 	}
@@ -1181,7 +1131,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareFolder(&$objetVmwareFolder) {
+	public function &setObjectVmwareFolder(
+			&$objetVmwareFolder) {
 		$this->objetVmwareFolder = $objetVmwareFolder;
 		return $this;
 	}
@@ -1200,7 +1151,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareHostSystem(&$objetVmwareHostSystem) {
+	public function &setObjectVmwareHostSystem(
+			&$objetVmwareHostSystem) {
 		$this->objetVmwareHostSystem = $objetVmwareHostSystem;
 		return $this;
 	}
@@ -1219,7 +1171,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareNetwork(&$objetVmwareNetwork) {
+	public function &setObjectVmwareNetwork(
+			&$objetVmwareNetwork) {
 		$this->objetVmwareNetwork = $objetVmwareNetwork;
 		return $this;
 	}
@@ -1238,7 +1191,8 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareResourcePool(&$objetVmwareResourcePool) {
+	public function &setObjectVmwareResourcePool(
+			&$objetVmwareResourcePool) {
 		$this->objetVmwareResourcePool = $objetVmwareResourcePool;
 		return $this;
 	}
@@ -1257,24 +1211,23 @@ class vmwareVim25ManagedEntity extends vmwareVim25Commun {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjectVmwareVirtualMachine(&$vmwareVirtualMachine) {
+	public function &setObjectVmwareVirtualMachine(
+			&$vmwareVirtualMachine) {
 		$this->objetVmwareVirtualMachine = $vmwareVirtualMachine;
 		return $this;
 	}
 
-	/************************* Accesseurs ***********************/
-	
+	/**
+	 * *********************** Accesseurs **********************
+	 */
 	/**
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		
 		$help [__CLASS__] ["text"] = array ();
-		
 		return $help;
 	}
 }
-
 ?>

@@ -39,7 +39,7 @@ class splunk_messages extends splunk_ci {
 	 * @param array $liste_class
 	 * @return splunk_messages
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		 return $this ->reset_resource();
@@ -53,7 +53,6 @@ class splunk_messages extends splunk_ci {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion du parent
@@ -62,9 +61,10 @@ class splunk_messages extends splunk_ci {
 
 	/**
 	 * Remet l'url par defaut
-	 * @return splunk_saved
+	 * @return splunk_messages
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): static
+	{
 		return parent::reset_resource () ->addResource ( 'messages' );
 	}
 
@@ -97,7 +97,7 @@ class splunk_messages extends splunk_ci {
 	 */
 	public function postNewMessage($name, $message, $severity = "info", $params = array()) {
 		$this ->onDebug ( __METHOD__, 1 );
-		$params ['name'] = $titre;
+		$params ['name'] = $name;
 		$params ['value'] = $message;
 		$params ['severity'] = $severity;
 		$results = $this ->reset_resource () 
@@ -117,7 +117,8 @@ class splunk_messages extends splunk_ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

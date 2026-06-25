@@ -54,11 +54,12 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * Instancie un objet de type zabbix_host_interface.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_host_interface
+	 * @return zabbix_host_interface|abstract_log
 	 */
-	static function &creer_zabbix_host_interface(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_host_interface(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_host_interface|abstract_log
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_host_interface ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -70,9 +71,9 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_host_interface
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -84,7 +85,6 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_common_interface
@@ -97,7 +97,8 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * @return false|zabbix_host_interface
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param($interface) {
+	public function retrouve_zabbix_param(string $interface): zabbix_host_interface|bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		parent::retrouve_zabbix_common_param ();
 		
@@ -117,7 +118,8 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * @param zabbix_common_interface $zabbix_interface_compare
 	 * @return boolean True si les interfaces correspondent, false sinon
 	 */
-	public function compare_interface($zabbix_interface_compare) {
+	public function compare_interface(zabbix_common_interface $zabbix_interface_compare): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($zabbix_interface_compare->getType () != $this->getType ()) {
 			return false;
@@ -141,7 +143,8 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * Creer un definition de l'interface sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_host_interface_ws() {
+	public function creer_definition_host_interface_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$interface = array (
 				"type" => $this->getType (),
@@ -161,56 +164,44 @@ class zabbix_host_interface extends zabbix_common_interface {
 
 	/**
 	 * 1 - agent;
- 	 * 2 - SNMP;
- 	 * 3 - IPMI;
- 	 * 4 - JMX.
+	 * 2 - SNMP;
+	 * 3 - IPMI;
+	 * 4 - JMX.
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_code_interface($type) {
+	public function retrouve_code_interface(string $type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "snmp" :
-				return 2;
-				break;
-			case "ipmi" :
-				return 3;
-				break;
-			case "jmx" :
-				return 4;
-				break;
-			case "agent" :
-			default :
-				return 1;
-		}
-		
-		return 1;
+		return match (strtolower($type)) {
+			"snmp" => 2,
+			"ipmi" => 3,
+			"jmx" => 4,
+			default => 1,
+		};
 	}
 
 	/**
 	 * 0 - not default;
  	 * 1 - default.
 	 * @param string $main
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_main($main) {
+	public function retrouve_main(string $main): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $main )) {
 			return $main;
 		}
-		switch ($main) {
-			case "oui" :
-				return 1;
-				break;
-			case "non" :
-				return 0;
-				break;
-		}
-		
-		return 1;
+		return match ($main) {
+			"oui" => 1,
+			"non" => 0,
+			default => 1,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
@@ -218,14 +209,16 @@ class zabbix_host_interface extends zabbix_common_interface {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMain() {
+	public function getMain(): int
+	{
 		return $this->main;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMain($main) {
+	public function &setMain($main): static
+	{
 		$this->main = $this->retrouve_main ( $main );
 		return $this;
 	}
@@ -233,14 +226,16 @@ class zabbix_host_interface extends zabbix_common_interface {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getType() {
+	public function getType(): int
+	{
 		return $this->type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setType($type) {
+	public function &setType($type): static
+	{
 		$this->type = $this->retrouve_code_interface ( $type );
 		return $this;
 	}
@@ -251,14 +246,12 @@ class zabbix_host_interface extends zabbix_common_interface {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Zabbix Host Interface :";
-		$help = array_merge ( $help, zabbix_common_interface::help () );
-		
-		return $help;
+		return array_merge ( $help, zabbix_common_interface::help () );
 	}
 }
-?>
+

@@ -41,7 +41,7 @@ class VirtualSerialPortThinPrintBackingInfo extends VirtualDeviceBackingInfo {
 	 * @return VirtualSerialPortThinPrintBackingInfo
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;

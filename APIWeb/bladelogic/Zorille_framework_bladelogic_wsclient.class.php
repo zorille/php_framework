@@ -51,13 +51,17 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Instancie un objet de type bladelogic_wsclient. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param bladelogic_datas &$bladelogic_datas Reference sur un objet bladelogic_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return bladelogic_wsclient
+	 * @throws Exception
 	 */
-	static function &creer_bladelogic_wsclient(&$liste_option, &$bladelogic_datas, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_bladelogic_wsclient(
+		options          &$liste_option,
+		bladelogic_datas &$bladelogic_datas,
+		bool|string      $sort_en_erreur = false,
+		string           $entete = __CLASS__): bladelogic_wsclient {
 		$objet = new bladelogic_wsclient ( $sort_en_erreur, $entete );
 		$objet ->_initialise ( array (
 				"options" => $liste_option,
@@ -68,13 +72,15 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return bladelogic_wsclient
+	 * @return bool|self
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["bladelogic_datas"] )) {
-			return $this ->onError ( "il faut un objet de type bladelogic_datas" );
+			$r = $this->onError ( "il faut un objet de type bladelogic_datas" );
+			return $r;
 		}
 		$this ->setObjetBladelogicDatas ( $liste_class ["bladelogic_datas"] ) 
 			->setObjetSoap ( soap::creer_soap ( $liste_class ["options"] ) );
@@ -87,11 +93,12 @@ class bladelogic_wsclient extends abstract_log {
 	
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		//Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -99,12 +106,13 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Prepare l'url de connexion au bladelogic nomme $nom
 	 * @param string $nom
-	 * @return boolean bladelogic_wsclient
+	 * @return bladelogic_wsclient|bool bladelogic_wsclient
+	 * @throws Exception
 	 */
-	public function prepare_connexion($nom) {
+	public function prepare_connexion(string $nom): static|bool {
 		$liste_data_bladelogic = $this ->getObjetBladelogicDatas () 
 			->valide_presence_bladelogic_data ( $nom );
-		if ($liste_data_bladelogic === false) {
+		if (!$liste_data_bladelogic) {
 			return $this ->onError ( "Aucune definition de bladelogic pour " . $nom );
 		}
 		$this ->setNomServeur ( $nom );
@@ -124,11 +132,11 @@ class bladelogic_wsclient extends abstract_log {
 	}
 
 	/**
-	 *
 	 * @param string $wsdl
-	 * @return boolean|soap
+	 * @return bladelogic_wsclient|soap|bool
+	 * @throws Exception
 	 */
-	public function &connecte_bsa($wsdl) {
+	public function &connecte_bsa(string $wsdl): static|soap|bool {
 		$this ->onDebug ( "connecte_bsa", 1 );
 		//On gere la partie Soap webService
 		$this ->getObjetSoap () 
@@ -153,8 +161,11 @@ class bladelogic_wsclient extends abstract_log {
 	 * @param string $fonction Fonction SOAP demandee
 	 * @param array $params Parametres de la fonction
 	 * @return boolean
+	 * @throws Exception
 	 */
-	public function applique_requete_soap($fonction, $params = array()) {
+	public function applique_requete_soap(
+		string $fonction,
+		array  $params = array()): bool {
 		$this ->onDebug ( "applique_requete_soap", 1 );
 		
 		try {
@@ -163,9 +174,9 @@ class bladelogic_wsclient extends abstract_log {
 				$this ->onWarning ( "DRY RUN : " . $fonction . " NON EXECUTE" );
 				$resultat = false;
 			} else {
-				$resultat = $this ->getObjetSoap () 
-					->getSoapClient () 
-					->__call ( $fonction, $params );
+				/** @var callable $fn */
+				$fn = $this ->getObjetSoap ()->getSoapClient ();
+				$resultat = $fn( $fonction, $params );
 				
 				$this ->onDebug ( $this ->getObjetSoap () 
 					->getSoapClient () 
@@ -186,9 +197,10 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Connecte le user
 	 *
-	 * @return array false en cas d'erreur
+	 * @return bool|array false en cas d'erreur
+	 * @throws Exception
 	 */
-	public function loginUsingUserCredential() {
+	public function loginUsingUserCredential(): bool|array {
 		$this ->onDebug ( "loginUsingUserCredential", 1 );
 		
 		$this ->connecte_bsa ( "LoginService" );
@@ -219,9 +231,10 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Connecte le user
 	 *
-	 * @return array false en cas d'erreur
+	 * @return bool false en cas d'erreur
+	 * @throws Exception
 	 */
-	public function AssumeRole($role) {
+	public function AssumeRole($role): bool {
 		$this ->onDebug ( "AssumeRole", 1 );
 		
 		$this ->connecte_bsa ( "AssumeRoleService" );
@@ -242,9 +255,10 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Execute une commande
 	 *
-	 * @return array false en cas d'erreur
+	 * @return bool false en cas d'erreur
+	 * @throws Exception
 	 */
-	public function executeCommandByParamString($nameSpace, $commandeName) {
+	public function executeCommandByParamString($nameSpace, $commandeName): bool {
 		$this ->onDebug ( "executeCommandByParamString", 1 );
 		
 		$this ->connecte_bsa ( "executeCommandByParamString" );
@@ -259,7 +273,11 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * ***************************** CLITunnelService *******************************
 	 */
-	public function RESTRequestService() {
+
+	/**
+	 * @throws Exception
+	 */
+	public function RESTRequestService(): bool {
 		$this ->onDebug ( "RESTRequestService", 1 );
 		$this ->connecte_bsa ( "RESTRequestService" );
 		
@@ -267,7 +285,10 @@ class bladelogic_wsclient extends abstract_log {
 		return true;
 	}
 
-	public function HandshakeService() {
+	/**
+	 * @throws Exception
+	 */
+	public function HandshakeService(): bool {
 		$this ->onDebug ( "HandshakeService", 1 );
 		
 		$this ->connecte_bsa ( "HandshakeService" );
@@ -275,7 +296,10 @@ class bladelogic_wsclient extends abstract_log {
 		return true;
 	}
 
-	public function StandardAttributeInterfaceService() {
+	/**
+	 * @throws Exception
+	 */
+	public function StandardAttributeInterfaceService(): bool {
 		$this ->onDebug ( "StandardAttributeInterfaceService", 1 );
 		
 		$this ->connecte_bsa ( "StandardAttributeInterfaceService" );
@@ -286,8 +310,9 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Methode temporaire @codeCoverageIgnore
 	 * @return boolean
+	 * @throws Exception
 	 */
-	private function _retrouveDonneesSoap() {
+	private function _retrouveDonneesSoap(): bool {
 		try {
 			$functions = $this ->getObjetSoap () 
 				->getSoapClient () 
@@ -315,7 +340,7 @@ class bladelogic_wsclient extends abstract_log {
 				->__getLastRequest (), 2 );
 			return $this ->onError ( $e ->getMessage (), "", $e ->getCode () );
 		}
-		
+
 		return true;
 	}
 
@@ -324,16 +349,16 @@ class bladelogic_wsclient extends abstract_log {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return bladelogic_datas
+	 * @return bladelogic_datas|null
 	 */
-	public function &getObjetBladelogicDatas() {
+	public function &getObjetBladelogicDatas(): ?bladelogic_datas {
 		return $this->bladelogic_datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetBladelogicDatas(&$bladelogic_datas) {
+	public function &setObjetBladelogicDatas(&$bladelogic_datas): static {
 		$this->bladelogic_datas = $bladelogic_datas;
 		return $this;
 	}
@@ -341,14 +366,14 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNomServeur() {
+	public function getNomServeur(): string {
 		return $this->nom_serveur;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNomServeur($nom_serveur) {
+	public function &setNomServeur($nom_serveur): static {
 		$this->nom_serveur = $nom_serveur;
 		return $this;
 	}
@@ -357,14 +382,14 @@ class bladelogic_wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string {
 		return $this->auth;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAuth($auth) {
+	public function &setAuth($auth): static {
 		$this->auth = $auth;
 		return $this;
 	}
@@ -373,14 +398,14 @@ class bladelogic_wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return soap
 	 */
-	public function &getObjetSoap() {
+	public function &getObjetSoap(): soap {
 		return $this->objet_soap;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetSoap(&$objet_soap) {
+	public function &setObjetSoap(&$objet_soap): static {
 		$this->objet_soap = $objet_soap;
 		return $this;
 	}
@@ -392,13 +417,11 @@ class bladelogic_wsclient extends abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
-		$help [__CLASS__] ["text"] = array ();
+		$help [__CLASS__] ["text"] = [];
 		
 		return $help;
 	}
 }
-
-?>

@@ -6,7 +6,7 @@
  */
 namespace Zorille\coservit;
 
-use Zorille\framework as Core;
+use Exception;
 
 /**
  * class Hosts
@@ -24,9 +24,10 @@ abstract class Hosts extends item {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Hosts
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -40,7 +41,7 @@ abstract class Hosts extends item {
 	/**
 	 * ******************************* Hosts URI ******************************
 	 */
-	public function hosts_list_uri() {
+	public function hosts_list_uri(): string {
 		return $this->globalapi_uri().'/hosts';
 	}
 	/**
@@ -58,11 +59,10 @@ abstract class Hosts extends item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Hosts :";
 		return $help;
 	}
 }
-?>

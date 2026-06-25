@@ -164,11 +164,14 @@ class cacti_addTree extends cacti_trees {
 	 * Instancie un objet de type cacti_addTree.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_addTree
 	 */
-	static function &creer_cacti_addTree(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_addTree(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_addTree {
 		$objet = new cacti_addTree ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -182,8 +185,9 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return cacti_addTree
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setGraphTreesItemData ( cacti_graphTreeItems::creer_cacti_graphTreeItems ( $liste_class ["options"], $this->getSortEnErreur () ) )
@@ -193,12 +197,12 @@ class cacti_addTree extends cacti_trees {
 	}
 
 	/*********************** Creation de l'objet *********************/
-	
+
 	/**
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -211,7 +215,7 @@ class cacti_addTree extends cacti_trees {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_ParentNode() {
+	public function valide_ParentNode(): bool {
 		return in_array ( $this->getTreeId (), $this->getGraphTreesItemData ()
 			->getGraphTreeItems ( $this->getParentNode () ) );
 	}
@@ -220,8 +224,9 @@ class cacti_addTree extends cacti_trees {
 	 * Ajoute un tree dans cacti
 	 *
 	 * @return boolean unknown
+	 * @throws Exception
 	 */
-	public function executeAdd_tree() {
+	public function executeAdd_tree(): bool {
 		if ($this->getName () == "") {
 			return $this->onError ( "Il faut un nom." );
 		}
@@ -249,7 +254,7 @@ class cacti_addTree extends cacti_trees {
 	 * @return boolean unknown
 	 * @throws Exception
 	 */
-	public function executeAdd_node() {
+	public function executeAdd_node(): bool {
 		if ($this->getNodeType () == "") {
 			return $this->onError ( "Il faut un NodeType." );
 		}
@@ -306,18 +311,15 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * Ajoute un device
 	 *
-	 * @return Integer/false Renvoi l'id du device, false en cas d'erreur.
+	 * @return bool|int Renvoi l'id du device, false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function executeCacti_addTree() {
-		switch ($this->getType ()) {
-			case "tree" :
-				return $this->executeAdd_tree ();
-			case "node" :
-				return $this->executeAdd_node ();
-			default :
-				return $this->onError ( "Ce type n'existe pas : " . $this->getType () );
-		}
+	public function executeCacti_addTree(): bool|int {
+		return match ($this->getType()) {
+			"tree" => $this->executeAdd_tree(),
+			"node" => $this->executeAdd_node(),
+			default => $this->onError("Ce type n'existe pas : " . $this->getType()),
+		};
 	}
 
 	/**
@@ -326,8 +328,7 @@ class cacti_addTree extends cacti_trees {
 	 * @return boolean true
 	 * @throws Exception
 	 */
-	public function reset_host() {
-		$this->setHostId ( - 1 );
+	public function reset_host(): bool {
 		$this->setHostGroupStyle ( 1 );
 		$this->setNodeId ( - 1 );
 		$this->setName ( "ND" );
@@ -348,14 +349,14 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHostId() {
+	public function getHostId(): int {
 		return $this->host_id;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostId($host_id) {
+	public function &setHostId($host_id): static {
 		if (is_numeric ( $host_id )) {
 			$this->host_id = $host_id;
 		}
@@ -365,7 +366,7 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHostGroupStyle() {
+	public function getHostGroupStyle(): int {
 		return $this->hostGroupStyle;
 	}
 
@@ -373,26 +374,27 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setHostGroupStyle($hostGroupStyle) {
-		if (is_numeric ( $hostGroupStyle ) && ($hostGroupStyle === 1 || $hostGroupStyle === 2)) {
+	public function &setHostGroupStyle($hostGroupStyle): bool|static {
+		if ($hostGroupStyle === 1 || $hostGroupStyle === 2) {
 			$this->hostGroupStyle = $hostGroupStyle;
-		} else {
-			return $this->onError ( "Ce group Style n'existe pas." );
+			return $this;
 		}
-		return $this;
+
+		$r = $this->onError ( "Ce group Style n'existe pas." );
+		return $r;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNodeId() {
+	public function getNodeId(): int {
 		return $this->node_id;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNodeId($node_id) {
+	public function &setNodeId($node_id): static {
 		if (is_numeric ( $node_id )) {
 			$this->node_id = $node_id;
 		}
@@ -402,7 +404,7 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getType() {
+	public function getType(): string {
 		return $this->type;
 	}
 
@@ -410,26 +412,25 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setType($type) {
+	public function &setType($type): bool|static {
 		switch ($type) {
 			case "ND" :
 				$this->type = "";
 				return $this;
-				break;
 			case "node" :
 			case "tree" :
 				$this->type = $type;
 				return $this;
-				break;
 			default :
-				return $this->onError ( "Type inconnu : " . $type );
+				$r = $this->onError ( "Type inconnu : " . $type );
+				return $r;
 		}
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getName() {
+	public function getName(): string {
 		return $this->name;
 	}
 
@@ -437,7 +438,7 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setName($name) {
+	public function &setName($name): bool|static {
 		if ($name != "") {
 			if ($name == "ND") {
 				$this->name = "";
@@ -445,7 +446,8 @@ class cacti_addTree extends cacti_trees {
 				$this->name = $name;
 			}
 		} else {
-			return $this->onError ( "le nom est obligatoire." );
+			$r = $this->onError ( "le nom est obligatoire." );
+			return $r;
 		}
 		return $this;
 	}
@@ -453,7 +455,7 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSortMethod() {
+	public function getSortMethod(): string {
 		return $this->sortMethod;
 	}
 
@@ -461,12 +463,13 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setSortMethod($sortMethod) {
+	public function &setSortMethod($sortMethod): bool|static {
 		if (array_key_exists ( $sortMethod, $this->getSortMethods () )) {
 			$this->sortMethod = $sortMethod;
 		} else {
 			$this->sortMethod = "";
-			return $this->onError ( "Cette methode n'existe pas : " . $sortMethod );
+			$r = $this->onError ( "Cette methode n'existe pas : " . $sortMethod );
+			return $r;
 		}
 		return $this;
 	}
@@ -474,14 +477,14 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getParentNode() {
+	public function getParentNode(): int {
 		return $this->parentNode;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setParentNode($parentNode) {
+	public function &setParentNode($parentNode): static {
 		if (is_numeric ( $parentNode )) {
 			$this->parentNode = $parentNode;
 		}
@@ -491,14 +494,14 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTreeId() {
+	public function getTreeId(): int {
 		return $this->treeId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTreeId($treeId) {
+	public function &setTreeId($treeId): static {
 		if (is_numeric ( $treeId )) {
 			$this->treeId = $treeId;
 		}
@@ -508,7 +511,7 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNodeType() {
+	public function getNodeType(): string {
 		return $this->nodeType;
 	}
 
@@ -516,12 +519,13 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setNodeType($nodeType) {
+	public function &setNodeType($nodeType): bool|static {
 		if (array_key_exists ( $nodeType, $this->getNodeTypes () )) {
 			$this->nodeType = $nodeType;
 		} else {
 			$this->nodeType = "";
-			return $this->onError ( "Ce typde de node n'existe pas : " . $nodeType );
+			$r = $this->onError ( "Ce typde de node n'existe pas : " . $nodeType );
+			return $r;
 		}
 		return $this;
 	}
@@ -529,14 +533,14 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGraphId() {
+	public function getGraphId(): int {
 		return $this->graphId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGraphId($graphId) {
+	public function &setGraphId($graphId): static {
 		if (is_numeric ( $graphId )) {
 			$this->graphId = $graphId;
 		}
@@ -546,7 +550,7 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRraId() {
+	public function getRraId(): int {
 		return $this->rra_id;
 	}
 
@@ -554,13 +558,14 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setRraId($rra_periodicity) {
+	public function &setRraId($rra_periodicity): bool|static {
 		$rraList = $this->getRraTypes ();
 		if (array_key_exists ( $rra_periodicity, $rraList )) {
 			$this->rra_id = $rraList [$rra_periodicity];
 		} else {
 			$this->rra_id = 1;
-			return $this->onError ( "Ce rra_id n'existe pas : " . $rra_periodicity );
+			$r = $this->onError ( "Ce rra_id n'existe pas : " . $rra_periodicity );
+			return $r;
 		}
 		return $this;
 	}
@@ -568,21 +573,21 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSortMethods() {
+	public function getSortMethods(): array {
 		return $this->sortMethods;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNodeTypes() {
+	public function getNodeTypes(): array {
 		return $this->nodeTypes;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRraTypes() {
+	public function getRraTypes(): array {
 		return $this->rraTypes;
 	}
 
@@ -590,14 +595,14 @@ class cacti_addTree extends cacti_trees {
 	 * @codeCoverageIgnore
 	 * @return cacti_hosts
 	 */
-	public function &getHostData() {
+	public function &getHostData(): cacti_hosts {
 		return $this->host_data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostData($host_data) {
+	public function &setHostData($host_data): static {
 		if ($host_data instanceof cacti_hosts) {
 			$this->host_data = $host_data;
 		}
@@ -606,16 +611,16 @@ class cacti_addTree extends cacti_trees {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return cacti_graphTreeItems
+	 * @return cacti_graphTreeItems|null
 	 */
-	public function &getGraphTreesItemData() {
+	public function &getGraphTreesItemData(): ?cacti_graphTreeItems {
 		return $this->GraphTreesItem_Data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGraphTreesItemData($graphTreeItems_data) {
+	public function &setGraphTreesItemData($graphTreeItems_data): static {
 		if ($graphTreeItems_data instanceof cacti_graphTreeItems) {
 			$this->GraphTreesItem_Data = $graphTreeItems_data;
 		}
@@ -624,16 +629,16 @@ class cacti_addTree extends cacti_trees {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return cacti_graphs
+	 * @return cacti_graphs|null
 	 */
-	public function &getGraphsData() {
+	public function &getGraphsData(): ?cacti_graphs {
 		return $this->Graphs_Data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGraphsData($graph_data) {
+	public function &setGraphsData($graph_data): static {
 		if ($graph_data instanceof cacti_graphs) {
 			$this->Graphs_Data = $graph_data;
 		}
@@ -643,15 +648,14 @@ class cacti_addTree extends cacti_trees {
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
 	 *
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -662,4 +666,3 @@ class cacti_addTree extends cacti_trees {
 		return $help;
 	}
 }
-?>

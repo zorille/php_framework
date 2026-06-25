@@ -38,7 +38,7 @@ class requete_complexe_gestion_idat extends desc_bd_gestion_idat {
 	 * @param array $liste_class
 	 * @return requete_complexe_gestion_idat
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

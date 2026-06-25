@@ -119,14 +119,15 @@ class message extends enveloppe {
 	 * Instancie un objet de type message. Arguments reconnus :<br> --mail_using=oui/non <br> --mail_to=\"xx xx ... xx\" <br> --mail_cc=\"xx xx ... xx\" <br> --mail_bcc=\"xx xx ... xx\" <br> --mail_from=xx <br> --mail_charset=xx <br> --mail_sort_en_erreur=oui/non<br> --no_mail <br> Permet de desactiver l'envoi du mail dans la fonction creer_liste_mail.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return message
 	 */
 	static function &creer_message(
-			&$liste_option,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): message
+	{
 		$objet = new message ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -139,9 +140,10 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return message
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->prepare_message_param ();
 		return $this;
@@ -160,14 +162,14 @@ class message extends enveloppe {
 			$entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
-		return $this;
 	}
 
 	/**
 	 * Mets en place les differents paramatres pour creer un mail
 	 * @return message
 	 */
-	public function prepare_message_param() {
+	public function prepare_message_param(): static
+	{
 		$this->setCrlf ( chr ( 13 ) . chr ( 10 ) );
 		$this->prepare_MIME_Headers ();
 		$separateur = array (
@@ -204,7 +206,8 @@ class message extends enveloppe {
 	 * Creer le Header MIME du mail avec les adresses d'envoi
 	 * @return message
 	 */
-	public function prepare_MIME_Headers() {
+	public function prepare_MIME_Headers(): static
+	{
 		if (is_array ( $this->getMailTo () )) {
 			$this->setMailingList ( implode ( ", ", $this->getMailTo () ) );
 		} else {
@@ -237,7 +240,8 @@ class message extends enveloppe {
 	 * @return message
 	 */
 	public function ecrit(
-			$texte) {
+		string $texte): message
+	{
 		return $this->ecrit_text ( $texte );
 	}
 
@@ -247,7 +251,8 @@ class message extends enveloppe {
 	 * @return message
 	 */
 	public function attache_fichier(
-			$liste_fichiers) {
+		array $liste_fichiers): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		foreach ( $liste_fichiers as $fichier ) {
 			$this->attache_un_fichier ( $fichier );
@@ -263,8 +268,9 @@ class message extends enveloppe {
 	 * @return Bool TRUE si tout est OK, FALSE sinon.
 	 */
 	public function attache_un_fichier(
-			$fichier,
-			$mime_type = "application/octet-stream") {
+		string $fichier,
+		string $mime_type = "application/octet-stream"): bool
+	{
 		$str = @file_get_contents ( $fichier );
 		if ($str) {
 			$liste_fichiers_attaches = $this->getFichierAttache ();
@@ -288,7 +294,8 @@ class message extends enveloppe {
 	 *
 	 * @return message
 	 */
-	public function ajoute_mail_header_content_type() {
+	public function ajoute_mail_header_content_type(): static
+	{
 		// Si on a un fichier, le content est de type mixed
 		if ($this->getFichierAttacheFlag ())
 			$this->setContentType ( $this->getOneMailContent ( "mixed" ) );
@@ -312,7 +319,8 @@ class message extends enveloppe {
 	 *
 	 * @return message
 	 */
-	public function ajoute_mail_header_encoding() {
+	public function ajoute_mail_header_encoding(): static
+	{
 		// Si on a un fichier, le encoding est dans le body
 		if ($this->getFichierAttacheFlag ())
 			$this->setContentEncode ( "" );
@@ -335,7 +343,8 @@ class message extends enveloppe {
 	 * @return string Renvoi le corp au format texte.
 	 */
 	public function ajoute_corp_text(
-			$ajoute_entete = false) {
+		bool $ajoute_entete = false): string
+	{
 		$corp = "";
 		if ($ajoute_entete) {
 			$corp .= str_replace ( "_charset_", $this->getCharset (), $this->getOneMailContent ( "text" ) ) . $this->getCrlf ();
@@ -352,7 +361,8 @@ class message extends enveloppe {
 	 * @return string Renvoi le corp au format html.
 	 */
 	public function ajoute_corp_html(
-			$ajoute_entete = false) {
+		bool $ajoute_entete = false): string
+	{
 		$corp = "";
 		if ($ajoute_entete) {
 			$corp .= str_replace ( "_charset_", $this->getCharset (), $this->getOneMailContent ( "html" ) ) . $this->getCrlf ();
@@ -367,7 +377,8 @@ class message extends enveloppe {
 	 *
 	 * @return string Renvoi le corp contenant du texte.
 	 */
-	public function prepare_corp_textuel() {
+	public function prepare_corp_textuel(): string
+	{
 		$corp = "";
 		if ($this->getMailCorpTextFlag () && $this->getMailCorpHtmlFlag ()) {
 			$corp .= $this->getCrlf () . "--" . $this->getOneSeparateur ( "alternative" ) . $this->getCrlf ();
@@ -394,7 +405,8 @@ class message extends enveloppe {
 	 *
 	 * @return string Renvoi le corp du texte contenant le mail.
 	 */
-	public function prepare_envoi() {
+	public function prepare_envoi(): string
+	{
 		$corp = "";
 		// on traite l'entete
 		$this->ajoute_mail_header_content_type ();
@@ -420,7 +432,8 @@ class message extends enveloppe {
 	 *
 	 * @return string Renvoi le corp du texte contenant le mail.
 	 */
-	public function prepare_message_mime() {
+	public function prepare_message_mime(): string
+	{
 		// on traite l'entete, Office 365 nécessite lr To, From , CC, bcc en premier
 		$this->ajoute_mail_header_content_type ();
 		$this->ajoute_mail_header_encoding ();
@@ -440,11 +453,12 @@ class message extends enveloppe {
 	 * Envoi le mail.<br> Une liste d'adresse peut venir surcharger la liste existante au moment de l'envoi grace a "$to".
 	 *
 	 * @param string $to Liste d'adresse mail separes par des virgules.
-	 * @return message
+	 * @return bool|message
 	 * @throws Exception
 	 */
 	public function envoi(
-			$to = "") {
+		string $to = ""): bool|static
+	{
 		if ($to == "")
 			$to = $this->getMailingList ();
 		$sujet_local = $this->prepare_sujet ();
@@ -470,12 +484,10 @@ class message extends enveloppe {
 	 * Envoi le mail.<br> Une liste d'adresse peut venir surcharger la liste existante au moment de l'envoi grace a "$to".
 	 *
 	 * @param &$objO365Message Zorille\o365\Message Objet de messagerie 0365 connecte sur un user valide
-	 * @param string $to Liste d'adresse mail separes par des virgules.
 	 * @return message
-	 * @throws Exception
 	 */
-	public function envoi_o365(
-			&$objO365Message) {
+	public function envoi_o365(&$objO365Message): static
+	{
 		$this->onDebug ( "Mail To " . print_r ( $this->getMailTo (), true ) . " Sujet : " . $this->prepare_sujet (), 1 );
 		if ($this->getNoMail () === false) {
 			// @codeCoverageIgnoreStart
@@ -491,8 +503,10 @@ class message extends enveloppe {
 
 	/**
 	 * Compatibilite avec l'objet Message-0365
+	 * @throws Exception
 	 */
-	public function envoi_message_par_enveloppe() {
+	public function envoi_message_par_enveloppe(): bool|message|static
+	{
 		return $this->envoi ();
 	}
 
@@ -502,7 +516,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailHeaderDestination() {
+	public function getMailHeaderDestination(): string
+	{
 		return $this->mail_destinations;
 	}
 
@@ -510,7 +525,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function setMailHeaderDestination(
-			$mail_destinations) {
+			$mail_destinations): static
+	{
 		$this->mail_destinations = $mail_destinations;
 		return $this;
 	}
@@ -518,7 +534,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCrlf() {
+	public function getCrlf(): string
+	{
 		return $this->crlf;
 	}
 
@@ -526,7 +543,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCrlf(
-			$crlf) {
+			$crlf): static
+	{
 		$this->crlf = $crlf;
 		return $this;
 	}
@@ -534,7 +552,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSeparateur() {
+	public function getSeparateur(): string
+	{
 		return $this->separateur;
 	}
 
@@ -542,7 +561,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function getOneSeparateur(
-			$type) {
+			$type): string
+	{
 		return $this->separateur [$type];
 	}
 
@@ -550,7 +570,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSeparateur(
-			$separateur) {
+			$separateur): static
+	{
 		$this->separateur = $separateur;
 		return $this;
 	}
@@ -558,7 +579,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailContent() {
+	public function getMailContent(): array
+	{
 		return $this->mail_Content;
 	}
 
@@ -574,7 +596,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailContent(
-			$mail_Content) {
+			$mail_Content): static
+	{
 		$this->mail_Content = $mail_Content;
 		return $this;
 	}
@@ -582,7 +605,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getContentType() {
+	public function getContentType(): string
+	{
 		return $this->content_type;
 	}
 
@@ -590,7 +614,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function setContentType(
-			$content_type) {
+			$content_type): static
+	{
 		$this->content_type = $content_type;
 		return $this;
 	}
@@ -598,7 +623,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getContentEncode() {
+	public function getContentEncode(): string
+	{
 		return $this->content_encode;
 	}
 
@@ -606,7 +632,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function setContentEncode(
-			$content_encode) {
+			$content_encode): static
+	{
 		$this->content_encode = $content_encode;
 		return $this;
 	}
@@ -614,7 +641,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailEncode() {
+	public function getMailEncode(): string
+	{
 		return $this->mail_Encode;
 	}
 
@@ -622,7 +650,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function getOneMailEncode(
-			$type) {
+			$type): string
+	{
 		return $this->mail_Encode [$type];
 	}
 
@@ -630,7 +659,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailEncode(
-			$mail_Encode) {
+			$mail_Encode): static
+	{
 		$this->mail_Encode = $mail_Encode;
 		return $this;
 	}
@@ -638,7 +668,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailFooter() {
+	public function getMailFooter(): string
+	{
 		return $this->mail_footer;
 	}
 
@@ -646,7 +677,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function getOneMailFooter(
-			$type) {
+			$type): string
+	{
 		return $this->mail_footer [$type];
 	}
 
@@ -654,7 +686,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailFooter(
-			$mail_Encode) {
+			$mail_Encode): static
+	{
 		$this->mail_footer = $mail_Encode;
 		return $this;
 	}
@@ -662,7 +695,8 @@ class message extends enveloppe {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getMailAdditionnal() {
+	function getMailAdditionnal(): string
+	{
 		return $this->mail_additionnal;
 	}
 
@@ -670,7 +704,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	function &setMailAdditionnal(
-			$mail_additionnal) {
+			$mail_additionnal): static
+	{
 		$this->mail_additionnal = $mail_additionnal;
 		return $this;
 	}
@@ -680,7 +715,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 * @return string Liste des adresses mails.
 	 */
-	public function getMailingList() {
+	public function getMailingList(): string
+	{
 		return $this->mailing_list;
 	}
 
@@ -688,29 +724,32 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailingList(
-			$mailing_list) {
+			$mailing_list): static
+	{
 		$this->mailing_list = $mailing_list;
 		return $this;
 	}
 
 	/**
 	 * Accesseur en ecriture<br> Ajoute un sujet au mail.
-	 * @deprecated
-	 * @codeCoverageIgnore
 	 * @param string $sujet Sujet a ajouter au mail.
 	 * @param bool $encode Encode le sujet ou pas.
-	 * @return true
+	 * @return message
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 */
 	public function sujet(
-			$sujet,
-			$encode = true) {
+		string $sujet,
+		bool   $encode = true): message
+	{
 		return $this->setSujet ( $sujet, $encode );
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailEntete() {
+	public function getMailEntete(): string
+	{
 		return $this->mail_entete;
 	}
 
@@ -718,7 +757,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailEntete(
-			$mail_entete) {
+			$mail_entete): static
+	{
 		$this->mail_entete = $mail_entete;
 		return $this;
 	}
@@ -728,7 +768,8 @@ class message extends enveloppe {
 	 * @codeCoverageIgnore
 	 * @return $this
 	 */
-	public function &getObjEnveloppe() {
+	public function &getObjEnveloppe(): static
+	{
 		return $this;
 	}
 
@@ -738,10 +779,10 @@ class message extends enveloppe {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Gestion des mails";
@@ -755,4 +796,4 @@ class message extends enveloppe {
 		return true;
 	}
 }
-?>
+

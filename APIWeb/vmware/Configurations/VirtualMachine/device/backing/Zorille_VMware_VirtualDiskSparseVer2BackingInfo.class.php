@@ -89,7 +89,7 @@ class VirtualDiskSparseVer2BackingInfo extends VirtualDeviceFileBackingInfo {
 	 * @return VirtualDiskSparseVer2BackingInfo
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;

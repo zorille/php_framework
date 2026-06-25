@@ -5,7 +5,7 @@
  */
 namespace Zorille\dolibarr;
 use Zorille\framework as Core;
-use \Exception as Exception;
+use Exception;
 /**
  * class status
  *
@@ -21,15 +21,16 @@ class status extends ci {
 	 * Instancie un objet de type status. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $dolibarr_webservice_rest Reference sur un objet wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return status
+	 * @throws Exception
 	 */
 	static function &creer_status(
-			&$liste_option,
-			&$dolibarr_webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$dolibarr_webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): status {
 				Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new status ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -44,9 +45,10 @@ class status extends ci {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return status
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->reset_resource ();
 	}
@@ -56,13 +58,12 @@ class status extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion du parent
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -71,7 +72,7 @@ class status extends ci {
 	 * Remet l'url par defaut
 	 * @return status
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): static {
 		return parent::reset_resource ()->addResource ( 'status' );
 	}
 
@@ -83,7 +84,7 @@ class status extends ci {
 	 * @throws Exception
 	 */
 	public function getStatus(
-			$params = array()) {
+		array $params = array()): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
 			->get ( $params );
@@ -99,11 +100,11 @@ class status extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "status :";
+		$help [__CLASS__] ["text"] = [
+			'status :'
+		];
 		return $help;
 	}
 }
-?>

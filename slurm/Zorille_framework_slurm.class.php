@@ -222,7 +222,7 @@ class slurm extends CommandLine {
 	 * @param array $liste_class
 	 * @return slurm
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -250,7 +250,7 @@ class slurm extends CommandLine {
 		
 		$this->_prepareCalculateurs ();
 		
-		$this->fork_liste = groupe_forks::creer_groupe_forks ( $this->getListeOptions (), $sort_en_erreur );
+		$this->fork_liste = groupe_forks::creer_groupe_forks ( $this->getListeOptions (), $this->getSortEnErreur() );
 	}
 
 	/**
@@ -291,7 +291,7 @@ class slurm extends CommandLine {
 				$this->onDebug ( $calculateur . "!=" . $this->getListeOptions ()
 					->getOption ( "netname" ), 1 );
 				//On fait la connexion
-				$class_flux = fonctions_standards_flux::creer_fonctions_standards_flux ( $liste_option );
+				$class_flux = fonctions_standards_flux::creer_fonctions_standards_flux ( $this->getListeOptions() );
 				if (! is_object ( $class_flux )) {
 					$localmongo->requete_update_dans_jobs ( $jobid, "__no_update", $this->slurmid, "erreur", 1005, "__no_update", "__no_update", date ( "Ymd H:i:s" ) );
 					return $this->onError ( "La class fonctions_standards_flux est introuvable.", "", 1005 );
@@ -587,7 +587,8 @@ class slurm extends CommandLine {
 	 * @param string $echo Affiche le help
 	 * @return string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

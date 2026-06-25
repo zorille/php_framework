@@ -16,55 +16,13 @@ use Exception as Exception;
  * @subpackage itop
  */
 class ci extends Core\abstract_log {
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var string
-	 */
-	private $format = '';
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var string
-	 */
-	private $id = '';
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var array
-	 */
-	private $donnees = array ();
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var array
-	 */
-	private $mandatory = array ();
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var wsclient_rest
-	 */
-	private $wsclient_rest = null;
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var string
-	 */
-	private $oql_ci = '';
-	/**
-	 * var privee
-	 *
-	 * @access private
-	 * @var boolean
-	 */
-	private $update = false;
+	private string $format = '';
+	private string $id = '';
+	private array $donnees = [];
+	private array $mandatory = [];
+	private string $oql_ci = '';
+	private bool $update = false;
+	private ?wsclient_rest $wsclient_rest = null;
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -73,15 +31,17 @@ class ci extends Core\abstract_log {
 	 * Instancie un objet de type ci. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return ci
+	 * @throws Exception
 	 */
 	static function &creer_itop_ci(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): ci
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new ci ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -95,11 +55,21 @@ class ci extends Core\abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return ci
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetItopWsclientRest ( $liste_class ["wsclient_rest"] );
+	}
+
+	public function reinitialise(): self {
+		return $this->setFormat('')
+			->setId('')
+			->setDonnees([])
+			->setMandatory([])
+			->setOqlCi('')
+			->setUpdate(false);
 	}
 
 	/**
@@ -107,13 +77,12 @@ class ci extends Core\abstract_log {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -124,7 +93,8 @@ class ci extends Core\abstract_log {
 	 * @return string
 	 */
 	public function prepare_oql_fields(
-			$fields) {
+		array $fields): string
+	{
 		$liste_fields = "";
 		foreach ( $fields as $champ => $valeur ) {
 			if (! $liste_fields == "") {
@@ -147,7 +117,8 @@ class ci extends Core\abstract_log {
 	 * @return $this
 	 */
 	public function creer_oql(
-			$fields = array ()) {
+		array $fields = array ()): static
+	{
 		$where = $this->prepare_oql_fields ( $fields );
 		if (! empty ( $where )) {
 			$where = " WHERE " . $where;
@@ -162,7 +133,8 @@ class ci extends Core\abstract_log {
 	 * @return $this
 	 */
 	public function enregistre_ci_a_partir_rest(
-			$ci) {
+		array $ci): static
+	{
 		foreach ( $ci ['objects'] as $donnees ) {
 			$this->setFormat ( $donnees ['class'] )
 				->setId ( $donnees ['key'] )
@@ -177,20 +149,22 @@ class ci extends Core\abstract_log {
 	 * @return $this|false False en cas d'erreur sans leve d'Exception ($error=false)
 	 * @throws Exception
 	 */
-	public function recupere_ci_dans_itop() {
+	public function recupere_ci_dans_itop(string $collect_data="*"): bool|static|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( $this->getFormat ()." ".$this->getOqlCi () , 2 );
 		// Sinon, on requete iTop
 		return $this->getObjetItopWsclientRest ()
-			->core_get ( $this->getFormat (), $this->getOqlCi () );
+			->core_get ( $this->getFormat (), $this->getOqlCi (), $collect_data );
 	}
 
 	/**
 	 * Permet de trouver un CI dans itop a partir d'une requete OQL et enregistre les donnees du CI dans l'objet
-	 * @return $this
+	 * @return ci|bool
 	 * @throws Exception
 	 */
-	public function retrouve_ci() {
+	public function retrouve_ci(): static|bool
+	{
 		// Si il y a deja un objet ci, alors le ci existe
 		if ($this->getDonnees ()) {
 			return $this;
@@ -208,15 +182,23 @@ class ci extends Core\abstract_log {
 	/**
 	 * Valide que le CI existe et est unique dans itop et enregistre les donnees du CI dans l'objet s'il est trouve
 	 * @return $this|null
+	 * @throws Exception
 	 */
-	public function valide_ci_existe() {
+	public function valide_ci_existe(
+		bool $collect_only_id=false): ?static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		// Si il y a deja un objet ci, alors le ci existe
 		if ($this->getDonnees ()) {
 			return $this;
 		}
 		// Sinon, on requete iTop
-		$ci = $this->recupere_ci_dans_itop ();
+		if($collect_only_id) {
+			$collect_data="id";
+		} else {
+			$collect_data="*";
+		}
+		$ci = $this->recupere_ci_dans_itop ($collect_data);
 		if ($ci ['message'] != 'Found: 1') {
 			// Le ci n'existe pas
 			$this->onDebug ( "Probleme avec la requete : " . $this->getOqlCi () . " : " . $ci ['message'], 1 );
@@ -233,8 +215,9 @@ class ci extends Core\abstract_log {
 	 * @throws Exception
 	 */
 	public function creer_ci(
-			$name,
-			$params) {
+		string $name,
+		array  $params): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! $this->valide_ci_existe ()) {
 			$this->onInfo ( "Ajout de : " . $name );
@@ -254,17 +237,22 @@ class ci extends Core\abstract_log {
 	 * Update un CI dans itop du format de l'objet
 	 * @param string $name
 	 * @param array $params
+	 * @param bool $force_update bypass validation CI exist
+	 * @param string $output_data Limit output fields from core-update
 	 * @return $this
 	 * @throws Exception
 	 */
 	public function update_ci(
-			$name,
-			$params) {
+		string $name,
+		array  $params,
+		bool $force_update=false,
+		string $output_data="*"): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_ci_existe ()) {
+		if ($force_update || $this->valide_ci_existe ()) {
 			$this->onInfo ( "Update de : " . $name . " ID = ".$this->getId () );
 			$ci = $this->getObjetItopWsclientRest ()
-				->core_update ( $this->getFormat (), $this->getId (), $params );
+				->core_update ( $this->getFormat (), $this->getId (), $params, $output_data );
 			$this->enregistre_ci_a_partir_rest ( $ci );
 		}
 		return $this;
@@ -272,11 +260,11 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * Valide si tous les champs nécessaires sont remplis avec une données
-	 * @param array $mandatory
-	 * @return $this
+	 * @return ci|bool
 	 * @throws Exception
 	 */
-	public function valide_mandatory_fields() {
+	public function valide_mandatory_fields(): static|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$retour = array ();
 		foreach ( $this->getMandatory () as $champ => $valeur ) {
@@ -293,12 +281,13 @@ class ci extends Core\abstract_log {
 	/**
 	 * Valide que valeur a des donnees et que le champ esr Mandatory
 	 * @param string $champ
-	 * @param string $valeur
-	 * @return $this
+	 * @param mixed $valeur
+	 * @return true
 	 */
 	public function valide_mandatory_field_filled(
-			$champ,
-			$valeur) {
+		string $champ,
+        mixed $valeur): bool
+	{
 		if (isset ( $this->getMandatory () [$champ] ) && ! empty ( $valeur )) {
 			$this->setMandatoryField ( $champ );
 		}
@@ -311,7 +300,8 @@ class ci extends Core\abstract_log {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_standard_params(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = array ();
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
@@ -337,7 +327,8 @@ class ci extends Core\abstract_log {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_obligatoire(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = array ();
 		foreach ( $this->getMandatory () as $champ => $inutile ) {
 			if (isset ( $parametres [$champ] )) {
@@ -353,7 +344,8 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFormat() {
+	public function getFormat(): string
+	{
 		return $this->format;
 	}
 
@@ -361,7 +353,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setFormat(
-			$format) {
+			$format): static
+	{
 		$this->format = $format;
 		return $this;
 	}
@@ -369,7 +362,8 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getId() {
+	public function getId(): string
+	{
 		return $this->id;
 	}
 
@@ -377,7 +371,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setId(
-			$id) {
+			$id): static
+	{
 		$this->id = $id;
 		return $this;
 	}
@@ -385,7 +380,8 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDonnees() {
+	public function getDonnees(): array
+	{
 		return $this->donnees;
 	}
 
@@ -393,7 +389,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setDonnees(
-			$donnees) {
+			$donnees): static
+	{
 		if (is_array ( $donnees )) {
 			$this->donnees = $donnees;
 		}
@@ -403,7 +400,8 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMandatory() {
+	public function getMandatory(): array
+	{
 		return $this->mandatory;
 	}
 
@@ -411,7 +409,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMandatory(
-			$mandatory) {
+			$mandatory): static
+	{
 		if (is_array ( $mandatory )) {
 			$this->mandatory = $mandatory;
 		}
@@ -421,10 +420,11 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 * @param string $field
-	 * @return \Zorille\itop\ci
+	 * @return ci
 	 */
 	public function &setMandatoryField(
-			$field) {
+		string $field): static
+	{
 		if (isset ( $this->mandatory [$field] )) {
 			$this->mandatory [$field] = true;
 		}
@@ -433,9 +433,10 @@ class ci extends Core\abstract_log {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return wsclient_rest
+	 * @return wsclient_rest|null
 	 */
-	public function &getObjetItopWsclientRest() {
+	public function &getObjetItopWsclientRest(): ?wsclient_rest
+	{
 		return $this->wsclient_rest;
 	}
 
@@ -443,7 +444,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopWsclientRest(
-			&$wsclient_rest) {
+			&$wsclient_rest): static
+	{
 		$this->wsclient_rest = $wsclient_rest;
 		return $this;
 	}
@@ -451,7 +453,8 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOqlCi() {
+	public function getOqlCi(): string
+	{
 		return $this->oql_ci;
 	}
 
@@ -459,7 +462,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setOqlCi(
-			$oql_ci) {
+			$oql_ci): static
+	{
 		$this->oql_ci = $oql_ci;
 		return $this;
 	}
@@ -467,7 +471,8 @@ class ci extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUpdate() {
+	public function getUpdate(): bool
+	{
 		return $this->update;
 	}
 
@@ -475,7 +480,8 @@ class ci extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUpdate(
-			$update) {
+			$update): static
+	{
 		$this->update = $update;
 		return $this;
 	}
@@ -486,11 +492,11 @@ class ci extends Core\abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "ci :";
 		return $help;
 	}
 }
-?>

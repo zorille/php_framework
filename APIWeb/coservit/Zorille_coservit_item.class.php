@@ -52,9 +52,10 @@ abstract class item extends globalapi {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return item
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -68,7 +69,7 @@ abstract class item extends globalapi {
 	 * @return $this
 	 */
 	public function enregistre_item_a_partir_rest(
-			$item) {
+		array $item): static {
 		foreach ( $item ['objects'] as $donnees ) {
 			$this->setFormat ( $donnees ['class'] )
 				->setId ( $donnees ['key'] )
@@ -80,10 +81,10 @@ abstract class item extends globalapi {
 
 	/**
 	 * Permet de trouver un CI dans coservit a partir d'une requete OQL et enregistre les donnees du CI dans l'objet
-	 * @return $this
+	 * @return item|bool
 	 * @throws Exception
 	 */
-	public function retrouve_item() {
+	public function retrouve_item(): static|bool {
 		// Si il y a deja un objet item, alors le item existe
 		if ($this->getDonnees ()) {
 			return $this;
@@ -99,9 +100,9 @@ abstract class item extends globalapi {
 
 	/**
 	 * Valide que le CI existe et est unique dans coservit et enregistre les donnees du CI dans l'objet s'il est trouve
-	 * @return $this|null
+	 * @return item|null
 	 */
-	public function valide_item_existe() {
+	public function valide_item_existe(): ?static {
 		// Si il y a deja un objet item, alors le item existe
 		if ($this->getDonnees ()) {
 			return $this;
@@ -124,8 +125,8 @@ abstract class item extends globalapi {
 	 * @throws Exception
 	 */
 	public function creer_item(
-			$name,
-			$params) {
+		string $name,
+		array  $params): static {
 		$this->onDebug ( __METHOD__, 1 );
 		if (! $this->valide_item_existe ()) {
 			$this->onInfo ( "Ajout de : " . $name );
@@ -149,8 +150,8 @@ abstract class item extends globalapi {
 	 * @throws Exception
 	 */
 	public function update_item(
-			$name,
-			$params) {
+		string $name,
+		array  $params): static {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_item_existe ()) {
 			$this->onInfo ( "Update de : " . $name );
@@ -165,18 +166,17 @@ abstract class item extends globalapi {
 	 * reset les informations dynamiques de l'objet
 	 * @return $this
 	 */
-	public function reset_donnees() {
+	public function reset_donnees(): static {
 		return $this->setId ( "" )
 		->setDonnees ( array () );
 	}
 
 	/**
 	 * Valide si tous les champs nécessaires sont remplis avec une données
-	 * @param array $mandatory
-	 * @return $this
+	 * @return item|bool
 	 * @throws Exception
 	 */
-	public function valide_mandatory_fields() {
+	public function valide_mandatory_fields(): static|bool {
 		$this->onDebug ( __METHOD__, 1 );
 		$retour = array ();
 		foreach ( $this->getMandatory () as $champ => $valeur ) {
@@ -185,7 +185,7 @@ abstract class item extends globalapi {
 			}
 		}
 		if (count ( $retour ) != 0) {
-			return $this->onError ( "Il manque des champs obligatoires : ", $retour, 1 );
+			return $this->onError ( "Il manque des champs obligatoires : ", $retour );
 		}
 		return $this;
 	}
@@ -193,12 +193,12 @@ abstract class item extends globalapi {
 	/**
 	 * Valide que valeur a des donnees et que le champ esr Mandatory
 	 * @param string $champ
-	 * @param string $valeur
-	 * @return $this
+	 * @param mixed $valeur
+	 * @return true
 	 */
 	public function valide_mandatory_field_filled(
-			$champ,
-			$valeur) {
+		string $champ,
+		mixed $valeur): bool {
 		if (isset ( $this->getMandatory () [$champ] ) && (! empty ( $valeur ) || $valeur===0)) {
 			$this->setMandatoryField ( $champ );
 		}
@@ -211,7 +211,7 @@ abstract class item extends globalapi {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_standard_params(
-			$parametres) {
+		array $parametres): array {
 		$params = array ();
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
@@ -233,7 +233,7 @@ abstract class item extends globalapi {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_obligatoire(
-			$parametres) {
+		array $parametres): array {
 		$params = array ();
 		foreach ( $this->getMandatory () as $champ => $inutile ) {
 			if (isset ( $parametres [$champ] )) {
@@ -242,13 +242,14 @@ abstract class item extends globalapi {
 		}
 		return $params;
 	}
-	
+
 	/**
 	 * Verifie qu'un item id est remplit/existe
+	 * @param bool $error
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_item_id($error=true) {
+	public function valide_item_id(bool $error=true): bool {
 		if (empty ( $this->getId () )) {
 			$this->onDebug ( $this->getId (), 2 );
 			if($error){
@@ -268,7 +269,7 @@ abstract class item extends globalapi {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFormat() {
+	public function getFormat(): string {
 		return $this->format;
 	}
 
@@ -276,7 +277,7 @@ abstract class item extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setFormat(
-			$format) {
+			$format): static {
 		$this->format = $format;
 		return $this;
 	}
@@ -284,7 +285,7 @@ abstract class item extends globalapi {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getId() {
+	public function getId(): string {
 		return $this->id;
 	}
 
@@ -292,7 +293,7 @@ abstract class item extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setId(
-			$id) {
+			$id): static {
 		$this->id = $id;
 		return $this;
 	}
@@ -300,7 +301,7 @@ abstract class item extends globalapi {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMandatory() {
+	public function getMandatory(): array {
 		return $this->mandatory;
 	}
 
@@ -308,7 +309,7 @@ abstract class item extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMandatory(
-			$mandatory) {
+			$mandatory): static {
 		if (is_array ( $mandatory )) {
 			$this->mandatory = $mandatory;
 		}
@@ -318,10 +319,10 @@ abstract class item extends globalapi {
 	/**
 	 * @codeCoverageIgnore
 	 * @param string $field
-	 * @return \Zorille\coservit\item
+	 * @return item
 	 */
 	public function &setMandatoryField(
-			$field) {
+		string $field): static {
 		if (isset ( $this->mandatory [$field] )) {
 			$this->mandatory [$field] = true;
 		}
@@ -331,7 +332,7 @@ abstract class item extends globalapi {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUpdate() {
+	public function getUpdate(): bool {
 		return $this->update;
 	}
 
@@ -339,7 +340,7 @@ abstract class item extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUpdate(
-			$update) {
+			$update): static {
 		$this->update = $update;
 		return $this;
 	}
@@ -350,11 +351,10 @@ abstract class item extends globalapi {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "item :";
 		return $help;
 	}
 }
-?>

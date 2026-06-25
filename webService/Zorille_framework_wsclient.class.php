@@ -8,6 +8,7 @@
 namespace Zorille\framework;
 
 use Exception as Exception;
+use stdClass;
 
 /**
  * class wsclient<br> Renvoi des information via un webservice.
@@ -122,16 +123,17 @@ class wsclient extends abstract_log {
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param object $datas NULL
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param object|null $datas NULL
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return wsclient
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = null,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = null,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): wsclient
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -145,9 +147,10 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->setGestionConnexionUrl ( gestion_connexion_url::creer_gestion_connexion_url ( $liste_class ["options"] ) )
 			->setObjetCurl ( curl::creer_curl ( $liste_class ["options"] ) );
@@ -160,13 +163,12 @@ class wsclient extends abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		return true;
@@ -175,9 +177,11 @@ class wsclient extends abstract_log {
 	/**
 	 * Valide la presence des variables obligatoires dans un tableau de definition du serveur.
 	 * @return wsclient|false l'objet wsclient si OK, False sinon
+	 * @throws Exception
 	 */
 	public function retrouve_variables_tableau(
-			$serveur_data) {
+			$serveur_data): bool|wsclient|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! isset ( $serveur_data ["url"] )) {
 			return $this->onError ( "Il faut un champ url dans la definition du serveur", "", 5100 );
@@ -196,8 +200,10 @@ class wsclient extends abstract_log {
 	/**
 	 * Prepare la liste des variables specifique au wsclient.
 	 * @return wsclient
+	 * @throws Exception
 	 */
-	public function retrouve_variables_liste_options() {
+	public function retrouve_variables_liste_options(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $this->getListeOptions ()
 			->renvoi_variables_standard ( array (
@@ -228,7 +234,8 @@ class wsclient extends abstract_log {
 	 * Creation d'entete HTTP standard
 	 * @return wsclient
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->setHttpHeader ( array (
 				"Content-Type: " . $this->getContentType (),
@@ -240,17 +247,18 @@ class wsclient extends abstract_log {
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"return_code":0}
 	 * @param string $retour_json
 	 * @param boolean $return_array
-	 * @return array
+	 * @return mixed
 	 */
 	public function traite_retour_json(
-			$retour_json,
-			$return_array = true) {
+		string $retour_json,
+		bool   $return_array = true): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( "Retour JSON selectionne", 2 );
 		$this->onDebug ( $retour_json, 2 );
 		// si le retour est en JSON, on le decode
 		// Si le json contient l'ajout du framework, on le traite separement
-		if (strpos ( $retour_json, '{"message":"","success":true,"return_code":0}' ) !== false) {
+		if (str_contains($retour_json, '{"message":"","success":true,"return_code":0}')) {
 			$retour_json = str_replace ( '{"message":"","success":true,"return_code":0}', "", $retour_json );
 			$tableau_resultat = json_decode ( $retour_json, true );
 			$tableau_resultat ["success"] = true;
@@ -267,12 +275,14 @@ class wsclient extends abstract_log {
 	/**
 	 * Envoi la requete de type CuRL par defaut et attend un retour CuRL.
 	 *
-	 * @return array|boolean resultat du json ou false en cas d'erreur
+	 * @return bool|stdClass|string|array resultat du json ou false en cas d'erreur
 	 * @throws Exception
 	 */
-	public function envoi_requete() {
+	public function envoi_requete(?string $url = null): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$url = $this->prepare_url_standard ();
+		if($url === null) 
+			$url = $this->prepare_url_standard ();
 		$this->onDebug ( "Url = " . $url, 1 );
 		// Si la connexion est desactive par le parametre no_wsclient
 		if ($this->getNoconnexion () === true) {
@@ -307,10 +317,10 @@ class wsclient extends abstract_log {
 
 	/**
 	 * Ajoute un hearder HTTP. Par defaut : Content-Type: application/json Necessite un connexion curl active
-	 * @param string $header
 	 * @return wsclient
 	 */
-	public function gere_header() {
+	public function gere_header(): static
+	{
 		// On ajoute les donnees sur une connexion active uniquement
 		$header = $this->getHttpHeader ();
 		if ($header == '') {
@@ -329,8 +339,10 @@ class wsclient extends abstract_log {
 	/**
 	 * Valide les options fournit en argument
 	 * @return wsclient
+	 * @throws Exception
 	 */
-	public function gere_curl_options() {
+	public function gere_curl_options(): static
+	{
 		// On gere les differents parmetres d'une requete
 		// le besoin d'avoir le header dans la reponse
 		if ($this->getCollectHeader ()) {
@@ -367,6 +379,17 @@ class wsclient extends abstract_log {
 			$this->getObjetCurl ()
 				->setSslVerifyPeerAndHost ( false );
 		}
+		// on gere la redirection du post
+		if (
+			in_array(
+				$this->getHttpMethod (),
+				["POST", "PUT", "PATCH"]
+			)
+		) {
+			$this->getObjetCurl()
+				->setLocation(true)
+				->setFollowRedirections();
+		}
 		return $this;
 	}
 
@@ -374,7 +397,8 @@ class wsclient extends abstract_log {
 	 * Gere le type de request (GET, POST, PUt ou DELETE) En cas de request differente de GET : ajoute les donnees en mode POSTDATA Necessite un connexion curl active
 	 * @return wsclient
 	 */
-	public function gere_request() {
+	public function gere_request(): static
+	{
 		$this->onDebug("Method : ".$this->getHttpMethod(), 1);
 		$this->getObjetCurl ()
 			->setRequest ( $this->getHttpMethod () );
@@ -388,7 +412,8 @@ class wsclient extends abstract_log {
 	 * Ajoute les donnees en mode POSTDATA si la request est de type POST Necessite un connexion curl active
 	 * @return wsclient
 	 */
-	public function gere_post_data() {
+	public function gere_post_data(): static
+	{
 		if ($this->getHttpMethod () == "POST" || $this->getHttpMethod () == "PUT" || $this->getHttpMethod () == "PATCH") {
 			if ($this->getPostDatas () != "") {
 				$this->getObjetCurl ()
@@ -405,7 +430,8 @@ class wsclient extends abstract_log {
 	 * Ajoute l'utilisateur et son mon de passe dans le header HTTP Necessite un connexion curl active
 	 * @return wsclient
 	 */
-	public function gere_utilisateurs() {
+	public function gere_utilisateurs(): static
+	{
 		// Si un User/Pass est defini
 		if ($this->getGestionConnexionUrl ()
 			->getObjetUtilisateurs ()
@@ -425,7 +451,8 @@ class wsclient extends abstract_log {
 	 * Ajoute les donnees du proxy, s'il existe Necessite un connexion curl active
 	 * @return wsclient
 	 */
-	public function gere_proxy() {
+	public function gere_proxy(): static
+	{
 		// Si un proxy est defini
 		if ($this->getGestionConnexionUrl ()
 			->valide_proxy_existe ()) {
@@ -442,7 +469,8 @@ class wsclient extends abstract_log {
 	 * Construit une url standard a partir du getHost et getUrl.<br/> Choisi entre la methode GET ou POST
 	 * @return string url construite
 	 */
-	public function prepare_url_standard() {
+	public function prepare_url_standard(): string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getHttpMethod () == "GET" || $this->getForceParamInUrl ()) {
 			return $this->prepare_url_get ();
@@ -456,7 +484,8 @@ class wsclient extends abstract_log {
 	 * Construit une url standard a partir du getHost et getUrl + la liste des parametres en GET.
 	 * @return string url construite
 	 */
-	public function prepare_url_get() {
+	public function prepare_url_get(): string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$url = $this->getGestionConnexionUrl ()
 			->getPrependUrl () . $this->getUrl ();
@@ -472,7 +501,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUrl() {
+	public function getUrl(): string
+	{
 		return $this->url;
 	}
 
@@ -480,7 +510,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUrl(
-			$url) {
+			$url): static
+	{
 		$this->url = $url;
 		return $this;
 	}
@@ -488,7 +519,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNoconnexion() {
+	public function getNoconnexion(): bool|string
+	{
 		return $this->no_connexion;
 	}
 
@@ -496,7 +528,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setNoconnexion(
-			$no_connexion) {
+			$no_connexion): static
+	{
 		if (is_bool ( $no_connexion )) {
 			$this->no_connexion = $no_connexion;
 		}
@@ -506,7 +539,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getParams() {
+	public function getParams(): array
+	{
 		return $this->params;
 	}
 
@@ -517,7 +551,8 @@ class wsclient extends abstract_log {
 	public function &setParams(
 			$param,
 			$value = "",
-			$add = false) {
+			$add = false): static
+	{
 		if ($add) {
 			$this->params [$param] = $value;
 		} else {
@@ -535,7 +570,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPostDatas() {
+	public function getPostDatas(): string|array
+	{
 		return $this->post_datas;
 	}
 
@@ -543,7 +579,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setPostDatas(
-			$post_datas) {
+			$post_datas): static
+	{
 		$this->post_datas = $post_datas;
 		return $this;
 	}
@@ -551,7 +588,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHttpMethod() {
+	public function getHttpMethod(): string
+	{
 		return $this->http_method;
 	}
 
@@ -559,7 +597,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHttpMethod(
-			$http_method) {
+			$http_method): static
+	{
 		$this->http_method = strtoupper ( $http_method );
 		return $this;
 	}
@@ -567,7 +606,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHttpHeader() {
+	public function getHttpHeader(): string|array
+	{
 		return $this->http_entete;
 	}
 
@@ -575,7 +615,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHttpHeader(
-			$http_entete) {
+			$http_entete): static
+	{
 		$this->http_entete = $http_entete;
 		return $this;
 	}
@@ -583,7 +624,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getContentType() {
+	public function getContentType(): string
+	{
 		return $this->content_type;
 	}
 
@@ -591,7 +633,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setContentType(
-			$content_type) {
+			$content_type): static
+	{
 		$this->content_type = $content_type;
 		return $this;
 	}
@@ -599,7 +642,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAccept() {
+	public function getAccept(): string
+	{
 		return $this->accept;
 	}
 
@@ -607,7 +651,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAccept(
-			$accept) {
+			$accept): static
+	{
 		$this->accept = $accept;
 		return $this;
 	}
@@ -615,7 +660,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getConnexionTimeout() {
+	public function getConnexionTimeout(): int
+	{
 		return $this->connection_timeout;
 	}
 
@@ -623,7 +669,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setConnexionTimeout(
-			$connection_timeout) {
+			$connection_timeout): static
+	{
 		$this->connection_timeout = $connection_timeout;
 		return $this;
 	}
@@ -631,7 +678,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getValidSSL() {
+	public function getValidSSL(): bool
+	{
 		return $this->validSSLcert;
 	}
 
@@ -639,7 +687,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setValidSSL(
-			$validSSLcert) {
+			$validSSLcert): static
+	{
 		$this->validSSLcert = $validSSLcert;
 		return $this;
 	}
@@ -647,7 +696,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHttpAuth() {
+	public function getHttpAuth(): string
+	{
 		return $this->httpAuth;
 	}
 
@@ -655,16 +705,18 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHttpAuth(
-			$httpAuth) {
+			$httpAuth): static
+	{
 		$this->httpAuth = $httpAuth;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return gestion_connexion_url
+	 * @return gestion_connexion_url|null
 	 */
-	public function &getGestionConnexionUrl() {
+	public function &getGestionConnexionUrl(): ?gestion_connexion_url
+	{
 		return $this->gestion_connexion_url;
 	}
 
@@ -672,7 +724,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setGestionConnexionUrl(
-			&$gestion_connexion_url) {
+			&$gestion_connexion_url): static
+	{
 		$this->gestion_connexion_url = $gestion_connexion_url;
 		return $this;
 	}
@@ -681,7 +734,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return curl
 	 */
-	public function &getObjetCurl() {
+	public function &getObjetCurl(): ?curl
+	{
 		return $this->objet_curl;
 	}
 
@@ -689,7 +743,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetCurl(
-			&$curl) {
+			&$curl): static
+	{
 		$this->objet_curl = $curl;
 		return $this;
 	}
@@ -697,7 +752,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getForceParamInUrl() {
+	public function getForceParamInUrl(): bool|string
+	{
 		return $this->force_param_url;
 	}
 
@@ -705,7 +761,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setForceParamInUrl(
-			$force_param_url) {
+			$force_param_url): static
+	{
 		if (is_bool ( $force_param_url )) {
 			$this->force_param_url = $force_param_url;
 		}
@@ -715,7 +772,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getCollectHeader() {
+	public function &getCollectHeader(): bool|string
+	{
 		return $this->collect_header;
 	}
 
@@ -723,7 +781,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCollectHeader(
-			$collect_header) {
+			$collect_header): static
+	{
 		$this->collect_header = $collect_header;
 		return $this;
 	}
@@ -731,7 +790,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getHeaderData() {
+	public function &getHeaderData(): string
+	{
 		return $this->header_data;
 	}
 
@@ -739,7 +799,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHeaderData(
-			$header_data) {
+			$header_data): static
+	{
 		$this->header_data = $header_data;
 		return $this;
 	}
@@ -747,7 +808,8 @@ class wsclient extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getCurlInfo() {
+	public function &getCurlInfo(): string|array
+	{
 		return $this->curl_info;
 	}
 
@@ -755,7 +817,8 @@ class wsclient extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCurlInfo(
-			$curl_info) {
+			$curl_info): static
+	{
 		$this->curl_info = $curl_info;
 		return $this;
 	}
@@ -767,7 +830,8 @@ class wsclient extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Generique aux webservices";
@@ -782,4 +846,3 @@ class wsclient extends abstract_log {
 		return $help;
 	}
 }
-?>

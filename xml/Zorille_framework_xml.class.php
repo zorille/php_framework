@@ -40,11 +40,13 @@ class xml extends abstract_log {
 	 * Instancie un objet de type xml.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return xml
+	 * @throws Exception
 	 */
-	static function &creer_xml(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_xml(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): xml
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new xml ( $sort_en_erreur, $entete );
 		$objet ->_initialise ( array ( 
@@ -58,8 +60,9 @@ class xml extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return xml
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this ->prepare_xml ();
@@ -86,7 +89,8 @@ class xml extends abstract_log {
 	 * @param string $encode UTF-8 par defaut
 	 * @return xml
 	 */
-	public function creer_domDocument($version = '1.0', $encode = 'UTF-8') {
+	public function creer_domDocument(string $version = '1.0', string $encode = 'UTF-8'): static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$dom = new DOMDocument ( $version, $encode );
 		return $this ->setDomDatas ( $dom );
@@ -95,8 +99,10 @@ class xml extends abstract_log {
 	/**
 	 * Prepare l'objet DOMDocument qui permet la gestion des XMLs
 	 * @return xml
+	 * @throws DOMException
 	 */
-	public function prepare_xml() {
+	public function prepare_xml(): static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$this ->creer_domDocument ();
 		$element = $this ->getDomDatas () 
@@ -110,11 +116,13 @@ class xml extends abstract_log {
 	/**
 	 * Ouvre le fichier XML, ou s'il fait moins de 1Mo, le charge en memoire.
 	 *
-	 * @param string $fichier Chemin complet du fichier XML.
-	 * @return true
+	 * @param string $fichier_xml
+	 * @return xml|bool
+	 * @throws DOMException
 	 * @throws Exception
 	 */
-	public function open_xml($fichier_xml = "") {
+	public function open_xml(string $fichier_xml = ""): static|bool
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		//Ouverture et lecture du fichier
 		if (is_file ( $fichier_xml )) {
@@ -141,9 +149,10 @@ class xml extends abstract_log {
 	 * Renvoie une reponse de type requete XPATH.
 	 * Si le $nom est un tableau, il est convertie en string champ1/champ2/..../champX
 	 * @param array|string $nom nom du champ xml voulue.
-	 * @return DOMNodeList|FALSE resultat sous forme de liste ou FALSE en cas d'erreur.
+	 * @return DOMNodeList resultat sous forme de liste ou FALSE en cas d'erreur.
 	 */
-	public function renvoi_xpath($nom) {
+	public function renvoi_xpath(array|string $nom): DOMNodeList
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$resultat = false;
 		
@@ -154,9 +163,7 @@ class xml extends abstract_log {
 		}
 		
 		$xpath_object = new DOMXPath ( $this ->getDomDatas () );
-		$resultat = $xpath_object ->query ( $xpath );
-		
-		return $resultat;
+		return $xpath_object ->query ( $xpath );
 	}
 
 	/**
@@ -166,22 +173,21 @@ class xml extends abstract_log {
 	 * @return DomElement
 	 * @throws DOMException
 	 */
-	public function creer_element($tag, $valeur = "") {
+	public function creer_element(string $tag, string $valeur = ""): DOMElement
+	{
 		$this ->onDebug ( __METHOD__, 2 );
-		$dom_finale = $this ->getDomDatas () 
+		return $this ->getDomDatas ()
 			->createElement ( $tag, $valeur );
-		
-		return $dom_finale;
 	}
 
 	/**
 	 * Ajoute un DOMElement $element au DOMDocument $source
-	 * @param DOMDocument $source
+	 * @param DOMDocument|DOMElement $source
 	 * @param DomElement $element
 	 * @return xml
-	 * @throws DOMException
 	 */
-	public function ajoute_element(&$source, &$element) {
+	public function ajoute_element(DOMDocument|DOMElement &$source, DOMElement &$element): static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$source ->appendChild ( $element );
 		
@@ -194,7 +200,8 @@ class xml extends abstract_log {
 	 * @return boolean
 	 * @throws DOMException
 	 */
-	public function ajoute_element_au_dom(&$element_a_ajouter) {
+	public function ajoute_element_au_dom(DOMElement &$element_a_ajouter): bool
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$domDatas = $this ->getDomDatas ();
 		$items = $domDatas ->getElementsByTagName ( $this ->getEnteteTagXml () );
@@ -215,7 +222,8 @@ class xml extends abstract_log {
 	 * @return boolean
 	 * @throws DOMException
 	 */
-	public function ajoute_element_liste($element_a_ajouter, $element_config) {
+	public function ajoute_element_liste(DOMElement $element_a_ajouter, DOMElement $element_config): bool
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$flag = true;
 		
@@ -247,7 +255,8 @@ class xml extends abstract_log {
 	 * Ferme le fichier XML et desalloue les parser.
 	 * @codeCoverageIgnore
 	 */
-	public function close_xml() {
+	public function close_xml(): void
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$this ->setDomDatas ( NULL );
 	}
@@ -256,9 +265,10 @@ class xml extends abstract_log {
 	 * Supprime un element.
 	 *
 	 * @param array|string $nom nom du champ xml voulue.
-	 * @return bool TRUE
+	 * @return xml TRUE
 	 */
-	public function supprime_element($nom) {
+	public function supprime_element(array|string $nom): static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$resultat = $this ->renvoi_xpath ( $nom );
 		
@@ -279,9 +289,10 @@ class xml extends abstract_log {
 	/**
 	 * renvoie le résultat du XPATH sous forme de tableau/string
 	 * @param array|string $nom nom du champ xml voulue.
-	 * @return array|string|false resultat ou FALSE en cas d'erreur.
+	 * @return bool|array|int|string resultat ou FALSE en cas d'erreur.
 	 */
-	public function renvoi_donnee($nom = "ZrootXML") {
+	public function renvoi_donnee(array|string $nom = "ZrootXML"): bool|array|int|string
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		
 		if ($nom == "ZrootXML") {
@@ -297,7 +308,7 @@ class xml extends abstract_log {
 			$final = array ();
 			foreach ( $resultat as $valeur ) {
 				if ($valeur->nodeType == XML_ELEMENT_NODE) {
-					$final [count ( $final )] = $this ->Dom_To_Array ( $valeur );
+					$final[] = $this->Dom_To_Array($valeur);
 				}
 			}
 		} else {
@@ -311,11 +322,13 @@ class xml extends abstract_log {
 
 	/**
 	 * Ajoute une valeur au DOM en memoire
-	 * @param string|array $champ
-	 * @param string|integer $valeur
+	 * @param array|string $champ
+	 * @param integer|string $valeur
 	 * @return xml
+	 * @throws DOMException
 	 */
-	public function ajoute_donnee($champ, $valeur) {
+	public function ajoute_donnee(array|string $champ, int|string $valeur): static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		if (! is_array ( $champ )) {
 			//Le xml n'aime pas avoir le premier caractere d'un champ de type numeric
@@ -342,10 +355,11 @@ class xml extends abstract_log {
 	/********************************* CONVERTION DOM/ARRAY **************************/
 	/**
 	 * Transforme un DOMNode en tableau
-	 * @param DOMNode $node DOMNode ou DOMElement a convertir
+	 * @param DOMNode|null $node DOMNode ou DOMElement a convertir
 	 * @return array|string tableau ou string contenant les resultats.
 	 */
-	public function Dom_To_Array(DOMNode $node = null) {
+	public function Dom_To_Array(DOMNode $node = null): array|string
+	{
 		$result = array ();
 		$group = array ();
 		
@@ -397,10 +411,11 @@ class xml extends abstract_log {
 	 * Transforme un tableau en elements DOMElement
 	 * @param array $tableau
 	 * @param string $valeur
-	 * @return DOMElement
+	 * @return bool|DOMElement
 	 * @throws DOMException
 	 */
-	public function array_to_dom($tableau, $valeur) {
+	public function array_to_dom(array $tableau, string $valeur): bool|DOMElement
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$dom_finale = false;
 		$tag = array_shift ( $tableau );
@@ -427,7 +442,8 @@ class xml extends abstract_log {
 	 * @return false|xml
 	 * @throws Exception
 	 */
-	public function import_dom_a_partir_de_simpleXML($simpleXML_donnees, $entete = 'xml') {
+	public function import_dom_a_partir_de_simpleXML(SimpleXMLElement $simpleXML_donnees, string $entete = 'xml'): xml|bool|static
+	{
 		$dom_element = @dom_import_simplexml ( $simpleXML_donnees );
 		if (! $dom_element) {
 			return $this ->onError ( 'Erreur lors de la conversion du simpleXML en DOMElement' );
@@ -448,7 +464,8 @@ class xml extends abstract_log {
 	 *
 	 * @return SimpleXMLElement resultat ou FALSE en cas d'erreur.
 	 */
-	public function renvoi_Dom_En_SimpleXmlElement() {
+	public function renvoi_Dom_En_SimpleXmlElement(): SimpleXMLElement
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		return simplexml_load_string ( $this ->getDomDatas () 
 			->saveXML () );
@@ -460,7 +477,8 @@ class xml extends abstract_log {
 	 * @param SimpleXMLElement $xml_object
 	 * @return array objet converti en tableau
 	 */
-	public function simpleXmlElement_to_array($xml_object) {
+	public function simpleXmlElement_to_array(SimpleXMLElement $xml_object): array
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		return json_decode ( json_encode ( ( array ) $xml_object ), true );
 	}
@@ -470,7 +488,8 @@ class xml extends abstract_log {
 	 * @param SimpleXMLElement $donnees
 	 * @return array
 	 */
-	public function simpleXml_to_array($donnees) {
+	public function simpleXml_to_array(SimpleXMLElement $donnees): array
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$CODE_RETOUR = array ();
 		foreach ( ( array ) $donnees as $nom => $valeur ) {
@@ -491,16 +510,17 @@ class xml extends abstract_log {
 	 * Prends la
 	 * @param mixed $donnees recupere la valeur "string" de la variable $donnees et l'ajoute au tableau $liste_donnees
 	 * @param array $liste_donnees
-	 * @return true
+	 * @return bool|xml
 	 */
-	public function creer_valeur($donnees, &$liste_donnees) {
+	public function creer_valeur(mixed $donnees, array &$liste_donnees): bool|static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		if (isset ( $liste_donnees )) {
 			if (! is_array ( $liste_donnees )) {
 				$liste_donnees = array ( 
 						$liste_donnees );
 			}
-			$liste_donnees [count ( $liste_donnees )] = strval ( $donnees );
+			$liste_donnees[] = strval($donnees);
 		} else {
 			$liste_donnees = strval ( $donnees );
 		}
@@ -512,9 +532,10 @@ class xml extends abstract_log {
 	 * Convertie un attribut de $pointeur_donnees en tableau dans $liste_donnees
 	 * @param SimpleXMLElement $pointeur_donnees
 	 * @param array $liste_donnees Tableau de donnees finales
-	 * @return true
+	 * @return bool|xml
 	 */
-	public function retrouve_attribut(&$pointeur_donnees, &$liste_donnees) {
+	public function retrouve_attribut(SimpleXMLElement &$pointeur_donnees, array &$liste_donnees): bool|static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		if ($pointeur_donnees instanceof SimpleXMLElement) {
 			foreach ( $pointeur_donnees ->attributes () as $nom => $donnees ) {
@@ -529,9 +550,10 @@ class xml extends abstract_log {
 	 * Convertie une valeur de $pointeur_donnees en tableau dans $liste_donnees
 	 * @param SimpleXMLElement $pointeur_donnees
 	 * @param array $liste_donnees
-	 * @return true
+	 * @return bool|xml
 	 */
-	public function retrouve_valeur(&$pointeur_donnees, &$liste_donnees) {
+	public function retrouve_valeur(SimpleXMLElement &$pointeur_donnees, array &$liste_donnees): bool|static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		$nb_boucle = 0;
 		
@@ -551,9 +573,10 @@ class xml extends abstract_log {
 	 *
 	 * @param SimpleXMLElement $pointeur_donnees
 	 * @param array $liste_donnees
-	 * @return true
+	 * @return bool|xml
 	 */
-	public function recupere_donnee_fils(&$pointeur_donnees, &$liste_donnees) {
+	public function recupere_donnee_fils(SimpleXMLElement &$pointeur_donnees, array &$liste_donnees): bool|static
+	{
 		$this ->onDebug ( __METHOD__, 2 );
 		if (count ( $pointeur_donnees ->children () ) == 0) {
 			$this ->retrouve_valeur ( $pointeur_donnees, $liste_donnees );
@@ -573,36 +596,40 @@ class xml extends abstract_log {
 	/**
 	 * Returns whether the specified XML element exists.
 	 *
-	 * @param SimpleXMLElement  $simpleXML
+	 * @param SimpleXMLElement $simpleXML
 	 * @return boolean
 	 */
-	public function elementExists($simpleXML) {
+	public function elementExists(SimpleXMLElement $simpleXML): bool
+	{
 		return $simpleXML ->getName () != '';
 	}
 
 	/**
-	 * @param SimpleXMLElement  $simpleXML
-	 * @param string            $attributeName
+	 * @param SimpleXMLElement $simpleXML
+	 * @param string $attributeName
 	 * @return string|NULL
 	 */
-	public function getAttributeValue($simpleXML, $attributeName) {
+	public function getAttributeValue(SimpleXMLElement $simpleXML, string $attributeName): ?string
+	{
 		return (isset ( $simpleXML ->attributes ()->$attributeName )) ? ( string ) $simpleXML ->attributes ()->$attributeName : NULL;
 	}
 
 	/**
-	 * @param SimpleXMLElement  $simpleXML
+	 * @param SimpleXMLElement $simpleXML
 	 * @return string
 	 */
-	public function getTextContent($simpleXML) {
+	public function getTextContent(SimpleXMLElement $simpleXML): string
+	{
 		return ( string ) $simpleXML;
 	}
 
 	/**
-	 * @param SimpleXMLElement  $xml
-	 * @param string            $xpathExpr
+	 * @param $simpleXML
+	 * @param string $xpathExpr
 	 * @return string|NULL
 	 */
-	public function getTextContentAtXpath($simpleXML, $xpathExpr) {
+	public function getTextContentAtXpath($simpleXML, string $xpathExpr): ?string
+	{
 		$matchingElements = $simpleXML ->xpath ( $xpathExpr );
 		return (count ( $matchingElements ) == 0) ? NULL : $this ->getTextContent ( $matchingElements [0] );
 	}
@@ -611,13 +638,13 @@ class xml extends abstract_log {
 	 * Returns true if the specified SimpleXMLElement represents a unique
 	 * element or false if it represents a collection of elements.
 	 *
-	 * @param SimpleXMLElement  $xml
+	 * @param $simpleXML
 	 * @return bool
 	 */
-	public function isSingleElement($simpleXML) {
+	public function isSingleElement($simpleXML): bool
+	{
 		$count = 0;
 		foreach ( $simpleXML as $item ) {
-			$item;
 			$count ++;
 			if ($count >= 2)
 				return false;
@@ -634,8 +661,11 @@ class xml extends abstract_log {
 	 * Transforme un tableau en XML
 	 * @param array $array_src
 	 * @param SimpleXMLElement $xml_output
+	 * @param string $encode
+	 * @return xml
 	 */
-	public function array_to_xml($array_src, &$xml_output, $encode = "UTF-8") {
+	public function array_to_xml(array $array_src, SimpleXMLElement &$xml_output, string $encode = "UTF-8"): static
+	{
 		foreach ( $array_src as $key => $value ) {
 			if (is_numeric ( $key )) {
 				$key = "item";
@@ -670,16 +700,18 @@ class xml extends abstract_log {
 	/******************** Accesseurs *****************/
 	/**
 	 * @codeCoverageIgnore
-	 * @return DOMDocument
+	 * @return DOMDocument|null
 	 */
-	public function &getDomDatas() {
+	public function &getDomDatas(): ?DOMDocument
+	{
 		return $this->dom_local;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDomDatas($dom_local) {
+	public function &setDomDatas($dom_local): static
+	{
 		$this->dom_local = $dom_local;
 		return $this;
 	}
@@ -688,7 +720,8 @@ class xml extends abstract_log {
 	 * ACCESSEURS get
 	 * @codeCoverageIgnore
 	 */
-	public function getEnteteTagXml() {
+	public function getEnteteTagXml(): string
+	{
 		return $this->root_tag;
 	}
 
@@ -696,10 +729,10 @@ class xml extends abstract_log {
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
 	 */
-	public function &setEnteteTagXml($root_tag) {
+	public function &setEnteteTagXml($root_tag): static
+	{
 		$this->root_tag = $root_tag;
 		return $this;
 	}
 /******************** Accesseurs *****************/
 }
-?>

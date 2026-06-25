@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class cacti_hostsTemplates<br>
  *
@@ -27,11 +29,15 @@ class cacti_hostsTemplates extends parametresStandard {
 	 * Instancie un objet de type cacti_hostsTemplates.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_hostsTemplates
 	 */
-	static function &creer_cacti_hostsTemplates(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_hostsTemplates(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_hostsTemplates
+	{
 		$objet = new cacti_hostsTemplates ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -46,7 +52,8 @@ class cacti_hostsTemplates extends parametresStandard {
 	 * @param array $liste_class
 	 * @return cacti_hostsTemplates
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		$this->charge_templates ();
 		return $this;
@@ -58,7 +65,6 @@ class cacti_hostsTemplates extends parametresStandard {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -68,8 +74,10 @@ class cacti_hostsTemplates extends parametresStandard {
 
 	/**
 	 * Charge la liste des hosts via l'API Cacti
+	 * @throws Exception
 	 */
-	public function charge_templates() {
+	public function charge_templates(): static
+	{
 		$this->onDebug ( "On charge la liste des templates.", 1 );
 		// fonction de l'API cacti : lib/database.php via global.php
 		$this->setTemplates ( getHostTemplates () );
@@ -82,7 +90,8 @@ class cacti_hostsTemplates extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_template_by_id($template_id) {
+	public function valide_template_by_id($template_id): bool
+	{
 		$templates = $this->getTemplates ();
 		if (isset ( $templates [$template_id] )) {
 			return true;
@@ -97,13 +106,15 @@ class cacti_hostsTemplates extends parametresStandard {
 	 * @param string $preg_match RegExpr permetant de filtrer les templates recupere par le terme $template
 	 * @param boolean $error True pour afficher une erreur si le template n'est pas trouve,false passe en warning
 	 * @return boolean
+	 * @throws Exception
 	 */
-	public function retrouve_templateid_par_nom(&$db_cacti, $template, $preg_match = "/^IMSL - /", $error = true) {
+	public function retrouve_templateid_par_nom(requete_complexe_cacti &$db_cacti, string $template, string $preg_match = "/^IMSL - /", bool $error = true): bool
+	{
 		// On retrouve l'id du template host
 		$resultat_host = $db_cacti->requete_select_standard ( 'host_template', array (
 				"name" => "%" . $template . "%" 
 		), "id ASC" );
-		if ($resultat_host === false) {
+		if (!$resultat_host) {
 			return $this->onError ( "Erreur durant la requete sur les host_template" );
 		}
 		
@@ -116,7 +127,7 @@ class cacti_hostsTemplates extends parametresStandard {
 				break;
 			}
 		}
-		if ($template_id === false) {
+		if (!$template_id) {
 			if ($error) {
 				return $this->onError ( "Pas de template pour ce type de template : " . $template . " et preg_match : " . $preg_match );
 			}
@@ -134,7 +145,8 @@ class cacti_hostsTemplates extends parametresStandard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTemplates() {
+	public function getTemplates(): array
+	{
 		return $this->templates;
 	}
 
@@ -150,8 +162,10 @@ class cacti_hostsTemplates extends parametresStandard {
 
 	/**
 	 * @codeCoverageIgnore
+	 * @throws Exception
 	 */
-	public function setTemplates($templates) {
+	public function setTemplates($templates): bool
+	{
 		if (is_array ( $templates )) {
 			$this->templates = $templates;
 		} else {
@@ -162,8 +176,10 @@ class cacti_hostsTemplates extends parametresStandard {
 
 	/**
 	 * @codeCoverageIgnore
+	 * @throws Exception
 	 */
-	public function ajouteTemplates($nom, $tree_id) {
+	public function ajouteTemplates($nom, $tree_id): bool
+	{
 		if ($nom != "" && $tree_id != "") {
 			$this->templates [$nom] = $tree_id;
 		} else {
@@ -176,4 +192,3 @@ class cacti_hostsTemplates extends parametresStandard {
  * ***************************** ACCESSEURS *******************************
  */
 }
-?>

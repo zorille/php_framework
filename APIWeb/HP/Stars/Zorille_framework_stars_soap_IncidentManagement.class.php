@@ -42,7 +42,7 @@ class stars_soap_IncidentManagement extends stars_datas {
 	 * @param array $liste_class
 	 * @return stars_soap_IncidentManagement
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -55,7 +55,6 @@ class stars_soap_IncidentManagement extends stars_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de star_datas
@@ -227,7 +226,8 @@ class stars_soap_IncidentManagement extends stars_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

@@ -26,11 +26,13 @@ class vmwareHostSystem extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareHostSystem
+	 * @throws Exception
 	 */
-	static function &creer_vmwareHostSystem(&$liste_option, &$ObjectVmwareWsclient, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareHostSystem(options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwareHostSystem
+	{
 		$objet = new vmwareHostSystem ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -46,7 +48,7 @@ class vmwareHostSystem extends vmwareManagedEntity {
 	 * @return vmwareHostSystem
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -59,7 +61,6 @@ class vmwareHostSystem extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -72,7 +73,8 @@ class vmwareHostSystem extends vmwareManagedEntity {
 	 * To Delete des qu'une autre methode apparait
 	 * @return string
 	 */
-	public function affiche_les_Tests() {
+	public function affiche_les_Tests(): string
+	{
 		return "affiche";
 	}
 	/************************* Methodes VMWare ***********************/
@@ -82,14 +84,16 @@ class vmwareHostSystem extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getHostSystem() {
+	public function &getHostSystem(): stdClass
+	{
 		return $this->getManagedObject();
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostSystem($HostSystem) {
+	public function &setHostSystem($HostSystem): vmwareHostSystem
+	{
 		return $this->setManagedObject($HostSystem);
 	}
 
@@ -99,7 +103,7 @@ class vmwareHostSystem extends vmwareManagedEntity {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -107,5 +111,3 @@ class vmwareHostSystem extends vmwareManagedEntity {
 		return $help;
 	}
 }
-
-?>

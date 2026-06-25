@@ -129,11 +129,12 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_mediatype
+	 * @return zabbix_mediatype|abstract_log
 	 */
-	static function &creer_zabbix_mediatype(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_mediatype(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_mediatype|abstract_log
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_mediatype ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -146,9 +147,9 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_mediatype
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -160,7 +161,6 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -171,8 +171,10 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
 	 * @param boolean $nom_seulement valide uniquement le nom (description) du mediatype
 	 * @return boolean True est OK, False sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param($nom_seulement = false) {
+	public function retrouve_zabbix_param(bool $nom_seulement = false): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setDescription ( $this->_valideOption ( array (
 				"zabbix",
@@ -262,10 +264,11 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 
 	/**
 	 * Creer un definition d'un mediatype sous forme de tableau
-	 * @return array;
+	 * @return array|bool
 	 * @throws Exception
 	 */
-	public function creer_definition_mediatype_ws() {
+	public function creer_definition_mediatype_ws(): array|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$mediatypeid = array (
 				"description" => $this->getDescription (),
@@ -307,8 +310,10 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * Creer un mediatype dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_mediatype() {
+	public function creer_mediatype(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_mediatype_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -318,9 +323,10 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 
 	/**
 	 * Creer un definition d'un mediatype sous forme de tableau
-	 * @return array;
+	 * @return array
 	 */
-	public function creer_definition_mediatype_delete_ws() {
+	public function creer_definition_mediatype_delete_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$mediatypeid = array ();
 		
@@ -334,8 +340,10 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * supprime un mediatype dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprime_mediatype() {
+	public function supprime_mediatype(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_mediatype = $this->recherche_mediatype ();
 		foreach ( $liste_mediatype as $mediatypeids ) {
@@ -353,7 +361,8 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * Creer un definition d'un mediatype sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_mediatype_get_ws() {
+	public function creer_definition_mediatype_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"output" => "mediatypeid",
@@ -366,8 +375,10 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * recherche un mediatype dans zabbix a partir de sa description
 	 * @return array
+	 * @throws Exception
 	 */
-	public function recherche_mediatype() {
+	public function recherche_mediatype(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_mediatype_get_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -378,9 +389,11 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * recherche un mediatype dans zabbix a partir de sa description et ajoute le mediatypeId dans l'objet
 	 * Le mot All renvoi l'id 0
-	 * @return array
+	 * @return zabbix_mediatype
+	 * @throws Exception
 	 */
-	public function recherche_mediatypeid_by_Name() {
+	public function recherche_mediatypeid_by_Name(): zabbix_mediatype
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getDescription () == "All") {
 			return $this->setMediatypeId ( 0 );
@@ -405,62 +418,47 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * 3 - Jabber;
 	 * 100 - Ez Texting
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Type($type) {
+	public function retrouve_Type($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "script" :
-				return 1;
-				break;
-			case "sms" :
-				return 2;
-				break;
-			case "jabber" :
-				return 3;
-				break;
-			case "ez texting" :
-				return 100;
-				break;
-			case "email" :
-			default :
-				return 0;
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"script" => 1,
+			"sms" => 2,
+			"jabber" => 3,
+			"ez texting" => 100,
+			default => 0,
+		};
 	}
 
 	/**
 	 * 0 - enabled;
 	 * 1 - disabled;
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Status($type) {
+	public function retrouve_Status($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "disabled" :
-				return 1;
-				break;
-			case "enabled" :
-			default :
-				return 0;
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"disabled" => 1,
+			default => 0,
+		};
 	}
 
 	/**
-	 * @param string $type
-	 * @return number|string en fonction du type de mediatype
+	 * @param $ExecPath
+	 * @return int|string en fonction du type de mediatype
 	 */
-	public function retrouve_ExecPath($ExecPath) {
+	public function retrouve_ExecPath($ExecPath): int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		switch ($this->getType ()) {
 			case 1 :
@@ -486,14 +484,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMediatypeId() {
+	public function getMediatypeId(): string
+	{
 		return $this->mediatypeid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMediatypeId($mediatypeid) {
+	public function &setMediatypeId($mediatypeid): static
+	{
 		$this->mediatypeid = $mediatypeid;
 		return $this;
 	}
@@ -501,14 +501,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDescription() {
+	public function getDescription(): string
+	{
 		return $this->description;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDescription($description) {
+	public function &setDescription($description): static
+	{
 		$this->description = $description;
 		return $this;
 	}
@@ -516,14 +518,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getType() {
+	public function getType(): string
+	{
 		return $this->type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setType($type) {
+	public function &setType($type): static
+	{
 		$this->type = $this->retrouve_Type ( $type );
 		return $this;
 	}
@@ -531,14 +535,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getExecPath() {
+	public function getExecPath(): string
+	{
 		return $this->exec_path;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setExecPath($exec_path) {
+	public function &setExecPath($exec_path): static
+	{
 		$this->exec_path = $this->retrouve_ExecPath ( $exec_path );
 		return $this;
 	}
@@ -546,14 +552,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getStatus() {
+	public function getStatus(): int
+	{
 		return $this->status;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStatus($status) {
+	public function &setStatus($status): static
+	{
 		$this->status = $this->retrouve_Status ( $status );
 		return $this;
 	}
@@ -561,14 +569,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGsmModem() {
+	public function getGsmModem(): string
+	{
 		return $this->gsm_modem;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGsmModem($gsm_modem) {
+	public function &setGsmModem($gsm_modem): static
+	{
 		$this->gsm_modem = $gsm_modem;
 		return $this;
 	}
@@ -576,14 +586,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSmtpHelo() {
+	public function getSmtpHelo(): string
+	{
 		return $this->smtp_helo;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSmtpHelo($smtp_helo) {
+	public function &setSmtpHelo($smtp_helo): static
+	{
 		$this->smtp_helo = $smtp_helo;
 		return $this;
 	}
@@ -591,14 +603,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSmtpServer() {
+	public function getSmtpServer(): string
+	{
 		return $this->smtp_server;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSmtpServer($smtp_server) {
+	public function &setSmtpServer($smtp_server): static
+	{
 		$this->smtp_server = $smtp_server;
 		return $this;
 	}
@@ -606,14 +620,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSmtpEmail() {
+	public function getSmtpEmail(): string
+	{
 		return $this->smtp_email;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSmtpEmail($smtp_email) {
+	public function &setSmtpEmail($smtp_email): static
+	{
 		$this->smtp_email = $smtp_email;
 		return $this;
 	}
@@ -621,14 +637,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->username;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsername($username) {
+	public function &setUsername($username): static
+	{
 		$this->username = $username;
 		return $this;
 	}
@@ -636,14 +654,16 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword() {
+	public function getPassword(): string
+	{
 		return $this->passwd;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPassword($passwd) {
+	public function &setPassword($passwd): static
+	{
 		$this->passwd = $passwd;
 		return $this;
 	}
@@ -654,7 +674,8 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -673,4 +694,3 @@ class zabbix_mediatype extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

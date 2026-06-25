@@ -39,7 +39,7 @@ class requete_complexe_tools extends desc_bd_tools {
 	 * @param array $liste_class
 	 * @return requete_complexe_tools
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

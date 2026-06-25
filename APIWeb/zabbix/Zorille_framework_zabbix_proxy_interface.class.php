@@ -30,11 +30,12 @@ class zabbix_proxy_interface extends zabbix_common_interface {
 	 * Instancie un objet de type zabbix_proxy_interface.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_proxy_interface
 	 */
-	static function &creer_zabbix_proxy_interface(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_proxy_interface(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_proxy_interface
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_proxy_interface ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -46,9 +47,9 @@ class zabbix_proxy_interface extends zabbix_common_interface {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_proxy_interface
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -60,7 +61,6 @@ class zabbix_proxy_interface extends zabbix_common_interface {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -72,7 +72,8 @@ class zabbix_proxy_interface extends zabbix_common_interface {
 	 * @return false|zabbix_common_interface
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): zabbix_common_interface|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		parent::retrouve_zabbix_common_param ();
 		//Gestion de l'interface
@@ -89,7 +90,8 @@ class zabbix_proxy_interface extends zabbix_common_interface {
 	 * Creer un definition de l'interface sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_proxy_interface_ws() {
+	public function creer_definition_proxy_interface_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$interface = array (
 				"useip" => $this->getUseIp (),
@@ -113,15 +115,12 @@ class zabbix_proxy_interface extends zabbix_common_interface {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Zabbix Proxy Interface :";
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_interface_port 10050 Port du Proxy";
-		$help = array_merge ( $help, zabbix_common_interface::help () );
-		
-		return $help;
+		return array_merge ( $help, zabbix_common_interface::help () );
 	}
 }
-?>

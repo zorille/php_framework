@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class ucmdb_wsclient<br> Renvoi des information via un webservice.
  * @package Lib
@@ -67,13 +69,14 @@ class ucmdb_wsclient extends abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return ucmdb_wsclient
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["ucmdb_datas"] )) {
-			$this ->onError ( "il faut un objet de type ucmdb_datas" );
-			return false;
+			$r = $this ->onError ( "il faut un objet de type ucmdb_datas" );
+			return $r;
 		}
 		$this ->setObjetUcmdbDatas ( $liste_class ["ucmdb_datas"] ) 
 			->setObjetSoap ( soap::creer_soap ( $liste_class ["options"] ) );
@@ -88,7 +91,6 @@ class ucmdb_wsclient extends abstract_log {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de abstract_log
@@ -185,7 +187,8 @@ class ucmdb_wsclient extends abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

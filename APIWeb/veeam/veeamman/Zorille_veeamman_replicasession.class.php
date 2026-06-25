@@ -52,15 +52,16 @@ class replicasession extends ci {
 	 * Instanreplicasessione un objet de type replicasession. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return replicasession
 	 */
 	static function &creer_veeamman_replicasession(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): replicasession
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new replicasession ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -74,9 +75,10 @@ class replicasession extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return replicasession
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -86,13 +88,12 @@ class replicasession extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de replicasession
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -102,7 +103,8 @@ class replicasession extends ci {
 	 * @return replicasession
 	 * @throws Exception
 	 */
-	public function recupere_donnees_replicasession() {
+	public function recupere_donnees_replicasession(): replicasession
+	{
 		$replicasession_data = $this->getObjetVeeamWsclientRest ()
 			->ReplicaSessions ( $this->getId (), array (
 				"format" => "Entity"
@@ -113,11 +115,13 @@ class replicasession extends ci {
 
 	/**
 	 * Recupere l'id du replicasession et l'ajoute à l'objet
-	 * @return replicasession
+	 * @param $replicasession
+	 * @return replicasession|bool
 	 * @throws Exception
 	 */
 	public function recupere_id_du_replicasession(
-			$replicasession) {
+			$replicasession): replicasession|bool
+	{
 		if (preg_match ( '/:ReplicaJobSession:(.*)/', $replicasession->attributes () ['UID'], $resultat ) === false) {
 			return $this->onError ( "Numero de ReplicaSession introuvable", $resultat );
 		}
@@ -126,11 +130,12 @@ class replicasession extends ci {
 
 	/**
 	 * Recupere le nom du replicasession
+	 * @param $replicasession
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_du_replicasession(
-			$replicasession) {
+			$replicasession): string
+	{
 		return $replicasession->attributes () ['Name'];
 	}
 
@@ -139,7 +144,8 @@ class replicasession extends ci {
 	 * @return string renvoie le nom du job
 	 * @throws Exception
 	 */
-	public function recupere_jobname() {
+	public function recupere_jobname(): string
+	{
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
@@ -151,7 +157,8 @@ class replicasession extends ci {
 	 * @return string renvoie le nom du job
 	 * @throws Exception
 	 */
-	public function recupere_status() {
+	public function recupere_status(): string
+	{
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
@@ -163,7 +170,8 @@ class replicasession extends ci {
 	 * @return string renvoie le nom du job
 	 * @throws Exception
 	 */
-	public function recupere_progress() {
+	public function recupere_progress(): string
+	{
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
@@ -175,7 +183,8 @@ class replicasession extends ci {
 	 * @return string renvoie true ou false
 	 * @throws Exception
 	 */
-	public function recupere_retry() {
+	public function recupere_retry(): string
+	{
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
@@ -187,7 +196,8 @@ class replicasession extends ci {
 	 * @return string renvoie le nom du job
 	 * @throws Exception
 	 */
-	public function recupere_date_creation() {
+	public function recupere_date_creation(): string
+	{
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
@@ -199,7 +209,8 @@ class replicasession extends ci {
 	 * @return string renvoie le nom du job
 	 * @throws Exception
 	 */
-	public function recupere_date_fin() {
+	public function recupere_date_fin(): string
+	{
 		if (! $this->valide_donnees_existe ()) {
 			return $this->onError ( "Pas de donnees de backup session" );
 		}
@@ -208,10 +219,11 @@ class replicasession extends ci {
 
 	/**
 	 * Permet de trouver la liste des replicasession dans veeamman et enregistre les donnees des replicasession dans l'objet
-	 * @return replicasession
+	 * @return bool|replicasession
 	 * @throws Exception
 	 */
-	public function retrouve_replicasession() {
+	public function retrouve_replicasession(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$replicasession = $this->getObjetVeeamWsclientRest ()
 			->listReplicaSessions ();
@@ -225,11 +237,13 @@ class replicasession extends ci {
 
 	/**
 	 * Permet de trouver la liste des replicasession par JobId dans veeamman et enregistre les donnees des replicasession dans l'objet
-	 * @return replicasession
+	 * @param $jobid
+	 * @return bool|replicasession
 	 * @throws Exception
 	 */
 	public function retrouve_replicasession_par_jobid(
-			$jobid) {
+			$jobid): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$replicasession = $this->getObjetVeeamWsclientRest ()
 			->listReplicaSessionsParJob ( $jobid );
@@ -246,10 +260,11 @@ class replicasession extends ci {
 	 */
 	/**
 	 * Permet de trouver la liste des replicasession dans veeamman et enregistre les donnees des replicasession dans l'objet
-	 * @return replicasession
+	 * @return bool|replicasession
 	 * @throws Exception
 	 */
-	public function retrouve_replicatasksession() {
+	public function retrouve_replicatasksession(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$replicatasksession = $this->getObjetVeeamWsclientRest ()
 			->listReplicaTasksSessions ( $this->recupere_id_du_replicasession ( $this->getDonnees () )
@@ -264,11 +279,13 @@ class replicasession extends ci {
 
 	/**
 	 * Recupere l'id du replicasession et l'ajoute à l'objet
-	 * @return replicasession
+	 * @param $replicatasksession
+	 * @return bool|replicasession
 	 * @throws Exception
 	 */
 	public function recupere_id_du_replicatasksession(
-			$replicatasksession) {
+			$replicatasksession): bool|static
+	{
 		if (preg_match ( '/:ReplicaTaskSession:(.*)/', $replicatasksession->attributes () ['UID'], $resultat ) === false) {
 			return $this->onError ( "Numero de ReplicaTaskSession introuvable", $resultat );
 		}
@@ -277,30 +294,33 @@ class replicasession extends ci {
 
 	/**
 	 * Recupere le nom du replicasession
+	 * @param $replicatasksession
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_du_replicatasksession(
-			$replicatasksession) {
+			$replicatasksession): string
+	{
 		return $replicatasksession->attributes () ['Name'];
 	}
 
 	/**
 	 * Recupere le nom du replicasession
+	 * @param $replicatasksession
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_VmDisplayName_du_replicatasksession(
-			$replicatasksession) {
+			$replicatasksession): string
+	{
 		return $replicatasksession->attributes () ['VmDisplayName'];
 	}
 
 	/**
 	 * Permet de trouver la liste des replicasession dans veeamman et enregistre les donnees des replicasession dans l'objet
-	 * @return replicasession
+	 * @return bool|replicasession
 	 * @throws Exception
 	 */
-	public function retrouve_replicatasksessiondata() {
+	public function retrouve_replicatasksessiondata(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( $this->getIdTask (), 2 );
 		$replicatasksession = $this->getObjetVeeamWsclientRest ()
@@ -321,7 +341,8 @@ class replicasession extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeReplicaSession() {
+	public function getListeReplicaSession(): ?\SimpleXMLElement
+	{
 		return $this->liste_replicasession;
 	}
 
@@ -329,7 +350,8 @@ class replicasession extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeReplicaSession(
-			$liste_replicasession) {
+			$liste_replicasession): static
+	{
 		$this->liste_replicasession = $liste_replicasession;
 		return $this;
 	}
@@ -337,7 +359,8 @@ class replicasession extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeTasks() {
+	public function getListeTasks(): ?\SimpleXMLElement
+	{
 		return $this->liste_tasks;
 	}
 
@@ -345,7 +368,8 @@ class replicasession extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeTasks(
-			$liste_tasks) {
+			$liste_tasks): static
+	{
 		$this->liste_tasks = $liste_tasks;
 		return $this;
 	}
@@ -353,7 +377,8 @@ class replicasession extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIdTask() {
+	public function getIdTask(): string
+	{
 		return $this->id_task;
 	}
 
@@ -361,7 +386,8 @@ class replicasession extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setIdTask(
-			$id_task) {
+			$id_task): static
+	{
 		$this->id_task = $id_task;
 		return $this;
 	}
@@ -369,7 +395,8 @@ class replicasession extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTaskDonnees() {
+	public function getTaskDonnees(): string
+	{
 		return $this->task_donnees;
 	}
 
@@ -377,7 +404,8 @@ class replicasession extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTaskDonnees(
-			$task_donnees) {
+			$task_donnees): static
+	{
 		$this->task_donnees = $task_donnees;
 		return $this;
 	}
@@ -388,11 +416,10 @@ class replicasession extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "replicasession :";
 		return $help;
 	}
 }
-?>

@@ -43,11 +43,13 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	 * Instancie un objet de type VirtualMachineFileInfo.
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return VirtualMachineFileInfo
+	 * @throws Exception
 	 */
-	static function &creer_VirtualMachineFileInfo(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_VirtualMachineFileInfo(Core\options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): VirtualMachineFileInfo
+	{
 		$objet = new VirtualMachineFileInfo ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -62,7 +64,7 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	 * @return VirtualMachineFileInfo
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -73,12 +75,11 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -86,10 +87,11 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	/************************* Methodes VMWare ***********************/
 	/**
 	 * Prepare les donnees sous forme de tableau pour une requete SOAP
-	 * @param string $arrayObject Permet de choisir entre un array ou un arrayObject en retour
+	 * @param bool|string $arrayObject Permet de choisir entre un array ou un arrayObject en retour
 	 * @return ArrayObject|array
 	 */
-	public function renvoi_donnees_soap($arrayObject=false){
+	public function renvoi_donnees_soap(bool|string $arrayObject=false): ArrayObject|array
+	{
 		$liste_proprietes=new ArrayObject();
 		if(!empty($this->getLogDirectory())){
 			$liste_proprietes["logDirectory"]=$this->getLogDirectory();
@@ -115,14 +117,16 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLogDirectory() {
+	public function getLogDirectory(): string
+	{
 		return $this->logDirectory;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLogDirectory($logDirectory) {
+	public function &setLogDirectory($logDirectory): static
+	{
 		$this->logDirectory=$logDirectory;
 		return $this;
 	}
@@ -130,14 +134,16 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnapshotDirectory() {
+	public function getSnapshotDirectory(): string
+	{
 		return $this->snapshotDirectory;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnapshotDirectory($snapshotDirectory) {
+	public function &setSnapshotDirectory($snapshotDirectory): static
+	{
 		$this->snapshotDirectory=$snapshotDirectory;
 		return $this;
 	}
@@ -145,14 +151,16 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSuspendDirectory() {
+	public function getSuspendDirectory(): string
+	{
 		return $this->suspendDirectory;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSuspendDirectory($suspendDirectory) {
+	public function &setSuspendDirectory($suspendDirectory): static
+	{
 		$this->suspendDirectory = $suspendDirectory;
 		return $this;
 	}
@@ -161,14 +169,16 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVmPathName() {
+	public function getVmPathName(): string
+	{
 		return $this->vmPathName;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVmPathName($vmPathName) {
+	public function &setVmPathName($vmPathName): static
+	{
 		$this->vmPathName=$vmPathName;
 		return $this;
 	}
@@ -178,7 +188,7 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -186,5 +196,3 @@ class VirtualMachineFileInfo extends Core\abstract_log {
 		return $help;
 	}
 }
-
-?>

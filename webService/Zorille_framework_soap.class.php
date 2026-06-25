@@ -129,14 +129,15 @@ class soap extends abstract_log {
 	 * Instancie un objet de type soap.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @param string $entete Entete des logs de l'objet 
-	 * @return soap
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param string $entete Entete des logs de l'objet
+	 * @return soap|abstract_log
 	 */
 	static function &creer_soap (
-			&$liste_option, 
-			$sort_en_erreur = false, 
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): soap|abstract_log
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new soap ( $sort_en_erreur, $entete );
 		return $objet ->_initialise ( array (
@@ -148,10 +149,11 @@ class soap extends abstract_log {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return soap
+	 * @throws Exception
 	 */
 	public function &_initialise (
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if ($liste_class ["options"] ->getOption ( "verbose" ) > 0) {
 			$this ->setTrace ( 1 );
@@ -169,16 +171,18 @@ class soap extends abstract_log {
 	 * @param string $nom_module Nom du module.
 	 */
 	public function __construct (
-			$sort_en_erreur = "non", 
-			$nom_module = __CLASS__) {
+		$sort_en_erreur = "non",
+		string $nom_module = __CLASS__) {
 		parent::__construct ( $sort_en_erreur, $nom_module );
 	}
 
 	/**
 	 * Valide la presence des variables obligatoires dans le serveurData.
 	 * @return soap|false l'objet soap si OK, False sinon
+	 * @throws Exception
 	 */
-	public function valide_presence_variables () {
+	public function valide_presence_variables (): soap|bool|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		if ($this ->getGestionConnexionUrl () 
 			->getHost () == "") {
@@ -209,9 +213,11 @@ class soap extends abstract_log {
 	/**
 	 * Valide la presence des variables obligatoires dans un tableau de definition du serveur.
 	 * @return soap|false l'objet soap si OK, False sinon
+	 * @throws Exception
 	 */
 	public function retrouve_variables_tableau (
-			$serveur_data) {
+			$serveur_data): soap|bool|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		if (! is_array ( $serveur_data )) {
 			return $this ->onError ( "Il faut un tableau de definition du serveur", "", 5100 );
@@ -261,9 +267,11 @@ class soap extends abstract_log {
 
 	/**
 	 * Valide la presence des variables obligatoires dans l'objet liste_options (argument et/ou conf xml).
-	 * @return soap|false l'objet soap si OK, False sinon
+	 * @return soap|null l'objet soap si OK, False sinon
+	 * @throws Exception
 	 */
-	public function retrouve_variables_liste_options () {
+	public function retrouve_variables_liste_options (): soap|static|null
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		if ($this ->getListeOptions () 
 			->verifie_parametre_standard ( "soap[@sort_en_erreur='oui']" )) {
@@ -341,7 +349,8 @@ class soap extends abstract_log {
 	 * Prepare les valeurs necessaire a une connexion soap via SoapClient
 	 * @return string
 	 */
-	public function prepare_donnees_connexion () {
+	public function prepare_donnees_connexion (): string
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//Enfin on construit la liste des parametres Soap
 		$liste_props = array (
@@ -378,7 +387,8 @@ class soap extends abstract_log {
 	 * @return soap|false
 	 * @throws Exception
 	 */
-	public function connect () {
+	public function connect (): soap|bool|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this ->valide_presence_variables ();
 		switch ($this ->getMethode ()) {
@@ -401,8 +411,10 @@ class soap extends abstract_log {
 	 * Connection d'un client SOAP
 	 * @codeCoverageIgnore
 	 * @return soap|false
+	 * @throws Exception
 	 */
-	public function connect_soap () {
+	public function connect_soap (): soap|bool|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		try {
 			$liste_props = $this ->prepare_donnees_connexion ();
@@ -430,7 +442,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return soap
 	 */
-	public function force_Url () {
+	public function force_Url (): static
+	{
 		$this ->getSoapClient () 
 			->__setLocation ( $this ->getGestionConnexionUrl () 
 			->getPrependUrl () );
@@ -442,7 +455,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return soap
 	 */
-	public function reset_Url () {
+	public function reset_Url (): static
+	{
 		$this ->getSoapClient () 
 			->__setLocation ();
 		return $this;
@@ -455,7 +469,8 @@ class soap extends abstract_log {
 	 * @param int $Content_length Taille des donnees xml du post
 	 */
 	private function _creerHeaderViaCurl (
-			$Content_length) {
+		int $Content_length): void
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this ->setHeader ( array (
 				"Content-type: text/xml;charset=\"utf-8\"",
@@ -471,9 +486,10 @@ class soap extends abstract_log {
 	/**
 	 * Creer un connection Curl pour transmettre des requetes soap.
 	 *
-	 * @return soap|False
+	 * @return soap
 	 */
-	public function connect_curl () {
+	public function connect_curl (): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		// PHP cURL for https connection with auth
 		$this ->getCurlObjet () 
@@ -503,10 +519,12 @@ class soap extends abstract_log {
 	/**
 	 * Fait une requete Soap en utilisant CuRl prepare par connect_curl.
 	 * @param string $xml_post_string Xml a transmettre.
-	 * @return string|False retour de la requete Curl
+	 * @return string retour de la requete Curl
+	 * @throws Exception
 	 */
 	public function send_curl_soap_requete (
-			$xml_post_string) {
+		string $xml_post_string): string
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$this ->_creerHeaderViaCurl ( strlen ( $xml_post_string ) );
 		$this ->getCurlObjet () 
@@ -523,7 +541,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHeader () {
+	public function getHeader (): string
+	{
 		return $this ->headers;
 	}
 
@@ -531,14 +550,16 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setHeader (
-			$data) {
+			$data): void
+	{
 		$this ->headers = $data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getCurlObjet () {
+	public function &getCurlObjet (): ?curl
+	{
 		return $this ->curl;
 	}
 
@@ -546,7 +567,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCurlObjet (
-			$curl) {
+			$curl): static
+	{
 		$this ->curl = $curl;
 		return $this;
 	}
@@ -571,7 +593,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getSoapClient () {
+	public function &getSoapClient (): ?SoapClient
+	{
 		return $this ->soapClient;
 	}
 
@@ -579,7 +602,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSoapClient (
-			$soapClient) {
+			$soapClient): static
+	{
 		$this ->soapClient = $soapClient;
 		return $this;
 	}
@@ -587,7 +611,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSoapVersion () {
+	public function getSoapVersion (): int
+	{
 		return $this ->soap_version;
 	}
 
@@ -595,7 +620,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSoapVersion (
-			$soap_version) {
+			$soap_version): static
+	{
 		$this ->soap_version = $soap_version;
 		return $this;
 	}
@@ -604,7 +630,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setRequestTimeout (
-			$request_timeout) {
+			$request_timeout): static
+	{
 		if (is_numeric ( $request_timeout ) && $request_timeout > 0)
 			ini_set ( 'default_socket_timeout', $request_timeout );
 		return $this;
@@ -613,7 +640,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCacheWsdl () {
+	public function getCacheWsdl (): int
+	{
 		return $this ->cache_wsdl;
 	}
 
@@ -621,7 +649,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCacheWsdl (
-			$cache_wsdl) {
+			$cache_wsdl): static
+	{
 		$this ->cache_wsdl = $cache_wsdl;
 		return $this;
 	}
@@ -629,7 +658,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getGestionConnexionUrl () {
+	public function &getGestionConnexionUrl (): ?gestion_connexion_url
+	{
 		return $this ->gestion_connexion_url;
 	}
 
@@ -637,7 +667,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setGestionConnexionUrl (
-			&$gestion_connexion_url) {
+			&$gestion_connexion_url): static
+	{
 		$this ->gestion_connexion_url = $gestion_connexion_url;
 		return $this;
 	}
@@ -645,7 +676,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTrace () {
+	public function getTrace (): int|string
+	{
 		return $this ->trace;
 	}
 
@@ -653,7 +685,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTrace (
-			$trace) {
+			$trace): static
+	{
 		$this ->trace = $trace;
 		return $this;
 	}
@@ -661,7 +694,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUrl () {
+	public function getUrl (): string
+	{
 		return $this ->url;
 	}
 
@@ -669,7 +703,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUrl (
-			$url) {
+			$url): static
+	{
 		$this ->url = $url;
 		return $this;
 	}
@@ -677,7 +712,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMethode () {
+	public function getMethode (): string
+	{
 		return $this ->methode;
 	}
 
@@ -685,7 +721,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMethode (
-			$methode) {
+			$methode): static
+	{
 		if ($methode == "soap" || $methode == "curl" || $methode == "TEST") {
 			$this ->methode = $methode;
 		}
@@ -695,7 +732,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsdl () {
+	public function getWsdl (): string
+	{
 		return $this ->wsdl;
 	}
 
@@ -703,7 +741,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setWsdl (
-			$wsdl) {
+			$wsdl): static
+	{
 		$this ->wsdl = $wsdl;
 		return $this;
 	}
@@ -711,7 +750,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLogin () {
+	public function getLogin (): string
+	{
 		return $this ->login;
 	}
 
@@ -719,7 +759,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setLogin (
-			$login) {
+			$login): static
+	{
 		$this ->login = $login;
 		return $this;
 	}
@@ -727,7 +768,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword () {
+	public function getPassword (): string
+	{
 		return $this ->password;
 	}
 
@@ -735,7 +777,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setPassword (
-			$password) {
+			$password): static
+	{
 		$this ->password = $password;
 		return $this;
 	}
@@ -743,7 +786,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getForceUrl () {
+	public function getForceUrl (): string
+	{
 		return $this ->force_url;
 	}
 
@@ -751,7 +795,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setForceUrl (
-			$force_url) {
+			$force_url): static
+	{
 		$this ->force_url = $force_url;
 		return $this;
 	}
@@ -759,7 +804,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getConnexion () {
+	public function getConnexion (): string
+	{
 		return $this ->connection;
 	}
 
@@ -767,7 +813,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setConnexion (
-			$connection) {
+			$connection): static
+	{
 		$this ->connection = $connection;
 		return $this;
 	}
@@ -775,7 +822,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getConnexionTimeout () {
+	public function getConnexionTimeout (): int
+	{
 		return $this ->connection_timeout;
 	}
 
@@ -783,7 +831,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setConnexionTimeout (
-			$connection_timeout) {
+			$connection_timeout): static
+	{
 		$this ->connection_timeout = $connection_timeout;
 		return $this;
 	}
@@ -791,7 +840,8 @@ class soap extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSoapAddedParams () {
+	public function getSoapAddedParams (): array
+	{
 		return $this ->soap_added_params;
 	}
 
@@ -799,7 +849,8 @@ class soap extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSoapAddedParams (
-			$soap_added_params) {
+			$soap_added_params): static
+	{
 		$this ->soap_added_params = $soap_added_params;
 		return $this;
 	}
@@ -809,10 +860,10 @@ class soap extends abstract_log {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help () {
+	static function help (): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "La definition d'un serveur doit contenir, au format XML :";
@@ -827,9 +878,7 @@ class soap extends abstract_log {
 		$help [__CLASS__] ["text"] [] .= " <wsdl>APISiteScopeImpl</wsdl>";
 		$help [__CLASS__] ["text"] [] .= " <connexion>oui/non</connexion> //Doit charger le Wsdl ou non";
 		$help [__CLASS__] ["text"] [] .= "</soap>";
-		$help = array_merge ( $help, gestion_connexion_url::help () );
-		return $help;
+		return array_merge ( $help, gestion_connexion_url::help () );
 	}
 /******************** HELP **********************/
 }
-?>

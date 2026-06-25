@@ -19,11 +19,13 @@ class fonctions_standards_fork extends abstract_log {
 	 * Instancie un objet de type fonctions_standards_fork.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fonctions_standards_fork
+	 * @throws Exception
 	 */
-	static function &creer_fonctions_standards_fork(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fonctions_standards_fork(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fonctions_standards_fork
+	{
 		$objet = new fonctions_standards_fork ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -37,8 +39,9 @@ class fonctions_standards_fork extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fonctions_standards_fork
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -48,7 +51,6 @@ class fonctions_standards_fork extends abstract_log {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		parent::__construct ( $sort_en_erreur, $entete );
@@ -59,11 +61,12 @@ class fonctions_standards_fork extends abstract_log {
 	* Verifie et permet d'attendre la fin de plusieurs processus fils.<br>
 	* Include : $INCLUDE_FONCTIONS<br>
 	*
-	* @param groupe_fork &$fork_liste Pointeur sur la class groupe_fork.
+	* @param groupe_forks &$fork_liste Pointeur sur la class groupe_fork.
 	* @param Bool $attend_fin_fork Met la fonction en attente de la fin des processus fils.
 	* @return array|false Tableau des codes retours des forks, FALSE en cas d'erreur.
 	*/
-	public function check_process_fils(&$fork_liste, $attend_fin_fork = true) {
+	public function check_process_fils(groupe_forks &$fork_liste, bool $attend_fin_fork = true): bool|array
+	{
 		$this->onDebug ( "Attente de la fin des forks. (NOHANGUP=" . (($attend_fin_fork) ? "oui" : "non") . ").", 1 );
 		
 		if ($fork_liste instanceof groupe_forks) {
@@ -92,7 +95,8 @@ class fonctions_standards_fork extends abstract_log {
 	 * @return array|false un tableau si OK, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function gestion_process_fils(&$fork_liste, $message = "", $attend_fin_fork = false) {
+	public function gestion_process_fils(groupe_forks &$fork_liste, string $message = "", bool $attend_fin_fork = false): bool|array
+	{
 		$forks_termines = $this->check_process_fils ( $fork_liste, $attend_fin_fork );
 		
 		if ($forks_termines) {
@@ -115,4 +119,3 @@ class fonctions_standards_fork extends abstract_log {
 		return $CODE_RETOUR;
 	}
 }
-?>

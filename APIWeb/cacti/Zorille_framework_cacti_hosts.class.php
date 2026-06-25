@@ -35,11 +35,16 @@ class cacti_hosts extends parametresStandard {
 	 * Instancie un objet de type cacti_hosts.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_hosts
+	 * @throws Exception
 	 */
-	static function &creer_cacti_hosts(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_hosts(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_hosts
+	{
 		$objet = new cacti_hosts ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -54,7 +59,8 @@ class cacti_hosts extends parametresStandard {
 	 * @param array $liste_class
 	 * @return cacti_hosts
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise($liste_class);
 		
 		return $this;
@@ -65,7 +71,7 @@ class cacti_hosts extends parametresStandard {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -74,11 +80,13 @@ class cacti_hosts extends parametresStandard {
 		
 		$this->charge_hosts();
 	}
-	
+
 	/**
 	 * Charge la liste des hosts via l'API Cacti
+	 * @throws Exception
 	 */
-	public function charge_hosts(){
+	public function charge_hosts(): static
+	{
 		$this->onDebug ( "On charge la liste des hosts.", 1 );
 		//fonction de l'API cacti : lib/api_automation_tools.php
 		$this->setHosts ( getHosts () );
@@ -95,7 +103,8 @@ class cacti_hosts extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_host_by_id($host_id) {
+	public function valide_host_by_id($host_id): bool
+	{
 		$Hosts = $this->gethosts ();
 		if (isset ( $Hosts [$host_id] )) {
 			return true;
@@ -109,7 +118,8 @@ class cacti_hosts extends parametresStandard {
 	 *
 	 * @return boolean True le host existe, false le host n'existe pas.
 	 */
-	public function valide_host_by_description($description) {
+	public function valide_host_by_description($description): bool
+	{
 		$this->onDebug ( "Valide host par description.", 2);
 		foreach($this->getHosts() as $host_data){
 			if(in_array($description, $host_data)){
@@ -122,9 +132,10 @@ class cacti_hosts extends parametresStandard {
 	/**
 	 * Renvoi l'id d'un host si il existe.
 	 *
-	 * @return Integer/false L'id du host, false le host n'existe pas.
+	 * @return int|false L'id du host, false le host n'existe pas.
 	 */
-	public function renvoi_hostid_by_description($description) {
+	public function renvoi_hostid_by_description($description): bool|int
+	{
 		$this->onDebug ( "On renvoi le hostid par description.", 2);
 		foreach($this->getHosts() as $ID=>$host_data){
 			if(in_array($description, $host_data)){
@@ -139,7 +150,8 @@ class cacti_hosts extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_host_by_ip($ip) {
+	public function valide_host_by_ip($ip): bool
+	{
 		$this->onDebug ( "Valide host par IP.", 2);
 		$Hosts = $this->getHostsByIPs ();
 		if (isset ( $Hosts [$ip] )) {
@@ -152,9 +164,10 @@ class cacti_hosts extends parametresStandard {
 	/**
 	 * Renvoi l'id d'un host si l'ip existe.
 	 *
-	 * @return Integer/false L'id du host, false le host n'existe pas.
+	 * @return int|false L'id du host, false le host n'existe pas.
 	 */
-	public function renvoi_hostid_by_ip($ip) {
+	public function renvoi_hostid_by_ip($ip): bool|int
+	{
 		$this->onDebug ( "On renvoi le host par IP.", 2);
 		if($this->valide_host_by_ip($ip)){
 			$hosts = $this->getHostsByIPs();
@@ -170,7 +183,8 @@ class cacti_hosts extends parametresStandard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHosts() {
+	public function getHosts(): array
+	{
 		return $this->hosts;
 	}
 	/**
@@ -189,7 +203,8 @@ class cacti_hosts extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function setHosts($hosts) {
+	public function setHosts($hosts): bool
+	{
 		if (is_array ( $hosts )) {
 			$this->hosts = $hosts;
 		} else {
@@ -201,7 +216,8 @@ class cacti_hosts extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function ajouteHosts($description, $device_id) {
+	public function ajouteHosts($description, $device_id): bool
+	{
 		//puis on ajoute le nouveau
 		if ($description != "" && $device_id != "") {
 			$this->hosts [$device_id] = array("id"=>$device_id,"description"=>$description);
@@ -223,7 +239,8 @@ class cacti_hosts extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function setHostsByIPs($liste_ips) {
+	public function setHostsByIPs($liste_ips): bool
+	{
 		if (is_array ( $liste_ips )) {
 			$this->hosts_by_ip = $liste_ips;
 		} else {
@@ -235,7 +252,8 @@ class cacti_hosts extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function ajouteHostsByIPs($ip, $device_id) {
+	public function ajouteHostsByIPs($ip, $device_id): bool
+	{
 		if ($ip != "" && $device_id != "") {
 			$this->hosts_by_ip [$ip] = $device_id;
 		} else {
@@ -248,4 +266,3 @@ class cacti_hosts extends parametresStandard {
 	 * ***************************** ACCESSEURS *******************************
 	 */
 }
-?>

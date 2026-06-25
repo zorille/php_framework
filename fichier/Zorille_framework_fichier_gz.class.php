@@ -5,9 +5,8 @@
  *
  */
 namespace Zorille\framework;
-/**
+use Exception;/**
  * class fichier_gz<br>
-
  *
  * Gere l'acces aux fichiers compresses en GZ
  * @package Lib
@@ -46,11 +45,13 @@ class fichier_gz extends abstract_log {
 	 * @param options $liste_option Reference sur un objet options
 	 * @param string $fichier Chemin complet du fichier.
 	 * @param string $creer Si le fichier n'existe pas, doit-on le creer oui/non ?
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return fichier_gz
+	 * @return fichier_gz|fichier
+	 * @throws Exception
 	 */
-	static function &creer_fichier_gz(&$liste_option, $fichier, $creer = "non", $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fichier_gz(options &$liste_option, string $fichier, string $creer = "non", bool|string $sort_en_erreur = false, string $entete = __CLASS__): fichier_gz|fichier
+	{
 		$objet = new fichier ( $fichier, $creer, $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -58,20 +59,21 @@ class fichier_gz extends abstract_log {
 	
 		return $objet;
 	}
-	
+
 	/**
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fichier_gz
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
 	
 	/*********************** Creation de l'objet *********************/
-	
+
 	/**
 	 * Prend le chemin complet d'un fichier compresse, teste sa presence sur le file system
 	 * et set la valeur du sort_en_erreur.<br>
@@ -80,8 +82,9 @@ class fichier_gz extends abstract_log {
 	 * @param string $fichier Chemin complet du fichier.
 	 * @param string $creer Si le fichier n'existe pas, doit-on le creer oui/non ?
 	 * @param string $sort_en_erreur Prend les valeurs oui/non
+	 * @throws Exception
 	 */
-	public function __construct($fichier, $creer = "non", $sort_en_erreur = "oui", $entete = __CLASS__) {
+	public function __construct($fichier, string $creer = "non", string $sort_en_erreur = "oui", $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -91,7 +94,7 @@ class fichier_gz extends abstract_log {
 		$this->etat = false;
 		$this->creer = false;
 		if (! $exist && $creer == "non") {
-			return $this->onError ( "Erreur le fichier GZ : " . $this->fichier . " n'existe pas" );
+			$this->onError ( "Erreur le fichier GZ : " . $this->fichier . " n'existe pas" );
 		} elseif (! $exist && $creer == "oui") {
 			$this->creer = true;
 		}
@@ -102,8 +105,10 @@ class fichier_gz extends abstract_log {
 	 * les mode sont standard : r,w,a,r+,w+,a+
 	 *
 	 * @param string $mode Mode d'ouverture du fichier.
+	 * @throws Exception
 	 */
-	public function ouvrir($mode = "r") {
+	public function ouvrir(string $mode = "r"): bool
+	{
 		if (fichier::tester_fichier_existe ( $this->fichier ) === false && $this->creer) {
 			touch ( $this->fichier );
 		}
@@ -124,8 +129,10 @@ class fichier_gz extends abstract_log {
 	 * Ecrit une ligne dans un fichier.
 	 *
 	 * @param string $texte Ligne a ecrire.
+	 * @throws Exception
 	 */
-	public function ecrit($texte) {
+	public function ecrit(string $texte): bool
+	{
 		if ($this->etat === false) {
 			// @codeCoverageIgnoreStart
 			return $this->onError ( "Erreur le fichier n'est pas ouvert : " . $this->fichier );
@@ -139,7 +146,8 @@ class fichier_gz extends abstract_log {
 		return true;
 	}
 
-	public function lit_une_ligne($nb_caracteres = 8096) {
+	public function lit_une_ligne($nb_caracteres = 8096): bool|string
+	{
 		if ($this->etat && ! feof ( $this->handler )) {
 			if ($nb_caracteres == "non")
 				$ligne = gzgets ( $this->handler );
@@ -161,7 +169,8 @@ class fichier_gz extends abstract_log {
 	 * @param string $fichier Chemin complet du fichier a lire.
 	 * @return string|false Renvoi toutes les lignes lues, FALSE sinon.
 	 */
-	static function lit_fichier($fichier = "no_file") {
+	static function lit_fichier(string $fichier = "no_file"): bool|string
+	{
 		if (fichier::tester_fichier_existe ( $fichier )) {
 			return gzfile ( $fichier );
 		}
@@ -175,8 +184,10 @@ class fichier_gz extends abstract_log {
 	 * @param string $fichier Chemin complet du fichier a lire.
 	 * @param int $level Niveau de compression
 	 * @return Bool Renvoi OK si le fichier est compresse, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function compresse($fichier, $level = 9) {
+	public function compresse(string $fichier, int $level = 9): bool
+	{
 		$str = @file_get_contents ( $fichier );
 		if ($str) {
 			$this->ecrit ( $str );
@@ -193,8 +204,10 @@ class fichier_gz extends abstract_log {
 	 * @param string $fichier Chemin complet du fichier a decompresser.
 	 * @param string $fichier_final Chemin complet du fichier decompresse.
 	 * @return Bool Renvoi OK si le fichier est decompresse, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function decompresse($fichier, $fichier_final) {
+	public function decompresse(string $fichier, string $fichier_final): bool
+	{
 		if ($fichier != "" && $fichier_final != "") {
 			$str = fichier_gz::lit_fichier ( $fichier );
 			if ($str) {
@@ -219,7 +232,8 @@ class fichier_gz extends abstract_log {
 	 *
 	 * @return true Renvoi TRUE.
 	 */
-	public function close() {
+	public function close(): bool
+	{
 		if ($this->etat) {
 			$this->handler = gzclose ( $this->handler );
 			$this->etat = false;
@@ -230,10 +244,10 @@ class fichier_gz extends abstract_log {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -251,5 +265,3 @@ class fichier_gz extends abstract_log {
 		return $this->close ();
 	}
 }
-
-?>

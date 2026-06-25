@@ -106,11 +106,12 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * Instancie un objet de type zabbix_action_condition.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_action_condition
 	 */
-	static function &creer_zabbix_action_condition(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_action_condition(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_action_condition
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_action_condition ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -122,9 +123,9 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_action_condition
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -136,7 +137,6 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -146,11 +146,12 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
 	 * @param integer $event_source Id du type d'evenement lie a l'action
-	 * @param string $contition creation d'une condition a partir d'une string au format "type|operator|valeur"
-	 * @return boolean True est OK, False sinon.
+	 * @param bool|string $contition creation d'une condition a partir d'une string au format "type|operator|valeur"
+	 * @return bool|zabbix_action_condition True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param($event_source, $contition = false) {
+	public function retrouve_zabbix_param(int $event_source, bool|string $contition = false): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($contition !== false) {
 			$liste_condition = explode ( "|", trim ( $contition ) );
@@ -188,7 +189,8 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * Creer un definition de condition sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_action_condition_ws() {
+	public function creer_definition_action_condition_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getValue () == "") {
 			return array ();
@@ -210,7 +212,7 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 
 	/**
 	 * Condition operator.
-	 * 
+	 *
 	 * Possible values:
 	 * 0 - (default) =;
 	 * 1 - <>;
@@ -219,42 +221,26 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * 4 - in;
 	 * 5 - >=;
 	 * 6 - <=;
-	 * 7 - not in. 
-	 * @param string $type
-	 * @return number
+	 * 7 - not in.
+	 * @param $operator
+	 * @return float|int|string
 	 */
-	public function retrouve_ConditionOperator($operator) {
+	public function retrouve_ConditionOperator($operator): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $operator )) {
 			return $operator;
 		}
-		switch (strtolower ( $operator )) {
-			case "<>" :
-				return 1;
-				break;
-			case "like" :
-				return 2;
-				break;
-			case "not like" :
-				return 3;
-				break;
-			case "in" :
-				return 4;
-				break;
-			case ">=" :
-				return 5;
-				break;
-			case "<=" :
-				return 6;
-				break;
-			case "not in" :
-				return 7;
-				break;
-			case "=" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($operator)) {
+			"<>" => 1,
+			"like" => 2,
+			"not like" => 3,
+			"in" => 4,
+			">=" => 5,
+			"<=" => 6,
+			"not in" => 7,
+			default => 0,
+		};
 	}
 
 	/**
@@ -270,7 +256,7 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * 15 - application;
 	 * 16 - maintenance status;
 	 * 17 - node.
-	 * 
+	 *
 	 * Possible values for discovery actions:
 	 * 7 - host IP;
 	 * 8 - discovered service type;
@@ -282,129 +268,71 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * 19 - discovery check;
 	 * 20 - proxy;
 	 * 21 - discovery object.
-	 * 
+	 *
 	 * Possible values for auto-registration actions:
 	 * 20 - proxy;
 	 * 22 - host name;
 	 * 24 - host metadata.
-	 * 
+	 *
 	 * Possible values for internal actions:
 	 * 0 - host group;
 	 * 1 - host;
 	 * 13 - host template;
 	 * 15 - application;
 	 * 23 - event type;
-	 * 17 - node. 
+	 * 17 - node.
 	 * @param string $type
-	 * @return number
+	 * @param $event_source
+	 * @return float|int|string
 	 */
-	public function retrouve_ConditionType($type, $event_source) {
+	public function retrouve_ConditionType(string $type, $event_source): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
 		if ($event_source == 0) {
-			switch (strtolower ( $type )) {
-				case "host" :
-					return 1;
-					break;
-				case "trigger" :
-					return 2;
-					break;
-				case "trigger name" :
-					return 3;
-					break;
-				case "trigger severity" :
-					return 4;
-					break;
-				case "trigger value" :
-					return 5;
-					break;
-				case "time period" :
-					return 6;
-					break;
-				case "host template" :
-					return 13;
-					break;
-				case "application" :
-					return 15;
-					break;
-				case "maintenance status" :
-					return 16;
-					break;
-				case "node" :
-					return 17;
-					break;
-				case "host group" :
-				default :
-					return 0;
-			}
+			return match (strtolower($type)) {
+				"host" => 1,
+				"trigger" => 2,
+				"trigger name" => 3,
+				"trigger severity" => 4,
+				"trigger value" => 5,
+				"time period" => 6,
+				"host template" => 13,
+				"application" => 15,
+				"maintenance status" => 16,
+				"node" => 17,
+				default => 0,
+			};
 		} elseif ($event_source == 1 || $event_source == 2) {
-			switch (strtolower ( $type )) {
-				case "discovered service type" :
-					return 8;
-					break;
-				case "discovered service port" :
-					return 9;
-					break;
-				case "discovery status" :
-					return 10;
-					break;
-				case "uptime or downtime duration" :
-					return 11;
-					break;
-				case "received value" :
-					return 12;
-					break;
-				case "discovery rule" :
-					return 18;
-					break;
-				case "discovery check" :
-					return 19;
-					break;
-				case "proxy" :
-					return 20;
-					break;
-				case "discovery object" :
-					return 21;
-					break;
-				case "host ip" :
-				default :
-					return 7;
-			}
+			return match (strtolower($type)) {
+				"discovered service type" => 8,
+				"discovered service port" => 9,
+				"discovery status" => 10,
+				"uptime or downtime duration" => 11,
+				"received value" => 12,
+				"discovery rule" => 18,
+				"discovery check" => 19,
+				"proxy" => 20,
+				"discovery object" => 21,
+				default => 7,
+			};
 		} elseif ($event_source == 3) {
-			switch (strtolower ( $type )) {
-				case "host name" :
-					return 22;
-					break;
-				case "host metadata" :
-					return 24;
-					break;
-				case "proxy" :
-				default :
-					return 20;
-			}
+			return match (strtolower($type)) {
+				"host name" => 22,
+				"host metadata" => 24,
+				default => 20,
+			};
 		} elseif ($event_source == 4 || $event_source == 5) {
-			switch (strtolower ( $type )) {
-				case "host" :
-					return 1;
-					break;
-				case "host template" :
-					return 13;
-					break;
-				case "application" :
-					return 15;
-					break;
-				case "event type" :
-					return 23;
-					break;
-				case "node" :
-					return 17;
-					break;
-				case "host group" :
-				default :
-					return 0;
-			}
+			return match (strtolower($type)) {
+				"host" => 1,
+				"host template" => 13,
+				"application" => 15,
+				"event type" => 23,
+				"node" => 17,
+				default => 0,
+			};
 		}
 		
 		return 0;
@@ -413,19 +341,16 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * Renvoi la valeur en fonction de ConditionType
 	 * @param string $value
-	 * @return number|string
+	 * @return int|string
 	 */
-	public function retrouve_Value($value) {
+	public function retrouve_Value($value): int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		switch ($this->getConditionType ()) {
-			case 5 :
-				switch (strtolower ( $value )) {
-					case "problem" :
-						return 1;
-					case "ok" :
-					default :
-						return 0;
-				}
+		if ($this->getConditionType() == 5) {
+			return match (strtolower($value)) {
+				"problem" => 1,
+				default => 0,
+			};
 		}
 		
 		return $value;
@@ -435,14 +360,16 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getConditionId() {
+	public function getConditionId(): string
+	{
 		return $this->conditionid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setConditionId($conditionid) {
+	public function &setConditionId($conditionid): static
+	{
 		$this->conditionid = $conditionid;
 		return $this;
 	}
@@ -450,14 +377,16 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getActionId() {
+	public function getActionId(): string
+	{
 		return $this->actionid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setActionId($actionid) {
+	public function &setActionId($actionid): static
+	{
 		$this->actionid = $actionid;
 		return $this;
 	}
@@ -465,14 +394,16 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getConditionType() {
+	public function getConditionType(): string
+	{
 		return $this->conditiontype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setConditionType($conditiontype, $event_source) {
+	public function &setConditionType($conditiontype, $event_source): static
+	{
 		$this->conditiontype = $this->retrouve_ConditionType ( $conditiontype, $event_source );
 		return $this;
 	}
@@ -480,14 +411,16 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getValue() {
+	public function getValue(): string
+	{
 		return $this->value;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setValue($value) {
+	public function &setValue($value): static
+	{
 		$this->value = $this->retrouve_Value ( $value );
 		return $this;
 	}
@@ -495,14 +428,16 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperator() {
+	public function getOperator(): int
+	{
 		return $this->operator;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperator($operator) {
+	public function &setOperator($operator): static
+	{
 		$this->operator = $this->retrouve_ConditionOperator ( $operator );
 		return $this;
 	}
@@ -513,7 +448,7 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -536,4 +471,3 @@ class zabbix_action_condition extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

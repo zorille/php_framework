@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class contraintesHoraire<br>
  * Gere les contraintes horaires de monitoring.
@@ -61,11 +63,14 @@ class contraintesHoraire extends abstract_log {
 	 * Instancie un objet de type contraintesHoraire.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param $date
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return contraintesHoraire
+	 * @throws Exception
 	 */
-	static function &creer_contraintesHoraire(&$liste_option, $date, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_contraintesHoraire(options &$liste_option, $date, bool|string $sort_en_erreur = false, string $entete = __CLASS__): contraintesHoraire
+	{
 		$objet = new contraintesHoraire ( $date, $entete, $sort_en_erreur );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -79,8 +84,10 @@ class contraintesHoraire extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return contraintesHoraire
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		$this->prepare_horaire ();
 		return $this;
@@ -91,10 +98,9 @@ class contraintesHoraire extends abstract_log {
 	 * Constructeur, verifie et prepare les variables de base.
 	 * @codeCoverageIgnore
 	 * @param string $entete
-	 * @param string|bool $sort_en_erreur
-	 * @return true
+	 * @param bool|string $sort_en_erreur
 	 */
-	public function __construct($date, $entete = __CLASS__, $sort_en_erreur = false) {
+	public function __construct($date, string $entete = __CLASS__, bool|string $sort_en_erreur = false) {
 		
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
@@ -108,7 +114,8 @@ class contraintesHoraire extends abstract_log {
 	 * Prepare les timestamps des contraintes horaire
 	 * @return contraintesHoraire|false
 	 */
-	public function prepare_horaire() {
+	public function prepare_horaire(): contraintesHoraire|bool|static
+	{
 		$date = $this->getDate ();
 		if ($date == "") {
 			return false;
@@ -150,7 +157,8 @@ class contraintesHoraire extends abstract_log {
 	 *
 	 * @return bool true=on a passe l'heure de debut max , false=on est avant l'heure de debut max
 	 */
-	public function valideHeureDebutGlobal() {
+	public function valideHeureDebutGlobal(): bool
+	{
 		if ($this->getTimestampJour () > $this->getTimestampDebutMax ()) {
 			return true;
 		} //sinon on attend le debut
@@ -162,7 +170,8 @@ class contraintesHoraire extends abstract_log {
 	 *
 	 * @return bool true=on a passe l'heure de fin max , false=on est avant l'heure de fin max
 	 */
-	public function valideHeureFinGlobal() {
+	public function valideHeureFinGlobal(): bool
+	{
 		if ($this->getTimestampJour () > $this->getTimestampFinMax ()) {
 			return true;
 		} //sinon on attend le fin
@@ -174,7 +183,8 @@ class contraintesHoraire extends abstract_log {
 	 *
 	 * @return bool true=on a passe l'heure de debut max , false=on est avant l'heure de debut max
 	 */
-	public function valideHeureDebutAlarmeGlobal() {
+	public function valideHeureDebutAlarmeGlobal(): bool
+	{
 		if ($this->getTimestampJour () > $this->getTimestampDebutAlarme ()) {
 			return true;
 		} //sinon on attend le debut
@@ -186,7 +196,8 @@ class contraintesHoraire extends abstract_log {
 	 *
 	 * @return bool true=on a passe l'heure de fin max , false=on est avant l'heure de fin max
 	 */
-	public function valideHeureFinAlarmeGlobal() {
+	public function valideHeureFinAlarmeGlobal(): bool
+	{
 		if ($this->getTimestampJour () > $this->getTimestampFinAlarme ()) {
 			return true;
 		} //sinon on attend le fin
@@ -199,7 +210,8 @@ class contraintesHoraire extends abstract_log {
 	 * heure de debut d'alarme > heure courante
 	 * @return boolean true valide les conditions precedentes, false sinon 
 	 */
-	public function activeAlarme() {
+	public function activeAlarme(): bool
+	{
 		//Si le script doit avoir demarre et l'heure de debut d'alarme est passee
 		if ($this->valideHeureDebutGlobal () && $this->valideHeureDebutAlarmeGlobal ()) {
 			return true;
@@ -211,14 +223,16 @@ class contraintesHoraire extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTimestampJour() {
+	public function getTimestampJour(): int
+	{
 		return $this->timestamp_jour;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTimestampJour($timestamp_jour) {
+	public function &setTimestampJour($timestamp_jour): static
+	{
 		$this->timestamp_jour = $timestamp_jour;
 		
 		return $this;
@@ -227,14 +241,16 @@ class contraintesHoraire extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTimestampDebutMax() {
+	public function getTimestampDebutMax(): bool|int
+	{
 		return $this->timestamp_debut_max;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTimestampDebutMax($timestamp_debut_max) {
+	public function &setTimestampDebutMax($timestamp_debut_max): static
+	{
 		$this->timestamp_debut_max = $timestamp_debut_max;
 		
 		return $this;
@@ -243,21 +259,24 @@ class contraintesHoraire extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHoraireDebutMax() {
+	public function getHoraireDebutMax(): string
+	{
 		return date ( "H:i d/m/Y", $this->timestamp_debut_max );
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTimestampFinMax() {
+	public function getTimestampFinMax(): bool|int
+	{
 		return $this->timestamp_fin_max;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTimestampFinMax($timestamp_fin_max) {
+	public function &setTimestampFinMax($timestamp_fin_max): static
+	{
 		$this->timestamp_fin_max = $timestamp_fin_max;
 		
 		return $this;
@@ -266,21 +285,24 @@ class contraintesHoraire extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHoraireFinMax() {
+	public function getHoraireFinMax(): string
+	{
 		return date ( "H:i d/m/Y", $this->timestamp_fin_max );
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTimestampDebutAlarme() {
+	public function getTimestampDebutAlarme(): bool|int
+	{
 		return $this->timestamp_debut_alarme;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTimestampDebutAlarme($timestamp_debut_alarme) {
+	public function &setTimestampDebutAlarme($timestamp_debut_alarme): static
+	{
 		$this->timestamp_debut_alarme = $timestamp_debut_alarme;
 		
 		return $this;
@@ -289,14 +311,16 @@ class contraintesHoraire extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTimestampFinAlarme() {
+	public function getTimestampFinAlarme(): bool|int
+	{
 		return $this->timestamp_fin_alarme;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTimestampFinAlarme($timestamp_fin_alarme) {
+	public function &setTimestampFinAlarme($timestamp_fin_alarme): static
+	{
 		$this->timestamp_fin_alarme = $timestamp_fin_alarme;
 		
 		return $this;
@@ -305,27 +329,29 @@ class contraintesHoraire extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDate() {
+	public function getDate(): string
+	{
 		return $this->date;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDate($date) {
+	public function &setDate($date): static
+	{
 		$this->date = $date;
 		return $this;
 	}
 
 	/************************* Accesseurs ************************/
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -339,4 +365,3 @@ class contraintesHoraire extends abstract_log {
 		return $help;
 	}
 }
-?>

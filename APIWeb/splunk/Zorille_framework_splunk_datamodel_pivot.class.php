@@ -14,9 +14,10 @@ abstract class splunk_datamodel_pivot extends splunk_datamodel {
 
 	/**
 	 * Remet l'url par defaut
-	 * @return splunk_datamodel_pivot
+	 * @return splunk_ci|splunk_datamodel
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): splunk_ci|splunk_datamodel
+	{
 		return parent::reset_resource () ->addResource ( 'pivot' );
 	}
 
@@ -31,7 +32,7 @@ abstract class splunk_datamodel_pivot extends splunk_datamodel {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -40,4 +41,4 @@ abstract class splunk_datamodel_pivot extends splunk_datamodel {
 		return $help;
 	}
 }
-?>
+

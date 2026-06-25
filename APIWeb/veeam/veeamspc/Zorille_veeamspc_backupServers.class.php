@@ -6,6 +6,8 @@
  */
 namespace Zorille\veeamspc;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use Zorille\itop\Organization;
@@ -28,7 +30,7 @@ class backupServers extends infrastructures {
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
 	private $liste_backupServers = null;
 
@@ -39,15 +41,16 @@ class backupServers extends infrastructures {
 	 * InstanbackupServerse un objet de type backupServers. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backupServers
 	 */
 	static function &creer_veeamspc_backupServers(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): backupServers
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new backupServers ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -63,7 +66,7 @@ class backupServers extends infrastructures {
 	 * @return backupServers
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -73,45 +76,48 @@ class backupServers extends infrastructures {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de backupServers
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Recupere l'id du backupServer, l'ajoute à l'objet et renvoi l'Id
+	 * @param $backupServer
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_id_de_backupServer(
-			$backupServer) {
+			$backupServer): string
+	{
 		$this->setBackupServerId ( $backupServer->backupServerUid );
 		return ( string ) $backupServer->backupServerUid;
 	}
 
 	/**
 	 * Recupere le nom du backupServer
+	 * @param $backupServer
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_de_backupServer(
-			$backupServer) {
+			$backupServer): string
+	{
 		return ( string ) $backupServer->name;
 	}
 
 	/**
 	 * Permet de trouver la liste des backupServers dans veeamspc et enregistre les donnees des backupServers dans l'objet
+	 * @param array $params
 	 * @return backupServers
 	 * @throws Exception
 	 */
 	public function retrouve_backupServers(
-			$params = array ()) {
+		array $params = array ()): backupServers
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$backupServers = array ();
 		while ( ! $this->getObjetVeeamWsclientRest ()
@@ -136,11 +142,11 @@ class backupServers extends infrastructures {
 	 * @throws Exception
 	 */
 	public function listBackupServers(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|array|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getObjetVeeamWsclientRest ()
+		return $this->getObjetVeeamWsclientRest ()
 			->getMethod ( $this->backupServers_list_uri (), $params );
-		return $resultat;
 	}
 
 	/**
@@ -150,13 +156,14 @@ class backupServers extends infrastructures {
 	 * @throws Exception
 	 */
 	public function retrouveAllBackupServersRepositories(
-			$params = array ()) {
+		array $params = array ()): backupServers
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$backupResourcesUsage = array ();
 		while ( ! $this->getObjetVeeamWsclientRest ()
 			->getDernierePage () ) {
 			$liste_res_tenants = $this->getObjetVeeamWsclientRest ()
-				->getMethod ( $this->backupServers_repositories_list_uri (), $params );
+				->getMethod ( $this->backupServers_repositories_list_uri (), array_merge($params, ['expand' => 'BackupRepositoryInfo']) );
 			$this->onDebug ( $liste_res_tenants, 2 );
 			foreach ( $liste_res_tenants->data as $tenant ) {
 				$backupResourcesUsage [$this->recupere_instanceUid ( $tenant )] = $tenant;
@@ -174,11 +181,13 @@ class backupServers extends infrastructures {
 	 */
 	/**
 	 * Verifie qu'un backupServer id est rempli/existe
+	 * @param bool $error
 	 * @return boolean
 	 * @throws Exception
 	 */
 	public function valide_backupServerid(
-			$error = true) {
+		bool $error = true): bool
+	{
 		if (empty ( $this->getBackupServerId () )) {
 			$this->onDebug ( $this->getBackupServerId (), 2 );
 			if ($error) {
@@ -189,19 +198,31 @@ class backupServers extends infrastructures {
 		return true;
 	}
 
-	public function backupServers_list_uri() {
+	/**
+	 * @throws Exception
+	 */
+	public function backupServers_list_uri(): string
+	{
 		if ($this->valide_infrastructureid ( false )) {
 			return $this->infrastructure_id_uri () . '/backupServers';
 		}
 		return $this->infrastructures_list_uri () . '/backupServers';
 	}
 
-	public function backupServers_repositories_list_uri() {
+	/**
+	 * @throws Exception
+	 */
+	public function backupServers_repositories_list_uri(): string
+	{
 		return $this->backupServers_list_uri () . "/repositories";
 	}
 
-	public function backupServer_id_uri() {
-		if ($this->valide_backupServerid () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function backupServer_id_uri(): bool|string
+	{
+		if (!$this->valide_backupServerid()) {
 			return $this->onError ( "Il n'y pas d'id de backupServer selectionne" );
 		}
 		return $this->infrastructure_id_uri () . "/backupServer/" . $this->getBackupServerId ();
@@ -213,7 +234,8 @@ class backupServers extends infrastructures {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getBackupServerId() {
+	public function getBackupServerId(): ?string
+	{
 		return $this->backupServer_id;
 	}
 
@@ -221,7 +243,8 @@ class backupServers extends infrastructures {
 	 * @codeCoverageIgnore
 	 */
 	public function &setBackupServerId(
-			$backupServer_id) {
+			$backupServer_id): static
+	{
 		$this->backupServer_id = $backupServer_id;
 		return $this;
 	}
@@ -229,7 +252,8 @@ class backupServers extends infrastructures {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeBackupServers() {
+	public function getListeBackupServers(): SimpleXMLElement|null|array
+	{
 		return $this->liste_backupServers;
 	}
 
@@ -237,7 +261,8 @@ class backupServers extends infrastructures {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeBackupServers(
-			$liste_backupServers) {
+			$liste_backupServers): static
+	{
 		$this->liste_backupServers = $liste_backupServers;
 		return $this;
 	}
@@ -248,11 +273,10 @@ class backupServers extends infrastructures {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "backupServers :";
 		return $help;
 	}
 }
-?>

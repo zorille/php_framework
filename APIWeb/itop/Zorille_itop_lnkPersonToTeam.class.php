@@ -61,7 +61,7 @@ class lnkPersonToTeam extends ci {
 	 * @param array $liste_class
 	 * @return lnkPersonToTeam
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this ->setFormat ( 'lnkPersonToTeam' ) 
@@ -78,7 +78,6 @@ class lnkPersonToTeam extends ci {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de serveur_datas
@@ -90,11 +89,12 @@ class lnkPersonToTeam extends ci {
 			->retrouve_ci ();
 	}
 
-	public function creer_oql($Team_name='',$Person_name='',$Person_firstname='',$Person_email='',$org_name='') {
+	public function creer_oql(array|string $fields=''): static
+	{
 		$where="";
 		$join="";
-		if(!empty($Team_name)){
-			$where .= " team_name='" . $Team_name . "'";
+		if(!empty($fields)){
+			$where .= " team_name='" . $fields . "'";
 		}
 		if(!empty($Person_name)||!empty($Person_firstname)||!empty($Person_email)||!empty($org_name)){
 			$person=$this->getObjetItopPerson () ->getFormat ();
@@ -226,7 +226,8 @@ class lnkPersonToTeam extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

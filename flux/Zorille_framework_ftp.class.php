@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class FTP<br>
  * 
@@ -74,14 +76,16 @@ class ftp extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param string $user Utilisateur pour se connecter.
-	 * @param string $password Mot de passe pour se connecter.
-	 * @param int $port Port de connexion.
+	 * @param $passwd
+	 * @param int|string $port Port de connexion.
 	 * @param int $timeout Duree du timeout.
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return ftp
+	 * @throws Exception
 	 */
-	static function &creer_ftp(&$liste_option, $user, $passwd, $port = '21', $timeout = 10, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_ftp(options &$liste_option, string $user, $passwd, int|string $port = '21', int $timeout = 10, bool|string $sort_en_erreur = false, string $entete = __CLASS__): ftp
+	{
 		$objet = new ftp ( $user, $passwd, $sort_en_erreur, $port, $timeout, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -95,24 +99,27 @@ class ftp extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return ftp
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
 
 	/*********************** Creation de l'objet *********************/
-	
+
 	/**
 	 * Initialise les variables host, port et timeout.
 	 * @codeCoverageIgnore
 	 * @param string $user Utilisateur pour se connecter.
-	 * @param string $password Mot de passe pour se connecter.
-	 * @param string $sort_en_erreur Prend les valeurs true/false.
-	 * @param int $port Port de connexion.
+	 * @param $passwd
+	 * @param bool $sort_en_erreur Prend les valeurs true/false.
+	 * @param string $port Port de connexion.
 	 * @param int $timeout Duree du timeout.
+	 * @param string $entete
 	 */
-	public function __construct($user, $passwd, $sort_en_erreur = false, $port = '21', $timeout = 10, $entete = __CLASS__) {
+	public function __construct($user, $passwd, bool $sort_en_erreur = false, string $port = '21', int $timeout = 10, string $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -125,10 +132,12 @@ class ftp extends abstract_log {
 	/**
 	 * Passe la connexion en mode passif.
 	 *
-	 * @param string $host Machine distante a connecter.
+	 * @param bool $erreur
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function verifie_connexion($erreur = true) {
+	public function verifie_connexion(bool $erreur = true): bool
+	{
 		if ($this->connected === false && $erreur) {
 			return $this->onError ( "Erreur la connexion n'existe pas" );
 		}
@@ -140,8 +149,10 @@ class ftp extends abstract_log {
 	 * Cree la connexion au host.
 	 * @codeCoverageIgnore
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function connect($host, $port = "", $timeout = "") {
+	public function connect($host, $port = "", $timeout = ""): bool
+	{
 		if (! $this->verifie_connexion ( false )) {
 			$this->conn_id = false;
 			$this->onDebug ( "Host : " . $host, 2 );
@@ -191,8 +202,10 @@ class ftp extends abstract_log {
 	/**
 	 * re cree la connexion au host.
 	 * @codeCoverageIgnore
+	 * @throws Exception
 	 */
-	private function _reconnect() {
+	private function _reconnect(): void
+	{
 		$this->disconnect ();
 		$this->connect ( $this->host, $this->port, $this->timeout );
 	}
@@ -201,8 +214,10 @@ class ftp extends abstract_log {
 	 * Passe la connexion en mode passif.
 	 * @codeCoverageIgnore
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function passiv_mode() {
+	public function passiv_mode(): bool
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ()) {
 			$CODE_RETOUR = ftp_pasv ( $this->conn_id, $this->getPassive () );
@@ -215,8 +230,10 @@ class ftp extends abstract_log {
 	 * Ferme la connexion au host.
 	 * @codeCoverageIgnore
 	 * @return true
+	 * @throws Exception
 	 */
-	public function disconnect() {
+	public function disconnect(): bool
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ( false )) {
 			if (! ftp_close ( $this->conn_id )) {
@@ -240,6 +257,7 @@ class ftp extends abstract_log {
 	 * Execute une commande shell sur le ftp.
 	 * @codeCoverageIgnore
 	 * @return Bool  TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
 	public function exec($command) {
 		$CODE_RETOUR = false;
@@ -252,8 +270,10 @@ class ftp extends abstract_log {
 	 * Execute une commande FTP sur le ftp.
 	 * @codeCoverageIgnore
 	 * @return Bool  TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function exec_ftp_commande($command) {
+	public function exec_ftp_commande($command): bool
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ())
 			$CODE_RETOUR = ftp_raw ( $this->conn_id, $command );
@@ -265,8 +285,10 @@ class ftp extends abstract_log {
 	 * Attention cette fonction fait un mkdir -p
 	 * @codeCoverageIgnore
 	 * @return Bool  TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function creer_dossier($dossier, $mode = false) {
+	public function creer_dossier($dossier, $mode = false): bool
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ()) {
 			$CODE_RETOUR = true;
@@ -301,8 +323,10 @@ class ftp extends abstract_log {
 	 * Les modes sont FTP_BINARY ou FTP_ASCII .
 	 * @codeCoverageIgnore
 	 * @return Bool  TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function recupere($source, $destination, $mode = FTP_BINARY) {
+	public function recupere($source, $destination, $mode = FTP_BINARY): bool
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ()) {
 			$essai = 0;
@@ -326,8 +350,10 @@ class ftp extends abstract_log {
 	 * Les modes sont FTP_BINARY ou FTP_ASCII .
 	 * @codeCoverageIgnore
 	 * @return Bool  TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function envoi($source, $destination, $mode = FTP_BINARY) {
+	public function envoi($source, $destination, $mode = FTP_BINARY): bool
+	{
 		$CODE_RETOUR = false;
 		
 		if ($this->verifie_connexion ()) {
@@ -351,8 +377,10 @@ class ftp extends abstract_log {
 	 * Supprime un fichier sur le serveur distant.
 	 * @codeCoverageIgnore
 	 * @return Bool  TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function supprime($fichier) {
+	public function supprime($fichier): bool
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ()) {
 			$CODE_RETOUR = ftp_delete ( $this->conn_id, $fichier );
@@ -366,8 +394,10 @@ class ftp extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string $dossier dossier distant a lire.
 	 * @return array|false  liste des fichiers du dossier, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function liste($dossier) {
+	public function liste(string $dossier): bool|array
+	{
 		$CODE_RETOUR = false;
 		if ($this->verifie_connexion ()) {
 			$CODE_RETOUR = ftp_nlist ( $this->conn_id, $dossier );
@@ -381,9 +411,11 @@ class ftp extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string $dossier_distant dossier distant a lire.
 	 * @param string $nom_fichier Nom du fichier a trouver.
-	 * @return Bool|-1 TRUE si OK, FALSE le fichier n'est pas present, -1 si une erreur est apparue.
+	 * @return bool|int -1 TRUE si OK, FALSE le fichier n'est pas present, -1 si une erreur est apparue.
+	 * @throws Exception
 	 */
-	public function verifie_presence_fichier($dossier_distant, $nom_fichier) {
+	public function verifie_presence_fichier(string $dossier_distant, string $nom_fichier): bool|int
+	{
 		if ($this->verifie_connexion ()) {
 			$liste_fichier = $this->liste ( $dossier_distant );
 			if ($liste_fichier) {
@@ -402,6 +434,7 @@ class ftp extends abstract_log {
 
 	/**
 	 * @codeCoverageIgnore
+	 * @throws Exception
 	 */
 	public function __destruct() {
 		// cleanup resources
@@ -412,14 +445,16 @@ class ftp extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassive() {
+	public function getPassive(): bool
+	{
 		return $this->passive;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setPassive($passive) {
+	public function setPassive($passive): void
+	{
 		if (is_bool ( $passive )) {
 			$this->passive = $passive;
 		}
@@ -428,26 +463,28 @@ class ftp extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNbRetry() {
+	public function getNbRetry(): int
+	{
 		return $this->nb_retry;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setNbRetry($nbretry) {
+	public function setNbRetry($nbretry): void
+	{
 		$this->nb_retry = $nbretry;
 	}
 
 	/******************************* ACCESSEURS ********************************/
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -471,4 +508,3 @@ class ftp extends abstract_log {
 		return $help;
 	}
 }
-?>

@@ -70,11 +70,12 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_action_operation_message
 	 */
-	static function &creer_zabbix_action_operation_message(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_action_operation_message(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_action_operation_message
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_action_operation_message ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -87,9 +88,9 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_action_operation_message
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetZabbixWsclient ( $liste_class ["zabbix_wsclient"] )
@@ -112,9 +113,11 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|zabbix_action_operation_message True est OK, False sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setDefaultMsg ( $this->_valideOption ( array (
 				"zabbix",
@@ -145,10 +148,11 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 
 	/**
 	 * Recupere un mediatypeid a partir du nom du mediatype
+	 * @return bool|zabbix_action_operation_message
 	 * @throws Exception
-	 * @return zabbix_action_operation_message
 	 */
-	public function retrouve_mediaTypeId() {
+	public function retrouve_mediaTypeId(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		//gestion du mediaTypeId
 		$this->getObjetMediatype ()
@@ -171,7 +175,8 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	 * @return array|false;
 	 * @throws Exception
 	 */
-	public function creer_definition_zabbix_operation_message_ws() {
+	public function creer_definition_zabbix_operation_message_ws(): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getDefaultMsg () === "") {
 			return array ();
@@ -195,37 +200,37 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	/**
 	 * defaultMsg : Possible values for trigger actions: operation/action
 	 * 0 - (default) use the data from the operation;
- 	 * 1 - use the data from the action.
+	 * 1 - use the data from the action.
 	 * @param string $type operation ou action
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_defaultMsg($type) {
+	public function retrouve_defaultMsg($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "action" :
-				return 1;
-			case "operation" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"action" => 1,
+			default => 0,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperationId() {
+	public function getOperationId(): string
+	{
 		return $this->operationid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperationId($operationid) {
+	public function &setOperationId($operationid): static
+	{
 		$this->operationid = $operationid;
 		return $this;
 	}
@@ -233,14 +238,16 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDefaultMsg() {
+	public function getDefaultMsg(): int|string
+	{
 		return $this->default_msg;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDefaultMsg($default_msg) {
+	public function &setDefaultMsg($default_msg): static
+	{
 		$this->default_msg = $this->retrouve_defaultMsg ( $default_msg );
 		return $this;
 	}
@@ -248,14 +255,16 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMediaTypeId() {
+	public function getMediaTypeId(): string
+	{
 		return $this->mediatypeid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMediaTypeId($mediatypeid) {
+	public function &setMediaTypeId($mediatypeid): static
+	{
 		$this->mediatypeid = $mediatypeid;
 		return $this;
 	}
@@ -263,14 +272,16 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpMessage() {
+	public function getOpMessage(): string
+	{
 		return $this->message;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpMessage($message) {
+	public function &setOpMessage($message): static
+	{
 		$this->message = $message;
 		return $this;
 	}
@@ -278,14 +289,16 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSubject() {
+	public function getSubject(): string
+	{
 		return $this->subject;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSubject($subject) {
+	public function &setSubject($subject): static
+	{
 		$this->subject = $subject;
 		return $this;
 	}
@@ -293,14 +306,16 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getObjetMediatype() {
+	public function &getObjetMediatype(): ?zabbix_mediatype
+	{
 		return $this->mediatype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetMediatype($mediatype) {
+	public function &setObjetMediatype($mediatype): static
+	{
 		$this->mediatype = $mediatype;
 		return $this;
 	}
@@ -311,7 +326,7 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -325,4 +340,3 @@ class zabbix_action_operation_message extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

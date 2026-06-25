@@ -6,8 +6,8 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
-use Zorille\framework\abstract_log;
 
 /**
  * class ModeleServices
@@ -33,15 +33,16 @@ class ModeleServices extends globalapi {
 	 * Instancie un objet de type ModeleServices. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return ModeleServices
+	 * @return self
+	 * @throws Exception
 	 */
 	static function &creer_ModeleServices(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): static {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new ModeleServices ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -55,9 +56,10 @@ class ModeleServices extends globalapi {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return ModeleServices
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->retrouve_ModeleServices ();
 		return $this;
@@ -70,11 +72,10 @@ class ModeleServices extends globalapi {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+			string|bool $sort_en_erreur = false,
+			string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -82,15 +83,21 @@ class ModeleServices extends globalapi {
 	/**
 	 * ******************************* ModeleServices URI ******************************
 	 */
-	public function ModeleServices_uri() {
+	public function ModeleServices_uri(): string {
 		return $this->globalapi_uri () . '/service_templates';
 	}
 
 	/**
 	 * ******************************* Coservit ModeleServices *********************************
 	 */
+
+	/**
+	 * @param $ModeleServices
+	 * @return array|int[]|bool|string
+	 * @throws Exception
+	 */
 	public function retrouve_id_ModeleServices(
-			$ModeleServices) {
+			$ModeleServices): array|bool|string {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( "Modele recherche : " . $ModeleServices, 1 );
 		if (empty ( $this->getModeleServices () )) {
@@ -99,10 +106,10 @@ class ModeleServices extends globalapi {
 		if (isset ( $this->getModeleServices () [strtoupper ( $ModeleServices )] )) {
 			return $this->getModeleServices () [strtoupper ( $ModeleServices )];
 		}
-		return $this->onError ( "Le modele de services " . $ModeleServices . " n'existe pas dans la liste", "", 1 );
+		return $this->onError ( "Le modele de services " . $ModeleServices . " n'existe pas dans la liste" );
 	}
 
-	public function prepare_ModeleServices() {
+	public function prepare_ModeleServices(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_ModeleServices = array ();
 		if (isset ( $this->getDonnees ()->_embedded->items )) {
@@ -114,6 +121,9 @@ class ModeleServices extends globalapi {
 		return $this->setModeleServices ( $liste_ModeleServices );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_ModeleServices(
 			$params = array (
 					"company" => array (
@@ -125,7 +135,7 @@ class ModeleServices extends globalapi {
 					"sort" => array (
 							"+name"
 					)
-			)) {
+			)): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->ModeleServices_uri (), $params );
@@ -139,7 +149,7 @@ class ModeleServices extends globalapi {
 	 * @return $this
 	 */
 	public function creerModeleServices(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -149,9 +159,9 @@ class ModeleServices extends globalapi {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array|string
 	 */
-	public function getModeleServices() {
+	public function getModeleServices(): array|string {
 		return $this->modeleServices;
 	}
 
@@ -159,7 +169,7 @@ class ModeleServices extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setModeleServices(
-			$liste_modeleServices) {
+			$liste_modeleServices): static {
 		$this->modeleServices = $liste_modeleServices;
 		return $this;
 	}
@@ -170,11 +180,11 @@ class ModeleServices extends globalapi {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "ModeleServices :";
+		$help [__CLASS__] ["text"] = [
+			'ModeleServices :'
+		];
 		return $help;
 	}
 }
-?>

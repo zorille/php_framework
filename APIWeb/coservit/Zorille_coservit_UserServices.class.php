@@ -6,7 +6,7 @@
  */
 namespace Zorille\coservit;
 
-use Zorille\framework as Core;
+use Exception;
 
 /**
  * class UserServices
@@ -23,9 +23,10 @@ abstract class UserServices extends item {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return UserServices
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -37,11 +38,11 @@ abstract class UserServices extends item {
 	/**
 	 * ******************************* UserServices URI ******************************
 	 */
-	public function userServices_uri() {
+	public function userServices_uri(): string {
 		return $this->globalapi_uri () . '/user_services';
 	}
 
-	public function userServices_lists_uri() {
+	public function userServices_lists_uri(): string {
 		return $this->userServices_uri () . '/lists';
 	}
 
@@ -57,11 +58,10 @@ abstract class UserServices extends item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "UserServices :";
 		return $help;
 	}
 }
-?>

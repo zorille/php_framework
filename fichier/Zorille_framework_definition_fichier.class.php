@@ -26,11 +26,12 @@ class definition_fichier extends variables_standards {
 	 * Instancie un objet de type definition_fichier.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return definition_fichier
 	 */
-	static function &creer_definition_fichier(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_definition_fichier(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): definition_fichier
+	{
 		$objet = new definition_fichier ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -45,7 +46,8 @@ class definition_fichier extends variables_standards {
 	 * @param array $liste_class
 	 * @return definition_fichier
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -68,10 +70,11 @@ class definition_fichier extends variables_standards {
 	 *
 	 * @param options $liste_options Pointeur sur les arguments.
 	 * @param $var
-	 * @param $valeur_defaut
+	 * @param string $valeur_defaut
 	 * @return string
 	 */
-	public function verifie_variables(&$liste_options, $var, $valeur_defaut = "NOVAL") {
+	public function verifie_variables(options &$liste_options, $var, string $valeur_defaut = "NOVAL"): string
+	{
 		if ($liste_options->verifie_option_existe ( $var, true ) !== false) {
 			return $liste_options->getOption ( $var );
 		} elseif ($valeur_defaut != "NOVAL") {
@@ -86,8 +89,10 @@ class definition_fichier extends variables_standards {
 	 *
 	 * @param options $liste_options Pointeur sur les arguments.
 	 * @return definition_fichier.
+	 * @throws \Exception
 	 */
-	public function creer_structure_fichier(&$liste_options) {
+	public function creer_structure_fichier(options &$liste_options): bool|static
+	{
 		$this->onInfo ( "On creer la structure du fichier." );
 		//type du fichier telecharge (donnee obligatoire)
 		if ($liste_options->verifie_option_existe ( "type_donnees", true ) === false) {
@@ -126,7 +131,8 @@ class definition_fichier extends variables_standards {
 	 * @param Bool $telecharger Telecharger oui ou non.
 	 * @return definition_fichier.
 	 */
-	public function structure_fichier_standard($nom, $type, $dossier = "", $format = "f", $mandatory = false, $telecharger = false) {
+	public function structure_fichier_standard(string $nom, string $type, string $dossier = "", string $format = "f", bool $mandatory = false, bool $telecharger = false): static
+	{
 		$this->structure_fichier = array ();
 		$this->structure_fichier ["nom"] = $nom;
 		$this->structure_fichier ["dossier"] = $dossier;
@@ -143,7 +149,8 @@ class definition_fichier extends variables_standards {
 	 *
 	 * @return bool true si OK, false sinon.
 	 */
-	public function verifie_structure() {
+	public function verifie_structure(): bool
+	{
 		if (isset ( $this->structure_fichier ["nom"] ) && isset ( $this->structure_fichier ["dossier"] ) && isset ( $this->structure_fichier ["type"] ) && $this->structure_fichier ["type"] != "" && isset ( $this->structure_fichier ["mandatory"] ) && $this->structure_fichier ["mandatory"] !== "" && isset ( $this->structure_fichier ["telecharger"] ) && isset ( $this->structure_fichier ["format"] )) {
 			return true;
 		}
@@ -153,9 +160,11 @@ class definition_fichier extends variables_standards {
 	/**
 	 * Renvoi un affichage de la structure.
 	 * @codeCoverageIgnore
+	 * @param int $niveau_debug
 	 * @return definition_fichier
 	 */
-	public function affiche_donnees_fichier($niveau_debug = 1) {
+	public function affiche_donnees_fichier($niveau_debug = 1): static
+	{
 		$this->onDebug ( "Donnees du fichier :", $niveau_debug );
 		$this->onDebug ( $this->structure_fichier, $niveau_debug );
 		return $this;
@@ -163,9 +172,11 @@ class definition_fichier extends variables_standards {
 
 	/**
 	 * Renvoi un affichage (toString) de la structure.
-	 * @return string
+	 * @param $parametre
+	 * @return bool|string
 	 */
-	public function renvoi_parametre_fichier($parametre) {
+	public function renvoi_parametre_fichier($parametre): bool|string
+	{
 		if (isset ( $this->structure_fichier [$parametre] )) {
 			return $this->structure_fichier [$parametre];
 		} 
@@ -177,7 +188,8 @@ class definition_fichier extends variables_standards {
 	 * 
 	 * @return Bool true si OK, false sinon.
 	 */
-	public function ajoute_donnees_structure_fichier($type, $valeur) {
+	public function ajoute_donnees_structure_fichier($type, $valeur): bool
+	{
 		if (! isset ( $this->structure_fichier [$type] )) {
 			$this->structure_fichier [$type] = $valeur;
 			return true;
@@ -190,7 +202,8 @@ class definition_fichier extends variables_standards {
 	 * 
 	 * @return Bool true si OK, false sinon.
 	 */
-	public function prepare_copie_fichier($valeur) {
+	public function prepare_copie_fichier($valeur): bool
+	{
 		return $this->ajoute_donnees_structure_fichier("type_copie", $valeur);
 	}
 
@@ -199,7 +212,8 @@ class definition_fichier extends variables_standards {
 	 * 
 	 * @return Bool true si OK, false sinon.
 	 */
-	public function modifie_donnees_structure_fichier($type, $valeur) {
+	public function modifie_donnees_structure_fichier($type, $valeur): bool
+	{
 		if (isset ( $this->structure_fichier [$type] )) {
 			$CODE_RETOUR = true;
 		} else {
@@ -215,7 +229,8 @@ class definition_fichier extends variables_standards {
 	 * 
 	 * @return array|false La structure, false sinon.
 	 */
-	public function renvoi_structure_fichier() {
+	public function renvoi_structure_fichier(): bool|array
+	{
 		if (is_array ( $this->structure_fichier )) {
 			return $this->structure_fichier;
 		}
@@ -226,14 +241,16 @@ class definition_fichier extends variables_standards {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getStructureFichier() {
+	public function getStructureFichier(): bool|array
+	{
 		return $this->structure_fichier;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStructureFichier($structure_fichier) {
+	public function &setStructureFichier($structure_fichier): static
+	{
 		$this->structure_fichier  = $structure_fichier;
 		return $this;
 	}
@@ -246,7 +263,7 @@ class definition_fichier extends variables_standards {
 	 * --help
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -264,13 +281,4 @@ class definition_fichier extends variables_standards {
 		
 		return $help;
 	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @codeCoverageIgnore
-	 * @see lib/fork/message#__destruct()
-	 */
-	public function __destruct() {
-	}
 }
-?>

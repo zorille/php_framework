@@ -59,7 +59,7 @@ class gestion_definition_table extends requete {
 	 * @return gestion_definition_table
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

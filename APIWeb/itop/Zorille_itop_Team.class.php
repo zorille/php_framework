@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -23,15 +24,16 @@ class Team extends Contact {
 	 * Instancie un objet de type Team. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Team
 	 */
 	static function &creer_Team(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): Team
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Team ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -44,13 +46,15 @@ class Team extends Contact {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return Team
+	 * @return Team|Person
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
-		return $this->setFormat ( 'Team' )
-			->champ_obligatoire_standard ();
+		$person = $this->setFormat('Team')
+			->champ_obligatoire_standard();
+		return $person;
 	}
 
 	/**
@@ -58,22 +62,22 @@ class Team extends Contact {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Person
+	 * @return Person|UserLocal|Team
 	 */
-	public function champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): Person|UserLocal|Team|static
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -83,10 +87,14 @@ class Team extends Contact {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Team(
 			$name = '',
 			$email = '',
-			$org_name = '') {
+			$org_name = ''): ci|Contact|bool
+	{
 		return $this->retrouve_Contact ( $name, $email, $org_name );
 	}
 
@@ -96,9 +104,9 @@ class Team extends Contact {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_Team(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		return $params;
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
@@ -107,7 +115,8 @@ class Team extends Contact {
 	 * @return Team
 	 */
 	public function creer_oql_Team(
-			$fields = array ()) {
+		array $fields = array ()): Team
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -125,9 +134,11 @@ class Team extends Contact {
 	 * Récupère une team existante suivant les critères données ou créer cette team si elle n'existe pas Champs standards : name, org_name
 	 * @param array $parametres Liste des critères. Le nom de la case= le nom du champ itop, la valeur de la case est la valeur dans itop.
 	 * @return Team
+	 * @throws Exception
 	 */
 	public function gestion_Team(
-			$parametres) {
+		array $parametres): Team
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Team ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -145,11 +156,10 @@ class Team extends Contact {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Team :";
 		return $help;
 	}
 }
-?>

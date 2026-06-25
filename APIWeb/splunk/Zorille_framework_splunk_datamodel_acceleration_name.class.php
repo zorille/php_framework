@@ -48,10 +48,10 @@ class splunk_datamodel_acceleration_name extends splunk_datamodel_acceleration {
 	 * @param array $liste_class
 	 * @return splunk_datamodel_acceleration_name
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
-		$this ->setMessagesName ( $liste_class ['datamodel_acceleration_name'] ) 
+		return $this ->setMessagesName ( $liste_class ['datamodel_acceleration_name'] )
 			->reset_resource ();
 	}
 
@@ -63,7 +63,6 @@ class splunk_datamodel_acceleration_name extends splunk_datamodel_acceleration {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion du parent
@@ -134,7 +133,8 @@ class splunk_datamodel_acceleration_name extends splunk_datamodel_acceleration {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

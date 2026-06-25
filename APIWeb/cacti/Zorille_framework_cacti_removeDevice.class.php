@@ -21,11 +21,16 @@ class cacti_removeDevice extends cacti_addDevice {
 	 * Instancie un objet de type cacti_removeDevice.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_removeDevice
+	 * @throws Exception
 	 */
-	static function &creer_cacti_removeDevice(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_removeDevice(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_removeDevice
+	{
 		$objet = new cacti_removeDevice ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -40,7 +45,8 @@ class cacti_removeDevice extends cacti_addDevice {
 	 * @param array $liste_class
 	 * @return cacti_removeDevice
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -51,7 +57,7 @@ class cacti_removeDevice extends cacti_addDevice {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -62,10 +68,11 @@ class cacti_removeDevice extends cacti_addDevice {
 	/**
 	 * Ajoute un device
 	 *
-	 * @return Integer/false Renvoi l'id du device, false en cas d'erreur.
+	 * @return int|false Renvoi l'id du device, false en cas d'erreur.
 	 * @throws Exception
 	 */
-	public function executeCacti_removeDevice() {
+	public function executeCacti_removeDevice(): bool|int
+	{
 		//L'IP est obligatoire
 		if ($this->getIp () == "") {
 			return $this->onError ( "Il faut une Ip.", "", 5004 );
@@ -95,15 +102,14 @@ class cacti_removeDevice extends cacti_addDevice {
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
+
 	/**
 	 *
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -114,4 +120,3 @@ class cacti_removeDevice extends cacti_addDevice {
 		return $help;
 	}
 }
-?>

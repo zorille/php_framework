@@ -6,6 +6,8 @@
  */
 namespace Zorille\o365;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -52,15 +54,16 @@ class Message extends User {
 	 * Instancie un objet de type Message. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice Reference sur un objet webservice
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Message
 	 */
 	static function &creer_Message(
-			&$liste_option,
-			&$webservice,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Message
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Message ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -74,9 +77,10 @@ class Message extends User {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Message
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->initialise_ressources ();
 	}
@@ -88,7 +92,6 @@ class Message extends User {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -99,21 +102,24 @@ class Message extends User {
 
 	/**
 	 * On valide les variables obligatoires
-	 * @return $this
+	 * @return Message|bool
 	 * @throws Exception
 	 */
-	public function &initialise_ressources() {
+	public function &initialise_ressources(): static|bool
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "envoi_par_mail", false ) !== false) {
 			// Gestion de Office365
 			$this->onInfo ( "On se connecte a o365 pour envoyer un mail" );
 			if ($this->getListeOptions ()
 				->verifie_option_existe ( "o365_serveur_mail", false ) === false) {
-				return $this->onError ( "Il manque le paramettre o365_serveur_mail pour continuer" );
+				$r = $this->onError ( "Il manque le paramettre o365_serveur_mail pour continuer" );
+				return $r;
 			}
 			if ($this->getListeOptions ()
 				->verifie_option_existe ( "o365_user_message", false ) === false) {
-				return $this->onError ( "Il manque le paramettre o365_user_message pour continuer" );
+				$r = $this->onError ( "Il manque le paramettre o365_user_message pour continuer" );
+				return $r;
 			}
 			// On creer l'objet connecte a O365
 			if ($this->getObjetO365Wsclient ()
@@ -140,7 +146,8 @@ class Message extends User {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_messageid() {
+	public function valide_messageid(): bool
+	{
 		if (empty ( $this->getMessageId () )) {
 			$this->onDebug ( $this->getMessageId (), 2 );
 			$this->onError ( "Il faut un message id renvoye par O365 pour travailler" );
@@ -149,6 +156,9 @@ class Message extends User {
 		return true;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function envoi_message(
 			$info_message) {
 		$this->onInfo ( "On envoie un message email" );
@@ -158,7 +168,8 @@ class Message extends User {
 	}
 
 	public function fabrique_message(
-			$params) {
+			$params): static
+	{
 		// On fabrique le message
 		$message = array (
 				'subject' => isset ( $params ['sujet'] ) ? $params ['sujet'] : '',
@@ -187,7 +198,8 @@ class Message extends User {
 
 	public function prepare_from(
 			$emailAddressFrom,
-			&$message) {
+			&$message): static
+	{
 		if (! empty ( $emailAddressFrom )) {
 			$message ['from'] = array (
 					'emailAddress' => array (
@@ -200,7 +212,8 @@ class Message extends User {
 
 	public function prepare_to(
 			$emailAddressTo,
-			&$message) {
+			&$message): static
+	{
 		$liste_to = array ();
 		if (is_array ( $emailAddressTo )) {
 			foreach ( $emailAddressTo as $to ) {
@@ -221,7 +234,8 @@ class Message extends User {
 
 	public function prepare_cc(
 			$emailAddressCc,
-			&$message) {
+			&$message): static
+	{
 		$liste_to = array ();
 		if (is_array ( $emailAddressCc )) {
 			foreach ( $emailAddressCc as $to ) {
@@ -242,7 +256,8 @@ class Message extends User {
 
 	public function prepare_bcc(
 			$emailAddressBcc,
-			&$message) {
+			&$message): static
+	{
 		$liste_to = array ();
 		if (is_array ( $emailAddressBcc )) {
 			foreach ( $emailAddressBcc as $to ) {
@@ -264,10 +279,12 @@ class Message extends User {
 	/**
 	 * Integration de la liste des fichiers de moins de 4 Mo
 	 * @param array $liste_fichiers Liste des fichiers (de moins de 4Mo) a envoyer avec leur chemin relatif
-	 * @return \Zorille\o365\Message
+	 * @return Message
+	 * @throws Exception
 	 */
 	public function attache_fichier(
-			$liste_fichiers) {
+		array $liste_fichiers): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->getObjEnveloppe ()
 			->prepare_liste_fichiers_attaches ( $liste_fichiers );
@@ -277,19 +294,23 @@ class Message extends User {
 	/**
 	 * ******************************* MESSAGE URI ******************************
 	 */
-	public function messages_source_uri() {
+	public function messages_source_uri(): string
+	{
 		return '/messages';
 	}
 
-	public function messages_list_uri() {
+	public function messages_list_uri(): string
+	{
 		return $this->user_id_uri () . $this->messages_source_uri ();
 	}
 
-	public function mailfolder_list_uri() {
+	public function mailfolder_list_uri(): string
+	{
 		return $this->user_id_uri () . '/mailFolders';
 	}
 
-	public function messages_source_attachments() {
+	public function messages_source_attachments(): string
+	{
 		return '/attachments';
 	}
 
@@ -299,10 +320,12 @@ class Message extends User {
 	/**
 	 * Renvoi le contenu du message
 	 * @param string $message_id
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|array|string|stdClass
+	 * @throws Exception
 	 */
 	public function lire_message(
-			$message_id) {
+		string $message_id): SimpleXMLElement|array|string|stdClass
+	{
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->messages_list_uri () . "/" . $message_id );
 	}
@@ -310,11 +333,12 @@ class Message extends User {
 	/**
 	 * Renvoi le heaser du message
 	 * @param string $message_id
-	 * @param string $chemin
-	 * @return SimpleXMLElement
+	 * @return array|bool|stdClass|string|SimpleXMLElement
+	 * @throws Exception
 	 */
 	public function lire_header_message(
-			$message_id) {
+		string $message_id): array|bool|stdClass|string|SimpleXMLElement
+	{
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->messages_list_uri () . "/" . $message_id . '/?$select=internetMessageHeaders' );
 	}
@@ -322,11 +346,12 @@ class Message extends User {
 	/**
 	 * Recupere le message en mime
 	 * @param string $message_id
-	 * @param string $chemin
 	 * @return string message au format RAW
+	 * @throws Exception
 	 */
 	public function lire_mimeType_message(
-			$message_id) {
+		string $message_id): string
+	{
 		$retour = $this->getObjetO365Wsclient ()
 			->setTypeRetour ( 'raw' )
 			->GetMethod ( $this->messages_list_uri () . "/" . $message_id . '/$value' );
@@ -338,10 +363,12 @@ class Message extends User {
 	/**
 	 * Supprime le message
 	 * @param string $message_id
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|bool|stdClass
+	 * @throws Exception
 	 */
 	public function supprime_message(
-			$message_id) {
+		string $message_id): SimpleXMLElement|bool|stdClass
+	{
 		if(empty($message_id)){
 			return $this->onError("Il faut un Message Id pour supprimer le message : ".$message_id);
 		}
@@ -358,7 +385,8 @@ class Message extends User {
 	 * @return int
 	 */
 	public function compte_message(
-			$chemin) {
+		string $chemin): int
+	{
 		$details = $this->lire_donnees_dossier ( $chemin );
 		return $details->totalItemCount;
 	}
@@ -374,13 +402,21 @@ class Message extends User {
 		return NULL;
 	}
 
-	public function retrouve_liste_dossier() {
+	/**
+	 * @throws Exception
+	 */
+	public function retrouve_liste_dossier(): SimpleXMLElement|array|string|stdClass
+	{
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->mailfolder_list_uri () . '?$top=50' );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function recupere_id_dossier(
-			$chemin) {
+			$chemin): SimpleXMLElement|bool|null|string
+	{
 		if ($chemin != "Inbox") {
 			$id = $this->retrouve_id_dossier ( $chemin );
 			if ($id == NULL) {
@@ -392,16 +428,24 @@ class Message extends User {
 		return $id;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function lire_donnees_dossier(
-			$chemin = 'Inbox') {
+			$chemin = 'Inbox'): SimpleXMLElement|array|string|stdClass
+	{
 		$id = $this->recupere_id_dossier ( $chemin );
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->mailfolder_list_uri () . '/' . $id );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function lire_liste_message(
 			$chemin = 'Inbox',
-			$param = array ()) {
+			$param = array ()): SimpleXMLElement|array|string|stdClass
+	{
 		$id = $this->recupere_id_dossier ( $chemin );
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->mailfolder_list_uri () . '/' . $id . $this->messages_source_uri (), $param );
@@ -410,28 +454,37 @@ class Message extends User {
 	/**
 	 * ******************************* O365 ATTACHEMENTS MESSAGES *********************************
 	 */
+	/**
+	 * @throws Exception
+	 */
 	public function liste_attachments(
 			$messageId,
-			$param = array ()) {
+			$param = array ()): SimpleXMLElement|array|string|stdClass
+	{
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->messages_list_uri () . '/' . $messageId . $this->messages_source_attachments (), $param );
 	}
 
-	public function proprietes_attachment(
+	/**
+	 * @throws Exception
+	 */
+	/*public function proprietes_attachment(
 			$attachmentId,
-			$param = array ()) {
+			$param = array ()): SimpleXMLElement|array|string|stdClass
+	{
 		return $this->getObjetO365Wsclient ()
 			->GetMethod ( $this->messages_list_uri () . '/' . $messageId . $this->messages_source_attachments () . '/' . $attachmentId, $param );
-	}
+	}*/
 
 	/**
 	 * ******************************* MESSAGES PAR Enveloppe *********************************
 	 */
 	/**
 	 * On prepare une enveloppe. Si le parametre mail_to n'est pas fournit, on catch l'Exception
-	 * @return \Zorille\o365\Message
+	 * @return Message
 	 */
-	public function prepare_enveloppe() {
+	public function prepare_enveloppe(): static
+	{
 		try {
 			$enveloppe = Core\enveloppe::creer_enveloppe ( $this->getListeOptions () );
 		} catch ( Exception $e ) {
@@ -440,6 +493,9 @@ class Message extends User {
 		return $this->setObjEnveloppe ( $enveloppe );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function envoi_message_par_enveloppe() {
 		$this->onInfo ( "On envoie un message email via l'enveloppe" );
 		return $this->fabrique_message_par_enveloppe ()
@@ -448,7 +504,8 @@ class Message extends User {
 			->user_message_send ();
 	}
 
-	public function fabrique_message_par_enveloppe() {
+	public function fabrique_message_par_enveloppe(): static
+	{
 		// On fabrique le message
 		$message = array (
 				'subject' => $this->getObjEnveloppe ()
@@ -491,13 +548,17 @@ class Message extends User {
 		return $this->setEmailContent ( $message );
 	}
 
-	public function ajoute_fichier_attache_par_enveloppe() {
+	/**
+	 * @throws Exception
+	 */
+	public function ajoute_fichier_attache_par_enveloppe(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! $this->getObjEnveloppe ()
 			->getFichierAttacheFlag ()) {
 			return $this;
 		}
-		if ($this->valide_userid () == false && $this->valide_messageid () == false) {
+		if (!$this->valide_userid() && !$this->valide_messageid()) {
 			return $this;
 		}
 		foreach ( $this->getObjEnveloppe ()
@@ -546,14 +607,22 @@ class Message extends User {
 		return $retour;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function user_message_send_mime(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static|null
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		if (!$this->valide_userid()) {
 			return $this;
 		}
-		return $this->getObjetO365Wsclient ()
-			->PostMethod ( '/users/' . $this->getUserId () . '/sendMail', $this->getEmailContent () );
+		if ($this->getObjEnveloppe()->getNoMail () === false) {
+			return $this->getObjetO365Wsclient()
+				->PostMethod('/users/' . $this->getUserId() . '/sendMail', $this->getEmailContent());
+		}
+		$this->onInfo('Envoi de mail desactive mime.');
+		return null;
 	}
 
 	/**
@@ -561,12 +630,13 @@ class Message extends User {
 	 */
 	/**
 	 * Creer un message dans le brouillon d'un utilisateur. Necessite un id utilisateur valide.
-	 * @return \Zorille\o365\Message
-	 * @throws \Exception
+	 * @return Message
+	 * @throws Exception
 	 */
-	public function user_message_create() {
+	public function user_message_create(): Message|static|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		if (!$this->valide_userid()) {
 			return $this;
 		}
 		$message_created = $this->getObjetO365Wsclient ()
@@ -582,16 +652,23 @@ class Message extends User {
 	/**
 	 * Envoi le message definit par son ID dans les brouillons Necessite un id utilisateur valide.
 	 * @param array $params
-	 * @return \Zorille\o365\Message|\SimpleXMLElement
+	 * @return array|bool|stdClass|string|SimpleXMLElement|Message|null
+	 * @throws Exception
 	 */
 	public function user_message_send(
-			$params = array ()) {
-		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		array $params = array ()): array|bool|stdClass|string|SimpleXMLElement|static|null
+	{
+		$this->onDebug(__METHOD__, 1);
+		if (!$this->valide_userid()) {
 			return $this;
 		}
-		return $this->getObjetO365Wsclient ()
-			->jsonPostMethod ( '/users/' . $this->getUserId () . '/messages/' . $this->getMessageId () . '/send', $params );
+		if ($this->getObjEnveloppe()->getNoMail() === false) {
+			return $this->getObjetO365Wsclient()
+				->jsonPostMethod('/users/' . $this->getUserId() . '/messages/' . $this->getMessageId() . '/send', $params);
+		}
+        var_dump($this->getObjEnveloppe()->getNoMail());
+		$this->onInfo('Envoi de mail desactive pas mime.');
+		return null;
 	}
 
 	/**
@@ -600,7 +677,8 @@ class Message extends User {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMessageId() {
+	public function getMessageId(): ?string
+	{
 		return $this->message_id;
 	}
 
@@ -608,7 +686,8 @@ class Message extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMessageId(
-			&$message_id) {
+			&$message_id): static
+	{
 		$this->message_id = $message_id;
 		return $this;
 	}
@@ -616,7 +695,8 @@ class Message extends User {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEmailContent() {
+	public function getEmailContent(): array
+	{
 		return $this->message_content;
 	}
 
@@ -624,7 +704,8 @@ class Message extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setEmailContent(
-			$message_content) {
+			$message_content): static
+	{
 		$this->message_content = $message_content;
 		return $this;
 	}
@@ -632,7 +713,8 @@ class Message extends User {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getO356MessageRef() {
+	public function getO356MessageRef(): array
+	{
 		return $this->message_o365_ref;
 	}
 
@@ -640,7 +722,8 @@ class Message extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setO356MessageRef(
-			&$message_o365_ref) {
+			&$message_o365_ref): static
+	{
 		$this->message_o365_ref = $message_o365_ref;
 		return $this;
 	}
@@ -649,7 +732,8 @@ class Message extends User {
 	 * @codeCoverageIgnore
 	 * return Core\enveloppe
 	 */
-	public function &getObjEnveloppe() {
+	public function &getObjEnveloppe(): ?Core\enveloppe
+	{
 		return $this->obj_enveloppe;
 	}
 
@@ -657,7 +741,8 @@ class Message extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjEnveloppe(
-			$obj_enveloppe) {
+			$obj_enveloppe): static
+	{
 		$this->obj_enveloppe = $obj_enveloppe;
 		return $this;
 	}
@@ -668,7 +753,7 @@ class Message extends User {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = Core\enveloppe::help ();
 		$help = array_merge ( $help, parent::help () );
 		$help [__CLASS__] ["text"] = array ();
@@ -679,4 +764,3 @@ class Message extends User {
 		return $help;
 	}
 }
-?>

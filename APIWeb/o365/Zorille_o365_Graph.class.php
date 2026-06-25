@@ -7,6 +7,7 @@
  */
 namespace Zorille\o365;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -300,15 +301,17 @@ abstract class Graph extends Core\abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Item
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetO365Wsclient ( $liste_class ['wsclient'] );
 	}
 
 	public function valide_champ_value(
-			$reponse) {
+			$reponse): bool
+	{
 		if (! isset ( $reponse->value )) {
 			$this->onWarning ( "Il n'y a pas de donnees dans la response" );
 			return false;
@@ -317,7 +320,8 @@ abstract class Graph extends Core\abstract_log {
 	}
 
 	public function prepare_nom_pour_url(
-			$recherche) {
+			$recherche): array|string
+	{
 		return str_replace ( " ", "%20", $recherche );
 	}
 
@@ -326,9 +330,10 @@ abstract class Graph extends Core\abstract_log {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return wsclient
+	 * @return wsclient|null
 	 */
-	public function &getObjetO365Wsclient() {
+	public function &getObjetO365Wsclient(): ?wsclient
+	{
 		return $this->wsclient;
 	}
 
@@ -336,7 +341,8 @@ abstract class Graph extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetO365Wsclient(
-			&$wsclient) {
+			&$wsclient): static
+	{
 		$this->wsclient = $wsclient;
 		return $this;
 	}
@@ -344,7 +350,8 @@ abstract class Graph extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsReponse() {
+	public function getWsReponse(): string|array
+	{
 		return $this->ws_reponse;
 	}
 
@@ -352,7 +359,8 @@ abstract class Graph extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setWsReponse(
-			$ws_reponse) {
+			$ws_reponse): static
+	{
 		$this->ws_reponse = $ws_reponse;
 		return $this;
 	}
@@ -360,7 +368,8 @@ abstract class Graph extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTableauLicence() {
+	public function getTableauLicence(): array
+	{
 		return $this->tableau_licence;
 	}
 
@@ -368,7 +377,8 @@ abstract class Graph extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTableauLicence(
-			$tableau_licence) {
+			$tableau_licence): static
+	{
 		$this->tableau_licence = $tableau_licence;
 		return $this;
 	}
@@ -376,4 +386,3 @@ abstract class Graph extends Core\abstract_log {
  * ***************************** ACCESSEURS *******************************
  */
 }
-?>

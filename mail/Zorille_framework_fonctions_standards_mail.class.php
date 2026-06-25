@@ -36,7 +36,7 @@ class fonctions_standards_mail extends abstract_log {
 	 * @param array $liste_class
 	 * @return fonctions_standards_mail
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

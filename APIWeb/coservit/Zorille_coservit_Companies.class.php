@@ -6,7 +6,7 @@
  */
 namespace Zorille\coservit;
 
-use Zorille\framework as Core;
+use Exception;
 
 /**
  * class Companies
@@ -29,14 +29,15 @@ abstract class Companies extends item {
 	 * @var array
 	 */
 	private $Customers = array();
-	
+
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -47,7 +48,7 @@ abstract class Companies extends item {
 	/**
 	 * ******************************* Companies URI ******************************
 	 */
-	public function companies_list_uri() {
+	public function companies_list_uri(): string {
 		return $this->globalapi_uri().'/companies';
 	}
 	/**
@@ -59,7 +60,7 @@ abstract class Companies extends item {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCompanies() {
+	public function getCompanies(): array {
 		return $this->Companies;
 	}
 	
@@ -67,7 +68,7 @@ abstract class Companies extends item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCompanies(
-			$ListeCompanies) {
+			$ListeCompanies): static {
 				$this->Companies = $ListeCompanies;
 				return $this;
 	}
@@ -75,7 +76,7 @@ abstract class Companies extends item {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCustomers() {
+	public function getCustomers(): array {
 		return $this->Customers;
 	}
 	
@@ -83,7 +84,7 @@ abstract class Companies extends item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCustomers(
-			$ListeCustomers) {
+			$ListeCustomers): static {
 				$this->Customers = $ListeCustomers;
 				return $this;
 	}
@@ -93,11 +94,11 @@ abstract class Companies extends item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "Companies :";
+		$help [__CLASS__] ["text"] = [
+			'Companies :'
+		];
 		return $help;
 	}
 }
-?>

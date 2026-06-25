@@ -6,8 +6,8 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
-use Zorille\framework\abstract_log;
 
 /**
  * class TimePeriods
@@ -33,15 +33,16 @@ class TimePeriods extends globalapi {
 	 * Instancie un objet de type TimePeriods. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return TimePeriods
+	 * @throws Exception
 	 */
 	static function &creer_TimePeriods(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): TimePeriods {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new TimePeriods ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -55,9 +56,10 @@ class TimePeriods extends globalapi {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return TimePeriods
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->retrouve_TimePeriods ();
 		return $this;
@@ -68,13 +70,12 @@ class TimePeriods extends globalapi {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -82,12 +83,16 @@ class TimePeriods extends globalapi {
 	/**
 	 * ******************************* TimePeriods URI ******************************
 	 */
-	public function TimePeriods_uri() {
+	public function TimePeriods_uri(): string {
 		return $this->globalapi_uri () . '/time_slots';
 	}
 
 	/**
 	 * ******************************* Coservit TimePeriods *********************************
+	 */
+
+	/**
+	 * @throws Exception
 	 */
 	public function retrouve_id_timePeriod(
 			$TimePeriods) {
@@ -98,10 +103,10 @@ class TimePeriods extends globalapi {
 		if (isset ( $this->getTimePeriods () [strtoupper ( $TimePeriods )] )) {
 			return $this->getTimePeriods () [strtoupper ( $TimePeriods )];
 		}
-		return $this->onError ( "Le timePeriod " . $timePeriod . " n'existe pas dans la liste", "", 1 );
+		return $this->onError ( "Le timePeriod " . $TimePeriods . " n'existe pas dans la liste" );
 	}
 
-	public function prepare_TimePeriods() {
+	public function prepare_TimePeriods(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_TimePeriods = array ();
 		if (isset ( $this->getDonnees ()->_embedded->items )) {
@@ -113,6 +118,9 @@ class TimePeriods extends globalapi {
 		return $this->setTimePeriods ( $liste_TimePeriods );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_TimePeriods(
 			$params = array (
 					"company" => array (
@@ -124,7 +132,7 @@ class TimePeriods extends globalapi {
 					"sort" => array (
 							"+name"
 					)
-			)) {
+			)): TimePeriods {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->TimePeriods_uri (), $params );
@@ -135,10 +143,10 @@ class TimePeriods extends globalapi {
 	/**
 	 * Creer un host la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande host. (parametres obligatoires) : 'host_alias',"host_address","company","collector"
-	 * @return \Zorille\coservit\Company
+	 * @return TimePeriods
 	 */
 	public function creerTimePeriods(
-			$parametres) {
+		array $parametres): TimePeriods {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -148,9 +156,9 @@ class TimePeriods extends globalapi {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array|string
 	 */
-	public function getTimePeriods() {
+	public function getTimePeriods(): array|string {
 		return $this->timePeriods;
 	}
 
@@ -158,7 +166,7 @@ class TimePeriods extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTimePeriods(
-			$liste_timePeriods) {
+			$liste_timePeriods): static {
 		$this->timePeriods = $liste_timePeriods;
 		return $this;
 	}
@@ -169,11 +177,10 @@ class TimePeriods extends globalapi {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "TimePeriods :";
 		return $help;
 	}
 }
-?>

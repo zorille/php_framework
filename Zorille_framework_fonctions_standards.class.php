@@ -4,7 +4,9 @@
  * @package Lib
  */
 namespace Zorille\framework;
-use \Exception as Exception;
+use Exception;
+use stdClass;
+
 /**
  * class fonctions_standards<br>
  * Fonctions generales communes.
@@ -15,15 +17,17 @@ use \Exception as Exception;
 class fonctions_standards extends abstract_log {
 
 	/*********************** Creation de l'objet *********************/
-	/**
-	 * Instancie un objet de type fonctions_standards.
-	 * @codeCoverageIgnore
-	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @param string $entete Entete des logs de l'objet
-	 * @return fonctions_standards
-	 */
-	static function &creer_fonctions_standards(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+    /**
+     * Instancie un objet de type fonctions_standards.
+     * @codeCoverageIgnore
+     * @param options $liste_option Reference sur un objet options
+     * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
+     * @param string $entete Entete des logs de l'objet
+     * @return fonctions_standards
+     * @throws Exception
+     */
+	static function &creer_fonctions_standards(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fonctions_standards
+	{
 		$objet = new fonctions_standards ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -32,13 +36,16 @@ class fonctions_standards extends abstract_log {
 		return $objet;
 	}
 
-	/**
-	 * Initialisation de l'objet
-	 * @codeCoverageIgnore
-	 * @param array $liste_class
-	 * @return fonctions_standards
-	 */
-	public function &_initialise($liste_class) {
+    /**
+     * Initialisation de l'objet
+     * @codeCoverageIgnore
+     * @param array $liste_class
+     * @return fonctions_standards
+     * @throws Exception
+     */
+	public function &_initialise(
+		array $liste_class): static
+    {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -65,7 +72,8 @@ class fonctions_standards extends abstract_log {
 	 * @param options &$liste_option Pointeur sur les arguments
 	 * @return string Renvoi le chemin physique du serial.
 	 */
-	public function creer_report_path(&$liste_option) {
+	public function creer_report_path(options &$liste_option): string
+	{
 		// voir help report_path
 		if ($liste_option->verifie_option_existe ( "dossier_rangement", true ) !== false) {
 			$dossier_par_defaut = $liste_option->getOption ( "dossier_rangement" );
@@ -84,10 +92,11 @@ class fonctions_standards extends abstract_log {
 	 * --taille_disque_mini=200Mo <br>
 	 * format supporte : ko Mo Go To et par defaut aucun identifiant=octet
 	 *
-	 * @param options &$pointeur_liste_option
+	 * @param $liste_option
 	 * @return int Taille Transforme en octet.
 	 */
-	public function renvoi_taille_octet(&$liste_option) {
+	public function renvoi_taille_octet(&$liste_option): int
+	{
 		// voir help taille_octet
 		$CODE_RETOUR = 209715200;
 		if ($liste_option->verifie_option_existe ( "taille_disque_mini", true ) !== false) {
@@ -110,7 +119,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $format Format de depart.
 	 * @return int Coeficient pour retrouve la valeur en octet.
 	 */
-	public function renvoi_coef_octet($format) {
+	public function renvoi_coef_octet(string $format): int
+	{
 		// format = o (octet), ko, Mo, Go, To
 		$facteur = 1;
 		switch ($format) {
@@ -134,7 +144,8 @@ class fonctions_standards extends abstract_log {
 	 * @param integer $valeur La valeur a convertir en texte
 	 * @return string
 	 */
-	public function retrouve_valeur_octet($valeur){
+	public function retrouve_valeur_octet(int $valeur): string
+	{
 		if($valeur/$this->renvoi_coef_octet('To')>=1){
 			return round($valeur/$this->renvoi_coef_octet('To'),2). " To";
 		}
@@ -156,8 +167,70 @@ class fonctions_standards extends abstract_log {
 	 *  @param string $format doit être un format de type ko, Mo, Go, To
 	 * @return string
 	 */
-	public function retrouve_valeur_format_definit($valeur,$format){
+	public function retrouve_valeur_format_definit(int $valeur, string $format): string
+	{
 		return round($valeur/$this->renvoi_coef_octet($format),2). " ".$format;
+	}
+	
+	/**
+	 * Parse les options passees en ligne de commande ou par xml
+	 * et renvoi un coef pour calculer en bps.<br>
+	 * format supporte :  bps (bit per second), kbps, Mbps, Gbps, Tbps et par defaut aucun identifiant=bps
+	 *
+	 * @param string $format Format de depart.
+	 * @return int Coeficient pour retrouve la valeur en bps.
+	 */
+	public function renvoi_coef_bps(string $format): int
+	{
+	    // format = bps (bit per second), kbps, Mbps, Gbps, Tbps
+	    $facteur = 1;
+	    switch ($format) {
+	        case "Tbps" :
+	            $facteur *= 1000;
+	        case "Gbps" :
+	            $facteur *= 1000;
+	        case "Mbps" :
+	            $facteur *= 1000;
+	        case "kbps" :
+	            $facteur *= 1000;
+	        case "bps" :
+	            $facteur *= 1;
+	    }
+	    
+	    return $facteur;
+	}
+	
+	/**
+	 * Renvoi la valeur texte au format kbps, Mbps, Gbps, Tbps
+	 * @param integer $valeur La valeur a convertir en texte
+	 * @return string
+	 */
+	public function retrouve_valeur_bps(int $valeur): string
+	{
+	    if($valeur/$this->renvoi_coef_bps('Tbps')>=1){
+	        return round($valeur/$this->renvoi_coef_bps('Tbps'),2). " Tbps";
+	    }
+	    if($valeur/$this->renvoi_coef_bps('Gbps')>=1){
+	        return round($valeur/$this->renvoi_coef_bps('Gbps'),2). " Gbps";
+	    }
+	    if($valeur/$this->renvoi_coef_bps('Mbps')>=1){
+	        return round($valeur/$this->renvoi_coef_bps('Mbps'),2). " Mbps";
+	    }
+	    if($valeur/$this->renvoi_coef_bps('kbps')>=1){
+	        return round($valeur/$this->renvoi_coef_bps('kbps'),2). " kbps";
+	    }
+	    return $valeur . " bps";
+	}
+	
+	/**
+	 * Renvoi la valeur d'bps passe en paramettre au format choisi
+	 * @param integer $valeur Nombre de bps a convertir
+	 *  @param string $format doit être un format de type kbps, Mbps, Gbps, Tbps
+	 * @return string
+	 */
+	public function retrouve_valeur_bps_format_definit(int $valeur, string $format): string
+	{
+	    return round($valeur/$this->renvoi_coef_bps($format),2). " ".$format;
 	}
 
 	/**
@@ -173,11 +246,12 @@ class fonctions_standards extends abstract_log {
 	 * --fichier_affiche_date="oui/non" <br>
 	 * affiche la date dans le nom du/des fichiers
 	 *
-	 * @param dates $liste_date Liste de dates.
+	 * @param bool|dates $liste_date Liste de dates.
 	 * @param string $nom_fichier Surcharge du nom de fichier.
 	 * @return string Chemin complet du fichier.
 	 */
-	public function creer_nom_fichier(&$liste_option, $liste_date = false, $nom_fichier = "non") {
+	public function creer_nom_fichier(&$liste_option, dates|bool $liste_date = false, string $nom_fichier = "non"): string
+	{
 		$repertoire = "";
 		$this->trouve_nom_fichier ( $liste_option, $nom_fichier )
 			->trouve_extension_fichier ( $liste_option, $nom_fichier )
@@ -194,7 +268,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $nom_fichier
 	 * @return fonctions_standards
 	 */
-	public function trouve_nom_fichier(&$liste_option, &$nom_fichier) {
+	public function trouve_nom_fichier(options &$liste_option, string &$nom_fichier): static
+	{
 		// Si un nom de fichier est en argument, alors il est prioritaire sur celui passe dans le code
 		if ($liste_option->verifie_option_existe ( "fichier_nom", true ) !== false) {
 			$nom_fichier = $liste_option->getOption ( "fichier_nom" );
@@ -218,7 +293,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $nom_fichier
 	 * @return fonctions_standards
 	 */
-	public function trouve_extension_fichier(&$liste_option, &$nom_fichier) {
+	public function trouve_extension_fichier(options &$liste_option, string &$nom_fichier): static
+	{
 		// Si on a une extension
 		if ($liste_option->verifie_option_existe ( "fichier_extension", true ) !== false) {
 			$nom_fichier = $nom_fichier . $liste_option->getOption ( "fichier_extension" );
@@ -242,7 +318,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $nom_fichier
 	 * @return fonctions_standards
 	 */
-	public function trouve_dossier_fichier(&$liste_option, &$repertoire, $nom_fichier) {
+	public function trouve_dossier_fichier(options &$liste_option, string &$repertoire, string $nom_fichier): static
+	{
 		// si on a un dossier/repertoire
 		if ($liste_option->verifie_option_existe ( "fichier_repertoire", true ) !== false) {
 			$repertoire = $liste_option->getOption ( "fichier_repertoire" ) . "/";
@@ -271,10 +348,11 @@ class fonctions_standards extends abstract_log {
 	 * Trouve les dates du fichier dans les parametres
 	 * @param options $liste_option
 	 * @param string $nom_fichier
-	 * @param dates $liste_date
+	 * @param dates|null $liste_date
 	 * @return fonctions_standards
 	 */
-	public function trouve_dates_fichier(&$liste_option, &$nom_fichier, &$liste_date) {
+	public function trouve_dates_fichier(options &$liste_option, string &$nom_fichier, ?dates &$liste_date): static
+	{
 		if ($liste_date && (($liste_option->getOption ( "fichier_affiche_date", true ) == "oui") || ($liste_option->verifie_option_existe ( "fichier[@affiche_date='oui']", true ) !== false))) {
 			if ($liste_option->verifie_option_existe ( "cumul_month" ) !== false) {
 				$liste_date_tempo = $liste_date->getListeMonth ();
@@ -296,13 +374,13 @@ class fonctions_standards extends abstract_log {
 	/**
 	 * Affiche le differents help on demand.<br>
 	 * @codeCoverageIgnore
-
-	 * @param Bool $fonctions_standards Affiche/renvoi le help de la class fonctions_standards.
+ * @param Bool $fonctions_standards Affiche/renvoi le help de la class fonctions_standards.
 	 * @param Bool $all_class Affiche/renvoi le help de chaques class deja en memoire.
 	 * @param array $class_utilisees Affiche/renvoi le help de chaques class declarees dans cette liste.
-	 * @return TRUE
+	 * @return array
 	 */
-	static public function help_fonctions_standard($fonctions_standards = false, $all_class = true, $class_utilisees = array()) {
+	static public function help_fonctions_standard(bool $fonctions_standards = false, bool $all_class = true, array $class_utilisees = array()): array|stdClass
+    {
 		$class_afficher = array ();
 		abstract_log::onDebug_standard($class_utilisees,1);
 		if ($fonctions_standards) {
@@ -316,7 +394,7 @@ class fonctions_standards extends abstract_log {
 					continue;
 				}
 				if (method_exists ( $class_locale, "help" )) {
-					$class_afficher = array_merge ( $class_afficher, call_user_func ( $class_locale . "::help" ) );
+					$class_afficher = array_merge ( ($class_afficher ?? []), call_user_func ( $class_locale . "::help" ) );
 				}
 			}
 		}
@@ -325,7 +403,7 @@ class fonctions_standards extends abstract_log {
 		foreach ( $class_utilisees as $class_locale ) {
 			abstract_log::onDebug_standard($class_locale,1);
 			if (method_exists ( $class_locale, "help" )) {
-				$class_afficher = array_merge ( $class_afficher, call_user_func ( $class_locale . "::help" ) );
+				$class_afficher = array_merge ( ($class_afficher ?? []), call_user_func ( $class_locale . "::help" ) );
 			}
 		}
 		abstract_log::onDebug_standard("class_afficher : class_utilisees",1);
@@ -340,7 +418,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $nom_class Nom de la classe a afficher (le help).
 	 * @return bool true si pas affiche, false si deja affiche
 	 */
-	public function retrouve_class_parent(&$class_used, $nom_class) {
+	public function retrouve_class_parent(array &$class_used, string $nom_class): bool
+	{
 		$parent = "";
 		$retour = true;
 		while ( $parent !== false ) {
@@ -362,8 +441,10 @@ class fonctions_standards extends abstract_log {
 	 * Fait un affichage standard pour les helps
 	 * @codeCoverageIgnore
 	 * @param array $help doit contenir ["titre"] et un tableau de ["text"]
+	 * @throws Exception
 	 */
-	static public function affichage_standard_help($help) {
+	static public function affichage_standard_help(array $help): bool
+	{
 		if (! is_array ( $help )) {
 			return false;
 		}
@@ -386,7 +467,7 @@ class fonctions_standards extends abstract_log {
 			//echo strtoupper ( $class ) . "\r\n";
 			if (isset ( $class ["text"] ) && is_array ( $class ["text"] )) {
 				foreach ( $class ["text"] as $ligne ) {
-					if (strpos ( $ligne, "\t" ) === 0) {
+					if (str_starts_with($ligne, "\t")) {
 						echo $ligne . "\r\n";
 					} else {
 						echo abstract_log::colorize ( $ligne . "\r\n", "Green" );
@@ -412,7 +493,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $commande 	Commande a retrouver.
 	 * @return string Chemin complet de la commande.
 	 */
-	public function recupere_chemin_commande($commande) {
+	public function recupere_chemin_commande(string $commande): string
+    {
 		$CMD = "PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin:/home/echo/bin; which " . $commande;
 		$CODE_RETOUR = $this->applique_commande_systeme ( $CMD );
 		$ligne = $CODE_RETOUR [(count ( $CODE_RETOUR ) - 1)];
@@ -421,22 +503,24 @@ class fonctions_standards extends abstract_log {
 		return $cmd [0];
 	}
 
-	/**
-	 * Supprime un fichier sqlite.<br>
-	 * @codeCoverageIgnore
-	 * @param string $fichier_sqlite Chemin complet du fichier a supprimer.
-	 * @return int 0 si OK, 1 sinon.
-	 */
-	public function supprime_sqlite($fichier_sqlite) {
+    /**
+     * Supprime un fichier sqlite.<br>
+     * @codeCoverageIgnore
+     * @param string $fichier_sqlite Chemin complet du fichier a supprimer.
+     * @return int 0 si OK, 1 sinon.
+     * @throws Exception
+     */
+	public function supprime_sqlite(string $fichier_sqlite): int
+    {
 		$var_return = 1;
-		if (fichier::tester_fichier_existe ( $fichier_sqlite ) == TRUE) {
+		if (fichier::tester_fichier_existe($fichier_sqlite)) {
 			// on supprime les donnees sqlite
 			$this->onDebug ( "fichier SQLITE a supprimer " . $fichier_sqlite, 1 );
 			$var_return = fichier::supprime_fichier ( $fichier_sqlite );
 			if ($var_return == 0) {
 				$this->onInfo ( $fichier_sqlite . " supprime." );
 			} else {
-				return $this->onError ( " erreur lors de la suppression du fichier sqlite :" . $fichier_sqlite, $output );
+				return $this->onError ( " erreur lors de la suppression du fichier sqlite :" . $fichier_sqlite );
 			}
 		} else {
 			$this->onWarning ( "le fichier sqlite a supprimer " . $fichier_sqlite . " n'existe pas pour ce compte." );
@@ -445,14 +529,16 @@ class fonctions_standards extends abstract_log {
 		return $var_return;
 	}
 
-	/**
-	 * Deplace un fichier sqlite.<br>
-	 * @codeCoverageIgnore
-	 * @param string $source Fichier source du fichier a deplacer.
-	 * @param string $dest Fichier destination du fichier a deplacer.
-	 * @return int 0 si OK, 1 sinon.
-	 */
-	public function deplace_sqlite($source, $dest) {
+    /**
+     * Deplace un fichier sqlite.<br>
+     * @codeCoverageIgnore
+     * @param string $source Fichier source du fichier a deplacer.
+     * @param string $dest Fichier destination du fichier a deplacer.
+     * @return int 0 si OK, 1 sinon.
+     * @throws Exception
+     */
+	public function deplace_sqlite(string $source, string $dest): int
+    {
 		$var_return = 1;
 		$this->onDebug ( "fichier SQLITE a deplacer " . $source . "\n", 1 );
 		$this->onDebug ( "vers " . $dest . "\n", 1 );
@@ -471,7 +557,7 @@ class fonctions_standards extends abstract_log {
 					$var_return = 1;
 				}
 			} else {
-				return $this->onError ( " erreur lors du deplacement du fichier sqlite :" . $source, $output );
+				return $this->onError ( " erreur lors du deplacement du fichier sqlite :" . $source );
 			}
 		} else {
 			$this->onWarning ( "le fichier sqlite a deplacer " . $source . " n'existe pas pour ce compte." );
@@ -484,12 +570,14 @@ class fonctions_standards extends abstract_log {
 	 * Verifie la version d'un fichier sqlite.<br>
 	 * @codeCoverageIgnore
 	 * @param string $sqlite Chemin complet du fichier a supprimer.
-	 * @return int 0 si OK, 1 sinon.
+	 * @return bool|int 0 si OK, 1 sinon.
+	 * @throws Exception
 	 */
-	public function check_version_sqlite($sqlite) {
+	public function check_version_sqlite(string $sqlite): bool|int
+	{
 		$var_return = FALSE;
 		abstract_log::onDebug_standard ( "Check de la version du fichier " . $sqlite . "\n", 1 );
-		if (fichier::tester_fichier_existe ( $sqlite ) == TRUE) {
+		if (fichier::tester_fichier_existe($sqlite)) {
 			$connexion = requete::creer_requete ( $this->getListeOptions (), "non" );
 			$connexion->setDbServeur ( $sqlite )
 				->setDbType ( "sqlite" )
@@ -525,7 +613,8 @@ class fonctions_standards extends abstract_log {
 	 * @param Bool $erreur TRUE affiche l'erreur, FALSE affiche un warning.
 	 * @return array Tableau avec en case 0 le retour systeme (0 ou 1) et dans les autres case le output standard et error.
 	 */
-	static public function applique_commande_systeme($CMD, $erreur = true) {
+	static public function applique_commande_systeme(string $CMD, bool $erreur = true): array|stdClass
+    {
 		abstract_log::onDebug_standard ( "Commande : " . $CMD, 1 );
 		$output = array ();
 		if ($CMD != "") {
@@ -551,7 +640,8 @@ class fonctions_standards extends abstract_log {
 	 * @param string $valeur Champ texte optionnel pour l'UUID.
 	 * @return string UUID.
 	 */
-	static public function uuid_perso($valeur = "optionnel") {
+	static public function uuid_perso(string $valeur = "optionnel"): string
+    {
 		$md5 = md5 ( uniqid ( $valeur, true ) );
 		return substr ( $md5, 0, 8 ) . '-' . substr ( $md5, 8, 4 ) . '-' . substr ( $md5, 12, 4 ) . '-' . substr ( $md5, 16, 4 ) . '-' . substr ( $md5, 20, 12 );
 	}
@@ -564,7 +654,8 @@ class fonctions_standards extends abstract_log {
 	 * @param array $liste_variables_request Liste des valeurs potentiellement passe par l'url/post "nom"=>"valeur_par_defaut"
 	 * @return array liste des options dans un tableau
 	 */
-	public function gestion_liste_option_via_url($nom_prog, $liste_variables_systeme, $liste_variables_request) {
+	public function gestion_liste_option_via_url(string $nom_prog, array $liste_variables_systeme, array $liste_variables_request): array|stdClass
+    {
 		// Dans le cadre des URLs on a $_REQUEST
 		$argv = array ();
 		$argv [0] = $nom_prog;
@@ -595,13 +686,13 @@ class fonctions_standards extends abstract_log {
 		return $argv;
 	}
 
-	/**
-	 * @static
-	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
-	 */
-	static function help() {
+    /**
+     * @static
+     * @codeCoverageIgnore
+     * @return array|string Renvoi le help
+     */
+	static function help(): array|string
+    {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -626,4 +717,3 @@ class fonctions_standards extends abstract_log {
 		return $help;
 	}
 }
-?>

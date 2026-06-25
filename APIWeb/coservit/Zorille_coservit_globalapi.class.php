@@ -6,6 +6,7 @@
  */
 namespace Zorille\coservit;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -45,9 +46,10 @@ abstract class globalapi extends Core\abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return globalapi
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetCoservitWsclient ( $liste_class ["wsclient"] );
 	}
@@ -58,11 +60,12 @@ abstract class globalapi extends Core\abstract_log {
 	/**
 	 * Extrait des parametres d'un liste d'option
 	 * @codeCoverageIgnore
-	 * @param string|array $chemin_option
+	 * @param array|string $chemin_option
 	 * @return boolean string array
+	 * @throws Exception
 	 */
 	protected function _valideOption(
-			$chemin_option) {
+		array|string $chemin_option): mixed {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( $chemin_option ) === false) {
@@ -82,7 +85,7 @@ abstract class globalapi extends Core\abstract_log {
 	/**
 	 * ******************************* Global URI ******************************
 	 */
-	public function globalapi_uri() {
+	public function globalapi_uri(): string {
 		return 'servicenav/' . $this->getLang ();
 	}
 
@@ -92,7 +95,7 @@ abstract class globalapi extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLang() {
+	public function getLang(): string {
 		return $this->lang;
 	}
 
@@ -100,7 +103,7 @@ abstract class globalapi extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setLang(
-			$lang) {
+			$lang): static {
 		$this->lang = $lang;
 		return $this;
 	}
@@ -108,7 +111,7 @@ abstract class globalapi extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDonnees() {
+	public function getDonnees(): array|stdClass|null {
 		return $this->donnees;
 	}
 
@@ -116,16 +119,16 @@ abstract class globalapi extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setDonnees(
-			$donnees) {
+			$donnees): static {
 		$this->donnees = $donnees;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return wsclient
+	 * @return wsclient|null
 	 */
-	public function &getObjetCoservitWsclient() {
+	public function &getObjetCoservitWsclient(): ?wsclient {
 		return $this->wsclient;
 	}
 
@@ -133,7 +136,7 @@ abstract class globalapi extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetCoservitWsclient(
-			&$wsclient) {
+			&$wsclient): static {
 		$this->wsclient = $wsclient;
 		return $this;
 	}
@@ -144,11 +147,10 @@ abstract class globalapi extends Core\abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "globalapi :";
 		return $help;
 	}
 }
-?>

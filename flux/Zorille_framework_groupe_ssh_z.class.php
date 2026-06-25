@@ -50,7 +50,8 @@ class groupe_ssh_z extends abstract_log {
 	 * @param array $liste_class
 	 * @return groupe_ssh_z
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -93,9 +94,10 @@ class groupe_ssh_z extends abstract_log {
 	 * @param string $privkey Cle privee de l'utilisateur.
 	 * @param string $passphrase Passphrase de l'utilisateur.
 	 * @param string $type_ssh_key Type dsa/rsa etc ...
-	 * @param string $commande_ssh Chemin de la commande systeme ssh. 
+	 * @param string $commande_ssh Chemin de la commande systeme ssh.
 	 * @param string $commande_scp Chemin de la commande systeme scp.
-	*/
+	 * @throws \Exception
+	 */
 	function ajouter_connexion_ssh($machine_distante, $username = "echo", $passwd = "", $pubkey = "", $privkey = "", $passphrase = "", $type_ssh_key = "", $commande_ssh = "/usr/bin/ssh", $commande_scp = "/usr/bin/scp") {
 		$CODE_RETOUR = false;
 		if (isset ( $this->liste_connexion [$machine_distante] )) {
@@ -103,6 +105,7 @@ class groupe_ssh_z extends abstract_log {
 				$this->liste_connexion [$machine_distante] = array ();
 			$pos = count ( $this->liste_connexion [$machine_distante] );
 			if ($pos < $this->liste_machine_distante [$machine_distante] ["nb_max_connexion"]) {
+				$liste_option = $this->getListeOptions();
 				$this->liste_connexion [$machine_distante] [$pos] = ssh_z::creer_ssh_z ( $liste_option, $username, $passwd, $pubkey, $privkey, $passphrase, $type_ssh_key, $commande_ssh, $commande_scp, $this->getSortEnErreur () );
 				array_push ( $this->liste_machine_distante [$machine_distante] ["pos_libre"], $pos );
 				$CODE_RETOUR = true;

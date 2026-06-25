@@ -67,12 +67,12 @@ class solarwinds_wsclient_soap extends abstract_log {
 	 * @param array $liste_class
 	 * @return solarwinds_wsclient_soap
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["solarwinds_datas"] )) {
-			$this ->onError ( "il faut un objet de type solarwinds_datas" );
-			return false;
+			$r = $this ->onError ( "il faut un objet de type solarwinds_datas" );
+			return $r;
 		}
 		$this ->setObjetSolarwindsDatas ( $liste_class ["solarwinds_datas"] ) 
 			->setObjetSoap ( soap::creer_soap ( $liste_class ["options"] ) );
@@ -371,7 +371,8 @@ class solarwinds_wsclient_soap extends abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

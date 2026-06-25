@@ -40,7 +40,7 @@ class VirtualE1000e extends VirtualEthernetCard {
 	 * @return VirtualE1000e
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;

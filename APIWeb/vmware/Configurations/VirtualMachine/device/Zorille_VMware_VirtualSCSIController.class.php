@@ -45,11 +45,13 @@ class VirtualSCSIController extends VirtualController {
 	 * Instancie un objet de type VirtualSCSIController.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return VirtualSCSIController
+	 * @throws Exception
 	 */
-	static function &creer_VirtualSCSIController(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_VirtualSCSIController(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): VirtualSCSIController
+	{
 		
 		$objet = new VirtualSCSIController ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -65,7 +67,7 @@ class VirtualSCSIController extends VirtualController {
 	 * @return VirtualSCSIController
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -79,7 +81,8 @@ class VirtualSCSIController extends VirtualController {
 	 * @return ArrayObject|array
 	 * @throws Exception
 	 */
-	public function renvoi_donnees_soap($arrayObject = false) {
+	public function renvoi_donnees_soap($arrayObject = false): bool|array
+	{
 		$liste_proprietes = parent::renvoi_donnees_soap ( true );
 		if ( $this->etHotAddRemove () ) {
 			$liste_proprietes ["hotAddRemove"] = $this->etHotAddRemove ();
@@ -100,10 +103,12 @@ class VirtualSCSIController extends VirtualController {
 
 	/**
 	 * Renvoi un soapvar contenant les variables de l'objet en cours
-	 * @param string $arrayObject Permet de choisir entre un array ou un arrayObject en retour de renvoi_donnees_soap
+	 * @param bool|string $arrayObject Permet de choisir entre un array ou un arrayObject en retour de renvoi_donnees_soap
 	 * @return soapvar
+	 * @throws Exception
 	 */
-	public function &renvoi_objet_soap($arrayObject = false) {
+	public function &renvoi_objet_soap(bool|string $arrayObject = false): soapvar
+	{
 		$soap_var = new soapvar ( $this->renvoi_donnees_soap ( $arrayObject ), SOAP_ENC_OBJECT, $this->getTypeScsi () );
 		return $soap_var;
 	}
@@ -114,7 +119,8 @@ class VirtualSCSIController extends VirtualController {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTypeScsi() {
+	public function getTypeScsi(): bool|string
+	{
 		return $this->type_scsi;
 	}
 
@@ -122,31 +128,28 @@ class VirtualSCSIController extends VirtualController {
 	 * @param string $type_scsi Type de class SCSI (ParaVirtualSCSIController/VirtualBusLogicController/VirtualLsiLogicController/VirtualLsiLogicSASController)
 	 * @codeCoverageIgnore
 	 */
-	public function &setTypeScsi($type_scsi) {
-		switch ($type_scsi) {
-			case "ParaVirtualSCSIController" :
-			case "VirtualBusLogicController" :
-			case "VirtualLsiLogicSASController" :
-				$this->type_scsi = $type_scsi;
-				break;
-			case "VirtualLsiLogicController" :
-			default :
-				$this->type_scsi = "VirtualLsiLogicController";
-		}
+	public function &setTypeScsi($type_scsi): static
+	{
+		$this->type_scsi = match ($type_scsi) {
+			"ParaVirtualSCSIController", "VirtualBusLogicController", "VirtualLsiLogicSASController" => $type_scsi,
+			default => "VirtualLsiLogicController",
+		};
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function etHotAddRemove() {
+	public function etHotAddRemove(): bool
+	{
 		return $this->hotAddRemove;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHotAddRemove($hotAddRemove) {
+	public function &setHotAddRemove($hotAddRemove): static
+	{
 		$this->hotAddRemove = $hotAddRemove;
 		return $this;
 	}
@@ -154,14 +157,16 @@ class VirtualSCSIController extends VirtualController {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getScsiCtlrUnitNumber() {
+	public function getScsiCtlrUnitNumber(): bool|int
+	{
 		return $this->scsiCtlrUnitNumber;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setScsiCtlrUnitNumber($scsiCtlrUnitNumber) {
+	public function &setScsiCtlrUnitNumber($scsiCtlrUnitNumber): static
+	{
 		$this->scsiCtlrUnitNumber = $scsiCtlrUnitNumber;
 		return $this;
 	}
@@ -169,7 +174,8 @@ class VirtualSCSIController extends VirtualController {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSharedBus() {
+	public function getSharedBus(): string
+	{
 		return $this->sharedBus;
 	}
 
@@ -177,20 +183,14 @@ class VirtualSCSIController extends VirtualController {
 	 * noSharing/physicalSharing/virtualSharing
 	 * @codeCoverageIgnore
 	 */
-	public function &setSharedBus($sharedBus) {
-		switch ($sharedBus) {
-			case 'noSharing' :
-			case 'physicalSharing' :
-			case 'virtualSharing' :
-				$this->sharedBus = $sharedBus;
-				break;
-			default :
-				$this->sharedBus = "";
-		}
+	public function &setSharedBus($sharedBus): static
+	{
+		$this->sharedBus = match ($sharedBus) {
+			'noSharing', 'physicalSharing', 'virtualSharing' => $sharedBus,
+			default => "",
+		};
 		
 		return $this;
 	}
 /************************* Accesseurs ***********************/
 }
-
-?>

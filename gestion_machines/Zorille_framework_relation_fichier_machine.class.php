@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
 use Zorille\framework\definition_fichier as definition_fichier;
 /**
  * class copie_donnees<br>
@@ -26,11 +27,12 @@ class relation_fichier_machine extends definition_fichier {
 	 * Instancie un objet de type relation_fichier_machine.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return relation_fichier_machine
 	 */
-	static function &creer_relation_fichier_machine(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_relation_fichier_machine(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): relation_fichier_machine
+	{
 		$objet = new relation_fichier_machine ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -45,7 +47,7 @@ class relation_fichier_machine extends definition_fichier {
 	 * @param array $liste_class
 	 * @return relation_fichier_machine
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -64,9 +66,11 @@ class relation_fichier_machine extends definition_fichier {
 
 	/**
 	 * @param string $nom_machine Nom de la machine dans les arguments.
-	 * @return true
+	 * @return relation_fichier_machine
+	 * @throws Exception
 	 */
-	public function prepare_variables_machines($nom_machine) {
+	public function prepare_variables_machines(string $nom_machine): static
+	{
 		$this->getListeOptions()->prepare_variable_standard ( array (
 				"filer",
 				"liste_machines",
@@ -124,15 +128,17 @@ class relation_fichier_machine extends definition_fichier {
 		
 		return $this;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param string $nom_machine
 	 * @param string $type
 	 * @param string $regexpr
 	 * @return boolean
+	 * @throws Exception
 	 */
-	public function recupere_variables_par_machine($nom_machine,$type,$regexpr){
+	public function recupere_variables_par_machine(string $nom_machine, string $type, string $regexpr): bool
+	{
 		//La regexpre fonctionne aussi bien pour le nom que pour un noeud
 		$structure_fichier=$this->getStructureFichier();
 		if ($regexpr !== false && (preg_match ( $regexpr, $structure_fichier ["nom"] ) === 1 || preg_match ( $regexpr, $this->getListeOptions()->getOption ( "noeud" ) ) === 1)) {
@@ -218,9 +224,11 @@ class relation_fichier_machine extends definition_fichier {
 	 * Verifie et set les donnees obligatoires des machines.
 	 *
 	 * @param string $nom_machine Nom de la machine dans les arguments.
-	 * @return TRUE
+	 * @return bool
+	 * @throws Exception
 	 */
-	public function structure_variable_machines($nom_machine) {
+	public function structure_variable_machines(string $nom_machine): bool
+	{
 		
 		$this->getListeOptions()->prepare_variable_standard ( array (
 				"filer",
@@ -263,7 +271,8 @@ class relation_fichier_machine extends definition_fichier {
 	 *
 	 * @return relation_fichier_machine
 	 */
-	public function &remplace_donnees_standard() {
+	public function &remplace_donnees_standard(): static
+	{
 		$liste_machines=$this->getListeMachines();
 		for($i = 0; $i < count ( $liste_machines ); $i ++) {
 			//Si le nom du fichier est force, on met ce nom
@@ -285,9 +294,10 @@ class relation_fichier_machine extends definition_fichier {
 
 	/**
 	 *
-	 * @return true
+	 * @return relation_fichier_machine
 	 */
-	public function verifie_surcharge_global() {
+	public function verifie_surcharge_global(): static
+	{
 		if ($this->getListeOptions()->verifie_option_existe ( "type_connexion_donnees", true ) !== false) {
 			$liste_machines=$this->getListeMachines();
 			for($i = 0; $i < count ( $liste_machines ); $i ++) {
@@ -302,8 +312,10 @@ class relation_fichier_machine extends definition_fichier {
 	 * Verifie la presence des variables "filer" necessaires au traitement.<br>
 	 *
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function prepare_liste_machine( $serial, $date) {
+	public function prepare_liste_machine( $serial, $date): bool
+	{
 		$liste_machine = array ();
 		
 		//gestion du filer en ligne de commande
@@ -364,9 +376,10 @@ class relation_fichier_machine extends definition_fichier {
 	 *
 	 * @param string $parametre Parametre recherche.
 	 * @param int $numero Position de la machine de reference.
-	 * @return string[false Parametre retourne,false sinon.
+	 * @return bool|string [false Parametre retourne,false sinon.
 	 */
-	public function renvoi_parametre_machine($parametre, $numero = 0) {
+	public function renvoi_parametre_machine(string $parametre, int $numero = 0): bool|string
+	{
 		$liste_machines=$this->getListeMachines();
 		if (isset ( $liste_machines [$numero] [$parametre] )) {
 			return $liste_machines [$numero] [$parametre];
@@ -377,9 +390,10 @@ class relation_fichier_machine extends definition_fichier {
 	/**
 	 * Modifie un champ existant de la structure.
 	 *
-	 * @return Bool true si OK, false sinon.
+	 * @return relation_fichier_machine true si OK, false sinon.
 	 */
-	public function modifie_donnees_structure_machine($parametre, $valeur, $numero = 0) {
+	public function modifie_donnees_structure_machine($parametre, $valeur, $numero = 0): relation_fichier_machine|bool
+	{
 		$liste_machines=$this->getListeMachines();
 		if (isset ( $liste_machines [$numero] )) {
 			$liste_machines [$numero] [$parametre] = $valeur;
@@ -391,9 +405,11 @@ class relation_fichier_machine extends definition_fichier {
 
 	/**
 	 * Renvoi un affichage de la structure.
+	 * @param int $niveau_debug
 	 * @return relation_fichier_machine
 	 */
-	public function affiche_donnees_machine($niveau_debug = 1) {
+	public function affiche_donnees_machine($niveau_debug = 1): static
+	{
 		$this->onDebug ( "Liste des machines :", $niveau_debug );
 		$this->onDebug ( $this->getListeMachines(), $niveau_debug );
 		return $this;
@@ -403,14 +419,16 @@ class relation_fichier_machine extends definition_fichier {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeMachines() {
+	public function getListeMachines(): array
+	{
 		return $this->liste_machines;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeMachines($liste_machines) {
+	public function &setListeMachines($liste_machines): static
+	{
 		$this->liste_machines  = $liste_machines;
 		return $this;
 	}
@@ -420,7 +438,7 @@ class relation_fichier_machine extends definition_fichier {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

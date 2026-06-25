@@ -178,11 +178,12 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_user
+	 * @return zabbix_user|abstract_log
 	 */
-	static function &creer_zabbix_user(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_user(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_user|abstract_log
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_user ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -195,9 +196,9 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_user
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetZabbixWsclient ( $liste_class ["zabbix_wsclient"] );
@@ -210,7 +211,6 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -219,10 +219,11 @@ class zabbix_user extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|zabbix_user True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setName ( $this->_valideOption ( array (
 				"zabbix",
@@ -292,7 +293,8 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Creer un definition d'un userGroup sous forme de tableau 
 	 * @return array;
 	 */
-	public function creer_definition_user_create_ws() {
+	public function creer_definition_user_create_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$userid = array (
 				"alias" => $this->getAlias (),
@@ -321,8 +323,10 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * Creer un user dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_user() {
+	public function creer_user(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$userdata = $this->creer_definition_user_create_ws ();
 		$this->onDebug ( $userdata, 1 );
@@ -334,7 +338,8 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Creer un definition d'un userGroup sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_user_delete_ws() {
+	public function creer_definition_user_delete_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$userid = array ();
 		
@@ -348,8 +353,10 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * supprime un user dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprime_user() {
+	public function supprime_user(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$userdata = $this->creer_definition_user_delete_ws ();
 		$this->onDebug ( $userdata, 1 );
@@ -361,7 +368,8 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Creer un definition d'un user sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_user_get_ws() {
+	public function creer_definition_user_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$filter = array (
 				"alias" => $this->getAlias () 
@@ -380,8 +388,10 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * recherche un user dans zabbix a partir de son alias (username)
 	 * son nom peux etre ajoute
 	 * @return array
+	 * @throws Exception
 	 */
-	public function recherche_user() {
+	public function recherche_user(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$userdata = $this->creer_definition_user_get_ws ();
 		$this->onDebug ( $userdata, 1 );
@@ -393,7 +403,8 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Creer un definition d'un user alias sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_userByAlias_get_ws() {
+	public function creer_definition_userByAlias_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"output" => "userid",
@@ -407,7 +418,8 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Creer un definition d'un userid sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_userid_get_ws() {
+	public function creer_definition_userid_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"userid" => $this->getUsrId () 
@@ -417,8 +429,10 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * recherche un host dans zabbix a partir de son alias (username)
 	 * @return zabbix_user
+	 * @throws Exception
 	 */
-	public function recherche_userid_by_Alias() {
+	public function recherche_userid_by_Alias(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_userByAlias_get_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -434,23 +448,20 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * 0 - disabled;
 	 * 1 - enabled;
-	 * @param string $type
-	 * @return number
+	 * @param $autologin
+	 * @return float|int|string
 	 */
-	public function retrouve_Autologin($autologin) {
+	public function retrouve_Autologin($autologin): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $autologin )) {
 			return $autologin;
 		}
-		switch (strtolower ( $autologin )) {
-			case "enabled" :
-				return 1;
-				break;
-			case "disabled" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($autologin)) {
+			"enabled" => 1,
+			default => 0,
+		};
+
 	}
 
 	/**
@@ -458,39 +469,36 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * 2 - Zabbix admin;
 	 * 3 - Zabbix super admin.
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Type($type) {
+	public function retrouve_Type($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "zabbix admin" :
-				return 2;
-				break;
-			case "zabbix super admin" :
-				return 3;
-				break;
-			case "zabbix user" :
-			default :
-		}
-		
-		return 1;
+		return match (strtolower($type)) {
+			"zabbix admin" => 2,
+			"zabbix super admin" => 3,
+			default => 1,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsrId() {
+	public function getUsrId(): string
+	{
 		return $this->userid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsrId($userid) {
+	public function &setUsrId($userid): static
+	{
 		$this->userid = $userid;
 		return $this;
 	}
@@ -498,14 +506,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAlias() {
+	public function getAlias(): string
+	{
 		return $this->alias;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAlias($alias) {
+	public function &setAlias($alias): static
+	{
 		$this->alias = $alias;
 		return $this;
 	}
@@ -513,14 +523,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAttemptClock() {
+	public function getAttemptClock(): int
+	{
 		return $this->attempt_clock;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAttemptClock($attempt_clock) {
+	public function &setAttemptClock($attempt_clock): static
+	{
 		$this->attempt_clock = $attempt_clock;
 		return $this;
 	}
@@ -528,14 +540,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAttemptFailed() {
+	public function getAttemptFailed(): int
+	{
 		return $this->attempt_failed;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAttemptFailed($attempt_failed) {
+	public function &setAttemptFailed($attempt_failed): static
+	{
 		$this->attempt_failed = $attempt_failed;
 		return $this;
 	}
@@ -543,14 +557,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAttemptIp() {
+	public function getAttemptIp(): string
+	{
 		return $this->attempt_ip;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAttemptIp($attempt_ip) {
+	public function &setAttemptIp($attempt_ip): static
+	{
 		$this->attempt_ip = $attempt_ip;
 		return $this;
 	}
@@ -558,14 +574,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAutologin() {
+	public function getAutologin(): int
+	{
 		return $this->autologin;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAutologin($autologin) {
+	public function &setAutologin($autologin): static
+	{
 		$this->autologin = $this->retrouve_Autologin ( $autologin );
 		return $this;
 	}
@@ -573,14 +591,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAutologout() {
+	public function getAutologout(): int
+	{
 		return $this->autologout;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAutologout($autologout) {
+	public function &setAutologout($autologout): static
+	{
 		$this->autologout = $autologout;
 		return $this;
 	}
@@ -588,14 +608,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLang() {
+	public function getLang(): string
+	{
 		return $this->lang;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLang($lang) {
+	public function &setLang($lang): static
+	{
 		$this->lang = $lang;
 		return $this;
 	}
@@ -603,14 +625,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getName() {
+	public function getName(): string
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setName($name) {
+	public function &setName($name): static
+	{
 		$this->name = $name;
 		return $this;
 	}
@@ -618,14 +642,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRefresh() {
+	public function getRefresh(): int
+	{
 		return $this->refresh;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRefresh($refresh) {
+	public function &setRefresh($refresh): static
+	{
 		$this->refresh = $refresh;
 		return $this;
 	}
@@ -633,14 +659,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRowsPerPage() {
+	public function getRowsPerPage(): int
+	{
 		return $this->rows_per_page;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRowsPerPage($rows_per_page) {
+	public function &setRowsPerPage($rows_per_page): static
+	{
 		$this->rows_per_page = $rows_per_page;
 		return $this;
 	}
@@ -648,14 +676,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSurname() {
+	public function getSurname(): string
+	{
 		return $this->surname;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSurname($surname) {
+	public function &setSurname($surname): static
+	{
 		$this->surname = $surname;
 		return $this;
 	}
@@ -663,14 +693,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTheme() {
+	public function getTheme(): string
+	{
 		return $this->theme;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTheme($theme) {
+	public function &setTheme($theme): static
+	{
 		$this->theme = $theme;
 		return $this;
 	}
@@ -678,14 +710,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getType() {
+	public function getType(): string
+	{
 		return $this->type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setType($type) {
+	public function &setType($type): static
+	{
 		$this->type = $this->retrouve_Type ( $type );
 		return $this;
 	}
@@ -693,14 +727,16 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUrl() {
+	public function getUrl(): string
+	{
 		return $this->url;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUrl($url) {
+	public function &setUrl($url): static
+	{
 		$this->url = $url;
 		return $this;
 	}
@@ -708,46 +744,52 @@ class zabbix_user extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword() {
+	public function getPassword(): string
+	{
 		return $this->passwd;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPassword($passwd) {
+	public function &setPassword($passwd): static
+	{
 		$this->passwd = $passwd;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_usermedia
+	 * @return zabbix_usermedia|null
 	 */
-	public function &getObjetListeMedia() {
+	public function &getObjetListeMedia(): ?zabbix_usermedia
+	{
 		return $this->liste_media;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetListeMedia(&$liste_media) {
+	public function &setObjetListeMedia(&$liste_media): static
+	{
 		$this->liste_media = $liste_media;
 		return $this;
 	}
 
 	/**
-	* @codeCoverageIgnore
-	* @return zabbix_usergroups
-	*/
-	public function &getObjetListeUserGroups() {
+	 * @codeCoverageIgnore
+	 * @return zabbix_usergroups|null
+	 */
+	public function &getObjetListeUserGroups(): ?zabbix_usergroups
+	{
 		return $this->liste_usergroups;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetListeUserGroups(&$liste_usergroups) {
+	public function &setObjetListeUserGroups(&$liste_usergroups): static
+	{
 		$this->liste_usergroups = $liste_usergroups;
 		return $this;
 	}
@@ -758,7 +800,8 @@ class zabbix_user extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -776,9 +819,6 @@ class zabbix_user extends zabbix_fonctions_standard {
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_user_url '' Url de l'utilisateur pour redirection apres connexion";
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_user_password 'xxx' Password de l'utilisateur en cas de creation";
 		$help = array_merge ( $help, zabbix_usermedia::help () );
-		$help = array_merge ( $help, zabbix_usergroups::help () );
-		
-		return $help;
+		return array_merge ( $help, zabbix_usergroups::help () );
 	}
 }
-?>

@@ -26,11 +26,12 @@ class datas extends Core\serveur_datas {
 	 * Instancie un objet de type datas.
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return datas
 	 */
-	static function &creer_datas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_datas(Core\options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): datas
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new datas ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -46,7 +47,7 @@ class datas extends Core\serveur_datas {
 	 * @param array $liste_class
 	 * @return datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_param ();
@@ -60,7 +61,6 @@ class datas extends Core\serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de serveur_datas
@@ -69,9 +69,10 @@ class datas extends Core\serveur_datas {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|datas True est OK, False sinon.
 	 */
-	public function retrouve_param() {
+	public function retrouve_param(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$donnee_itop = $this->_valideOption ( array (
 				"itop_machines",
@@ -96,9 +97,10 @@ class datas extends Core\serveur_datas {
 	 *
 	 * @param string $nom
 	 * @param string $protocole rest|soap|both par defaut 'both'
-	 * @return array false informations de configuration, false sinon.
+	 * @return array|false false informations de configuration, false sinon.
 	 */
-	public function valide_presence_data($nom, $protocole='both') {
+	public function valide_presence_data(string $nom, string $protocole='both'): array|false
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->valide_presence_serveur_data ( $nom, $protocole );
 	}
@@ -106,10 +108,12 @@ class datas extends Core\serveur_datas {
 	/**
 	 * Valide la presence de la definition d'un itop nomme : $nom
 	 *
-	 * @param string $nom
-	 * @return array false informations de configuration, false sinon.
+	 * @param $wsdl
+	 * @return array|bool false informations de configuration, false sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_wsdl($wsdl) {
+	public function retrouve_wsdl($wsdl): array|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_wsdl = $this->getWsdlDatas ();
 		if (! isset ( $liste_wsdl [$wsdl] )) {
@@ -120,15 +124,17 @@ class datas extends Core\serveur_datas {
 		}
 		return $liste_wsdl [$wsdl];
 	}
-	
+
 	/**
 	 * Connexion au soap preferences de itop
 	 *
 	 * @param string $nom nom du itop a connecter
-	 * @return bool TRUE si connexion ok, FALSE sinon
+	 * @param string $wsdl
+	 * @return bool|array TRUE si connexion ok, FALSE sinon
 	 * @throws Exception
 	 */
-	public function recupere_donnees_serveur($nom = "", $wsdl = "") {
+	public function recupere_donnees_serveur(string $nom = "", string $wsdl = ""): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($nom == "") {
 			return $this->onError ( "Il faut un nom de itop pour se connecter.", "", 5103 );
@@ -150,14 +156,16 @@ class datas extends Core\serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsdlDatas() {
+	public function getWsdlDatas(): bool|array
+	{
 		return $this->wsdl_data;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setWsdlData($wsdl_data) {
+	public function &setWsdlData($wsdl_data): static
+	{
 		if (is_array ( $wsdl_data )) {
 			$this->wsdl_data = $wsdl_data;
 		}
@@ -169,7 +177,8 @@ class datas extends Core\serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -179,4 +188,3 @@ class datas extends Core\serveur_datas {
 		return $help;
 	}
 }
-?>

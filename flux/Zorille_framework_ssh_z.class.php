@@ -116,11 +116,13 @@ class ssh_z extends abstract_log {
 	/**
 	 * Instancie un objet de type ssh_z. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return ssh_z
+	 * @throws Exception
 	 */
-	static function &creer_ssh_z(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_ssh_z(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): ssh_z
+	{
 		$objet = new ssh_z ( $sort_en_erreur, $entete );
 		$objet ->_initialise ( array (
 				"options" => $liste_option ) );
@@ -132,8 +134,9 @@ class ssh_z extends abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return ssh_z
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this ->setObjetFluxDatas ( flux_datas::creer_flux_datas ( $liste_class ['options'] ) ) 
@@ -157,8 +160,10 @@ class ssh_z extends abstract_log {
 	/**
 	 * Rempli les variables de ssh_z a partir de liste_option (ligne de commande)
 	 * @return ssh_z
+	 * @throws Exception
 	 */
-	public function retrouve_ssh_z_param() {
+	public function retrouve_ssh_z_param(): static
+	{
 		#Valeur par defaut si on ne rtavail pas avec la ligne de commande : NOUSERNAMEZ
 		$this ->setUsername ( $this ->getListeOptions () 
 			->renvoi_variables_standard ( array (
@@ -206,9 +211,11 @@ class ssh_z extends abstract_log {
 
 	/**
 	 * Rempli les variables de ssh_z a partir d'un tableau
-	 * @return ssh_z
+	 * @return bool|ssh_z
+	 * @throws Exception
 	 */
-	public function prepare_ssh_z() {
+	public function prepare_ssh_z(): bool|static
+	{
 		if ($this ->getCliDatas ()) {
 			return $this ->onWarning ( "Parametre en ligne commande qui remplace les fichier XML" );
 		}
@@ -254,7 +261,8 @@ class ssh_z extends abstract_log {
 	 * Identifie l'utilisateur sur la connexion active. return Bool True si OK, False sinon.
 	 * @throws Exception
 	 */
-	public function autentification() {
+	public function autentification(): bool
+	{
 		$retour = false;
 		$essai = 0;
 		
@@ -296,8 +304,10 @@ class ssh_z extends abstract_log {
 	 * Ouvre la connexion SSH sur une machine distante.
 	 *
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function ssh_connect() {
+	public function ssh_connect(): bool
+	{
 		$this ->onDebug ( "SSH connect", 1 );
 		// Si les parametres sont par fichier de conf
 		if ($this ->getCliDatas () == false) {
@@ -328,21 +338,25 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore Ouvre la connexion SSH sur une machine distante.
 	 *
-	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function connect() {
-		$this ->ssh_connect ();
+	public function connect(): bool
+	{
+		return $this ->ssh_connect ();
 	}
 
 	/**
 	 * Valide le retour d'une commande ssh
 	 * @param array $CODE_RETOUR tableau contenant le champ err
+	 * @param $commande
 	 * @param boolean $affiche_erreur
 	 * @param boolean $force_output
-	 * @return ssh_z
+	 * @return bool|ssh_z
 	 * @throws Exception
 	 */
-	public function valide_stderr(&$CODE_RETOUR, $commande, $affiche_erreur = true, $force_output = false) {
+	public function valide_stderr(array &$CODE_RETOUR, $commande, bool $affiche_erreur = true, bool $force_output = false): bool|static
+	{
 		if ($CODE_RETOUR ["err"] !== "") {
 			// Dans le cas d'un ajout automatique de cle dsa/rsa, ce n'est pas une erreur
 			if (preg_match ( '/^Warning: Permanently added .* \(DSA\) to the list of known hosts.[\n|\r]$/', $CODE_RETOUR ["err"] ) === 1) {
@@ -369,8 +383,10 @@ class ssh_z extends abstract_log {
 	 * @param bool $affiche_erreur Doit-on afficher l'erreur si elle se produit ?
 	 * @param bool $force_output Force le renvoi de l'output malgres un retour en erreur.
 	 * @return array Renvoi le retour de la commande dans la case "output", FALSE sinon; idem pour l'erreur dans "err".
+	 * @throws Exception
 	 */
-	public function ssh_commande($commande, $affiche_erreur = true, $force_output = false) {
+	public function ssh_commande(string $commande, bool $affiche_erreur = true, bool $force_output = false): array
+	{
 		$CODE_RETOUR = array ();
 		
 		$streams = $this ->getObjetSsh2Commandes () 
@@ -394,8 +410,10 @@ class ssh_z extends abstract_log {
 	 * @param string $commande Commande sh a appliquer SANS retour chariot.
 	 * @param bool $affiche_erreur Doit-on afficher l'erreur si elle se produit ?
 	 * @return array Renvoi le retour de la commande dans la case "output", FALSE sinon; idem pour l'erreur dans "err".
+	 * @throws Exception
 	 */
-	public function ssh_shell_commande($commande, $affiche_erreur = true, $type_shell = "xterm") {
+	public function ssh_shell_commande(string $commande, bool $affiche_erreur = true, $type_shell = "xterm"): array
+	{
 		$CODE_RETOUR = array ();
 		
 		$streams = $this ->getObjetSsh2Commandes () 
@@ -434,8 +452,10 @@ class ssh_z extends abstract_log {
 	 * @param string $dossier_distant dossier distant a lire.
 	 * @param string $nom_fichier Nom du fichier a trouver.
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function verifie_presence_fichier($dossier_distant, $nom_fichier) {
+	public function verifie_presence_fichier(string $dossier_distant, string $nom_fichier): bool
+	{
 		$output = $this ->ssh_commande ( "ls " . $dossier_distant . "/" . $nom_fichier, false,true );
 		if ($output ["output"] === false)
 			return false;
@@ -446,8 +466,10 @@ class ssh_z extends abstract_log {
 	/**
 	 * Creer un repertoire sur le ssh. Attention cette fonction fait un mkdir -p
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function creer_dossier($dossier, $mkdir = "mkdir") {
+	public function creer_dossier($dossier, $mkdir = "mkdir"): bool
+	{
 		$CMD = "if [ ! -d \"" . $dossier . "\" ]; then " . $mkdir . " -p " . $dossier . " ; fi";
 		$output = $this ->ssh_commande ( $CMD, false,true );
 		if ($output ["output"] === false)
@@ -459,7 +481,8 @@ class ssh_z extends abstract_log {
 	/**
 	 * Fermeture de la connexion SSH.
 	 */
-	public function ssh_close() {
+	public function ssh_close(): static
+	{
 		unset ( $this->connexion );
 		$connexion = false;
 		$this ->setSshConnexion ( $connexion );
@@ -489,7 +512,8 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSshConnexion(&$connexion) {
+	public function &setSshConnexion(&$connexion): static
+	{
 		$this->connexion = $connexion;
 		return $this;
 	}
@@ -497,14 +521,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNbRetry() {
+	public function getNbRetry(): int
+	{
 		return $this->nb_retry;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNbRetry($nbretry) {
+	public function &setNbRetry($nbretry): static
+	{
 		$this->nb_retry = $nbretry;
 		return $this;
 	}
@@ -513,14 +539,16 @@ class ssh_z extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return flux_datas
 	 */
-	public function &getObjetFluxDatas() {
+	public function &getObjetFluxDatas(): ?flux_datas
+	{
 		return $this->flux_datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetFluxDatas(&$flux_datas) {
+	public function &setObjetFluxDatas(&$flux_datas): static
+	{
 		$this->flux_datas = $flux_datas;
 		return $this;
 	}
@@ -528,14 +556,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMachineDistante() {
+	public function getMachineDistante(): string
+	{
 		return $this->machine_distante;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMachineDistante($machine_distante) {
+	public function &setMachineDistante($machine_distante): static
+	{
 		$this->machine_distante = $machine_distante;
 		return $this;
 	}
@@ -543,14 +573,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHost() {
+	public function getHost(): string
+	{
 		return $this->host;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHost($host) {
+	public function &setHost($host): static
+	{
 		$this->host = $host;
 		return $this;
 	}
@@ -558,14 +590,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAutentification() {
+	public function getAutentification(): bool
+	{
 		return $this->autentification;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAutentification($autentification) {
+	public function &setAutentification($autentification): static
+	{
 		$this->autentification = $autentification;
 		return $this;
 	}
@@ -573,14 +607,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->username;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsername($username) {
+	public function &setUsername($username): static
+	{
 		$this->username = $username;
 		return $this;
 	}
@@ -588,14 +624,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPasswd() {
+	public function getPasswd(): string
+	{
 		return $this->passwd;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPasswd($passwd) {
+	public function &setPasswd($passwd): static
+	{
 		$this->passwd = $passwd;
 		return $this;
 	}
@@ -603,14 +641,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPubkey() {
+	public function getPubkey(): string
+	{
 		return $this->pubkey;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPubkey($pubkey) {
+	public function &setPubkey($pubkey): static
+	{
 		$this->pubkey = $pubkey;
 		return $this;
 	}
@@ -618,14 +658,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrivkey() {
+	public function getPrivkey(): string
+	{
 		return $this->privkey;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPrivkey($privkey) {
+	public function &setPrivkey($privkey): static
+	{
 		$this->privkey = $privkey;
 		return $this;
 	}
@@ -633,14 +675,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassphrase() {
+	public function getPassphrase(): string
+	{
 		return $this->passphrase;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPassphrase($passphrase) {
+	public function &setPassphrase($passphrase): static
+	{
 		$this->passphrase = $passphrase;
 		return $this;
 	}
@@ -648,14 +692,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTypeSshKey() {
+	public function getTypeSshKey(): array
+	{
 		return $this->type_ssh_key;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTypeSshKey($type_ssh_key) {
+	public function &setTypeSshKey($type_ssh_key): static
+	{
 		$this->type_ssh_key = $type_ssh_key;
 		return $this;
 	}
@@ -663,14 +709,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPort() {
+	public function getPort(): int
+	{
 		return $this->port;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPort($port) {
+	public function &setPort($port): static
+	{
 		$this->port = $port;
 		return $this;
 	}
@@ -678,14 +726,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCmdSsh() {
+	public function getCmdSsh(): string
+	{
 		return $this->cmd_ssh;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCmdSsh($cmd_ssh) {
+	public function &setCmdSsh($cmd_ssh): static
+	{
 		$this->cmd_ssh = $cmd_ssh;
 		return $this;
 	}
@@ -693,14 +743,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCliDatas() {
+	public function getCliDatas(): bool
+	{
 		return $this->cli_datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCliDatas($cli_datas) {
+	public function &setCliDatas($cli_datas): static
+	{
 		$this->cli_datas = $cli_datas;
 		return $this;
 	}
@@ -708,14 +760,16 @@ class ssh_z extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getObjetSsh2Commandes() {
+	public function &getObjetSsh2Commandes(): ?ssh2_commandes
+	{
 		return $this->objet_ssh2_commandes;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetSsh2Commandes(&$objet_ssh2_commandes) {
+	public function &setObjetSsh2Commandes(&$objet_ssh2_commandes): static
+	{
 		$this->objet_ssh2_commandes = $objet_ssh2_commandes;
 		return $this;
 	}
@@ -727,7 +781,7 @@ class ssh_z extends abstract_log {
 	/**
 	 * **************** Statics *************************
 	 */
-	
+
 	/**
 	 *
 	 * @static @codeCoverageIgnore Ouvre un tunnel temporaire durant le temps défini dans timeout.
@@ -735,10 +789,13 @@ class ssh_z extends abstract_log {
 	 * @param int $port_passerelle Port utilisé sur la passerelle
 	 * @param string $host_distant Nom du host a atteindre
 	 * @param int $port_distant Port du host a atteindre
-	 * @param string $ssh_option
 	 * @param int $timeout Temps de vie du tunnel
+	 * @param string $ssh_option
+	 * @param string $ssh
+	 * @return bool
 	 */
-	static function creer_tunnel_temporaire($passerelle, $port_passerelle, $host_distant, $port_distant, $timeout = 60, $ssh_option = "", $ssh = "/usr/bin/ssh") {
+	static function creer_tunnel_temporaire(string $passerelle, int $port_passerelle, string $host_distant, int $port_distant, int $timeout = 60, string $ssh_option = "", string $ssh = "/usr/bin/ssh"): bool
+	{
 		$cmd=$ssh . " " . $ssh_option . " -f -L " . $port_passerelle . ":" . $host_distant . ":" . $port_distant . " " . $passerelle . " sleep " . $timeout . " >> /tmp/logfile 2>&1";
 		$retour = fonctions_standards::applique_commande_systeme ( $cmd );
 		
@@ -752,14 +809,14 @@ class ssh_z extends abstract_log {
 	/**
 	 * **************** Statics *************************
 	 */
-	
+
 	/**
 	 *
 	 * @static @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -777,4 +834,3 @@ class ssh_z extends abstract_log {
 		return $help;
 	}
 }
-?>

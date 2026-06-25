@@ -22,14 +22,15 @@ class desc_bd_power extends gestion_definition_table {
 	 * Instancie un objet de type desc_bd_power.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return desc_bd_power
 	 */
 	static function &creer_desc_bd_power(
-			&$liste_option,
-			$sort_en_erreur = true,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = true,
+		string      $entete = __CLASS__): desc_bd_power
+	{
 		$objet = new desc_bd_power ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -44,7 +45,8 @@ class desc_bd_power extends gestion_definition_table {
 	 * @return desc_bd_power
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -67,7 +69,8 @@ class desc_bd_power extends gestion_definition_table {
 		$this->charge_champs ();
 	}
 
-	private function charge_table() {
+	private function charge_table(): void
+	{
 		$this->setTable ( 'rack', "rack" );
 		$this->setTable ( 'wago_new', "wago" );
 		$this->setTable ( 'customer_DC2', "customer_DC2" );
@@ -78,7 +81,8 @@ class desc_bd_power extends gestion_definition_table {
 		$this->setTable ( 'consoDC6', "consoDC6" );
 	}
 
-	private function charge_champs() {
+	private function charge_champs(): void
+	{
 		$this->charge_champs_rack ();
 		$this->charge_champs_wago ();
 		$this->charge_champs_customer_DC2();
@@ -87,7 +91,6 @@ class desc_bd_power extends gestion_definition_table {
 		$this->charge_champs_consoDC5();
 		$this->charge_champs_customer_DC6();
 		$this->charge_champs_consoDC6();
-		return true;
 	}
 
 	/*
@@ -107,7 +110,8 @@ class desc_bd_power extends gestion_definition_table {
 | coeftmp  | varchar(5)   | YES  |     | NULL    |                |
 
 	 */
-	private function charge_champs_rack() {
+	private function charge_champs_rack(): void
+	{
 		$this->setChamp ( "compteur", "compteur", "rack", "numeric" );
 		$this->setChamp ( "row", "row", "rack", "text" );
 		$this->setChamp ( "col", "col", "rack", "text" );
@@ -122,7 +126,6 @@ class desc_bd_power extends gestion_definition_table {
 		$this->setChamp ( "status", "status", "rack", "text" );
 		$this->setChamp ( "id", "id", "rack", "numeric" );
 		$this->setChamp ( "coeftmp", "coeftmp", "rack", "text" );
-		return true;
 	}
 
 	/*
@@ -132,13 +135,13 @@ class desc_bd_power extends gestion_definition_table {
 | building | varchar(5) | YES  |     | NULL    |       |
 | room     | varchar(5) | YES  |     | NULL    |       |
 	 */
-	private function charge_champs_wago() {
+	private function charge_champs_wago(): void
+	{
 		$this->setChamp ( "num", "num", "wago", "numeric" );
 		$this->setChamp ( "amount", "amount", "wago", "numeric" );
 		$this->setChamp ( "date", "date", "wago", "date" );
 		$this->setChamp ( "building", "building", "wago", "text" );
 		$this->setChamp ( "room", "room", "wago", "text" );
-		return true;
 	}
 	
 	/*
@@ -151,11 +154,11 @@ class desc_bd_power extends gestion_definition_table {
 | pdpm     | varchar(20)  | NO   | PRI | NULL    |       |
 
 	 */
-	private function charge_champs_customer_DC2() {
+	private function charge_champs_customer_DC2(): void
+	{
 		$this->setChamp ( "name", "name", "customer_DC2", "text" );
 		$this->setChamp ( "customer", "customer", "customer_DC2", "text" );
 		$this->setChamp ( "pdpm", "pdpm", "customer_DC2", "text" );
-		return true;
 	}
 	
 	/*
@@ -167,41 +170,42 @@ class desc_bd_power extends gestion_definition_table {
 | amount   | varchar(100) | YES  |     | NULL    |       |
 
 	 */
-	private function charge_champs_consoDC2() {
+	private function charge_champs_consoDC2(): void
+	{
 		$this->setChamp ( "pdpm", "pdpm", "consoDC2", "text" );
 		$this->setChamp ( "customer", "customer", "consoDC2", "text" );
 		$this->setChamp ( "location", "location", "consoDC2", "text" );
 		$this->setChamp ( "date", "date", "consoDC2", "text" );
 		$this->setChamp ( "datets", "datets", "consoDC2", "date" );
 		$this->setChamp ( "amount", "amount", "consoDC2", "text" );
-		return true;
 	}
 	
-	private function charge_champs_customer_DC5() {
+	private function charge_champs_customer_DC5(): void
+	{
 		$this->setChamp ( "name", "name", "customer_DC5", "text" );
 		$this->setChamp ( "customer", "customer", "customer_DC5", "text" );
 		$this->setChamp ( "pdpm", "pdpm", "customer_DC5", "text" );
-		return true;
 	}
 	
-	private function charge_champs_consoDC5() {
+	private function charge_champs_consoDC5(): void
+	{
 		$this->setChamp ( "pdpm", "pdpm", "consoDC5", "text" );
 		$this->setChamp ( "customer", "customer", "consoDC5", "text" );
 		$this->setChamp ( "location", "location", "consoDC5", "text" );
 		$this->setChamp ( "date", "date", "consoDC5", "text" );
 		$this->setChamp ( "datets", "datets", "consoDC5", "date" );
 		$this->setChamp ( "amount", "amount", "consoDC5", "text" );
-		return true;
 	}
 	
-	private function charge_champs_customer_DC6() {
+	private function charge_champs_customer_DC6(): void
+	{
 		$this->setChamp ( "name", "name", "customer_DC6", "text" );
 		$this->setChamp ( "customer", "customer", "customer_DC6", "text" );
 		$this->setChamp ( "pdpm", "pdpm", "customer_DC6", "text" );
-		return true;
 	}
 	
-	private function charge_champs_consoDC6() {
+	private function charge_champs_consoDC6(): bool
+	{
 		$this->setChamp ( "pdpm", "pdpm", "consoDC6", "text" );
 		$this->setChamp ( "customer", "customer", "consoDC6", "text" );
 		$this->setChamp ( "location", "location", "consoDC6", "text" );
@@ -211,4 +215,3 @@ class desc_bd_power extends gestion_definition_table {
 		return true;
 	}
 }
-?>

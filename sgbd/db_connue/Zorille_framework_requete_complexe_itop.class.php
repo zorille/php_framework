@@ -7,6 +7,8 @@
  */
 namespace Zorille\framework;
 
+use Exception;
+
 /**
  * class requete_complexe_itop<br>
  *
@@ -23,14 +25,15 @@ class requete_complexe_itop extends desc_bd_itop {
 	 * Instancie un objet de type requete_complexe_itop.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return requete_complexe_itop
 	 */
 	static function &creer_requete_complexe_itop(
-			&$liste_option,
-			$sort_en_erreur = true,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = true,
+		string      $entete = __CLASS__): requete_complexe_itop
+	{
 		$objet = new requete_complexe_itop ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -45,7 +48,7 @@ class requete_complexe_itop extends desc_bd_itop {
 	 * @return requete_complexe_itop
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -53,8 +56,12 @@ class requete_complexe_itop extends desc_bd_itop {
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
+	/**
+	 * @throws Exception
+	 */
 	public function select_table_params(
-			$table_recherche) {
+			$table_recherche): \PDO|bool|array
+	{
 		$table = 'INFORMATION_SCHEMA.TABLES';
 		$select = array ();
 		$this->fabrique_select ( $select, $table, "AUTO_INCREMENT" );
@@ -68,4 +75,3 @@ class requete_complexe_itop extends desc_bd_itop {
 		/* SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'DatabaseName' AND TABLE_NAME = 'TableName'; */
 	}
 }
-?>

@@ -5,9 +5,10 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class base64<br>
-
  *
  * Encode/Decode au format base64.
  * @package Lib
@@ -26,11 +27,15 @@ class base64 extends abstract_log {
 	 * Instancie un objet de type base64.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return base64
+	 * @throws Exception
 	 */
-	static function &creer_base64(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_base64(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): base64 {
 		$objet = new base64 ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -44,8 +49,9 @@ class base64 extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return base64
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -55,11 +61,13 @@ class base64 extends abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
 	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -71,14 +79,8 @@ class base64 extends abstract_log {
 	 * @param string $string
 	 * @return boolean
 	 */
-	public function is_encoded($string) {
-		if (base64_decode ( $string,true ) !== false) {
-			$retour = true;
-		} else {
-			$retour = false;
-		}
-		
-		return $retour;
+	public function is_encoded(string $string): bool {
+		return base64_decode ( $string,true ) !== false;
 	}
 
 	/**
@@ -86,7 +88,7 @@ class base64 extends abstract_log {
 	 * @param string $string
 	 * @return string
 	 */
-	public function encode($string) {
+	public function encode(string $string): string {
 		return base64_encode ( $string );
 	}
 
@@ -95,7 +97,7 @@ class base64 extends abstract_log {
 	 * @param string $string
 	 * @return string
 	 */
-	public function decode($string) {
+	public function decode(string $string): string {
 		return base64_decode ( $string,true );
 	}
 
@@ -103,14 +105,13 @@ class base64 extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "\t--base64_encoded";
+		$help [__CLASS__] ["text"] = [
+			"\t--base64_encoded"
+		];
 		
 		return $help;
 	}
 }
-
-?>

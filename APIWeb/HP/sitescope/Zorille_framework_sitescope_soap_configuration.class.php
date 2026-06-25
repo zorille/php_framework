@@ -25,11 +25,12 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 * Instancie un objet de type sitescope_soap_configuration.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet 
 	 * @return sitescope_soap_configuration
 	 */
-	static function &creer_sitescope_soap_configuration(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_sitescope_soap_configuration(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): sitescope_soap_configuration
+	{
 		$objet = new sitescope_soap_configuration ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
 				"options" => $liste_option 
@@ -42,7 +43,7 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 * @param array $liste_class
 	 * @return sitescope_soap_configuration
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -55,7 +56,6 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de sitescope_datas
@@ -69,7 +69,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 * @return bool TRUE si connexion ok, FALSE sinon
 	 * @throws Exception
 	 */
-	public function connect($nom = "") {
+	public function connect(string $nom = ""): bool
+	{
 		return $this->connexion ( $nom, $this->getWsdlNom () );
 	}
 
@@ -78,7 +79,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 *     	
 	 * @return array|false false en cas d'erreur
 	 */
-	public function retrouve_FullConfiguration_sitescope() {
+	public function retrouve_FullConfiguration_sitescope(): bool|array
+	{
 		$this->onDebug ( "retrouve Full Configuration de sitescope", 1 );
 		$full_confs = $this->applique_requete_soap ( "getFullConfigurationSnapshot", array (
 				$this->getSoapConnection ()
@@ -96,7 +98,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 *
 	 * @return array|false false en cas d'erreur
 	 */
-	public function retrouve_MonitoringStatus_sitescope() {
+	public function retrouve_MonitoringStatus_sitescope(): bool|array
+	{
 		$this->onDebug ( "retrouve Monitoring Status de sitescope", 1 );
 		$liste_MonitoringStatus = $this->applique_requete_soap ( "getSiteScopeMonitoringStatus", array (
 				$this->getSoapConnection ()
@@ -113,9 +116,14 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * Desactive les alertes durant une periode
 	 *
+	 * @param $fullpathgroup
+	 * @param $diff_start_ms
+	 * @param $diff_end_ms
+	 * @param $description
 	 * @return Bool
 	 */
-	public function disableAssociatedAlerts($fullpathgroup, $diff_start_ms, $diff_end_ms, $description) {
+	public function disableAssociatedAlerts($fullpathgroup, $diff_start_ms, $diff_end_ms, $description): bool
+	{
 		$this->onDebug ( "disableAssociatedAlerts de sitescope", 1 );
 		$this->onDebug ( $fullpathgroup, 2 );
 
@@ -139,7 +147,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 *
 	 * @return Bool
 	 */
-	public function enableAssociatedAlerts($fullpathgroup, $description) {
+	public function enableAssociatedAlerts($fullpathgroup, $description): bool
+	{
 		$this->onDebug ( "enableAssociatedAlerts de sitescope", 1 );
 		$this->onDebug ( $fullpathgroup, 2 );
 		
@@ -162,9 +171,11 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * supprime un groupe
 	 *
+	 * @param $fullpathgroup
 	 * @return Bool
 	 */
-	public function deleteGroupEx($fullpathgroup) {
+	public function deleteGroupEx($fullpathgroup): bool
+	{
 		$this->onDebug ( "deleteGroupEx de sitescope", 1 );
 		$this->onDebug ( $fullpathgroup, 2 );
 		
@@ -184,7 +195,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 *
 	 * @return Bool
 	 */
-	public function disableGroupFullPathEx($fullpathgroup, $periode_en_seconde) {
+	public function disableGroupFullPathEx($fullpathgroup, $periode_en_seconde): bool
+	{
 		$this->onDebug ( "disableGroupFullPathEx de sitescope", 1 );
 		$this->onDebug ( $fullpathgroup, 2 );
 		
@@ -203,9 +215,14 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * Desactive un groupe
 	 *
+	 * @param $fullpathgroup
+	 * @param $diff_start_ms
+	 * @param $diff_end_ms
+	 * @param $description
 	 * @return Bool
 	 */
-	public function disableGroupWithDescription($fullpathgroup, $diff_start_ms, $diff_end_ms, $description) {
+	public function disableGroupWithDescription($fullpathgroup, $diff_start_ms, $diff_end_ms, $description): bool
+	{
 		$this->onDebug ( "disableGroupWithDescription de sitescope", 1 );
 		$this->onDebug ( $fullpathgroup, 2 );
 		
@@ -226,9 +243,12 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * enable un groupe
 	 *
+	 * @param $fullpathgroup
+	 * @param $description
 	 * @return Bool
 	 */
-	public function enableGroupEx($fullpathgroup, $description) {
+	public function enableGroupEx($fullpathgroup, $description): bool
+	{
 		$this->onDebug ( "enableGroupEx de sitescope", 1 );
 		$this->onDebug ( $fullpathgroup, 2 );
 		
@@ -249,9 +269,11 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * supprime un moniteur
 	 *
+	 * @param $fullpathMonitor
 	 * @return Bool
 	 */
-	public function deleteMonitorEx($fullpathMonitor) {
+	public function deleteMonitorEx($fullpathMonitor): bool
+	{
 		$this->onDebug ( "deleteMonitorEx de sitescope", 1 );
 		$this->onDebug ( $fullpathMonitor, 2 );
 		
@@ -269,9 +291,12 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * Desactive un moniteur
 	 *
+	 * @param $fullpathMonitor
+	 * @param $periode_en_seconde
 	 * @return Bool
 	 */
-	public function disableMonitorEx($fullpathMonitor, $periode_en_seconde) {
+	public function disableMonitorEx($fullpathMonitor, $periode_en_seconde): bool
+	{
 		$this->onDebug ( "disableMonitorEx de sitescope", 1 );
 		$this->onDebug ( $fullpathMonitor, 2 );
 		
@@ -290,9 +315,14 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * Desactive un moniteur
 	 *
+	 * @param $fullpathMonitor
+	 * @param $diff_start_ms
+	 * @param $diff_end_ms
+	 * @param $description
 	 * @return Bool
 	 */
-	public function disableMonitorWithDescription($fullpathMonitor, $diff_start_ms, $diff_end_ms, $description) {
+	public function disableMonitorWithDescription($fullpathMonitor, $diff_start_ms, $diff_end_ms, $description): bool
+	{
 		$this->onDebug ( "disableMonitorWithDescription de sitescope", 1 );
 		$this->onDebug ( $fullpathMonitor, 2 );
 		
@@ -313,9 +343,12 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * Desactive un moniteur
 	 *
+	 * @param $fullpathMonitor
+	 * @param $description
 	 * @return Bool
 	 */
-	public function enableMonitorWithDescription($fullpathMonitor, $description) {
+	public function enableMonitorWithDescription($fullpathMonitor, $description): bool
+	{
 		$this->onDebug ( "enableMonitorWithDescription de sitescope", 1 );
 		$this->onDebug ( $fullpathMonitor, 2 );
 		
@@ -335,9 +368,12 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * Desactive un moniteur
 	 *
+	 * @param $fullpathMonitor
+	 * @param $propertiesFilter
 	 * @return Bool
 	 */
-	public function getMonitorSnapshots($fullpathMonitor, $propertiesFilter) {
+	public function getMonitorSnapshots($fullpathMonitor, $propertiesFilter): bool
+	{
 		$this->onDebug ( "getMonitorSnapshots de sitescope", 1 );
 		$this->onDebug ( $fullpathMonitor, 1 );
 		
@@ -373,9 +409,13 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * supprime un remote server
 	 *
+	 * @param $OS
+	 * @param $remoteName
 	 * @return Bool
+	 * @throws Exception
 	 */
-	public function deleteRemote($OS, $remoteName) {
+	public function deleteRemote($OS, $remoteName): bool
+	{
 		$this->onDebug ( "deleteRemote de sitescope", 1 );
 		$this->onDebug ( $OS, 2 );
 		$this->onDebug ( $remoteName, 2 );
@@ -398,7 +438,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/******************************* Remote Server ********************************/
 	
 	/******************************* Templates ********************************/
-	public function deploySingleTemplateEx($fullPathToTemplateName, $actualVariablesValuesHashMap, $pathToTargetGroup) {
+	public function deploySingleTemplateEx($fullPathToTemplateName, $actualVariablesValuesHashMap, $pathToTargetGroup): bool
+	{
 		//void deploySingleTemplateEx(String[] fullPathToTemplateName, HashMap actualVariablesValuesHashMap, String[] pathToTargetGroup, String username, String password)
 		$this->onDebug ( "deploySingleTemplateEx de sitescope", 1 );
 		$this->onDebug ( $fullPathToTemplateName, 2 );
@@ -418,7 +459,11 @@ class sitescope_soap_configuration extends sitescope_datas {
 		return true;
 	}
 
-	public function deploySingleTemplateWithResult($fullPathToTemplateName, $actualVariablesValuesHashMap, $pathToTargetGroup, $connectToServer = false, $testRemotes = false) {
+	/**
+	 * @throws Exception
+	 */
+	public function deploySingleTemplateWithResult($fullPathToTemplateName, $actualVariablesValuesHashMap, $pathToTargetGroup, $connectToServer = false, $testRemotes = false): bool|array
+	{
 		//HashMap deploySingleTemplateWithResult(String[] fullPathToTemplateName, HashMap actualVariablesValuesHashMap, String[] pathToTargetGroup, boolean connectToServer, boolean testRemotes, String username, String password, String identifier)
 		$this->onDebug ( "deploySingleTemplateWithResult de sitescope", 1 );
 		$this->onDebug ( $fullPathToTemplateName, 2 );
@@ -439,7 +484,7 @@ class sitescope_soap_configuration extends sitescope_datas {
 					"" 
 			) );
 		} catch ( Exception $e ) {
-			if (strpos ( $e->getMessage (), "java.lang.IndexOutOfBoundsException: Index: 0, Size: 0" ) !== false) {
+			if (str_contains($e->getMessage(), "java.lang.IndexOutOfBoundsException: Index: 0, Size: 0")) {
 				$this->onWarning ( "Pas d'index trouve : " . $e->getMessage () );
 				return array ();
 			}
@@ -450,7 +495,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 		return $retour_sis;
 	}
 
-	public function publishTemplateChanges($fullPathToTemplateName, $selectedGroupsWithVariablesHashMap, $connectToServer = false, $deleteOnUpdate = false) {
+	public function publishTemplateChanges($fullPathToTemplateName, $selectedGroupsWithVariablesHashMap, $connectToServer = false, $deleteOnUpdate = false): bool
+	{
 		//String publishTemplateChanges(String templatePath, HashMap selectedGroupsWithVariables, boolean connectToServer, boolean deleteOnUpdate, String username, String password, String identifier)
 		$this->onDebug ( "publishTemplateChanges de sitescope", 1 );
 		$this->onDebug ( $fullPathToTemplateName, 2 );
@@ -480,7 +526,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsdlNom() {
+	public function getWsdlNom(): string
+	{
 		return $this->wsdl;
 	}
 
@@ -490,7 +537,8 @@ class sitescope_soap_configuration extends sitescope_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -499,4 +547,4 @@ class sitescope_soap_configuration extends sitescope_datas {
 		return $help;
 	}
 }
-?>
+

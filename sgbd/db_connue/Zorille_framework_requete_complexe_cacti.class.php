@@ -19,11 +19,12 @@ class requete_complexe_cacti extends desc_bd_cacti {
 	 * Instancie un objet de type requete_complexe_cacti.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return requete_complexe_cacti
 	 */
-	static function &creer_requete_complexe_cacti(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_requete_complexe_cacti(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): requete_complexe_cacti
+	{
 		$objet = new requete_complexe_cacti ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -38,7 +39,7 @@ class requete_complexe_cacti extends desc_bd_cacti {
 	 * @param array $liste_class
 	 * @return requete_complexe_cacti
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -46,4 +47,3 @@ class requete_complexe_cacti extends desc_bd_cacti {
 	/*********************** Creation de l'objet *********************/
 	
 }
-?>

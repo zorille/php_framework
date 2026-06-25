@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -19,16 +20,16 @@ class UserRequest extends ci {
 	 * var privee
 	 *
 	 * @access private
-	 * @var Organization
+	 * @var Organization|null
 	 */
-	private $Organization = null;
+	private ?Organization $Organization = null;
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var Contact
+	 * @var Contact|null
 	 */
-	private $Contact = null;
+	private ?Contact $Contact = null;
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -40,12 +41,14 @@ class UserRequest extends ci {
 	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return UserRequest
+	 * @throws Exception
 	 */
 	static function &creer_UserRequest(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		string|bool   $sort_en_erreur = false,
+		string        $entete = __CLASS__
+	): self {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new UserRequest ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -59,9 +62,10 @@ class UserRequest extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return UserRequest
+	 * @throws Exception
 	 */
-	public function &_initialise(
-			$liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'UserRequest' )
 			->champ_obligatoire_standard ()
@@ -76,20 +80,20 @@ class UserRequest extends ci {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		string|bool $sort_en_erreur = false,
+		string      $entete = __CLASS__
+	) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return self
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): self {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'title' => false,
@@ -101,8 +105,10 @@ class UserRequest extends ci {
 		return $this;
 	}
 
-	public function retrouve_UserRequest(
-			$name) {
+	/**
+	 * @throws Exception
+	 */
+	public function retrouve_UserRequest($name): self {
 		return $this->creer_oql ( array (
 				'title' => $name
 		) )
@@ -111,13 +117,12 @@ class UserRequest extends ci {
 
 	/**
 	 * Prepare les parametres standards d'un objet
-	 * @param array $parametres
+	 * @param array $parameters
 	 * @return array liste des parametres au format iTop
 	 */
-	public function prepare_params_UserRequest(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
+	public function prepare_params_UserRequest(array $parameters): array {
+		$params = $this->prepare_standard_params ( $parameters );
+		foreach ($parameters as $champ => $valeur ) {
 			switch ($champ) {
 				case 'caller_email' :
 					$params ['caller_id'] = $this->getObjetItopContact ()
@@ -138,40 +143,39 @@ class UserRequest extends ci {
 	/**
 	 * Fait un requete OQL sur les champs Mandatory
 	 * @param array $fields Liste de champs pour filtrer la requete au format ['champ']='valeur'
-	 * @return Change
+	 * @return self
 	 */
-	public function creer_oql_UserRequest(
-			$fields = array ()) {
+	public function creer_oql_UserRequest(array $fields = []): self {
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
-				case 'org_id' :
-					$filtre ['org_name'] = $fields ['org_name'];
-					break;
-				case 'caller_id' :
-					$filtre ['caller_email'] = $fields ['caller_email'];
+				case 'caller_email' :
+					$filtre ['caller_id'] = "SELECT Person WHERE email='{$fields ['caller_email']}";
 					break;
 				default :
 					$filtre [$field] = $fields [$field];
 			}
 		}
 		if (! isset ( $filtre ['status'] )) {
-			$filtre ['status'] = "NOT IN ('closed')";
+			$filtre ['status'] = " NOT IN ('closed')";
 		}
+		$this->onDebug ( $filtre, 1 );
 		return parent::creer_oql ( $filtre );
 	}
 
 	/**
 	 * Champs existants : title, org_name, description, impact, urgency, caller_email, contacts_list, functionalcis_list, workorders_list
+	 * @param array $parameters
 	 * @return UserRequest
+	 * @throws Exception
 	 */
-	public function gestion_UserRequest(
-			$parametres) {
+	public function gestion_UserRequest(array $parameters): self {
 		$this->onDebug ( __METHOD__, 1 );
-		$params = $this->prepare_params_UserRequest ( $parametres );
+		$this->onDebug ( $parameters, 1 );
+		$params = $this->prepare_params_UserRequest ( $parameters );
 		$this->onDebug ( $params, 1 );
 		return $this->valide_mandatory_fields ()
-			->creer_oql_UserRequest ( $parametres )
+			->creer_oql_UserRequest ( $params )
 			->creer_ci ( $params ['title'], $params );
 	}
 
@@ -182,15 +186,14 @@ class UserRequest extends ci {
 	 * @codeCoverageIgnore
 	 * @return Organization
 	 */
-	public function &getObjetItopOrganization() {
+	public function &getObjetItopOrganization(): Organization {
 		return $this->Organization;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopOrganization(
-			&$Organization) {
+	public function &setObjetItopOrganization(Organization &$Organization): self {
 		$this->Organization = $Organization;
 		return $this;
 	}
@@ -199,18 +202,35 @@ class UserRequest extends ci {
 	 * @codeCoverageIgnore
 	 * @return Contact
 	 */
-	public function &getObjetItopContact() {
+	public function &getObjetItopContact(): Contact {
 		return $this->Contact;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetItopContact(
-			&$Contact) {
+	public function &setObjetItopContact(Contact &$Contact): self {
 		$this->Contact = $Contact;
 		return $this;
 	}
+
+    /**
+     * @throws Exception
+     */
+    public function core_stimulus(
+        string     $class,
+        string     $stimulus,
+        array|string $fields,
+        string     $output_fields = '*',
+        string     $comment = ''): array|string
+    {
+        return $this->getObjetItopWsclientRest()
+            ->core_stimulus(
+                $class, $stimulus,
+                $this->getId(), $fields,
+                $output_fields, $comment
+            );
+    }
 
 	/**
 	 * ***************************** ACCESSEURS *******************************
@@ -218,11 +238,11 @@ class UserRequest extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "UserRequest :";
+		$help [__CLASS__] ["text"] = [
+            "UserRequest :"
+        ];
 		return $help;
 	}
 }
-?>

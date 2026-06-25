@@ -9,6 +9,7 @@ namespace Zorille\framework;
 
 use Zorille\o365 as o365;
 use Exception as Exception;
+use Zorille\o365\Message;
 
 /**
  * class mail_alert<br> Gere un point de monitoring.
@@ -67,14 +68,14 @@ class mail_alert extends moniteur {
 	 * Instancie un objet de type mail_alert.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @return mail_alert false un objet MONITEUR ou FALSE en cas d'erreur.
-	 * @param string $sort_en_erreur Prend les valeurs oui/non
 	 * @param string $entete Entete des logs de l'objet
-	 * @return mail_alert
+	 * @return mail_alert false un objet MONITEUR ou FALSE en cas d'erreur.
+	 * @throws Exception
 	 */
 	static function &creer_mail_alert(
-			&$liste_option,
-			$entete = __CLASS__) {
+		options &$liste_option,
+		string  $entete = __CLASS__): mail_alert
+	{
 		$mail_alert = new mail_alert ();
 		$mail_alert->_initialise ( array (
 				"options" => $liste_option
@@ -87,9 +88,10 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return mail_alert
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->retrouve_mail_alert_param ();
 		return $this;
@@ -101,8 +103,8 @@ class mail_alert extends moniteur {
 	/**
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
-	 * @param string $status Temps en minutes entre deux points de monitoring.
-	 * @param string $bb_client Chemin du programme bbClient.
+	 * @param string $sort_en_erreur
+	 * @param string $entete
 	 */
 	public function __construct(
 			$sort_en_erreur = "non",
@@ -118,7 +120,8 @@ class mail_alert extends moniteur {
 	 * @return moniteur
 	 * @throws Exception
 	 */
-	public function retrouve_mail_alert_param() {
+	public function retrouve_mail_alert_param(): moniteur|bool
+	{
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( array (
 				"mail_alert",
@@ -138,15 +141,13 @@ class mail_alert extends moniteur {
 		return $this->setObjectMessage ( $message );
 	}
 
-	/**
-	 * Prepare le mail et l'envoi si il y a au moins un fichier
-	 * @param array $liste_contacts liste des adresses email pour le TO mais en Bcc
-	 * @param string $message message de type HTML
-	 * @param array $liste_fichiers Liste des fichiers (de moins de 4Mo) a envoyer avec leur chemin relatif/absolu
-	 * @return mail_alert
-	 */
-	public function prepare_message(
-			$liste_fichiers = array ()) {
+    /**
+     * Prepare le mail et l'envoi si il y a au moins un fichier
+     * @param array $liste_fichiers Liste des fichiers (de moins de 4Mo) a envoyer avec leur chemin relatif/absolu
+     * @return mail_alert
+     */
+	public function prepare_message(array $liste_fichiers = []): static
+	{
 		// Charset, le sujet et le From par ligne de commande
 		if (! empty ( $liste_fichiers )) {
 			$this->getObjectMessage ()
@@ -156,9 +157,9 @@ class mail_alert extends moniteur {
 			->getObjEnveloppe ()
 			->setSujet ( $this->getListeOptions ()
 			->renvoi_variables_standard ( array (
-				"mail_alert",
-				"titre"
-		) ) )
+                    "mail_alert",
+                    "titre"
+            ) ) )
 			->ecrit_html ( $this->getDatas () );
 		// Si le no_mail n'est pas active
 		if (! $this->getObjectMessage ()
@@ -177,39 +178,30 @@ class mail_alert extends moniteur {
 	 *
 	 * @return string Couleur en cours (green,yellow,red).
 	 */
-	public function renvoi_couleur() {
-		switch ($this->getCouleurEnCours ()) {
-			case $this->getYellow () :
-				return $this->getYellow ();
-				break;
-			case $this->getRed () :
-				return $this->getRed ();
-				break;
-		}
-		return $this->getGreen ();
+	public function renvoi_couleur(): string
+	{
+		return match ($this->getCouleurEnCours()) {
+			$this->getYellow() => $this->getYellow(),
+			$this->getRed() => $this->getRed(),
+			default => $this->getGreen(),
+		};
 	}
 
 	/**
 	 * Accesseur en ecriture<br> Ajoute du texte au mail_alert en cours.<br> On peut ajouter une couleur specifique pour les donnees ajoutees grace a $ajoute_couleur
 	 *
 	 * @param string $donnees Texte a ajouter dans le mail_alert.
-	 * @param string|false $ajoute_couleur Couleur a ajouter (green,yellow,red), FALSE sinon.
+	 * @param bool|string $ajoute_couleur Couleur a ajouter (green,yellow,red), FALSE sinon.
 	 * @return mail_alert
 	 */
 	public function ecrit(
-			$donnees,
-			$ajoute_couleur = false) {
-		switch ($ajoute_couleur) {
-			case "green" :
-				$donnees = "&" . $this->getGreen () . " " . $donnees;
-				break;
-			case "yellow" :
-				$donnees = "&" . $this->getYellow () . " " . $donnees;
-				break;
-			case "red" :
-				$donnees = "&" . $this->getRed () . " " . $donnees;
-				break;
-		}
+		$donnees,
+		bool|string $ajoute_couleur = false) {
+		$donnees = match($ajoute_couleur) {
+			'green' => "&{$this->getGreen ()} {$donnees}",
+			'yellow' => "&{$this->getYellow ()} {$donnees}",
+			'red' => "&{$this->getRed ()} {$donnees}"
+		};
 		parent::ecrit ( $donnees );
 		return $this;
 	}
@@ -218,7 +210,8 @@ class mail_alert extends moniteur {
 	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a vert.
 	 * @return mail_alert
 	 */
-	public function green() {
+	public function green(): static
+	{
 		return $this->setCouleurEnCours ( $this->getGreen () );
 	}
 
@@ -226,7 +219,8 @@ class mail_alert extends moniteur {
 	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a orange.
 	 * @return mail_alert
 	 */
-	public function yellow() {
+	public function yellow(): static
+	{
 		return $this->setCouleurEnCours ( $this->getYellow () );
 	}
 
@@ -234,7 +228,8 @@ class mail_alert extends moniteur {
 	 * Accesseur en ecriture<br> Met la couleur de la page de monitoring a rouge.
 	 * @return mail_alert
 	 */
-	public function red() {
+	public function red(): static
+	{
 		return $this->setCouleurEnCours ( $this->getRed () );
 	}
 
@@ -244,7 +239,8 @@ class mail_alert extends moniteur {
 	 * @return true.
 	 */
 	public function send(
-			$liste_fichier = array ()) {
+			$liste_fichier = array ()): bool
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "envoi_uniquement_alerte", false ) !== false) {
 			// On se limite a la couleur rouge
@@ -264,7 +260,8 @@ class mail_alert extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGreen() {
+	public function getGreen(): string
+	{
 		return $this->green;
 	}
 
@@ -272,7 +269,8 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 */
 	public function &setGreen(
-			$green) {
+			$green): static
+	{
 		$this->green = $green;
 		return $this;
 	}
@@ -280,7 +278,8 @@ class mail_alert extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getYellow() {
+	public function getYellow(): string
+	{
 		return $this->yellow;
 	}
 
@@ -288,7 +287,8 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 */
 	public function &setYellow(
-			$yellow) {
+			$yellow): static
+	{
 		$this->yellow = $yellow;
 		return $this;
 	}
@@ -296,7 +296,8 @@ class mail_alert extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRed() {
+	public function getRed(): string
+	{
 		return $this->red;
 	}
 
@@ -304,7 +305,8 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 */
 	public function &setRed(
-			$red) {
+			$red): static
+	{
 		$this->red = $red;
 		return $this;
 	}
@@ -312,7 +314,8 @@ class mail_alert extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCouleurEnCours() {
+	public function getCouleurEnCours(): string
+	{
 		return $this->couleur_en_cours;
 	}
 
@@ -320,7 +323,8 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCouleurEnCours(
-			$couleur_en_cours) {
+			$couleur_en_cours): static
+	{
 		$this->couleur_en_cours = $couleur_en_cours;
 		return $this;
 	}
@@ -328,7 +332,8 @@ class mail_alert extends moniteur {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTypeOS() {
+	public function getTypeOS(): string
+	{
 		return $this->type_os;
 	}
 
@@ -336,16 +341,18 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTypeOS(
-			$type_os) {
+			$type_os): static
+	{
 		$this->type_os = $type_os;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return o365\Message|message
+	 * @return Message|null
 	 */
-	public function &getObjectMessage() {
+	public function &getObjectMessage(): o365\Message|null
+	{
 		return $this->message;
 	}
 
@@ -353,7 +360,8 @@ class mail_alert extends moniteur {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjectMessage(
-			$message) {
+			$message): static
+	{
 		$this->message = $message;
 		return $this;
 	}
@@ -364,10 +372,10 @@ class mail_alert extends moniteur {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Gestion d'un mail_alert";
@@ -378,4 +386,3 @@ class mail_alert extends moniteur {
 		return $help;
 	}
 }
-?>

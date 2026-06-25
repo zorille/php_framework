@@ -21,11 +21,13 @@ class Vim25 extends vmwareVim25ManagedObject {
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $vmware_webservice Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Vim25
+	 * @throws Exception
 	 */
-	static function &creer_Vim25(&$liste_option, &$vmware_webservice, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_Vim25(Core\options &$liste_option, vmwareWsclient &$vmware_webservice, bool|string $sort_en_erreur = false, string $entete = __CLASS__): Vim25
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Vim25 ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -42,7 +44,7 @@ class Vim25 extends vmwareVim25ManagedObject {
 	 * @return Vim25
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -55,7 +57,6 @@ class Vim25 extends vmwareVim25ManagedObject {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -67,7 +68,8 @@ class Vim25 extends vmwareVim25ManagedObject {
 	 * To Delete des qu'une autre methode apparait
 	 * @return string
 	 */
-	public function affiche_les_Tests() {
+	public function affiche_les_Tests(): string
+	{
 		return "affiche";
 	}
 	/************************* Accesseurs ***********************/
@@ -77,7 +79,7 @@ class Vim25 extends vmwareVim25ManagedObject {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -85,5 +87,3 @@ class Vim25 extends vmwareVim25ManagedObject {
 		return $help;
 	}
 }
-
-?>

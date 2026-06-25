@@ -43,7 +43,7 @@ class ucmdb_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return ucmdb_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setSoapConnection ( soap::creer_soap ( $this->getListeOptions () ) )
@@ -58,7 +58,6 @@ class ucmdb_datas extends serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Serveur de serveur_datas
@@ -163,7 +162,8 @@ class ucmdb_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

@@ -21,15 +21,16 @@ class users extends ci {
 	 * Instancie un objet de type users. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $dolibarr_webservice_rest Reference sur un objet wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return users
+	 * @throws Exception
 	 */
 	static function &creer_users(
-			&$liste_option,
-			&$dolibarr_webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$dolibarr_webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): users {
 				Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new users ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -44,9 +45,10 @@ class users extends ci {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return users
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->reset_resource ();
 	}
@@ -58,11 +60,10 @@ class users extends ci {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+			string|bool $sort_en_erreur = false,
+			string      $entete = __CLASS__) {
 		// Gestion du parent
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -71,7 +72,7 @@ class users extends ci {
 	 * Remet l'url par defaut
 	 * @return users
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): static {
 		return parent::reset_resource ()->addResource ( 'users' );
 	}
 
@@ -82,7 +83,7 @@ class users extends ci {
 	 * @throws Exception
 	 */
 	public function getAllUsers(
-			$params = array()) {
+		array $params = array()): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
 			->get ( $params );
@@ -91,8 +92,9 @@ class users extends ci {
 
 	/**
 	 * @return users
+	 * @throws Exception
 	 */
-	public function retrouve_liste_utilisateurs_dolibarr() {
+	public function retrouve_liste_utilisateurs_dolibarr(): static {
 		$this->getAllUsers ();
 		foreach ( $this->getListEntry () as $user ) {
 			$this->onInfo ( $user ['login'] );
@@ -102,8 +104,9 @@ class users extends ci {
 
 	/**
 	 * @return users
+	 * @throws Exception
 	 */
-	public function retrouve_liste_utilisateurs_infraops_dolibarr() {
+	public function retrouve_liste_utilisateurs_infraops_dolibarr(): static {
 		$this->getAllUsers ();
 		foreach ( $this->getListEntry () as $user ) {
 			if (empty ( $user ['societe_id'] ) && isset ( $user ['login'] ) && ! empty ( $user ['lastname'] ) && ! empty ( $user ['firstname'] )) {
@@ -122,11 +125,10 @@ class users extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "users :";
 		return $help;
 	}
 }
-?>

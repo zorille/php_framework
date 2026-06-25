@@ -1,17 +1,22 @@
 <?php
+
 /**
  * @author dvargas
  * @package Lib
  *
  */
 namespace Zorille\VMware;
+
 use Zorille\framework as Core;
-use \Exception as Exception;
-use \SimpleXMLElement as SimpleXMLElement;
-use \stdClass as stdClass;
+use Exception as Exception;
+use SimpleXMLElement as SimpleXMLElement;
+use stdClass as stdClass;
+use Zorille\framework\gestion_connexion_url;
+use Zorille\framework\options;
+use Zorille\framework\soap;
+
 /**
- * class vmwareWsclient<br>
- * Renvoi des information via un webservice.
+ * class vmwareWsclient<br> Renvoi des information via un webservice.
  * @package Lib
  * @subpackage VMWare
  */
@@ -53,22 +58,23 @@ class vmwareWsclient extends Core\abstract_log {
 	 */
 	/**
 	 * Instancie un objet de type vmwareWsclient. @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
+	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareDatas &$vmwareDatas Reference sur un objet vmwareDatas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareWsclient
+	 * @throws Exception
 	 */
 	static function &creer_vmwareWsclient(
-			&$liste_option, 
-			&$vmwareDatas, 
-			$sort_en_erreur = false, 
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		vmwareDatas  &$vmwareDatas,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): vmwareWsclient
+	{
 		$objet = new vmwareWsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
-				"vmwareDatas" => $vmwareDatas 
+				"vmwareDatas" => $vmwareDatas
 		) );
 		return $objet;
 	}
@@ -76,13 +82,15 @@ class vmwareWsclient extends Core\abstract_log {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return vmwareWsclient
+	 * @return vmwareWsclient|bool
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["vmwareDatas"] )) {
-			return $this->onError ( "il faut un objet de type vmwareDatas" );
+			$r = $this->onError ( "il faut un objet de type vmwareDatas" );
+			return $r;
 		}
 		$this->setObjetVMWareDatas ( $liste_class ["vmwareDatas"] )
 			->setObjetSoap ( Core\soap::creer_soap ( $liste_class ["options"] ) )
@@ -95,14 +103,13 @@ class vmwareWsclient extends Core\abstract_log {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct(
-			$sort_en_erreur = false, 
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -111,9 +118,11 @@ class vmwareWsclient extends Core\abstract_log {
 	 * Prepare l'url de connexion au vmware nomme $nom
 	 * @param string $nom
 	 * @return boolean|vmwareWsclient
+	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): bool|vmwareWsclient|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_vmware = $this->getObjetVMWareDatas ()
 			->valide_presence_vmware_data ( $nom );
@@ -136,12 +145,11 @@ class vmwareWsclient extends Core\abstract_log {
 			->retrouve_variables_tableau ( $this->getObjetVMWareDatas ()
 			->recupere_donnees_vmware_serveur ( $nom, "vimService" ) )
 			->connect ();
-			
 		// On creer un ServiceInstance de VMWare pour connaitre la liste des services disponible
 		$ServiceInstance = $this->applique_requete_soap ( $this->getObjectServiceInstance ()
 			->getNomFonction (), array (
 				$this->getObjectServiceInstance ()
-					->prepare_SoapMessage () 
+					->prepare_SoapMessage ()
 		) );
 		$this->getObjectServiceInstance ()
 			->setAuth ( $ServiceInstance );
@@ -158,10 +166,12 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @param string $fonction Fonction SOAP demandee
 	 * @param array $params Parametres de la fonction
 	 * @return boolean
+	 * @throws Exception
 	 */
 	public function applique_requete_soap(
-			$fonction, 
-			$params = array()) {
+		string $fonction,
+		array  $params = array ()): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		try {
 			if ($this->getListeOptions ()
@@ -169,6 +179,8 @@ class vmwareWsclient extends Core\abstract_log {
 				$this->onWarning ( "DRY RUN : " . $fonction . " NON EXECUTE" );
 				$resultat = false;
 			} else {
+				$this->onDebug ( "Function : " . $fonction, 2 );
+				$this->onDebug ( $params, 2 );
 				$result = $this->getObjetSoap ()
 					->getSoapClient ()
 					->__soapCall ( $fonction, $params );
@@ -193,10 +205,12 @@ class vmwareWsclient extends Core\abstract_log {
 	 * Connecte le user
 	 *
 	 * @return array|false false en cas d'erreur
+	 * @throws Exception
 	 */
 	public function login(
-			$username, 
-			$password) {
+			$username,
+			$password): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		// login via sessionManager
 		$soap_message = $this->getObjectServiceInstance ()
@@ -204,7 +218,7 @@ class vmwareWsclient extends Core\abstract_log {
 		$soap_message->userName = $username;
 		$soap_message->password = $password;
 		$soap_session = $this->applique_requete_soap ( "Login", array (
-				$soap_message 
+				$soap_message
 		) );
 		$this->onDebug ( $soap_session, 2 );
 		return $soap_session;
@@ -213,14 +227,16 @@ class vmwareWsclient extends Core\abstract_log {
 	/**
 	 * logout
 	 * @return array|boolean
+	 * @throws Exception
 	 */
-	public function logout() {
+	public function logout(): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		// logout via sessionManager
 		$soap_message = $this->getObjectServiceInstance ()
 			->creer_entete_sessionManager_this ();
 		$soap_session = $this->applique_requete_soap ( "Logout", array (
-				$soap_message 
+				$soap_message
 		) );
 		$this->onDebug ( $soap_session, 2 );
 		return $soap_session;
@@ -231,10 +247,12 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @param stdClass $donnees
 	 * @param string $type array|xml
 	 * @return array|Core\xml
+	 * @throws Exception
 	 */
 	public function convertit_donnees(
-			$donnees, 
-			$type = "xml") {
+		stdClass $donnees,
+		string   $type = "xml"): Core\xml|array
+	{
 		$xml_vm_info = new SimpleXMLElement ( "<?xml version=\"1.0\" encoding=\"UTF-8\"?><objects/>" );
 		$this->renvoi_donnees_xml ( $donnees, $xml_vm_info );
 		$xml = Core\xml::creer_xml ( $this->getListeOptions () );
@@ -251,13 +269,14 @@ class vmwareWsclient extends Core\abstract_log {
 
 	/**
 	 * Transforme un soap VMWare en SimpleXMLElement
-	 * @param stdClass|array $object_src
+	 * @param array|stdClass $object_src
 	 * @param SimpleXMLElement $xml_output
 	 * @return vmwareWsclient
 	 */
 	public function renvoi_donnees_xml(
-			$object_src, 
-			&$xml_output) {
+		array|stdClass   $object_src,
+		SimpleXMLElement &$xml_output): static
+	{
 		if (is_array ( $object_src )) {
 			foreach ( $object_src as $key => $value ) {
 				$this->traite_valeur_xml ( $key, $value, $xml_output );
@@ -277,13 +296,15 @@ class vmwareWsclient extends Core\abstract_log {
 	/**
 	 * Choix du traitement en fonction de la valeur. Traitement particulier pour propSet
 	 * @param string $key
-	 * @param stdClass|array|string $value
+	 * @param array|string|stdClass $value
 	 * @param SimpleXMLElement $xml_output
+	 * @return vmwareWsclient
 	 */
 	public function traite_valeur_xml(
-			$key, 
-			$value, 
-			&$xml_output) {
+		string                $key,
+		array|string|stdClass $value,
+		SimpleXMLElement      &$xml_output): static
+	{
 		if (is_numeric ( $key )) {
 			$this->renvoi_donnees_xml ( $value, $xml_output );
 		} elseif (is_array ( $value )) {
@@ -330,7 +351,8 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @return vmwareDatas
 	 */
-	public function &getObjetVMWareDatas() {
+	public function &getObjetVMWareDatas(): ?vmwareDatas
+	{
 		return $this->vmwareDatas;
 	}
 
@@ -338,7 +360,8 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetVMWareDatas(
-			&$vmwareDatas) {
+			&$vmwareDatas): static
+	{
 		$this->vmwareDatas = $vmwareDatas;
 		return $this;
 	}
@@ -346,7 +369,8 @@ class vmwareWsclient extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNomServeur() {
+	public function getNomServeur(): string
+	{
 		return $this->nom_serveur;
 	}
 
@@ -354,16 +378,18 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setNomServeur(
-			$nom_serveur) {
+			$nom_serveur): static
+	{
 		$this->nom_serveur = $nom_serveur;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return vmwareServiceInstance
+	 * @return vmwareServiceInstance|null
 	 */
-	public function &getObjectServiceInstance() {
+	public function &getObjectServiceInstance(): ?vmwareServiceInstance
+	{
 		return $this->ObjectServiceInstance;
 	}
 
@@ -371,16 +397,18 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjectServiceInstance(
-			$ObjectServiceInstance) {
+			$ObjectServiceInstance): static
+	{
 		$this->ObjectServiceInstance = $ObjectServiceInstance;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return Core\soap
+	 * @return soap|null
 	 */
-	public function &getObjetSoap() {
+	public function &getObjetSoap(): ?Core\soap
+	{
 		return $this->objet_soap;
 	}
 
@@ -388,7 +416,8 @@ class vmwareWsclient extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetSoap(
-			&$objet_soap) {
+			&$objet_soap): static
+	{
 		$this->objet_soap = $objet_soap;
 		return $this;
 	}
@@ -399,10 +428,9 @@ class vmwareWsclient extends Core\abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		return $help;
 	}
 }
-?>

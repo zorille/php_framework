@@ -23,11 +23,13 @@ class vmwareComputeResource extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareComputeResource
+	 * @throws Exception
 	 */
-	static function &creer_vmwareComputeResource(&$liste_option, &$ObjectVmwareWsclient, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareComputeResource(options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwareComputeResource
+	{
 		$objet = new vmwareComputeResource ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -43,7 +45,7 @@ class vmwareComputeResource extends vmwareManagedEntity {
 	 * @return vmwareComputeResource
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -56,7 +58,6 @@ class vmwareComputeResource extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -69,10 +70,11 @@ class vmwareComputeResource extends vmwareManagedEntity {
 	 * Change the compute resource configuration. 
 	 * @param vmwareComputeResourceConfigSpec $ComputeResourceConfigSpec A set of configuration changes to apply to the compute resource
 	 * @param boolean $modify Flag to specify whether the specification ("spec") should be applied incrementally
-	 * @return vmwareTask
+	 * @return bool
 	 * @throws Exception
 	 */
-	public function ReconfigureComputeResource_Task($ComputeResourceConfigSpec, $modify = false) {
+	public function ReconfigureComputeResource_Task(vmwareComputeResourceConfigSpec $ComputeResourceConfigSpec, bool $modify = false): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this();
@@ -95,14 +97,16 @@ class vmwareComputeResource extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getComputeResource() {
+	public function &getComputeResource(): stdClass
+	{
 		return $this->getManagedObject();
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setComputeResource($ComputeResource) {
+	public function &setComputeResource($ComputeResource): vmwareComputeResource
+	{
 		return $this->setManagedObject($ComputeResource);
 	}
 
@@ -112,7 +116,7 @@ class vmwareComputeResource extends vmwareManagedEntity {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -120,5 +124,3 @@ class vmwareComputeResource extends vmwareManagedEntity {
 		return $help;
 	}
 }
-
-?>

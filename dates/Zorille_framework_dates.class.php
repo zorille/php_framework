@@ -54,11 +54,13 @@ class dates extends abstract_log {
 	 * Instancie un objet de type dates.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return dates
+	 * @throws Exception
 	 */
-	static function &creer_dates(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_dates(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): dates
+	{
 		if ($liste_option->verifie_option_existe ( 'date', true ) !== false) {
 			$liste_dates = new dates ( $liste_option->getOption ( 'date' ), "no_date", $sort_en_erreur, $entete );
 			if ($liste_option->verifie_option_existe ( "ajouter_week_extreme" ) !== false) {
@@ -92,7 +94,7 @@ class dates extends abstract_log {
 				$liste_dates->ajout_date ( $liste_dates->retrouve_month ( $date_debut, 0 ), "month" );
 				$liste_dates->ajout_date ( $liste_dates->retrouve_month ( $date_fin, 0 ), "month" );
 			}
-			
+
 			//Dans le cas ou $liste_option['date'] est relatif (+/- x day/week/year ...)
 			$liste_option->setOption ( 'date_debut', $date_debut );
 			$liste_option->setOption ( 'date_fin', $date_fin );
@@ -114,8 +116,11 @@ class dates extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return dates
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+		array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -134,7 +139,7 @@ class dates extends abstract_log {
 	 * @return Bool Renvoi FALSE en cas d'erreur, TRUE sinon.
 	 * @throws Exception
 	 */
-	public function __construct($date_depart, $date_fin = "no_date", $sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct($date_depart, string $date_fin = "no_date", $sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -152,10 +157,11 @@ class dates extends abstract_log {
 	 * Prend une date au format YYYYMMDD et renvoi un tableau year/month/day
 	 *
 	 * @param string $date Date au format YYYYMMDD
-	 * @return array false un tableau avec les cases year/month/day remplie ou FALSE si le format ne correspond pas.
+	 * @return array|bool false un tableau avec les cases year/month/day remplie ou FALSE si le format ne correspond pas.
 	 * @throws Exception
 	 */
-	public function parse_date($date) {
+	public function parse_date(string $date): array|bool
+	{
 		if (strlen ( $date ) == 8) {
 			$date_parser ['year'] = substr ( $date, 0, 4 );
 			$date_parser ['month'] = substr ( $date, 4, 2 );
@@ -172,9 +178,10 @@ class dates extends abstract_log {
 	 * La chaine au format anglais US doit etre en accord avec la syntaxe des dates GNU.
 	 *
 	 * @param string $date Date au format YYYYMMDD ou au format anglais US
-	 * @return string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
+	 * @return bool|string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
 	 */
-	public static function extraire_date($date) {
+	public static function extraire_date(string $date): bool|string
+	{
 		if (! preg_match ( "/^[0-9]{8}$/", $date )) {
 			$stamp_date = strtotime ( $date );
 			if ($stamp_date !== false)
@@ -191,9 +198,10 @@ class dates extends abstract_log {
 	 * Prend un timestamp epoc.<br>
 	 *
 	 * @param int $timestamp timestamp Epoc
-	 * @return string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
+	 * @return bool|string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
 	 */
-	public function extraire_date_timestamp($timestamp) {
+	public function extraire_date_timestamp(int $timestamp): bool|string
+	{
 		if (is_int ( $timestamp )) {
 			return date ( "Ymd", $timestamp );
 		}
@@ -205,10 +213,12 @@ class dates extends abstract_log {
 	 * Prend une date au format Ymd et renvoi le timestamp.<br>
 	 *
 	 * @param int $date date au format Ymd
-	 * @return int false un timestamp epoc ou FALSE si le format ne correspond pas.
+	 * @param string $hour
+	 * @return bool|int false un timestamp epoc ou FALSE si le format ne correspond pas.
 	 * @throws Exception
 	 */
-	public function extraire_timestamp($date, $hour = "00:00:00") {
+	public function extraire_timestamp(int $date, string $hour = "00:00:00"): bool|int
+	{
 		$parse_date = $this->parse_date ( $date );
 		$split = explode ( ":", $hour );
 		if ($parse_date !== false && count ( $split ) == 3) {
@@ -222,9 +232,10 @@ class dates extends abstract_log {
 	 * Prend un timestamp epoc et renvoi une date au format Y-m-d H:i:s.<br>
 	 *
 	 * @param int $timestamp timestamp Epoc
-	 * @return string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
+	 * @return bool|string false une string au format YYYYMMDD ou FALSE si le format ne correspond pas.
 	 */
-	public function extraire_date_mysql_timestamp($timestamp) {
+	public function extraire_date_mysql_timestamp(int $timestamp): bool|string
+	{
 		if (is_numeric ( $timestamp )) {
 			return date ( "Y-m-d H:i:s", substr ( $timestamp, 0, 10 ) );
 		}
@@ -236,10 +247,11 @@ class dates extends abstract_log {
 	 * Prend une date au format Ymd et renvoi la date au format Y-m-d H:i:s.<br>
 	 *
 	 * @param int $date date au format Ymd
-	 * @return int false un timestamp epoc ou FALSE si le format ne correspond pas.
+	 * @return bool|int|string false un timestamp epoc ou FALSE si le format ne correspond pas.
 	 * @throws Exception
 	 */
-	public function extraire_date_mysql_standard($date, $hour = "00:00:00") {
+	public function extraire_date_mysql_standard($date, string $hour = "00:00:00"): bool|int|string
+	{
 		$ts_date = $this->extraire_timestamp ( $date, $hour );
 		if ($ts_date !== false) {
 			return date ( "Y-m-d H:i:s", $ts_date ); // Y-m-d H:i:s
@@ -251,10 +263,11 @@ class dates extends abstract_log {
 	/**
 	 * Transforme une date mysql au format Y-m-d H:i:s vers un objet DateTime
 	 *
-	 * @param string $mysql_date        	
-	 * @return DateTime
+	 * @param string $mysql_date
+	 * @return DateTime|bool|array
 	 */
-	public function prepare_date_mysql($mysql_date) {
+	public function prepare_date_mysql(string $mysql_date): DateTime|bool|array
+	{
 		$retour = date_parse_from_format ( "Y-m-d H:i:s", $mysql_date );
 		$this->onDebug ( $retour, 2 );
 		if (is_array ( $retour ) && $retour ["error_count"] > 0) {
@@ -270,7 +283,8 @@ class dates extends abstract_log {
 	 * @param string $mysql_date Date au format "Y-m-d H:i:s"
 	 * @return int Timestamp de la date en argument
 	 */
-	public function timestamp_mysql_date($mysql_date) {
+	public function timestamp_mysql_date(string $mysql_date): int
+	{
 		// On recupere le timestamp du last_done
 		$array_mysql_date = $this->prepare_date_mysql ( $mysql_date );
 		
@@ -297,7 +311,8 @@ class dates extends abstract_log {
 	 * @return Bool Renvoi FALSE en cas d'erreur, TRUE sinon.
 	 * @throws Exception
 	 */
-	public function creer_date($date) {
+	public function creer_date(string $date): bool
+	{
 		// permet de verifier le format de la date
 		$date_depart_hash = $this->parse_date ( $date );
 		
@@ -319,7 +334,8 @@ class dates extends abstract_log {
 	 * @return Bool Renvoi FALSE en cas d'erreur, TRUE sinon.
 	 * @throws Exception
 	 */
-	public function creer_liste_dates($date_depart, $date_fin) {
+	public function creer_liste_dates(string $date_depart, string $date_fin): bool
+	{
 		$date_depart_hash = $this->parse_date ( $date_depart );
 		$date_fin_hash = $this->parse_date ( $date_fin );
 		
@@ -345,11 +361,12 @@ class dates extends abstract_log {
 	 * Il verifie si une ou la liste des dates sont des lundi ou pas.<br>
 	 * Lorsqu'il trouve un lundi, il l'ajoute a la liste des lundis. Il ordonne cette liste.<br>
 	 *
-	 * @param array $hash_day Date au format array(year/month/day
+	 * @param array|string $hash_day Date au format array(year/month/day
 	 * @return Bool Renvoi FALSE en cas d'erreur, TRUE sinon.
 	 * @throws Exception
 	 */
-	public function week_day($hash_day = "non") {
+	public function week_day(array|string $hash_day = "non"): bool
+	{
 		if ($hash_day == "non") {
 			foreach ( $this->liste_dates as $date ) {
 				$date_locale = $this->parse_date ( $date );
@@ -370,11 +387,12 @@ class dates extends abstract_log {
 	 * Il verifie si une ou la liste des dates sont des debut de mois ou pas.<br>
 	 * Lorsqu'il trouve un debut de mois, il l'ajoute a la liste des mois. Il ordonne cette liste.<br>
 	 *
-	 * @param array $hash_day Date au format array(year/month/day)
+	 * @param array|string $hash_day Date au format array(year/month/day)
 	 * @return Bool Renvoi FALSE en cas d'erreur, TRUE sinon.
 	 * @throws Exception
 	 */
-	public function month_day($hash_day = "non") {
+	public function month_day(array|string $hash_day = "non"): bool
+	{
 		if ($hash_day == "non") {
 			foreach ( $this->liste_dates as $date ) {
 				$date_locale = $this->parse_date ( $date );
@@ -396,10 +414,11 @@ class dates extends abstract_log {
 	 *
 	 * @param string $date Date de debut au format YYYYMMDD
 	 * @param string $time Horaire au format HH:MM:SS
-	 * @return int false si OK, False sinon.
+	 * @return bool|int false si OK, False sinon.
 	 * @throws Exception
 	 */
-	public function renvoi_timestamp($date, $time = "00:00:00") {
+	public function renvoi_timestamp(string $date, string $time = "00:00:00"): bool|int
+	{
 		$date_hash = $this->parse_date ( $date );
 		
 		$liste_hour = explode ( ":", $time );
@@ -414,14 +433,17 @@ class dates extends abstract_log {
 	}
 	
 	// Fonction d'acces aux variables
-	
+
 
 	/**
 	 * Accesseur en lecture a une date
 	 *
-	 * @return array Renvoi la date.
+	 * @param $case
+	 * @param string $type
+	 * @return bool|string Renvoi la date.
 	 */
-	public function recupere_date($case, $type = "day") {
+	public function recupere_date($case, string $type = "day"): bool|string
+	{
 		$CODE_RETOUR = false;
 		switch ($type) {
 			case "week" :
@@ -446,18 +468,20 @@ class dates extends abstract_log {
 	/**
 	 * Accesseur en lecture a la liste du premier jour de la liste des jours
 	 *
-	 * @return array Renvoi le premier jour de la liste des jours.
+	 * @return bool|string Renvoi le premier jour de la liste des jours.
 	 */
-	public function recupere_premier_jour() {
+	public function recupere_premier_jour(): bool|string
+	{
 		return $this->recupere_date ( 0, "day" );
 	}
 
 	/**
 	 * Accesseur en lecture a la liste du dernier jour de la liste des jours
 	 *
-	 * @return array Renvoi la liste du dernier jour de la liste des jours
+	 * @return bool|string Renvoi la liste du dernier jour de la liste des jours
 	 */
-	public function recupere_dernier_jour() {
+	public function recupere_dernier_jour(): bool|string
+	{
 		$compteur = count ( $this->getListeDates () ) - 1;
 		if ($compteur < 0) {
 			return false;
@@ -473,10 +497,11 @@ class dates extends abstract_log {
 	 *
 	 * @param string $date Date au format YYYYMMDD
 	 * @param string $type Type de date : day/week/month
-	 * @return array Renvoi la liste des mois.
+	 * @return bool|array Renvoi la liste des mois.
 	 * @throws Exception
 	 */
-	public function ajout_date($date, $type = "day") {
+	public function ajout_date(string $date, string $type = "day"): bool|array
+	{
 		$date_locale = $this->parse_date ( $date );
 		if ($date_locale) {
 			switch ($type) {
@@ -506,7 +531,8 @@ class dates extends abstract_log {
 	 * @param string $date Date au format YYYYMMDD
 	 * @return bool true si vrai, false sinon.
 	 */
-	public function date_existe_dans_liste_day($date) {
+	public function date_existe_dans_liste_day(string $date): bool
+	{
 		return in_array ( $date, $this->getListeDates () );
 	}
 
@@ -520,7 +546,8 @@ class dates extends abstract_log {
 	 * @return string Renvoi la date calculee.
 	 * @throws Exception
 	 */
-	public function retrouve_jour($date, $nb_jours, $anterieur = false) {
+	public function retrouve_jour(string $date, int $nb_jours, bool $anterieur = false): string
+	{
 		$hash_date = $this->parse_date ( $date );
 		if ($hash_date && is_int ( $nb_jours )) {
 			if ($anterieur)
@@ -541,7 +568,8 @@ class dates extends abstract_log {
 	 * @return string Renvoi le jour de la semain
 	 * @throws Exception
 	 */
-	public function retrouve_nom_jour_semaine($date) {
+	public function retrouve_nom_jour_semaine(string $date): string
+	{
 		$hash_date = $this->parse_date ( $date );
 		return strftime ( "%A", mktime ( 0, 0, 0, $hash_date ['month'], $hash_date ['day'], $hash_date ['year'] ) );
 	}
@@ -557,7 +585,8 @@ class dates extends abstract_log {
 	 * @return string Renvoi la date calculee.
 	 * @throws Exception
 	 */
-	public function retrouve_week($date, $nb_week, $anterieur = false) {
+	public function retrouve_week(string $date, int $nb_week, bool $anterieur = false): string
+	{
 		$hash_date = $this->parse_date ( $date );
 		if ($hash_date && is_int ( $nb_week )) {
 			$nb_week *= 7;
@@ -589,7 +618,8 @@ class dates extends abstract_log {
 	 * @return string Renvoi la date calculee.
 	 * @throws Exception
 	 */
-	public function retrouve_month($date, $nb_month, $anterieur = false) {
+	public function retrouve_month(string $date, int $nb_month, bool $anterieur = false): string
+	{
 		$hash_date = $this->parse_date ( $date );
 		if ($hash_date && is_int ( $nb_month )) {
 			if ($anterieur)
@@ -605,37 +635,22 @@ class dates extends abstract_log {
 	/**
 	 *
 	 * Permet de retrouver le trimestre correspondant a la date en argument
-	 *        
+	 *
 	 * @param string $date Date de depart au format YYYYMMDD
-	 * @return string Renvoi la date calculee au format YYYYMM01.
+	 * @return bool|string Renvoi la date calculee au format YYYYMM01.
 	 * @throws Exception
 	 */
-	public function retrouve_trimestre($date) {
+	public function retrouve_trimestre(string $date): bool|string
+	{
 		$hash_date = $this->parse_date ( $date );
-		switch ($hash_date ['month']) {
-			case "01" :
-			case "02" :
-			case "03" :
-				return $hash_date ['year'] . "0101";
-				break;
-			case "04" :
-			case "05" :
-			case "06" :
-				return $hash_date ['year'] . "0401";
-				break;
-			case "07" :
-			case "08" :
-			case "09" :
-				return $hash_date ['year'] . "0701";
-				break;
-			case "10" :
-			case "11" :
-			case "12" :
-				return $hash_date ['year'] . "1001";
-				break;
-		}
-		
-		return false;
+		return match ($hash_date ['month']) {
+			"01", "02", "03" => $hash_date ['year'] . "0101",
+			"04", "05", "06" => $hash_date ['year'] . "0401",
+			"07", "08", "09" => $hash_date ['year'] . "0701",
+			"10", "11", "12" => $hash_date ['year'] . "1001",
+			default => false,
+		};
+
 	}
 
 	/**
@@ -649,7 +664,8 @@ class dates extends abstract_log {
 	 * @return Bool Renvoi TRUE si la date est inferieur a la date de reference ou FALSE sinon.
 	 * @throws Exception
 	 */
-	public function compare_dates($date, $date_reference) {
+	public function compare_dates(string $date, int $date_reference): bool
+	{
 		// renvoi true si $date < $date_reference
 		// renvoi false si $date >= $date_reference
 		$hash_date = $this->parse_date ( $date );
@@ -667,12 +683,13 @@ class dates extends abstract_log {
 	/**
 	 *
 	 * Retrouve le lundi qui precede la date donnee.
-	 *        
+	 *
 	 * @param string $date Date de depart au format YYYYMMDD
-	 * @return string false la date au format YYYYMMDD ou FALSE en cas d'erreur
+	 * @return bool|string false la date au format YYYYMMDD ou FALSE en cas d'erreur
 	 * @throws Exception
 	 */
-	public function retrouve_lundi_precedent($date) {
+	public function retrouve_lundi_precedent(string $date): bool|string
+	{
 		$hash_date = $this->parse_date ( $date );
 		$CODE_RETOUR = FALSE;
 		if ($hash_date) {
@@ -690,12 +707,13 @@ class dates extends abstract_log {
 	/**
 	 *
 	 * Retrouve le dimanche qui suit la date donnee.
-	 *        
+	 *
 	 * @param string $date Date de depart au format YYYYMMDD
-	 * @return string false la date au format YYYYMMDD ou FALSE en cas d'erreur
+	 * @return bool|string false la date au format YYYYMMDD ou FALSE en cas d'erreur
 	 * @throws Exception
 	 */
-	public function retrouve_dimanche_suivant($date) {
+	public function retrouve_dimanche_suivant(string $date): bool|string
+	{
 		$hash_date = $this->parse_date ( $date );
 		$CODE_RETOUR = FALSE;
 		if ($hash_date) {
@@ -713,12 +731,13 @@ class dates extends abstract_log {
 	/**
 	 *
 	 * Retrouve le dernier jour du mois de la date donnee.
-	 *        
+	 *
 	 * @param string $date Date de depart au format YYYYMMDD
-	 * @return string false la date au format YYYYMMDD ou FALSE en cas d'erreur
+	 * @return bool|string false la date au format YYYYMMDD ou FALSE en cas d'erreur
 	 * @throws Exception
 	 */
-	public function retrouve_dernier_du_mois($date) {
+	public function retrouve_dernier_du_mois(string $date): bool|string
+	{
 		$hash_date = $this->parse_date ( $date );
 		$CODE_RETOUR = FALSE;
 		if ($hash_date) {
@@ -732,12 +751,13 @@ class dates extends abstract_log {
 	/**
 	 *
 	 * Retrouve le dernier jour du mois de la date donnee.
-	 *        
+	 *
 	 * @param string $date Date de depart au format YYYYMMDD
-	 * @return string false la date au format YYYYMMDD ou FALSE en cas d'erreur
+	 * @return bool|string false la date au format YYYYMMDD ou FALSE en cas d'erreur
 	 * @throws Exception
 	 */
-	public function retrouve_mois_str_fr($date) {
+	public function retrouve_mois_str_fr(string $date): bool|string
+	{
 		$hash_date = $this->parse_date ( $date );
 		$CODE_RETOUR = FALSE;
 		if ($hash_date) {
@@ -791,7 +811,8 @@ class dates extends abstract_log {
 	 * @return int | boolean 1 si OK, 0 si NOK, false si erreur
 	 * @throws Exception
 	 */
-	public function est_feries($date) {
+	public function est_feries(string $date): bool|int
+	{
 		$hash_date = $this->parse_date ( $date );
 		$lstJF = $this->getjoursferies ();
 		if (count ( $lstJF ) == 0) {
@@ -811,11 +832,10 @@ class dates extends abstract_log {
 	/**
 	 * Calcule la liste des jours feries francais.
 	 *
-	 * @param string $date Date de depart au format YYYYMMDD
-	 * @return array liste des jours feries
-	 * @throws Exception
+	 * @return bool|array liste des jours feries
 	 */
-	public function creer_jours_feries() {
+	public function creer_jours_feries(): bool|array
+	{
 		$holidays = array ();
 		foreach ( $this->getListeDates () as $date ) {
 			try {
@@ -845,9 +865,9 @@ class dates extends abstract_log {
 					
 
 					// Jour feries qui dependent de paques
-					mktime ( 0, 0, 0, $easterMonth, $easterDay + 1, $easterYear ), // Lundi de paques
-					mktime ( 0, 0, 0, $easterMonth, $easterDay + 39, $easterYear ), // Ascension
-					mktime ( 0, 0, 0, $easterMonth, $easterDay + 50, $easterYear )  // Pentecote
+					mktime ( 0, 0, 0, $easterMonth, intval($easterDay) + 1, $easterYear ), // Lundi de paques
+					mktime ( 0, 0, 0, $easterMonth, intval($easterDay) + 39, $easterYear ), // Ascension
+					mktime ( 0, 0, 0, $easterMonth, intval($easterDay) + 50, $easterYear )  // Pentecote
 			);
 			
 			sort ( $holidays [$hash_date ['year']] );
@@ -865,7 +885,8 @@ class dates extends abstract_log {
 	 * @throws Exception
 	 * @codeCoverageIgnore
 	 */
-	public function getjoursferies() {
+	public function getjoursferies(): array
+	{
 		if (count ( $this->liste_feries ) === 0) {
 			$this->creer_jours_feries ();
 		}
@@ -877,7 +898,8 @@ class dates extends abstract_log {
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
 	 */
-	public function setjoursferies($liste_feries) {
+	public function setjoursferies($liste_feries): static
+	{
 		$this->liste_feries = $liste_feries;
 		return $this;
 	}
@@ -886,7 +908,8 @@ class dates extends abstract_log {
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
 	 */
-	public function ajouteListeJoursFeries($year, $liste_feries) {
+	public function ajouteListeJoursFeries($year, $liste_feries): static
+	{
 		$this->liste_feries [$year] = $liste_feries;
 		return $this;
 	}
@@ -897,7 +920,8 @@ class dates extends abstract_log {
 	 *
 	 * @return array Renvoi la liste des dates.
 	 */
-	public function getListeDates() {
+	public function getListeDates(): array
+	{
 		return $this->liste_dates;
 	}
 
@@ -906,7 +930,8 @@ class dates extends abstract_log {
 	 * @param array $liste_dates
 	 * @return dates
 	 */
-	public function setListeDates($liste_dates) {
+	public function setListeDates(array $liste_dates): static
+	{
 		$this->liste_dates = $liste_dates;
 		return $this;
 	}
@@ -917,7 +942,8 @@ class dates extends abstract_log {
 	 *
 	 * @return array Renvoi la liste des lundis.
 	 */
-	public function getListeWeek() {
+	public function getListeWeek(): array
+	{
 		return $this->liste_week;
 	}
 
@@ -926,7 +952,8 @@ class dates extends abstract_log {
 	 * @param array $liste_week
 	 * @return dates
 	 */
-	public function setListeWeek($liste_week) {
+	public function setListeWeek(array $liste_week): static
+	{
 		$this->liste_week = $liste_week;
 		return $this;
 	}
@@ -937,7 +964,8 @@ class dates extends abstract_log {
 	 *
 	 * @return array Renvoi la liste des mois.
 	 */
-	public function getListeMonth() {
+	public function getListeMonth(): array
+	{
 		return $this->liste_month;
 	}
 
@@ -946,7 +974,8 @@ class dates extends abstract_log {
 	 * @param array $liste_month
 	 * @return dates
 	 */
-	public function setListeMonth($liste_month) {
+	public function setListeMonth(array $liste_month): static
+	{
 		$this->liste_month = $liste_month;
 		return $this;
 	}
@@ -954,14 +983,14 @@ class dates extends abstract_log {
 	/**
 	 * ************* ACCESSEURS ******************
 	 */
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echoAffichie le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -981,5 +1010,3 @@ class dates extends abstract_log {
 		return $help;
 	}
 }
-// Fin de la class
-?>

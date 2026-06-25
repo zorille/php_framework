@@ -44,11 +44,13 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareFolder
+	 * @throws Exception
 	 */
-	static function &creer_vmwareFolder(&$liste_option, &$ObjectVmwareWsclient, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareFolder(options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwareFolder
+	{
 		$objet = new vmwareFolder ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -64,7 +66,7 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * @return vmwareFolder
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -77,7 +79,6 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -89,7 +90,8 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge folder.
 	 */
-	public function creer_entete_folder_this() {
+	public function creer_entete_folder_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$soap_message = new stdClass ();
@@ -103,9 +105,10 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * Necessite le rootFolder de reference
 	 * 
 	 * @param string $name
-	 * @return array|false
+	 * @return bool
 	 */
-	public function CreateDatacenter($name) {
+	public function CreateDatacenter(string $name): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_folder_this ();
@@ -122,9 +125,10 @@ class vmwareFolder extends vmwareManagedEntity {
 
 	/**
 	 * Fait un CreateVM_Task
-	 * @return array (Task)|false
+	 * @return bool (Task)|false
 	 */
-	public function CreateVM_Task($VirtualMachineConfigSpec, $ResourcePool, $host="") {
+	public function CreateVM_Task($VirtualMachineConfigSpec, $ResourcePool, $host=""): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_folder_this ();
@@ -147,28 +151,32 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getMoIDFolder() {
+	public function &getMoIDFolder(): stdClass
+	{
 		return $this->getManagedObject();
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMoIDFolder($Folder) {
+	public function &setMoIDFolder($Folder): vmwareFolder
+	{
 		return $this->setManagedObject($Folder);
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getChildEntity() {
+	public function getChildEntity(): array
+	{
 		return $this->childEntity;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setChildEntity($childEntity) {
+	public function &setChildEntity($childEntity): static
+	{
 		$this->childEntity=$childEntity;
 		return $this;
 	}
@@ -176,14 +184,16 @@ class vmwareFolder extends vmwareManagedEntity {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getChildType() {
+	public function getChildType(): string
+	{
 		return $this->childType;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setChildType($childType) {
+	public function &setChildType($childType): static
+	{
 		$this->childType=$childType;
 		return $this;
 	}
@@ -193,7 +203,7 @@ class vmwareFolder extends vmwareManagedEntity {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -201,5 +211,3 @@ class vmwareFolder extends vmwareManagedEntity {
 		return $help;
 	}
 }
-
-?>

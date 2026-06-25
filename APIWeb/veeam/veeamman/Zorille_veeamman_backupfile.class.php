@@ -39,15 +39,16 @@ class backupfile extends ci {
 	 * Instanbackupfilee un objet de type backupfile. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backupfile
 	 */
 	static function &creer_veeamman_backupfile(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		wsclient    &$webservice_rest,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): backupfile
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new backupfile ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -61,9 +62,10 @@ class backupfile extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return backupfile
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -73,13 +75,12 @@ class backupfile extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de backupfile
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -89,7 +90,8 @@ class backupfile extends ci {
 	 * @return backupfile
 	 * @throws Exception
 	 */
-	public function recupere_donnees_backupfile() {
+	public function recupere_donnees_backupfile(): backupfile
+	{
 		$backupfile_data = $this->getObjetVeeamWsclientRest ()
 			->BackupFileData ( $this->getId (), array (
 				"format" => "Entity"
@@ -98,7 +100,8 @@ class backupfile extends ci {
 		return $this->setDonnees ( $backupfile_data );
 	}
 
-	public function valide_donnees_backupfile() {
+	public function valide_donnees_backupfile(): bool
+	{
 		if (is_object ( $this->getDonnees () )) {
 			return true;
 		}
@@ -110,7 +113,8 @@ class backupfile extends ci {
 	 * @return string renvoie le nom de la machine ou le FilePath par defaut
 	 * @throws Exception
 	 */
-	public function recupere_nom_machine_backupee() {
+	public function recupere_nom_machine_backupee(): string
+	{
 		if (! $this->valide_donnees_backupfile ()) {
 			return $this->onError ( "Pas de donnees de fichier de backup" );
 		}
@@ -137,7 +141,8 @@ class backupfile extends ci {
 	 * @return string renvoie le nom de la machine ou le FilePath par defaut
 	 * @throws Exception
 	 */
-	public function recupere_taille_fichier_backupee() {
+	public function recupere_taille_fichier_backupee(): string
+	{
 		if (! $this->valide_donnees_backupfile ()) {
 			return $this->onError ( "Pas de donnees de fichier de backup" );
 		}
@@ -146,10 +151,11 @@ class backupfile extends ci {
 
 	/**
 	 * Extrait le nom de la VM dans le nom du backup
-	 * @return string renvoie le nom de la machine ou le FilePath par defaut
+	 * @return bool|\SimpleXMLElement|null renvoie le nom de la machine ou le FilePath par defaut
 	 * @throws Exception
 	 */
-	public function recupere_horaire_fichier_backupee() {
+	public function recupere_horaire_fichier_backupee(): \SimpleXMLElement|bool|null
+	{
 		if (! $this->valide_donnees_backupfile ()) {
 			return $this->onError ( "Pas de donnees de fichier de backup" );
 		}
@@ -158,11 +164,13 @@ class backupfile extends ci {
 
 	/**
 	 * Recupere l'id du backupfile et l'ajoute à l'objet
-	 * @return backupfile
+	 * @param $backupfile
+	 * @return backupfile|bool
 	 * @throws Exception
 	 */
 	public function recupere_id_du_backupfile(
-			$backupfile) {
+			$backupfile): backupfile|bool
+	{
 		if (preg_match ( '/:BackupFile:(.*)/', $backupfile->attributes () ['UID'], $resultat ) === false) {
 			return $this->onError ( "Numero de BackupFile introuvable", $resultat );
 		}
@@ -171,20 +179,23 @@ class backupfile extends ci {
 
 	/**
 	 * Recupere le nom du backupfile
+	 * @param $backupfile
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_du_backupfile(
-			$backupfile) {
+			$backupfile): string
+	{
 		return $backupfile->attributes () ['Name'];
 	}
 
 	/**
 	 * Permet de trouver la liste des backupfile dans veeamman et enregistre les donnees des backupfile dans l'objet
-	 * @return backupfile
+	 * @param array $params
+	 * @return bool|backupfile
 	 * @throws Exception
 	 */
-	public function retrouve_backupfiles($params = array()) {
+	public function retrouve_backupfiles(array $params = array()): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$backupfile = $this->getObjetVeeamWsclientRest ()
 			->listBackupFiles ();
@@ -198,11 +209,13 @@ class backupfile extends ci {
 
 	/**
 	 * Permet de trouver la liste des backupfile dans veeamman et enregistre les donnees des backupfile dans l'objet
-	 * @return backupfile
+	 * @param $backupid
+	 * @return bool|backupfile
 	 * @throws Exception
 	 */
 	public function retrouve_backupfiles_par_backup(
-			$backupid) {
+			$backupid): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$backupfiles = $this->getObjetVeeamWsclientRest ()
 			->BackupFilesbybackup ( $backupid );
@@ -220,7 +233,8 @@ class backupfile extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeBackupFile() {
+	public function getListeBackupFile(): ?\SimpleXMLElement
+	{
 		return $this->liste_backupfile;
 	}
 
@@ -228,7 +242,8 @@ class backupfile extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeBackupFile(
-			$liste_backupfile) {
+			$liste_backupfile): static
+	{
 		$this->liste_backupfile = $liste_backupfile;
 		return $this;
 	}
@@ -239,11 +254,10 @@ class backupfile extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "backupfile :";
 		return $help;
 	}
 }
-?>

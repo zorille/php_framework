@@ -118,7 +118,8 @@ class connexion extends sql {
 	 * @param array $liste_class
 	 * @return connexion
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		$this->setDbConnexion ( PDO_local::creer_PDO_local ( $liste_class ['options'] ) );
@@ -142,9 +143,10 @@ class connexion extends sql {
 
 	/**
 	 * creer la connexion.
-	 * @return boolean
+	 * @return connexion|bool
 	 */
-	public function &prepare_connexion() {
+	public function &prepare_connexion(): static|bool
+	{
 		$this->prepare_ligne_pdo ();
 		
 		//On se connecte a la base de donnee
@@ -170,10 +172,13 @@ class connexion extends sql {
 	/**
 	 * Creer la ligne PDO en fonction du type de base mysql/pgsql/sqlite
 	 * @return connexion
+	 * @throws Exception
 	 */
-	public function &prepare_ligne_pdo() {
+	public function &prepare_ligne_pdo(): bool|static
+	{
 		if ($this->getDbServeur () == "") {
-			return $this->onError ( "Probleme avec le serveur Database !", "", 3001 );
+			$r = $this->onError ( "Probleme avec le serveur Database !", "", 3001 );
+			return $r;
 		}
 		
 		switch ($this->getDbType ()) {
@@ -210,8 +215,10 @@ class connexion extends sql {
 	 * Permet de selectionner un base Sur le serveur connecte.
 	 *
 	 * @param string $base Nom de la machine ayant la base.
+	 * @throws Exception
 	 */
-	public function selection_base($base = "") {
+	public function selection_base(string $base = ""): bool|static
+	{
 		//Necessite $base
 		if ($base == "") {
 			return $this->onError ( "La variable base est vide !", "", 3002 );
@@ -223,9 +230,9 @@ class connexion extends sql {
 				if (! $this->getDbConnexion ()
 					->getPDOConnexion ()
 					->query ( "use " . $base )) {
-					return $this->onError ( $this->getDbConnexion ()
+					return $this->onError ( print_r($this->getDbConnexion ()
 						->getPDOConnexion ()
-						->errorInfo (), "", $this->getDbConnexion ()
+						->errorInfo (), true), "", $this->getDbConnexion ()
 						->getPDOConnexion ()
 						->errorCode () );
 				}
@@ -239,8 +246,10 @@ class connexion extends sql {
 	 * Test si base de donnee est connectee.
 	 *
 	 * @return Bool TRUE si la base est connectee, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function test_connexion_active() {
+	public function test_connexion_active(): bool
+	{
 		if ($this->getDbConnexion () instanceof PDO_local) {
 			return true;
 		}
@@ -252,12 +261,11 @@ class connexion extends sql {
 	 * Fonction la plus utilisee.
 	 *
 	 * @param string $request Surcharge la requete a execute.
-	 * @param string $exit_on_error Prend les valeurs oui/non
-	 * @return PDO Renvoi le resultat au format PDO.
+	 * @return PDOStatement|bool Renvoi le resultat au format PDO.
 	 * @throws Exception
-	 * @throws PDOException
 	 */
-	public function faire_requete($request = "NOREQUEST") {
+	public function faire_requete(string $request = "NOREQUEST"): PDOStatement|bool
+	{
 		if ($request == "NOREQUEST" || $request == "") {
 			$request = $this->getSql ();
 		}
@@ -289,11 +297,11 @@ class connexion extends sql {
 	 * Fonction permettant d executer la requete sur la base avec la commande exec.
 	 *
 	 * @param string $request Surcharge la requete a execute.
-	 * @return PDO Renvoi le resultat au format PDO.
+	 * @return bool|PDOStatement Renvoi le resultat au format PDO.
 	 * @throws Exception
-	 * @throws PDOException
 	 */
-	public function faire_requete_exec($request = "NOREQUEST") {
+	public function faire_requete_exec(string $request = "NOREQUEST"): bool|PDOStatement
+	{
 		if ($request == "NOREQUEST" || $request == "") {
 			$request = $this->getSql ();
 		}
@@ -326,7 +334,8 @@ class connexion extends sql {
 	 * @return PDOStatement|false Renvoi le resultat au format PDO.
 	 * @throws Exception
 	 */
-	public function preparer_requete($request = "NOREQUEST") {
+	public function preparer_requete(string $request = "NOREQUEST"): bool|PDOStatement
+	{
 		if ($request == "NOREQUEST" || $request == "") {
 			$request = $this->getSql ();
 		}
@@ -345,7 +354,8 @@ class connexion extends sql {
 	 *
 	 * @return boolean Resultat du debut de la transaction PDO.
 	 */
-	public function beginTransaction() {
+	public function beginTransaction(): bool
+	{
 		return $this->getDbConnexion ()
 			->getPDOConnexion ()
 			->beginTransaction ();
@@ -356,7 +366,8 @@ class connexion extends sql {
 	 *
 	 * @return boolean Resultat du Commit PDO.
 	 */
-	public function commit() {
+	public function commit(): bool
+	{
 		return $this->getDbConnexion ()
 			->getPDOConnexion ()
 			->commit ();
@@ -367,7 +378,8 @@ class connexion extends sql {
 	 *
 	 * @return boolean Resultat du Rollback PDO.
 	 */
-	public function rollback() {
+	public function rollback(): bool
+	{
 		return $this->getDbConnexion ()
 			->getPDOConnexion ()
 			->rollBack ();
@@ -376,9 +388,10 @@ class connexion extends sql {
 	/**
 	 * Prepare la commande pour une socket.
 	 *
-	 * @return PDO Resulat du Rollback PDO.
+	 * @return string Resulat du Rollback PDO.
 	 */
-	public function prepare_socket() {
+	public function prepare_socket(): string
+	{
 		if ($this->getDbSocket () != "") {
 			$active_socket = ";unix_socket=" . $this->getDbSocket ();
 		} else {
@@ -391,9 +404,10 @@ class connexion extends sql {
 	/**
 	 * Prepare la commande pour une socket.
 	 *
-	 * @return PDO Resulat du Rollback PDO.
+	 * @return string Resulat du Rollback PDO.
 	 */
-	public function prepare_port() {
+	public function prepare_port(): string
+	{
 		if ($this->getDbPort () != "") {
 			$active_port = ";port=" . $this->getDbPort ();
 		} else {
@@ -407,15 +421,14 @@ class connexion extends sql {
 	 * Test si base de donnee est connectee.
 	 *
 	 * @return Bool TRUE si la base est connectee, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function test_database_active($verifie_maj = false) {
-		if ($verifie_maj) {
-			if (! $this->getDbMaj ()) {
-				return false;
-			}
+	public function test_database_active($verifie_maj = false): bool
+	{
+		if ($verifie_maj && ! $this->getDbMaj ()) {
+			return false;
 		}
-		if ($this->getDbSelected ()) {
-		} else {
+		if (!$this->getDbSelected ()) {
 			return $this->onError ( "Base de donnees non connectee !", "", 3000 );
 		}
 		
@@ -425,14 +438,16 @@ class connexion extends sql {
 	/**
 	 * active la MAJ de la base de donnees
 	 */
-	public function active_maj_db() {
+	public function active_maj_db(): static
+	{
 		return $this->setDbMaj ( true );
 	}
 
 	/**
 	 * Desactive la MAJ de la base de donnees
 	 */
-	public function desactive_maj_db() {
+	public function desactive_maj_db(): static
+	{
 		return $this->setDbMaj ( false );
 	}
 
@@ -456,14 +471,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbUsername() {
+	public function getDbUsername(): string
+	{
 		return $this->user;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbUsername($user) {
+	public function &setDbUsername($user): static
+	{
 		$this->user = $user;
 		return $this;
 	}
@@ -471,14 +488,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbPassword() {
+	public function getDbPassword(): string
+	{
 		return $this->password;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbPassword($password) {
+	public function &setDbPassword($password): static
+	{
 		$this->password = $password;
 		return $this;
 	}
@@ -486,14 +505,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDatabase() {
+	public function getDatabase(): string
+	{
 		return $this->base;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDatabase($database) {
+	public function &setDatabase($database): static
+	{
 		$this->base = $database;
 		return $this;
 	}
@@ -501,14 +522,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbServeur() {
+	public function getDbServeur(): string
+	{
 		return $this->machine;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbServeur($machine) {
+	public function &setDbServeur($machine): static
+	{
 		$this->machine = $machine;
 		return $this;
 	}
@@ -516,14 +539,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbType() {
+	public function getDbType(): string
+	{
 		return $this->type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbType($type) {
+	public function &setDbType($type): static
+	{
 		$this->type = $type;
 		return $this;
 	}
@@ -532,14 +557,16 @@ class connexion extends sql {
 	 * @codeCoverageIgnore
 	 * @return PDO_local
 	 */
-	public function &getDbConnexion() {
+	public function &getDbConnexion(): PDO_local|bool
+	{
 		return $this->connexion;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbConnexion($connexion) {
+	public function &setDbConnexion($connexion): static
+	{
 		$this->connexion = $connexion;
 		return $this;
 	}
@@ -547,14 +574,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbEncodage() {
+	public function getDbEncodage(): string
+	{
 		return $this->encodage;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbEncodage($encodage) {
+	public function &setDbEncodage($encodage): static
+	{
 		$this->encodage = $encodage;
 		return $this;
 	}
@@ -562,14 +591,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbSocket() {
+	public function getDbSocket(): string
+	{
 		return $this->socket;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbSocket($socket) {
+	public function &setDbSocket($socket): static
+	{
 		$this->socket = $socket;
 		return $this;
 	}
@@ -577,14 +608,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbPort() {
+	public function getDbPort(): int
+	{
 		return $this->port;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbPort($port) {
+	public function &setDbPort($port): static
+	{
 		$this->port = $port;
 		return $this;
 	}
@@ -592,14 +625,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPdoOptions() {
+	public function getPdoOptions(): array
+	{
 		return $this->options_pdo;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPdoOptions($options_pdo) {
+	public function &setPdoOptions($options_pdo): static
+	{
 		$this->options_pdo = $options_pdo;
 		return $this;
 	}
@@ -607,14 +642,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPdoRequete() {
+	public function getPdoRequete(): string
+	{
 		return $this->requete_pdo;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPdoRequete($requete_pdo) {
+	public function &setPdoRequete($requete_pdo): static
+	{
 		$this->requete_pdo = $requete_pdo;
 		return $this;
 	}
@@ -622,14 +659,16 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbMaj() {
+	public function getDbMaj(): bool
+	{
 		return $this->option_maj_bd;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbMaj($maj_db) {
+	public function &setDbMaj($maj_db): static
+	{
 		$this->option_maj_bd = $maj_db;
 		return $this;
 	}
@@ -637,27 +676,28 @@ class connexion extends sql {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDbSelected() {
+	public function getDbSelected(): bool
+	{
 		return $this->db_connecte;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbSelected($db_connecte) {
+	public function &setDbSelected($db_connecte): static
+	{
 		$this->db_connecte = $db_connecte;
 		return $this;
 	}
 
 	/************** Accesseur ****************/
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -665,4 +705,3 @@ class connexion extends sql {
 		return $help;
 	}
 }
-?>

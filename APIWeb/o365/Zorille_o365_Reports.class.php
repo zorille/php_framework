@@ -6,6 +6,8 @@
  */
 namespace Zorille\o365;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -38,15 +40,16 @@ class Reports extends Graph {
 	 * Instancie un objet de type Reports. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice Reference sur un objet webservice
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Reports
 	 */
 	static function &creer_Reports(
-			&$liste_option,
-			&$webservice,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Reports
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Reports ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -60,9 +63,10 @@ class Reports extends Graph {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Reports
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -72,13 +76,12 @@ class Reports extends Graph {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -89,10 +92,12 @@ class Reports extends Graph {
 	/**
 	 * Retrouve l'ID d'un utilisateur dans le champ displayname
 	 * @param string $nom
-	 * @return \Zorille\o365\Reports|false
+	 * @return Reports|false
+	 * @throws Exception
 	 */
 	public function retrouve_Reportsid_par_nom(
-			$nom) {
+		string $nom): bool|Reports|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->list_Reportss ();
 		foreach ( $this->getListeReports () as $personne ) {
@@ -106,11 +111,13 @@ class Reports extends Graph {
 
 	/**
 	 * Retrouve l'ID d'un utilisateur dans le champ displayname
-	 * @param string $nom
-	 * @return \Zorille\o365\Reports|false
+	 * @param $mail
+	 * @return Reports|false
+	 * @throws Exception
 	 */
 	public function retrouve_Reportsid_par_mail(
-			$mail) {
+			$mail): bool|Reports|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->list_Reportss ();
 		foreach ( $this->getListeReports () as $personne ) {
@@ -126,7 +133,8 @@ class Reports extends Graph {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_Reportsid(){
+	public function valide_Reportsid(): bool
+	{
 		if(empty($this->getReportsId ())){
 			$this->onDebug($this->getReportsId (), 2);
 			$this->onError("Il faut un Reports id renvoye par O365 pour travailler");
@@ -139,7 +147,8 @@ class Reports extends Graph {
 	 * Renvoi la liste des licences sur O365
 	 * @return array
 	 */
-	public function liste_licenses_vendues(){
+	public function liste_licenses_vendues(): array
+	{
 		$correspondances=$this->getTableauLicence();
 		$vendu=array();
 		$lisenses=$this->reports_subscribedLicenses();
@@ -159,34 +168,40 @@ class Reports extends Graph {
 	/**
 	 *Recupere les activations
 	 * @param array $params
-	 * @return \Zorille\o365\Sharepoint
+	 * @return array|SimpleXMLElement|string
+	 * @throws Exception
 	 */
 	public function reports_activations(
-			$params = array()) {
+		array $params = array()): SimpleXMLElement|array|string|stdClass
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				return $this->getObjetO365Wsclient ()
 				->getMethod ( '/reports/getOffice365ActivationCounts', $params );
 	}
-	
+
 	/**
 	 *Recupere les activations
 	 * @param array $params
-	 * @return \Zorille\o365\Sharepoint
+	 * @return array|SimpleXMLElement|string
+	 * @throws Exception
 	 */
 	public function reports_user_activation_detail(
-			$params = array()) {
+		array $params = array()): SimpleXMLElement|array|string|stdClass
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				return $this->getObjetO365Wsclient ()
 				->getMethod ( '/reports/getOffice365ActivationsUserDetail', $params );
 	}
-	
+
 	/**
 	 *Recupere les Skus (Subscribed licenses)
 	 * @param array $params
-	 * @return \Zorille\o365\Sharepoint
+	 * @return SimpleXMLElement|stdClass|array|string
+	 * @throws Exception
 	 */
 	public function reports_subscribedLicenses(
-			$params = array()) {
+		array $params = array()): SimpleXMLElement|stdClass|array|string
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				return $this->getObjetO365Wsclient ()
 				->getMethod ( '/subscribedSkus', $params );
@@ -197,7 +212,8 @@ class Reports extends Graph {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getReportsId() {
+	public function getReportsId(): ?string
+	{
 		return $this->Reports_id;
 	}
 
@@ -205,7 +221,8 @@ class Reports extends Graph {
 	 * @codeCoverageIgnore
 	 */
 	public function &setReportsId(
-			$Reports_id) {
+			$Reports_id): static
+	{
 		$this->Reports_id = $Reports_id;
 		return $this;
 	}
@@ -213,7 +230,8 @@ class Reports extends Graph {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeReports() {
+	public function getListeReports(): array
+	{
 		return $this->url_reports;
 	}
 
@@ -221,7 +239,8 @@ class Reports extends Graph {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeReports(
-			&$url_reports) {
+			&$url_reports): static
+	{
 		$this->url_reports = $url_reports;
 		return $this;
 	}
@@ -232,11 +251,10 @@ class Reports extends Graph {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Reports :";
 		return $help;
 	}
 }
-?>

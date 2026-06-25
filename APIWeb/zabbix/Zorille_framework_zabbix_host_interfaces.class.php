@@ -39,11 +39,12 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * Instancie un objet de type zabbix_host_interfaces.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_host_interfaces
+	 * @return zabbix_host_interfaces|abstract_log
 	 */
-	static function &creer_zabbix_host_interfaces(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_host_interfaces(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_host_interfaces|abstract_log
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_host_interfaces ( $sort_en_erreur, $entete );
 		return $objet ->_initialise ( array ( 
@@ -54,9 +55,9 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_host_interfaces
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this ->setObjetHostInterfaceRef ( zabbix_host_interface::creer_zabbix_host_interface ( $liste_class ["options"] ) );
@@ -69,7 +70,6 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -78,10 +78,11 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return false|zabbix_host_interfaces
+	 * @return zabbix_host_interfaces
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//Gestion des interfaces
 		$liste_interfaces = $this ->_valideOption ( array ( 
@@ -98,9 +99,10 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	/**
 	 * Valide la presence d'un objet interface similaire dans la liste de interfaces
 	 * @param zabbix_host_interface $objet_interface Objet interface a comparer a la liste existante
-	 * @return zabbix_host_interface|False zabbix_host_interface si l'objet existe dans la liste, false sinon
+	 * @return zabbix_host_interface|bool zabbix_host_interface si l'objet existe dans la liste, false sinon
 	 */
-	public function verifie_interface_existe(&$objet_interface) {
+	public function verifie_interface_existe(zabbix_host_interface &$objet_interface): zabbix_host_interface|bool
+	{
 		//On valide que l'interface n'existe pas deja
 		foreach ( $this ->getListeInterface () as $interface_local ) {
 			if ($interface_local ->compare_interface ( $objet_interface )) {
@@ -117,7 +119,8 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * @return zabbix_host_interfaces
 	 * @throws Exception
 	 */
-	public function ajoute_interfaces_par_ligne($liste_interfaces) {
+	public function ajoute_interfaces_par_ligne(array $liste_interfaces): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		
 		$liste = array ();
@@ -139,11 +142,13 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	}
 
 	/**
-	 * Ajoute a l'objet en cours toutes les interfaces de $liste_interfaces non existante. Liste d'interfaces recuperees dans zabbix. 
+	 * Ajoute a l'objet en cours toutes les interfaces de $liste_interfaces non existante. Liste d'interfaces recuperees dans zabbix.
 	 * @param array $liste_interfaces
 	 * @return zabbix_host_interfaces
+	 * @throws Exception
 	 */
-	public function ajoute_interfaces($liste_interfaces) {
+	public function ajoute_interfaces(array $liste_interfaces): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		foreach ( $liste_interfaces as $interface ) {
 			$objet_interface = clone $this ->getObjetHostInterfaceRef ();
@@ -171,8 +176,10 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * Redefinie la liste d'interface du host en retirant les interfaces contenuent dans l'ojbet courant.
 	 * @param array $liste_interfaces Liste d'interface du host dans zabbix
 	 * @return zabbix_host_interfaces
+	 * @throws Exception
 	 */
-	public function supprime_interfaces($liste_interfaces) {
+	public function supprime_interfaces(array $liste_interfaces): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_interface_finale = array ();
 		
@@ -188,7 +195,7 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 			}
 			$objet_interface ->setInterfaceId ( $interface ["interfaceid"] );
 			$objet_interface ->setHostId ( $interface ["hostid"] );
-			$liste_interface_finale [count ( $liste_interface_finale )] = $objet_interface;
+			$liste_interface_finale[] = $objet_interface;
 		}
 		$this ->setListeInterface ( $liste_interface_finale );
 		
@@ -199,12 +206,13 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * Creer un definition de toutes les interfaces listees dans la class
 	 * @return array;
 	 */
-	public function creer_definition_host_interfaces_ws() {
+	public function creer_definition_host_interfaces_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$donnees_interfaces = array ();
 		
 		foreach ( $this ->getListeInterface () as $interface ) {
-			$donnees_interfaces [count ( $donnees_interfaces )] = $interface ->creer_definition_host_interface_ws ();
+			$donnees_interfaces[] = $interface->creer_definition_host_interface_ws();
 		}
 		
 		return $donnees_interfaces;
@@ -214,14 +222,16 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeInterface() {
+	public function getListeInterface(): array
+	{
 		return $this->liste_interface;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeInterface($liste_interface) {
+	public function &setListeInterface($liste_interface): static
+	{
 		$this->liste_interface = $liste_interface;
 		return $this;
 	}
@@ -229,22 +239,25 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAjoutInterface(&$interface) {
-		$this->liste_interface [count ( $this->liste_interface )] = $interface;
+	public function &setAjoutInterface(&$interface): static
+	{
+		$this->liste_interface[] = $interface;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeInterfaceCli() {
+	public function getListeInterfaceCli(): array
+	{
 		return $this->liste_interface_cli;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeInterfaceCli($liste_interface_cli) {
+	public function &setListeInterfaceCli($liste_interface_cli): static
+	{
 		$this->liste_interface_cli = $liste_interface_cli;
 		return $this;
 	}
@@ -252,14 +265,16 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getObjetHostInterfaceRef() {
+	public function &getObjetHostInterfaceRef(): ?zabbix_host_interface
+	{
 		return $this->zabbix_interface_reference;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetHostInterfaceRef(&$zabbix_interface_reference) {
+	public function &setObjetHostInterfaceRef(&$zabbix_interface_reference): static
+	{
 		$this->zabbix_interface_reference = $zabbix_interface_reference;
 		return $this;
 	}
@@ -270,15 +285,14 @@ class zabbix_host_interfaces extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Zabbix Host Interfaces :";
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_interfaces 'agent/snmp|main: oui/non|port' 'agent/snmp|main: oui/non|port' ... liste des groupes du CI";
-		$help = array_merge ( $help, zabbix_host_interface::help () );
-		
-		return $help;
+		return array_merge ( $help, zabbix_host_interface::help () );
 	}
 }
-?>
+

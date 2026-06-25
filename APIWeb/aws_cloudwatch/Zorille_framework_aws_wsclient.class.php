@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class aws_wsclient<br>
  *
@@ -37,13 +39,17 @@ class aws_wsclient extends wsclient {
 	 * Instancie un objet de type aws_wsclient.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param aws_datas &$aws_datas Reference sur un objet aws_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return aws_wsclient
+	 * @throws Exception
 	 */
-	static function &creer_aws_wsclient(&$liste_option, &$aws_datas, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_aws_wsclient(
+		options     &$liste_option,
+		aws_datas   &$aws_datas,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): aws_wsclient {
 		$objet = new aws_wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -56,13 +62,15 @@ class aws_wsclient extends wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return aws_wsclient
+	 * @return bool|self
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["aws_datas"] )) {
-			return $this->onError ( "il faut un objet de type aws_datas" );
+			$r = $this->onError ( "il faut un objet de type aws_datas" );
+			return $r;
 		}
 		$this->setObjetAwsDatas ( $liste_class ["aws_datas"] );
 		return $this;
@@ -87,11 +95,12 @@ class aws_wsclient extends wsclient {
 	 * Prepare l'url de connexion au aws nomme $nom
 	 * @param string $nom
 	 * @return boolean|aws_wsclient
+	 * @throws Exception
 	 */
-	public function prepare_connexion($nom) {
+	public function prepare_connexion(string $nom): aws_wsclient|bool|static {
 		$liste_data_aws = $this->getObjetAwsDatas ()
 			->valide_presence_aws_data ( $nom );
-		if ($liste_data_aws === false) {
+		if (!$liste_data_aws) {
 			return $this->onError ( "Aucune definition de aws pour " . $nom );
 		}
 		$this->getGestionConnexionUrl ()
@@ -103,9 +112,10 @@ class aws_wsclient extends wsclient {
 
 	/**
 	 * Execute la requete
-	 * @return array|false tableau de resultat, FALSE sinon 
+	 * @return array|false tableau de resultat, FALSE sinon
+	 * @throws Exception
 	 */
-	public function execute_requete_aws() {
+	public function execute_requete_aws(): bool|array {
 		$query_time = time ();
 		
 		$this->setParams ( 'AWSAccessKeyId', $this->getAWSAccessKeyId (), true );
@@ -142,56 +152,57 @@ class aws_wsclient extends wsclient {
 	/************************* Accesseurs ***********************/
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return string|null
 	 */
-	public function getAWSAccessKeyId() {
+	public function getAWSAccessKeyId(): ?string {
 		return $this->AWSAccessKeyId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAWSAccessKeyId(&$AWSAccessKeyId) {
+	public function &setAWSAccessKeyId(&$AWSAccessKeyId): static {
 		$this->AWSAccessKeyId = $AWSAccessKeyId;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return string|null
 	 */
-	public function getAWSSecretKeyId() {
+	public function getAWSSecretKeyId(): ?string {
 		return $this->AWSSecretKeyId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAWSSecretKeyId(&$AWSSecretKeyId) {
+	public function &setAWSSecretKeyId(&$AWSSecretKeyId): static {
 		$this->AWSSecretKeyId = $AWSSecretKeyId;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
+	 * @param $http_get_string
 	 * @return string
 	 */
-	public function getAWSSignature($http_get_string) {
+	public function getAWSSignature($http_get_string): string {
 		return base64_encode ( hash_hmac ( 'sha256', $http_get_string, $this->getAWSSecretKeyId (), true ) );
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return aws_datas
+	 * @return aws_datas|null
 	 */
-	public function &getObjetAwsDatas() {
+	public function &getObjetAwsDatas(): ?aws_datas {
 		return $this->aws_datas;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetAwsDatas(&$aws_datas) {
+	public function &setObjetAwsDatas(&$aws_datas): static {
 		$this->aws_datas = $aws_datas;
 		return $this;
 	}
@@ -202,13 +213,11 @@ class aws_wsclient extends wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
-		$help [__CLASS__] ["text"] = array ();
+		$help [__CLASS__] ["text"] = [];
 		
 		return $help;
 	}
 }
-
-?>

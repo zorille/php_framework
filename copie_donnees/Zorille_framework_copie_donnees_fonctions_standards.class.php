@@ -4,6 +4,7 @@
  * @package Lib
  */
 namespace Zorille\framework;
+use Exception;
 use Zorille\framework\ssh_z as ssh_z;
 use Zorille\framework\ftp as ftp;
 /**
@@ -26,12 +27,14 @@ class copie_donnees_fonctions_standards extends abstract_log {
 	 * Instancie un objet de type copie_donnees.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param ssh_z|ftp $connexion connexion ftp/ssh existante.
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param bool|ftp|ssh_z $connexion connexion ftp/ssh existante.
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return copie_donnees
+	 * @return copie_donnees|copie_donnees_fonctions_standards
+	 * @throws Exception
 	 */
-	static function &creer_copie_donnees_fonctions_standards(&$liste_option, $connexion = false, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_copie_donnees_fonctions_standards(options &$liste_option, \Zorille\framework\ftp|\Zorille\framework\ssh_z|bool $connexion = false, bool|string $sort_en_erreur = false, string $entete = __CLASS__): copie_donnees|copie_donnees_fonctions_standards
+	{
 		$objet = new copie_donnees_fonctions_standards ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -40,14 +43,16 @@ class copie_donnees_fonctions_standards extends abstract_log {
 	
 		return $objet;
 	}
-	
+
 	/**
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return copie_donnees
+	 * @return copie_donnees_fonctions_standards
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 	
 		$fichier_a_copier = copie_donnees::creer_copie_donnees ( $liste_class ["options"], $liste_class ["connexion"] );
@@ -60,18 +65,17 @@ class copie_donnees_fonctions_standards extends abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 */
-	public function __construct( $sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
 		
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * Copie les donnees d'un structure standard vers le calaculateur.
 	 *
@@ -81,15 +85,17 @@ class copie_donnees_fonctions_standards extends abstract_log {
 	 * @param string $noeud Noeud en cours de traitement.
 	 * @param string $service Service en cours de traitement.
 	 * @param string $regexpr Regexpr pour filtrer le serveur source/dest.
-	 * @param int $hour heure du fichier a copier (cookie_log).
-	 * @param int $min Minute du fichier a copier (cookie_log).
-	 * @param int $sec seconde du fichier a copier (cookie_log).
-	 * @param int $nouvelle_date Dte au format standard.
-	 * @param string $serial Serial en cours de traitement.
-	 * @param int $genday Date de generation au format standard.
+	 * @param int|string $hour heure du fichier a copier (cookie_log).
+	 * @param int|string $min Minute du fichier a copier (cookie_log).
+	 * @param int|string $sec seconde du fichier a copier (cookie_log).
+	 * @param int|string $nouvelle_date Dte au format standard.
+	 * @param bool|string $serial Serial en cours de traitement.
+	 * @param bool|int $genday Date de generation au format standard.
 	 * @return true
+	 * @throws Exception
 	 */
-	public function telecharge_fichier_standard($liste_option, &$fichier_a_telecharger, $type_copie = "get", $noeud = "", $service = "", $regexpr = "", $hour = "", $min = "", $sec = "", $nouvelle_date = "", $serial = false, $genday = false) {
+	public function telecharge_fichier_standard(options $liste_option, relation_fichier_machine &$fichier_a_telecharger, string $type_copie = "get", string $noeud = "", string $service = "", string $regexpr = "", int|string $hour = "", int|string $min = "", int|string $sec = "", int|string $nouvelle_date = "", bool|string $serial = false, bool|int $genday = false): bool
+	{
 
 		//On verifie que le fichier n'est pas deja telecharge
 		$this->onDebug (  "Donnees local : ", 2 );
@@ -139,18 +145,19 @@ class copie_donnees_fonctions_standards extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return copie_donnees
 	 */
-	public function &getObjetCopieDonneesRef() {
+	public function &getObjetCopieDonneesRef(): copie_donnees
+	{
 		return $this->class_copie_donnees;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetCopieDonneesRef(&$class_copie_donnees) {
+	public function &setObjetCopieDonneesRef(&$class_copie_donnees): static
+	{
 		$this->class_copie_donnees = $class_copie_donnees;
 	
 		return $this;
 	}
 	/***************** ACCESSEURS *********************/
 }
-?>

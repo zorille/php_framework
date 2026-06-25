@@ -6,6 +6,8 @@
  */
 namespace Zorille\o365;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -45,15 +47,16 @@ class Calendar extends User {
 	 * Instancie un objet de type Calendar. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice Reference sur un objet webservice
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Calendar
 	 */
 	static function &creer_Calendar(
-			&$liste_option,
-			&$webservice,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Calendar
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Calendar ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -69,7 +72,7 @@ class Calendar extends User {
 	 * @return Calendar
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -81,7 +84,6 @@ class Calendar extends User {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -93,7 +95,8 @@ class Calendar extends User {
 	/**
 	 * ******************************* CALENDARS *********************************
 	 */
-	public function creer_entree_calendrier() {
+	public function creer_entree_calendrier(): void
+	{
 		// $test_start=new DateTime('20210412 20:00:00');
 		// $test_end=new DateTime('20210412 20:30:00');
 		// echo $test->format('c')."\n";
@@ -119,13 +122,15 @@ class Calendar extends User {
 	 * ******************************* O365 CALENDARS *********************************
 	 */
 	/**
-	 * @return \Zorille\o365\Calendar
-	 * @throws \Exception
+	 * @param array $params
+	 * @return array|SimpleXMLElement|string|Calendar|stdClass
+	 * @throws Exception
 	 */
 	public function list_user_calendars(
-			$params = array()) {
+		array $params = array()): array|SimpleXMLElement|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		if (!$this->valide_userid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -133,13 +138,15 @@ class Calendar extends User {
 	}
 
 	/**
-	 * @return \Zorille\o365\Calendar
-	 * @throws \Exception
+	 * @param array $params
+	 * @return array|SimpleXMLElement|string|Calendar|stdClass
+	 * @throws Exception
 	 */
 	public function list_user_calendar_groups(
-			$params = array()) {
+		array $params = array()): array|SimpleXMLElement|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		if (!$this->valide_userid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -147,13 +154,15 @@ class Calendar extends User {
 	}
 
 	/**
-	 * @return \Zorille\o365\Calendar
-	 * @throws \Exception
+	 * @param array $params
+	 * @return array|SimpleXMLElement|string|Calendar|stdClass
+	 * @throws Exception
 	 */
 	public function user_calendar_view(
-			$params = array()) {
+		array $params = array()): array|SimpleXMLElement|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		if (!$this->valide_userid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -161,13 +170,15 @@ class Calendar extends User {
 	}
 
 	/**
-	 * @return \Zorille\o365\Calendar
-	 * @throws \Exception
+	 * @param array $params
+	 * @return array|SimpleXMLElement|string|Calendar
+	 * @throws Exception
 	 */
 	public function user_calendar_create(
-			$params = array()) {
+		array $params = array()): array|SimpleXMLElement|string|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_userid () == false) {
+		if (!$this->valide_userid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -180,7 +191,8 @@ class Calendar extends User {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCalendarId() {
+	public function getCalendarId(): ?string
+	{
 		return $this->calendar_id;
 	}
 
@@ -188,7 +200,8 @@ class Calendar extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCalendarId(
-			&$calendar_id) {
+			&$calendar_id): static
+	{
 		$this->calendar_id = $calendar_id;
 		return $this;
 	}
@@ -196,7 +209,8 @@ class Calendar extends User {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEmailContent() {
+	public function getEmailContent(): array
+	{
 		return $this->calendar_content;
 	}
 
@@ -204,7 +218,8 @@ class Calendar extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setEmailContent(
-			&$calendar_content) {
+			&$calendar_content): static
+	{
 		$this->calendar_content = $calendar_content;
 		return $this;
 	}
@@ -212,7 +227,8 @@ class Calendar extends User {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getO356CalendarRef() {
+	public function getO356CalendarRef(): array
+	{
 		return $this->calendar_o365_ref;
 	}
 
@@ -220,7 +236,8 @@ class Calendar extends User {
 	 * @codeCoverageIgnore
 	 */
 	public function &setO356CalendarRef(
-			&$calendar_o365_ref) {
+			&$calendar_o365_ref): static
+	{
 		$this->calendar_o365_ref = $calendar_o365_ref;
 		return $this;
 	}
@@ -231,11 +248,10 @@ class Calendar extends User {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Calendar :";
 		return $help;
 	}
 }
-?>

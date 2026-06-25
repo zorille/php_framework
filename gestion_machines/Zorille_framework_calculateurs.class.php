@@ -64,8 +64,10 @@ class calculateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return calculateurs
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetCalculateurRef ( calculateur::creer_calculateur ( $liste_class ["options"], "REF", "NetName", "IP", "Username", "Password", "FTPPassword", 0, 0, 0, 0, 0, 0, 0 ) );
@@ -90,10 +92,11 @@ class calculateurs extends abstract_log {
 	 * et cree la liste de calculateur avec la class calculateur
 	 *
 	 * @param array $liste liste de machine avec tous leurs attribues (cf class calculateur sans le s)
-	 * @return Bool Renvoi TRUE si des calculateurs sont creer, FALSE sinon.
+	 * @return bool|self Renvoi TRUE si des calculateurs sont creer, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function &charge_liste_calculateurs($liste) {
+	public function &charge_liste_calculateurs(array $liste): bool|static
+	{
 		if (is_array ( $liste ) && count ( $liste ) > 0) {
 			$liste_calc = $this->getListeMachine ();
 			foreach ( $liste as $row ) {
@@ -121,11 +124,13 @@ class calculateurs extends abstract_log {
 			}
 			$this->setListeMachine ( $liste_calc );
 		} else {
-			return $this->onError ( "Pas de calculateurs dans la liste" );
+			$r = $this->onError ( "Pas de calculateurs dans la liste" );
+			return $r;
 		}
 		
 		if (count ( $this->getListeMachine () ) == 0) {
-			return $this->onError ( "Pas de calculateurs dans la liste des machines" );
+			$r = $this->onError ( "Pas de calculateurs dans la liste des machines" );
+			return $r;
 		}
 		$this->onDebug ( $this->getListeMachine (), 2 );
 		return $this;
@@ -136,7 +141,8 @@ class calculateurs extends abstract_log {
 	 *
 	 * @return array Liste des NetName des calculateurs utilises
 	 */
-	public function renvoi_liste_machine() {
+	public function renvoi_liste_machine(): array
+	{
 		$liste_machine_en_cours = array ();
 		foreach ( $this->getListeMachine () as $machine )
 			$liste_machine_en_cours [] .= $machine->renvoi_donnees_machine ( "NetName" );
@@ -149,7 +155,8 @@ class calculateurs extends abstract_log {
 	 *
 	 * @return array Liste ordre aleatoire des NetName des calculateurs utilises
 	 */
-	public function renvoi_liste_machine_aleatoire() {
+	public function renvoi_liste_machine_aleatoire(): array
+	{
 		$liste_calc = $this->getListeMachine ();
 		$new_liste = array ();
 		$nb_machine = count ( $liste_calc );
@@ -164,15 +171,16 @@ class calculateurs extends abstract_log {
 	}
 
 	/**
-	* Prend les valeurs RAM, Disk et CPU d'un job
-	* et trouve une machine pouvant le recevoir
-	*
-	* @param int $ram RAM utilise par le job
-	* @param int $disk Disque utilise par le job
-	* @param int $cpu CPUUnit utilise par le job
-	* @return string|false Renvoi l'id de la machine pouvant recevoir le job ou FALSE sinon.
-	*/
-	public function trouve_calculateur_libre($ram, $disk, $cpu) {
+	 * Prend les valeurs RAM, Disk et CPU d'un job
+	 * et trouve une machine pouvant le recevoir
+	 *
+	 * @param int $ram RAM utilise par le job
+	 * @param int $disk Disque utilise par le job
+	 * @param int $cpu CPUUnit utilise par le job
+	 * @return bool|int|string Renvoi l'id de la machine pouvant recevoir le job ou FALSE sinon.
+	 */
+	public function trouve_calculateur_libre(int $ram, int $disk, int $cpu): bool|int|string
+	{
 		$CODE_RETOUR = - 1;
 		foreach ( $this->getListeMachine () as $id => $calculateur ) {
 			$RETOUR = $calculateur->compare_valeur ( $ram, $disk, $cpu );
@@ -194,7 +202,8 @@ class calculateurs extends abstract_log {
 	 *
 	 * @return int nombre max de job.
 	 */
-	public function renvoi_nb_max_job() {
+	public function renvoi_nb_max_job(): int
+	{
 		$CODE_RETOUR = 0;
 		foreach ( $this->getListeMachine () as $calculateur ) {
 			$CODE_RETOUR += $calculateur->renvoi_donnees_machine ( "MaxNbJob" );
@@ -208,7 +217,8 @@ class calculateurs extends abstract_log {
 	 *
 	 * @return int nombre max de job.
 	 */
-	public function renvoi_nb_attribution() {
+	public function renvoi_nb_attribution(): int
+	{
 		return count ( $this->getAttribution () );
 	}
 
@@ -222,7 +232,8 @@ class calculateurs extends abstract_log {
 	 * @param int $cpu CPUUnit utilise par le job
 	 * @return Bool Renvoi TRUE si le job est attribue ou FALSE sinon. -1 le calculateur ne supporte pas ce job.
 	 */
-	public function utilise_puissance_machine($id, $ram, $disk, $cpu) {
+	public function utilise_puissance_machine(int $id, int $ram, int $disk, int $cpu): bool
+	{
 		$calculateur = $this->getCalculateur ( $id );
 		if ($calculateur != NULL) {
 			return $calculateur->utilise_puissance_calculateur ( $ram, $disk, $cpu );
@@ -241,7 +252,8 @@ class calculateurs extends abstract_log {
 	 * @param int $cpu CPUUnit utilise par le job
 	 * @return Bool Renvoi TRUE si le job est bien des-attribue ou FALSE si il n'y a plus de job sur la machine.
 	 */
-	public function libere_puissance_machine($id, $ram, $disk, $cpu) {
+	public function libere_puissance_machine(int $id, int $ram, int $disk, int $cpu): bool
+	{
 		$calculateur = $this->getCalculateur ( $id );
 		if ($calculateur != NULL) {
 			return $calculateur->libere_puissance_calculateur ( $ram, $disk, $cpu );
@@ -259,9 +271,10 @@ class calculateurs extends abstract_log {
 	 * @param int $ram RAM utilise par le job
 	 * @param int $disk Disque utilise par le job
 	 * @param int $cpu CPUUnit utilise par le job
-	 * @return string|false Renvoi le nom de la machine ayant recu le job ou FALSE si il n'y a pas eu d'attribution.
+	 * @return bool|int|string Renvoi le nom de la machine ayant recu le job ou FALSE si il n'y a pas eu d'attribution.
 	 */
-	public function attribut_calculateur($uniq_id, $ram, $disk, $cpu) {
+	public function attribut_calculateur(string $uniq_id, int $ram, int $disk, int $cpu): bool|int|string
+	{
 		$liste_attribution = $this->getAttribution ();
 		if (! isset ( $liste_attribution [$uniq_id] )) {
 			$id = $this->trouve_calculateur_libre ( $ram, $disk, $cpu );
@@ -289,9 +302,10 @@ class calculateurs extends abstract_log {
 	 * Prend le nom d'un job et des-alloue ses ressources du calculateur.
 	 *
 	 * @param string $uniq_id Numero unique du job
-	 * @return Bool Renvoi TRUE si le job est bien des-attribue ou FALSE si il n'y a plus de job sur la machine.
+	 * @return bool|int Renvoi TRUE si le job est bien des-attribue ou FALSE si il n'y a plus de job sur la machine.
 	 */
-	public function libere_calculateur($uniq_id) {
+	public function libere_calculateur(string $uniq_id): bool|int
+	{
 		$liste_attribution = $this->getAttribution ();
 		if (isset ( $liste_attribution [$uniq_id] )) {
 			$var_return = $this->libere_puissance_machine ( $liste_attribution [$uniq_id] ["calculateur"], $liste_attribution [$uniq_id] ["ram"], $liste_attribution [$uniq_id] ["disk"], $liste_attribution [$uniq_id] ["cpu"] );
@@ -315,9 +329,9 @@ class calculateurs extends abstract_log {
 	/**
 	 * libere tous les calculateurs.
 	 */
-	public function libere_tous_calculateurs() {
+	public function libere_tous_calculateurs(): bool
+	{
 		foreach ( $this->getAttribution () as $uniq_id => $calc ) {
-			$calc;
 			$this->libere_calculateur ( $uniq_id );
 		}
 		
@@ -328,23 +342,27 @@ class calculateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeMachine() {
+	public function getListeMachine(): array
+	{
 		return $this->liste_machine;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeMachine($liste_machine) {
+	public function &setListeMachine($liste_machine): static
+	{
 		$this->liste_machine = $liste_machine;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return calculateur
+	 * @param $pos
+	 * @return calculateur|null
 	 */
-	public function &getCalculateur($pos) {
+	public function &getCalculateur($pos): ?calculateur
+	{
 		if (isset ( $this->liste_machine [$pos] )) {
 			return $this->liste_machine [$pos];
 		}
@@ -355,14 +373,16 @@ class calculateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMachineId() {
+	public function getMachineId(): array
+	{
 		return $this->machine_id;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMachineId($machine_id) {
+	public function &setMachineId($machine_id): static
+	{
 		$this->machine_id = $machine_id;
 		return $this;
 	}
@@ -370,7 +390,8 @@ class calculateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAddMachineId($nom, $machine_id) {
+	public function &setAddMachineId($nom, $machine_id): static
+	{
 		$this->machine_id [$nom] = $machine_id;
 		return $this;
 	}
@@ -378,14 +399,16 @@ class calculateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAttribution() {
+	public function getAttribution(): array
+	{
 		return $this->attribution;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAttribution($attribution) {
+	public function &setAttribution($attribution): static
+	{
 		$this->attribution = $attribution;
 		return $this;
 	}
@@ -393,36 +416,39 @@ class calculateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAddAttribution($nom, $attribution) {
+	public function &setAddAttribution($nom, $attribution): static
+	{
 		$this->attribution [$nom] = $attribution;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return calculateur
+	 * @return calculateur|null
 	 */
-	public function &getObjetCalculateurRef() {
+	public function &getObjetCalculateurRef(): ?calculateur
+	{
 		return $this->calculateur_ref;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetCalculateurRef($calculateur_ref) {
+	public function &setObjetCalculateurRef($calculateur_ref): static
+	{
 		$this->calculateur_ref = $calculateur_ref;
 		return $this;
 	}
 
 	/************************* Accesseurs ************************/
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -448,4 +474,3 @@ class calculateurs extends abstract_log {
 		return $help;
 	}
 }
-?>

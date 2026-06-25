@@ -28,11 +28,16 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * Instancie un objet de type cacti_graphTreeItems.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_graphTreeItems
+	 * @throws Exception
 	 */
-	static function &creer_cacti_graphTreeItems(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_graphTreeItems(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_graphTreeItems
+	{
 		$objet = new cacti_graphTreeItems ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -47,7 +52,8 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * @param array $liste_class
 	 * @return cacti_graphTreeItems
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -58,7 +64,7 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -72,7 +78,8 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * Charge la liste des hosts via l'API Cacti
 	 * @throws Exception
 	 */
-	public function charge_graphTreeItems() {
+	public function charge_graphTreeItems(): bool|static
+	{
 		$dbparentNodes = db_fetch_assoc ( "SELECT id,graph_tree_id
 					FROM graph_tree_items" );
 		if ($dbparentNodes) {
@@ -89,7 +96,8 @@ class cacti_graphTreeItems extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_graphTreeItem_by_tree_id($tree_id) {
+	public function valide_graphTreeItem_by_tree_id($tree_id): bool
+	{
 		foreach($this->getGraphTreeItems () as $GraphTreeItem){
 			if(in_array ( $tree_id, $GraphTreeItem )){
 				return true;
@@ -103,7 +111,8 @@ class cacti_graphTreeItems extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_graphTreeItem_by_id($getGraphTreeItems_id) {
+	public function valide_graphTreeItem_by_id($getGraphTreeItems_id): bool
+	{
 		$trees = $this->getGraphTreeItems ();
 		if (isset ( $trees [$getGraphTreeItems_id] )) {
 			return true;
@@ -128,11 +137,13 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setGraphTreeItems($graphTreeItems) {
+	public function &setGraphTreeItems($graphTreeItems): bool|static
+	{
 		if (is_array ( $graphTreeItems )) {
 			$this->graphTreeItems = $graphTreeItems;
 		} else {
-			return $this->onError ( "Il faut un tableau de graph Tree Items." );
+			$r = $this->onError ( "Il faut un tableau de graph Tree Items." );
+			return $r;
 		}
 		return $this;
 	}
@@ -141,11 +152,13 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &ajouteGraphTreeItems($id, $tree_id) {
+	public function &ajouteGraphTreeItems($id, $tree_id): bool|static
+	{
 		if ($id != "" && $tree_id != "") {
 			$this->graphTreeItems [$id] = $tree_id;
 		} else {
-			return $this->onError ( "Il faut un id et/ou un tree_id." );
+			$r = $this->onError ( "Il faut un id et/ou un tree_id." );
+			return $r;
 		}
 		return $this;
 	}
@@ -154,4 +167,3 @@ class cacti_graphTreeItems extends parametresStandard {
 	 * ***************************** ACCESSEURS *******************************
 	 */
 }
-?>

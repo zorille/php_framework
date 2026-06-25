@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -44,15 +45,16 @@ class VirtualMachine extends FunctionalCI {
 	 * Instancie un objet de type VirtualMachine. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return VirtualMachine
 	 */
 	static function &creer_VirtualMachine(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): VirtualMachine
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new VirtualMachine ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -68,7 +70,7 @@ class VirtualMachine extends FunctionalCI {
 	 * @return VirtualMachine
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'VirtualMachine' )
 			->champ_obligatoire_standard ()
@@ -85,7 +87,6 @@ class VirtualMachine extends FunctionalCI {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -96,9 +97,10 @@ class VirtualMachine extends FunctionalCI {
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return VirtualMachine
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): VirtualMachine
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -109,8 +111,12 @@ class VirtualMachine extends FunctionalCI {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_VirtualMachine(
-			$name) {
+			$name): ci|bool|VirtualMachine
+	{
 		return $this->creer_oql ( array (
 				'friendlyname' => $name
 		) )
@@ -123,7 +129,8 @@ class VirtualMachine extends FunctionalCI {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_VirtualMachine(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = $this->prepare_standard_params ( $parametres );
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
@@ -183,7 +190,8 @@ class VirtualMachine extends FunctionalCI {
 	 * @return VirtualMachine
 	 */
 	public function creer_oql_VirtualMachine(
-			$fields = array ()) {
+		array $fields = array ()): VirtualMachine
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -199,10 +207,13 @@ class VirtualMachine extends FunctionalCI {
 
 	/**
 	 * Champ Obligatoire : name, org_name, hypervisor_name, osfamily_name, osversion_name, status, business_criticity, managementip, cpu, mem, move2production, fqdn
+	 * @param $parametres
 	 * @return VirtualMachine
+	 * @throws Exception
 	 */
 	public function gestion_VirtualMachine(
-			$parametres) {
+			$parametres): VirtualMachine
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_VirtualMachine ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -218,7 +229,8 @@ class VirtualMachine extends FunctionalCI {
 	 * @codeCoverageIgnore
 	 * @return hypervisor
 	 */
-	public function &getObjetItophypervisor() {
+	public function &getObjetItophypervisor(): hypervisor
+	{
 		return $this->hypervisor;
 	}
 
@@ -226,16 +238,18 @@ class VirtualMachine extends FunctionalCI {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItophypervisor(
-			&$hypervisor) {
+			&$hypervisor): static
+	{
 		$this->hypervisor = $hypervisor;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return OSFamily
+	 * @return OSFamily|null
 	 */
-	public function &getObjetItopOSFamily() {
+	public function &getObjetItopOSFamily(): ?OSFamily
+	{
 		return $this->OSFamily;
 	}
 
@@ -243,16 +257,18 @@ class VirtualMachine extends FunctionalCI {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopOSFamily(
-			&$OSFamily) {
+			&$OSFamily): static
+	{
 		$this->OSFamily = $OSFamily;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return OSVersion
+	 * @return OSVersion|null
 	 */
-	public function &getObjetItopOSVersion() {
+	public function &getObjetItopOSVersion(): ?OSVersion
+	{
 		return $this->OSVersion;
 	}
 
@@ -260,7 +276,8 @@ class VirtualMachine extends FunctionalCI {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopOSVersion(
-			&$OSVersion) {
+			&$OSVersion): static
+	{
 		$this->OSVersion = $OSVersion;
 		return $this;
 	}
@@ -271,11 +288,10 @@ class VirtualMachine extends FunctionalCI {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "VirtualMachine :";
 		return $help;
 	}
 }
-?>

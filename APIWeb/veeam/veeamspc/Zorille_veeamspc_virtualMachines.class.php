@@ -6,6 +6,7 @@
  */
 namespace Zorille\veeamspc;
 
+use SimpleXMLElement;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -45,15 +46,16 @@ class virtualMachines extends protectedWorkloads {
 	 * InstanvirtualMachinese un objet de type virtualMachines. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return virtualMachines
 	 */
 	static function &creer_veeamspc_virtualMachines(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): virtualMachines
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new virtualMachines ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -69,7 +71,7 @@ class virtualMachines extends protectedWorkloads {
 	 * @return virtualMachines
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -81,7 +83,6 @@ class virtualMachines extends protectedWorkloads {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -92,72 +93,81 @@ class virtualMachines extends protectedWorkloads {
 
 	/**
 	 * Recupere l'id du virtualMachine, l'ajoute à l'objet et renvoi l'Id
-	 * @return string
+	 * @param $virtualMachine
+	 * @return string|null
 	 * @throws Exception
 	 */
 	public function recupere_id_du_virtualMachine(
-			$virtualMachine) {
+			$virtualMachine): ?string
+	{
 		$this->setVirtualMachineId ( $this->recupere_instanceUid ( $virtualMachine ) );
 		return $this->getVirtualMachineId ();
 	}
 
 	/**
 	 * Recupere le nom du virtualMachine
+	 * @param $virtualMachine
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_du_virtualMachine(
-			$virtualMachine) {
+			$virtualMachine): string
+	{
 		return ( string ) $virtualMachine->name;
 	}
 
 	/**
 	 * Recupere le nom du virtualMachine
+	 * @param $virtualMachine
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_OrganizationUID_du_virtualMachine(
-			$virtualMachine) {
+			$virtualMachine): string
+	{
 		return ( string ) $virtualMachine->organizationUid;
 	}
 
 	/**
 	 * Recupere le nom du virtualMachine
+	 * @param $virtualMachine
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_latestRestorePointDate_du_virtualMachine(
-			$virtualMachine) {
+			$virtualMachine): string
+	{
 		return ( string ) $virtualMachine->latestRestorePointDate;
 	}
 
 	/**
 	 * Recupere le nom du virtualMachine
-	 * @return string
-	 * @throws Exception
+	 * @param $virtualMachine
+	 * @return int|string
 	 */
 	public function recupere_nb_restorePoints_du_virtualMachine(
-			$virtualMachine) {
+			$virtualMachine): int|string
+	{
 		return ( int ) $virtualMachine->restorePoints;
 	}
-	
+
 	/**
 	 * Recupere le nom du virtualMachine
-	 * @return string
-	 * @throws Exception
+	 * @param $virtualMachine
+	 * @return int|string
 	 */
 	public function recupere_taille_du_virtualMachine(
-			$virtualMachine) {
+			$virtualMachine): int|string
+	{
 				return ( int ) $virtualMachine->usedSourceSize;
 	}
 
 	/**
 	 * Permet de trouver la liste des virtualMachines dans veeamspc et enregistre les donnees des virtualMachines dans l'objet
+	 * @param array $params
 	 * @return virtualMachines
 	 * @throws Exception
 	 */
 	public function retrouve_virtualMachines(
-			$params = array ()) {
+		array $params = array ()): virtualMachines
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$virtualMachines = array ();
 		while ( ! $this->getObjetVeeamWsclientRest ()
@@ -180,11 +190,13 @@ class virtualMachines extends protectedWorkloads {
 	 */
 	/**
 	 * Verifie qu'un virtualMachine id est rempli/existe
+	 * @param bool $error
 	 * @return boolean
 	 * @throws Exception
 	 */
 	public function valide_virtualMachineid(
-			$error = true) {
+		bool $error = true): bool
+	{
 		if (empty ( $this->getVirtualMachineId() )) {
 			$this->onDebug ( $this->getVirtualMachineId (), 2 );
 			if ($error) {
@@ -195,12 +207,17 @@ class virtualMachines extends protectedWorkloads {
 		return true;
 	}
 
-	public function virtualMachines_list_uri() {
+	public function virtualMachines_list_uri(): string
+	{
 		return $this->protectedWorkloads_list_uri().'/virtualMachines';
 	}
 
-	public function virtualMachine_id_uri() {
-		if ($this->valide_virtualMachineid () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function virtualMachine_id_uri(): bool|string
+	{
+		if (!$this->valide_virtualMachineid()) {
 			return $this->onError ( "Il n'y pas d'id virtualMachine selectionne" );
 		}
 		return $this->protectedWorkload_id_uri() () . '/virtualMachines/' . $this->getVirtualMachineId ();
@@ -212,7 +229,8 @@ class virtualMachines extends protectedWorkloads {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVirtualMachineId() {
+	public function getVirtualMachineId(): ?string
+	{
 		return $this->virtualMachine_id;
 	}
 
@@ -220,7 +238,8 @@ class virtualMachines extends protectedWorkloads {
 	 * @codeCoverageIgnore
 	 */
 	public function &setVirtualMachineId(
-			$virtualMachine_id) {
+			$virtualMachine_id): static
+	{
 		$this->virtualMachine_id = $virtualMachine_id;
 		return $this;
 	}
@@ -228,7 +247,8 @@ class virtualMachines extends protectedWorkloads {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeVirtualMachines() {
+	public function getListeVirtualMachines(): SimpleXMLElement|null|array
+	{
 		return $this->liste_virtualMachines;
 	}
 
@@ -236,7 +256,8 @@ class virtualMachines extends protectedWorkloads {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeVirtualMachines(
-			$liste_virtualMachines) {
+			$liste_virtualMachines): static
+	{
 		$this->liste_virtualMachines = $liste_virtualMachines;
 		return $this;
 	}
@@ -247,11 +268,10 @@ class virtualMachines extends protectedWorkloads {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "virtualMachines :";
 		return $help;
 	}
 }
-?>

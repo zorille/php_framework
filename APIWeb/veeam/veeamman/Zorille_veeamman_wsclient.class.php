@@ -7,9 +7,12 @@
  */
 namespace Zorille\veeamman;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
+use Zorille\framework\gestion_connexion_url;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des informations via un webservice.
@@ -48,18 +51,19 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param datas &$datas Reference sur un objet datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null &$datas Reference sur un objet datas
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = NULL,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = NULL,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): Core\wsclient
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -73,15 +77,15 @@ class wsclient extends Core\wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return wsclient|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this->setObjetveeamDatas ( $liste_class ["datas"] )
 			->setContentType ( 'application/xml' )
@@ -95,13 +99,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -113,7 +116,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): bool|wsclient|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_veeamman = $this->getObjetveeamDatas ()
 			->valide_presence_data ( $nom );
@@ -143,10 +147,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Http Veeam header creator
 	 *
-	 * @return string Http Header
+	 * @param array $params
+	 * @return wsclient Http Header
 	 */
 	public function prepare_html_entete(
-			$params = array ()) {
+		array $params = array ()): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
 			return $this->setHttpHeader ( array (
@@ -172,7 +178,8 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @return wsclient
 	 */
-	public function prepare_params() {
+	public function prepare_params(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -180,11 +187,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Convert return data to array
 	 *
-	 * @return array
-	 * @throws Exception
+	 * @param $retour_wsclient
+	 * @return false|SimpleXMLElement
 	 */
 	public function prepare_retour(
-			$retour_wsclient) {
+			$retour_wsclient): false|SimpleXMLElement
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return simplexml_load_string ( $retour_wsclient );
 	}
@@ -193,14 +201,14 @@ class wsclient extends Core\wsclient {
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
 	 * @param string $retour_json
 	 * @param boolean $return_array
-	 * @return array
+	 * @return mixed
 	 */
 	public function traite_retour_json(
-			$retour_json,
-			$return_array = true) {
+		string $retour_json,
+		bool   $return_array = true): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$tableau_resultat = json_decode ( $retour_json, $return_array );
-		return $tableau_resultat;
+		return json_decode ( $retour_json, $return_array );
 	}
 
 	/**
@@ -210,7 +218,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function valide_retour(
-			$retour_wsclient) {
+		mixed $retour_wsclient): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (preg_match ( '/HTTP Error (.*)</', $retour_wsclient, $retour ) === 1) {
 			return $this->onError ( "Requete en erreur : " . $retour [1], $retour_wsclient, 1 );
@@ -220,14 +229,15 @@ class wsclient extends Core\wsclient {
 
 	/**
 	 * Valide le code retour dans une page HTML
-	 * @param \SimpleXMLElement $simplexmlobject
-	 * @return boolean
+	 * @param SimpleXMLElement $simplexmlobject
+	 * @return boolean|self
 	 * @throws Exception
 	 */
 	public function gere_erreur_simplexml(
-			&$simplexmlobject) {
+		SimpleXMLElement &$simplexmlobject): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($simplexmlobject instanceof \SimpleXMLElement) {
+		if ($simplexmlobject instanceof SimpleXMLElement) {
 			$attributes = $simplexmlobject->attributes ();
 			if (isset ( $attributes ['StatusCode'] ) && ( int ) $attributes ['StatusCode'] != 200) {
 				return $this->onError ( "Requete en erreur : " . ( string ) $attributes ['Message'], "", ( int ) $attributes ['StatusCode'] );
@@ -243,7 +253,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_requete(
-			$params_login = array ()) {
+			$params_login = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'DELETE')) {
@@ -268,23 +279,25 @@ class wsclient extends Core\wsclient {
 	 * Resource: auth/login Method: Post Autentification
 	 *
 	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
+	 * @param array $params_login
+	 * @return bool|wsclient
 	 * @throws Exception
 	 */
 	final public function userLogin(
-			$params_login = array ()) {
+		array $params_login = array ()): bool|wsclient
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->setUrl ( 'sessionMngr/?v=latest' )
 			->setHttpMethod ( "POST" )
 			->setCollectHeader ( true )
 			->prepare_requete ( $params_login );
 		if (preg_match ( '/X-RestSvcSessionId: (.*)/', $this->getHeaderData (), $retour ) === 1) {
-			if (isset ( $resultat->SessionId ) && ! empty ( $resultat->SessionId )) {
+			if (! empty ( $resultat->SessionId )) {
 				return $this->setAuth ( trim ( $retour [1] ) )
 					->setSession ( ( string ) $resultat->SessionId );
 			}
 		} elseif (preg_match ( '/x-restsvcsessionid: (.*)/', $this->getHeaderData (), $retour ) === 1) {
-			if (isset ( $resultat->SessionId ) && ! empty ( $resultat->SessionId )) {
+			if (! empty ( $resultat->SessionId )) {
 				return $this->setAuth ( trim ( $retour [1] ) )
 					->setSession ( ( string ) $resultat->SessionId );
 			}
@@ -300,7 +313,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	final public function userLogout(
-			$params = array ()) {
+		array $params = array ()): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->deleteMethod ( 'logonSessions/' . $this->getSession (), array () );
 		return $this;
@@ -314,10 +328,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listJobs(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'jobs', $params );
-		return $resultat;
+		return $this->getMethod ( 'jobs', $params );
 	}
 
 	/**
@@ -326,11 +340,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function Job(
-			$jobid,
-			$params = array ()) {
+		$jobid,
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'jobs/' . $jobid, $params );
-		return $resultat;
+		return $this->getMethod ( 'jobs/' . $jobid, $params );
 	}
 
 	/**
@@ -339,11 +353,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listeJobIncludes(
-			$jobid,
-			$params = array ()) {
+		$jobid,
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'jobs/' . $jobid . '/includes', $params );
-		return $resultat;
+		return $this->getMethod ( 'jobs/' . $jobid . '/includes', $params );
 	}
 
 	/**
@@ -352,12 +366,12 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function JobInclude(
-			$jobid,
-			$ObjectInJobId,
-			$params = array ()) {
+		$jobid,
+		$ObjectInJobId,
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'jobs/' . $jobid . '/includes/' . $ObjectInJobId, $params );
-		return $resultat;
+		return $this->getMethod ( 'jobs/' . $jobid . '/includes/' . $ObjectInJobId, $params );
 	}
 
 	/**
@@ -369,11 +383,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listBackupSessionsParJob(
-			$jobid,
-			$params = array ()) {
+		string $jobid,
+		array  $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'jobs/' . $jobid . '/backupSessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'jobs/' . $jobid . '/backupSessions', $params );
 	}
 
 	/**
@@ -382,10 +396,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listBackupSessions(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupSessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'backupSessions', $params );
 	}
 
 	/**
@@ -394,25 +408,26 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupSessions(
-			$BackupSessionsId,
-			$params = array ()) {
+		$BackupSessionsId,
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupSessions/' . $BackupSessionsId, $params );
-		return $resultat;
+		return $this->getMethod ( 'backupSessions/' . $BackupSessionsId, $params );
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @param string $jobid numero du job
+	 * @param $backupSessionsid
 	 * @param array $params Request Parameters
+	 * @return bool|SimpleXMLElement|string
 	 * @throws Exception
 	 */
 	public function listBackupTaskSessionParBackup(
-			$backupSessionsid,
-			$params = array ()) {
+		$backupSessionsid,
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupSessions/' . $backupSessionsid . '/taskSessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'backupSessions/' . $backupSessionsid . '/taskSessions', $params );
 	}
 
 	/**
@@ -423,10 +438,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listBackupTasksSessions(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupTaskSessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'backupTaskSessions', $params );
 	}
 
 	/**
@@ -438,11 +453,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupTaskSession(
-			$backupTaskSessionsid,
-			$params = array ()) {
+		string $backupTaskSessionsid,
+		array  $params = array ()): SimpleXMLElement|bool|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupTaskSessions/' . $backupTaskSessionsid, $params );
-		return $resultat;
+		return $this->getMethod ( 'backupTaskSessions/' . $backupTaskSessionsid, $params );
 	}
 
 	/**
@@ -452,10 +467,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listbackups(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backups', $params );
-		return $resultat;
+		return $this->getMethod ( 'backups', $params );
 	}
 
 	/**
@@ -465,11 +480,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupData(
-			$backupId,
-			$params = array ()) {
+		$backupId,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backups/' . $backupId, $params );
-		return $resultat;
+		return $this->getMethod ( 'backups/' . $backupId, $params );
 	}
 
 	/**
@@ -479,11 +494,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupFilesbybackup(
-			$backupId,
-			$params = array ()) {
+		$backupId,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backups/' . $backupId . "/backupFiles", $params );
-		return $resultat;
+		return $this->getMethod ( 'backups/' . $backupId . "/backupFiles", $params );
 	}
 
 	/**
@@ -492,10 +507,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listbackupServers(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupServers', $params );
-		return $resultat;
+		return $this->getMethod ( 'backupServers', $params );
 	}
 
 	/**
@@ -504,11 +519,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupServerData(
-			$backupServerId,
-			$params = array ()) {
+		$backupServerId,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupServers/' . $backupServerId, $params );
-		return $resultat;
+		return $this->getMethod ( 'backupServers/' . $backupServerId, $params );
 	}
 
 	/**
@@ -517,11 +532,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupServerListJobs(
-			$backupServerId,
-			$params = array ()) {
+		$backupServerId,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupServers/' . $backupServerId . "/jobs", $params );
-		return $resultat;
+		return $this->getMethod ( 'backupServers/' . $backupServerId . "/jobs", $params );
 	}
 
 	/**
@@ -530,10 +545,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listBackupFiles(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupFiles', $params );
-		return $resultat;
+		return $this->getMethod ( 'backupFiles', $params );
 	}
 
 	/**
@@ -542,11 +557,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function BackupFileData(
-			$backupfileuid,
-			$params = array ()) {
+		$backupfileuid,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupFiles/' . $backupfileuid, $params );
-		return $resultat;
+		return $this->getMethod ( 'backupFiles/' . $backupfileuid, $params );
 	}
 
 	/**
@@ -555,10 +570,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function reports(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'reports/summary', $params );
-		return $resultat;
+		return $this->getMethod ( 'reports/summary', $params );
 	}
 
 	/**
@@ -567,10 +582,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function reportsOverview(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'reports/summary/overview', $params );
-		return $resultat;
+		return $this->getMethod ( 'reports/summary/overview', $params );
 	}
 
 	/**
@@ -579,10 +594,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function reportsVmsOverview(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'reports/summary/vms_overview', $params );
-		return $resultat;
+		return $this->getMethod ( 'reports/summary/vms_overview', $params );
 	}
 
 	/**
@@ -591,10 +606,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function reportsJobStatistics(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'reports/summary/job_statistics', $params );
-		return $resultat;
+		return $this->getMethod ( 'reports/summary/job_statistics', $params );
 	}
 
 	/**
@@ -603,10 +618,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function reportsProcessedVms(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'reports/summary/processed_vms', $params );
-		return $resultat;
+		return $this->getMethod ( 'reports/summary/processed_vms', $params );
 	}
 
 	/**
@@ -615,10 +630,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function reportsRepository(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'reports/summary/repository', $params );
-		return $resultat;
+		return $this->getMethod ( 'reports/summary/repository', $params );
 	}
 
 	/**
@@ -628,10 +643,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listReplicaSessions(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'replicaSessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'replicaSessions', $params );
 	}
 
 	/**
@@ -640,11 +655,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function ReplicaSessions(
-			$ReplicaSessionsId,
-			$params = array ()) {
+		$ReplicaSessionsId,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'replicaSessions/' . $ReplicaSessionsId, $params );
-		return $resultat;
+		return $this->getMethod ( 'replicaSessions/' . $ReplicaSessionsId, $params );
 	}
 
 	/**
@@ -655,27 +670,28 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listReplicaTasksSessions(
-			$replicaSessionId,
-			$params = array ()) {
+		$replicaSessionId,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'replicaSessions/' . $replicaSessionId . '/replicaTaskSessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'replicaSessions/' . $replicaSessionId . '/replicaTaskSessions', $params );
 	}
 
 	/**
 	 * Resource: auth/login Method: Post Autentification
 	 *
 	 * @codeCoverageIgnore
-	 * @param string $backupTaskSessionsid numero de la task
+	 * @param $replicaTaskSessionsid
 	 * @param array $params Request Parameters
+	 * @return bool|SimpleXMLElement|string
 	 * @throws Exception
 	 */
 	public function ReplicaTaskSession(
-			$replicaTaskSessionsid,
-			$params = array ()) {
+		$replicaTaskSessionsid,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'replicaTaskSessions/' . $replicaTaskSessionsid, $params );
-		return $resultat;
+		return $this->getMethod ( 'replicaTaskSessions/' . $replicaTaskSessionsid, $params );
 	}
 
 	/**
@@ -686,36 +702,37 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listCatalogVms(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'catalog/vms', $params );
-		return $resultat;
+		return $this->getMethod ( 'catalog/vms', $params );
 	}
 
 	/**
 	 * Resource: auth/login Method: Post Autentification
 	 *
 	 * @codeCoverageIgnore
-	 * @param string $backupTaskSessionsid numero de la task
+	 * @param $vmname
 	 * @param array $params Request Parameters
+	 * @return bool|SimpleXMLElement|string
 	 * @throws Exception
 	 */
 	public function CatalogVm(
-			$vmname,
-			$params = array ()) {
+		$vmname,
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'catalog/vms/' . $vmname, $params );
-		return $resultat;
+		return $this->getMethod ( 'catalog/vms/' . $vmname, $params );
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function querySvc() {
+	public function querySvc(): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'querySvc', array () );
-		return $resultat;
+		return $this->getMethod ( 'querySvc', array () );
 	}
 
 	/**
@@ -724,13 +741,13 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function query(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! isset ( $params ['type'] )) {
 			return $this->onError ( "La query doit contenir un type au minimum" );
 		}
-		$resultat = $this->getMethod ( 'query', $params );
-		return $resultat;
+		return $this->getMethod ( 'query', $params );
 	}
 
 	/**
@@ -740,12 +757,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|bool|string
 	 * @throws Exception
 	 */
 	public function getMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -758,12 +776,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|bool|string
 	 * @throws Exception
 	 */
 	public function postMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): SimpleXMLElement|bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -776,12 +795,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|bool|string
 	 * @throws Exception
 	 */
 	public function deleteMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): SimpleXMLElement|bool|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -798,9 +818,10 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return datas
+	 * @return datas|null
 	 */
-	public function &getObjetveeamDatas() {
+	public function &getObjetveeamDatas(): ?datas
+	{
 		return $this->datas;
 	}
 
@@ -808,7 +829,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetveeamDatas(
-			&$datas) {
+			&$datas): static
+	{
 		$this->datas = $datas;
 		return $this;
 	}
@@ -817,7 +839,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string
+	{
 		return $this->auth;
 	}
 
@@ -825,7 +848,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static
+	{
 		$this->auth = $auth;
 		return $this;
 	}
@@ -834,7 +858,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getSession() {
+	public function getSession(): string
+	{
 		return $this->session;
 	}
 
@@ -842,7 +867,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSession(
-			$session) {
+			$session): static
+	{
 		$this->session = $session;
 		return $this;
 	}
@@ -853,7 +879,8 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array
+	{
 		return $this->defaultParams;
 	}
 
@@ -861,13 +888,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retrun wsclient
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): bool|static
+	{
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -882,7 +910,7 @@ class wsclient extends Core\wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "veeamman Wsclient :";
@@ -891,4 +919,3 @@ class wsclient extends Core\wsclient {
 		return $help;
 	}
 }
-?>

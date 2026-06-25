@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -24,15 +25,16 @@ class ContactType extends ci {
 	 * Instancie un objet de type ContactType.
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return ContactType
 	 */
 	static function &creer_ContactType(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): ContactType
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new ContactType ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -46,10 +48,12 @@ class ContactType extends ci {
 	 * @codeCoverageIgnore
 	 * Initialisation de l'objet
 	 * @param array $liste_class
-	 * @return ContactType
+	 * @return ContactType|Organization
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'ContactType' )
 			->champ_obligatoire_standard ();
@@ -60,22 +64,22 @@ class ContactType extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return ContactType
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): ContactType
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false
@@ -84,8 +88,12 @@ class ContactType extends ci {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_ContactType(
-			$name) {
+			$name): ci|bool|ContactType
+	{
 		return $this->creer_oql ( array (
 				'name' => $name
 		) )
@@ -98,9 +106,9 @@ class ContactType extends ci {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_ContactType(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		return $params;
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
@@ -109,7 +117,8 @@ class ContactType extends ci {
 	 * @return ContactType
 	 */
 	public function creer_oql_ContactType(
-			$fields = array ()) {
+		array $fields = array ()): ContactType
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -125,12 +134,13 @@ class ContactType extends ci {
 
 	/**
 	 * Creer une entree ContactType
-	 * @param string $name Nom de la famille de service
-	 * @param string $service_name Nom de service existant
+	 * @param $parametres
 	 * @return ContactType
+	 * @throws Exception
 	 */
 	public function gestion_ContactType(
-			$parametres) {
+			$parametres): ContactType
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_ContactType ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -148,11 +158,11 @@ class ContactType extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "ContactType :";
 		return $help;
 	}
 }
-?>

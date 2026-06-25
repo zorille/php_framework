@@ -35,11 +35,16 @@ class cacti_trees extends parametresStandard {
 	 * Instancie un objet de type cacti_trees.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return cacti_trees
+	 * @throws Exception
 	 */
-	static function &creer_cacti_trees(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_trees(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_trees
+	{
 		$objet = new cacti_trees ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -54,18 +59,19 @@ class cacti_trees extends parametresStandard {
 	 * @param array $liste_class
 	 * @return cacti_trees
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise($liste_class);
 		return $this;
 	}
 	
 	/*********************** Creation de l'objet *********************/
-	
+
 	/**
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -79,7 +85,8 @@ class cacti_trees extends parametresStandard {
 	 * Charge la liste des hosts via l'API Cacti
 	 * @throws Exception
 	 */
-	public function charge_trees() {
+	public function charge_trees(): bool|static
+	{
 		$this->onDebug ( "On charge la liste des trees.", 1 );
 		// fonction de l'API cacti : lib/database.php via global.php
 		$dbtrees = db_fetch_assoc ( "select id,name from graph_tree" );
@@ -91,11 +98,13 @@ class cacti_trees extends parametresStandard {
 		}
 		return $this->setTrees ( $trees );
 	}
-	
+
 	/**
 	 * Charge la liste des hosts via l'API Cacti
+	 * @throws Exception
 	 */
-	public function charge_trees_list() {
+	public function charge_trees_list(): static
+	{
 		$this->onDebug ( "On charge la liste des sous-trees.", 1 );
 		$array_trees = array ();
 		foreach ( $this->getTrees () as $tree_id => $tree_name ) {
@@ -132,7 +141,7 @@ class cacti_trees extends parametresStandard {
 		
 		return $this;
 	}
-	
+
 	/**
 	 * Creer un tableau de structure des arbres cacti
 	 * @codeCoverageIgnore
@@ -140,8 +149,10 @@ class cacti_trees extends parametresStandard {
 	 * @param int $niveau
 	 * @param string $type
 	 * @param string $nom_menu
+	 * @return cacti_trees
 	 */
-	private function _creerTableau(&$tableau,$niveau,$type,$nom_menu){
+	private function _creerTableau(array &$tableau, int $niveau, string $type, string $nom_menu): static
+	{
 		//Le niveau commence a 1
 		$i=1;
 		while ($i<$niveau){
@@ -173,7 +184,8 @@ class cacti_trees extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_tree_by_name($tree_name) {
+	public function valide_tree_by_name($tree_name): bool
+	{
 		foreach($this->getTrees () as $Tree){
 			if(in_array ( $tree_name, $Tree )){
 				return true;
@@ -187,7 +199,8 @@ class cacti_trees extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_tree_by_id($tree_id) {
+	public function valide_tree_by_id($tree_id): bool
+	{
 		$trees = $this->getTrees ();
 		if (isset ( $trees [$tree_id] )) {
 			return true;
@@ -211,11 +224,13 @@ class cacti_trees extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setTrees($trees) {
+	public function &setTrees($trees): bool|static
+	{
 		if (is_array ( $trees )) {
 			$this->trees = $trees;
 		} else {
-			return $this->onError ( "Il faut un tableau de trees." );
+			$r = $this->onError ( "Il faut un tableau de trees." );
+			return $r;
 		}
 		return $this;
 	}
@@ -223,29 +238,34 @@ class cacti_trees extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &ajoutetrees($nom, $tree_id) {
+	public function &ajoutetrees($nom, $tree_id): bool|static
+	{
 		if ($nom != "" && $tree_id != "") {
 			$this->trees [$nom] = $tree_id;
 		} else {
-			return $this->onError ( "Il faut un nom et/ou un tree_id." );
+			$r = $this->onError ( "Il faut un nom et/ou un tree_id." );
+			return $r;
 		}
 		return $this;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTreesStruct() {
+	public function getTreesStruct(): array
+	{
 		return $this->trees_structure;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setTreesStruct($trees_structure) {
+	public function &setTreesStruct($trees_structure): bool|static
+	{
 		if (is_array ( $trees_structure )) {
 			$this->trees_structure = $trees_structure;
 		} else {
-			return $this->onError ( "Il faut un tableau de trees structure." );
+			$r = $this->onError ( "Il faut un tableau de trees structure." );
+			return $r;
 		}
 		return $this;
 	}
@@ -254,4 +274,3 @@ class cacti_trees extends parametresStandard {
  * ***************************** ACCESSEURS *******************************
  */
 }
-?>

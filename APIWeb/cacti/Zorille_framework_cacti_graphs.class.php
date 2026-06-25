@@ -47,7 +47,8 @@ class cacti_graphs extends parametresStandard {
 	 * @param array $liste_class
 	 * @return cacti_graphs
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -58,7 +59,7 @@ class cacti_graphs extends parametresStandard {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
-	 * @return true
+	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de cacti_globals
@@ -72,7 +73,8 @@ class cacti_graphs extends parametresStandard {
 	 * Charge la liste des hosts via l'API Cacti
 	 * @throws Exception
 	 */
-	public function charge_graphs() {
+	public function charge_graphs(): static
+	{
 		$this->onDebug ( "On charge la liste des graph_local.", 1 );
 		$dbgraphids = db_fetch_assoc ( "SELECT id,graph_template_id,host_id FROM graph_local " );
 		if ($dbgraphids) {
@@ -91,7 +93,8 @@ class cacti_graphs extends parametresStandard {
 	 *
 	 * @return boolean True le tree existe, false le tree n'existe pas.
 	 */
-	public function valide_graph_by_id($graph_id) {
+	public function valide_graph_by_id($graph_id): bool
+	{
 		$graphIds = $this->getGraphIds ();
 		if (isset ( $graphIds [$graph_id] )) {
 			return true;
@@ -116,11 +119,13 @@ class cacti_graphs extends parametresStandard {
 	 * @codeCoverageIgnore
 	 * @throws Exception
 	 */
-	public function &setGraphIds($graphid) {
+	public function &setGraphIds($graphid): bool|static
+	{
 		if (is_array ( $graphid )) {
 			$this->graphids = $graphid;
 		} else {
-			return $this->onError ( "Il faut un tableau de graphid." );
+			$r = $this->onError ( "Il faut un tableau de graphid." );
+			return $r;
 		}
 		return $this;
 	}
@@ -129,4 +134,4 @@ class cacti_graphs extends parametresStandard {
 	 * ***************************** ACCESSEURS *******************************
 	 */
 }
-?>
+

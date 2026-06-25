@@ -49,7 +49,7 @@ class scp_z extends ssh_z {
 	 * @param array $liste_class
 	 * @return scp_z
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this ->retrouve_scp_z_param ();
@@ -332,7 +332,7 @@ class scp_z extends ssh_z {
 	 * @param string $echo Affiche le help
 	 * @return string Renvoie le help
 	 */
-	static function help() {
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

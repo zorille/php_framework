@@ -10,6 +10,8 @@ use \Exception as Exception;
 /**
  * class options<br>
  * Gere les options passes en argument.
+ * @method self setSortEnErreur(\bool|\string $sort_en_erreur)
+ *
  * @package Lib
  * @subpackage XML
  */
@@ -47,22 +49,23 @@ class options extends xml {
 	 * @codeCoverageIgnore
 	 * @param int $argc Nombre d'argument.
 	 * @param array $argv Liste des arguments.
-	 * @param string $limite_basse Nombre d'argument minimum.
-	 * @param string $limite_haute Nombre d'argument maximum.
+	 * @param int|string $limite_basse Nombre d'argument minimum.
+	 * @param int|string $limite_haute Nombre d'argument maximum.
 	 * @param string $usage Phrase en cas d'erreur sur le nombre d'argument.
 	 * @param bool $sort_en_erreur Prend les valeurs true/false.
 	 * @param string $rep_framework chemin du framework
 	 * @return options
 	 */
 	static function &creer_options(
-			$argc,
-			$argv,
-			$limite_basse = 1,
-			$limite_haute = 50,
-			$usage = "",
-			$rep_framework = "no",
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		int        $argc,
+		array      $argv,
+		int|string $limite_basse = 1,
+		int|string $limite_haute = 50,
+		string     $usage = "",
+		string     $rep_framework = "no",
+		bool       $sort_en_erreur = false,
+		           $entete = __CLASS__): options
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new options ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -84,7 +87,7 @@ class options extends xml {
 	 * @return options
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -108,20 +111,21 @@ class options extends xml {
 	/**
 	 * @param int $argc Nombre d'argument.
 	 * @param array $argv Liste des arguments.
-	 * @param string $limite_basse Nombre d'argument minimum.
-	 * @param string $limite_haute Nombre d'argument maximum.
+	 * @param int|string $limite_basse Nombre d'argument minimum.
+	 * @param int|string $limite_haute Nombre d'argument maximum.
 	 * @param string $usage Phrase en cas d'erreur sur le nombre d'argument.
 	 * @param string $rep_framework chemin du framework
-	 * @return options
+	 * @return options|false
 	 * @throws Exception
 	 */
 	public function retrouve_options_param(
-			&$argc,
-			&$argv,
-			$limite_basse = 1,
-			$limite_haute = 50,
-			$usage = "",
-			$rep_framework = "no") {
+		int        &$argc,
+		array      &$argv,
+		int|string $limite_basse = 1,
+		int|string $limite_haute = 50,
+		string     $usage = "",
+		string     $rep_framework = "no"): bool|options|static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		if ($argc < $limite_basse || $argc > $limite_haute) {
 			return $this->onError ( "Le nombre de parametres ne correspond pas pour " . $argv [0] . " " . $usage );
@@ -151,7 +155,8 @@ class options extends xml {
 	 * @return string|boolean
 	 */
 	private function _retrouveParamConf(
-			$option) {
+		string $option): bool|string
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		switch ($option) {
 			case "--conf" :
@@ -186,7 +191,8 @@ class options extends xml {
 	 * @return options
 	 */
 	public function &gestion_des_confs_par_fichier(
-			$liste_arguments) {
+		array $liste_arguments): static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		// On cherche un parametre de conf
 		$fonction = false;
@@ -194,7 +200,7 @@ class options extends xml {
 		$fonction_finale = "";
 		foreach ( $liste_arguments as $option ) {
 			// On entre dans la definition des parametres de conf
-			if (strpos ( $option, "--" ) === 0) {
+			if (str_starts_with($option, "--")) {
 				$flag_fonction = false;
 				$fonction_finale = "";
 			}
@@ -214,18 +220,17 @@ class options extends xml {
 	/**
 	 * Trouve l'argument --conf_dir dans la liste des arguments.<br> Et extrait la liste des fichiers de conf (s'ils existent) du dossier conf_dir.
 	 *
-	 * @param string $dossier_conf dossier de conf a lire.
 	 * @return options
 	 */
-	public function &lit_dossier_conf() {
+	public function &lit_dossier_conf(): static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$dossiers_conf = $this->getListeDossiersConf ();
 		foreach ( $dossiers_conf as $dossier_conf => $datas ) {
-			$datas;
 			$fichier_conf = repertoire::lire_repertoire ( $dossier_conf );
 			$regexp = $this->getRegexpConfDir ();
 			foreach ( $fichier_conf as $conf ) {
-				if (preg_match ( $regexp, $conf ) != FALSE) {
+				if (preg_match($regexp, $conf)) {
 					$this->ajoute_fichier_conf ( $dossier_conf . "/" . $conf );
 				}
 			}
@@ -238,11 +243,13 @@ class options extends xml {
 	/**
 	 * Ajoute un fichier de configuration a la liste et charge la configuration qu'il contient
 	 *
-	 * @param string $dossier_conf dossier de conf a lire.
+	 * @param bool $fichier_conf_sup
 	 * @return options
+	 * @throws Exception
 	 */
 	public function &ajouter_fichier_conf(
-			$fichier_conf_sup = false) {
+		bool $fichier_conf_sup = false): static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		if ($fichier_conf_sup !== false && $fichier_conf_sup != "") {
 			$this->ajoute_fichier_conf ( $fichier_conf_sup )
@@ -254,11 +261,10 @@ class options extends xml {
 	/**
 	 * Extrait tous les arguments du fichier de configuration.
 	 *
-	 * @return Bool TRUE si OK, FALSE sinon.
-	 * @return options
+	 * @return bool|self TRUE si OK, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function &parse_file_option() {
+	public function &parse_file_option(): bool|static {
 		$this->onDebug ( __METHOD__, 2 );
 		foreach ( $this->getListeFichiersConf () as $fichier ) {
 			if ($fichier ["load"] === false) {
@@ -269,15 +275,17 @@ class options extends xml {
 		return $this;
 	}
 
-	/**
-	 * Attribut une valeur par defaut au parametre dans $option
-	 * @param options $option
-	 * @param boolean $plusieurs_vars
-	 * @return options
-	 */
+    /**
+     * Attribut une valeur par defaut au parametre dans $option
+     * @param string|options $option
+     * @param boolean $plusieurs_vars
+     * @return options
+     * @throws Exception
+     */
 	private function _setOptionParDefaut(
-			$option,
-			$plusieurs_vars) {
+		options|string $option,
+		bool           $plusieurs_vars): options
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		if ($plusieurs_vars === false) {
 			if ($option == "verbose") {
@@ -289,18 +297,20 @@ class options extends xml {
 		return $this;
 	}
 
-	/**
-	 * Extrait tous les arguments de la liste.
-	 *
-	 * @param int $argc Nombre d'argument.
-	 * @param array $argv Liste des arguments.
-	 * @param string $usage Phrase en cas d'erreur sur le nombre d'argument.
-	 * @return options
-	 */
+    /**
+     * Extrait tous les arguments de la liste.
+     *
+     * @param int $argc Nombre d'argument.
+     * @param array $argv Liste des arguments.
+     * @param string $usage Phrase en cas d'erreur sur le nombre d'argument.
+     * @return options|bool
+     * @throws Exception
+     */
 	public function &parse_ligne_option(
-			$argc,
-			$argv,
-			$usage) {
+		int    $argc,
+		array  $argv,
+		string $usage): options|bool|static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$plusieurs_vars = false;
 		$option = "";
@@ -319,7 +329,7 @@ class options extends xml {
 			// On verifie la syntax de l'option
 			if ($entete == "--") {
 				$option = substr ( $argv [$i], 2 );
-				if (strpos ( $option, "=" ) != FALSE) {
+				if (strpos($option, "=")) {
 					// On split le parametre et sa valeur
 					$value_option = explode ( "=", $option, 2 );
 					// Dans le cas ou un fichier de conf a setter la variable
@@ -334,8 +344,9 @@ class options extends xml {
 				}
 			} else {
 				// Enfin sinon on a une erreur de syntax
-				return $this->onError ( "Erreur de syntax dans vos options : " . $argv [$i] . " " . $usage );
-			}
+				$err = $this->onError ( "Erreur de syntax dans vos options : " . $argv [$i] . " " . $usage );
+			    return $err;
+            }
 		}
 		if ($option != "") {
 			$this->_setOptionParDefaut ( $option, $plusieurs_vars );
@@ -347,13 +358,14 @@ class options extends xml {
 	 * Verifie si une option existe dans la liste des options.<br> Le $not_null permet de verifier l'option n'est pas egale a "".
 	 *
 	 *
-	 * @param string|array $nom_option Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
+	 * @param array|string $nom_option Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
 	 * @param Bool $not_null FALSE si la valeur peut etre egale a "" ou TRUE sinon.
 	 * @return Bool TRUE si l'option existe, FALSE sinon.
 	 */
 	public function verifie_option_existe(
-			$nom_option,
-			$not_null = false) {
+		array|string $nom_option,
+		bool         $not_null = false): bool
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$position = $this->_trouvePosition0ption ( $nom_option );
 		if ($position === "Z_NOTFOUND") {
@@ -368,17 +380,20 @@ class options extends xml {
 		return $CODE_RETOUR;
 	}
 
-	/**
-	 * ACCESSEURS set Ajoute une option.<br> Attention : en XML la valeur ne peut pas etre un tableau.
-	 *
-	 * @param string|array $champ Chemin complet du fichier XML.
-	 * @param string $valeur Valeur du xml.
-	 * @return true
-	 */
+    /**
+     * ACCESSEURS set Ajoute une option.<br> Attention : en XML la valeur ne peut pas etre un tableau.
+     *
+     * @param array|string|self $champ Chemin complet du fichier XML.
+     * @param string $valeur Valeur du xml.
+     * @param bool $ajout_valeur
+     * @return self|bool
+     * @throws Exception
+     */
 	public function setOption(
-			$champ,
-			$valeur,
-			$ajout_valeur = false) {
+		options|array|string $champ,
+		mixed               $valeur,
+		bool                 $ajout_valeur = false): options|bool
+    {
 		$this->onDebug ( __METHOD__, 2 );
 		if (is_string ( $valeur )) {
 			$valeur = str_replace ( "&", "&amp;", $valeur );
@@ -397,15 +412,15 @@ class options extends xml {
 		return $this->onError ( "Le champ est nul.", "" );
 	}
 
-	/**
-	 * Supprime un element de la liste
-	 *
-	 * @param string|array $nom Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
-	 * @param Bool $not_null FALSE si la valeur peut etre egale a "" ou TRUE sinon.
-	 * @return Bool TRUE si l'option existe, FALSE sinon.
-	 */
+    /**
+     * Supprime un element de la liste
+     *
+     * @param array|string $nom Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
+     * @return self TRUE si l'option existe, FALSE sinon.
+     */
 	public function supprime_option(
-			$nom) {
+		array|string $nom): static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$this->supprime_element ( $nom );
 		return $this;
@@ -414,20 +429,18 @@ class options extends xml {
 	/**
 	 * Renvoi la valeur d'une option dans la liste des options.<br> Le $not_null permet de verifier l'option n'est pas egale a "".
 	 *
-	 * @param string|array $nom_option Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
+	 * @param array|string $nom_option Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
 	 * @param Bool $not_null FALSE si la valeur peut etre egale a "" ou TRUE sinon.
 	 * @return mixed|false La valeur de l'option, FALSE sinon.
 	 */
 	public function getOption(
-			$nom_option,
-			$not_null = false) {
+		array|string $nom_option,
+		bool         $not_null = false): mixed
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$position = $this->_trouvePosition0ption ( $nom_option );
-		if ($not_null && $position === "")
-			return false;
-		elseif ($position === "Z_NOTFOUND")
-			return false;
-		return $position;
+
+        return (($not_null && $position === "") || $position === "Z_NOTFOUND") ? false : $position;
 	}
 
 	/**
@@ -435,21 +448,22 @@ class options extends xml {
 	 *
 	 * @return array Liste des options.
 	 */
-	public function getListeOption() {
+	public function getListeOption(): array
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$local_data = $this->renvoi_donnee ();
-		$resultat = array_merge ( $local_data, $this->getListeClass () );
-		return $resultat;
+		return array_merge ( $local_data, $this->getListeClass () );
 	}
 
 	/**
 	 * Renvoi un pointeur sur une option.
 	 * @access private
-	 * @param string|array $nom_option Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
+	 * @param array|string $nom_option Nom de l'option ou tableau de champ et sous-champ pour trouver l'option.
 	 * @return mixed Pointeur sur la case de l'option, "Z_NOTFOUND" si l'option n'existe pas.
 	 */
 	private function &_trouvePosition0ption(
-			$nom_option) {
+		array|string $nom_option): mixed
+	{
 		// On cherche l'option en priorite sur la ligne de commande
 		$data = $this->renvoi_donnee ( $nom_option );
 		if (is_string ( $data )) {
@@ -472,7 +486,8 @@ class options extends xml {
 	 * @codeCoverageIgnore
 	 */
 	public function dump_liste_option(
-			$fichier) {
+			$fichier): static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		if ($fichier != "") {
 			$this->getDomDatas ()
@@ -491,7 +506,8 @@ class options extends xml {
 	 * @return array|false si le parametre n'est pas au bon format.
 	 */
 	public function construit_parametre_standard(
-			$parametre_xml) {
+		string $parametre_xml): bool|array
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		// On prepare la ligne de commande logique
 		if (! is_array ( $parametre_xml )) {
@@ -515,12 +531,12 @@ class options extends xml {
 	/**
 	 * Verifie la presence d'une variable necessaires au traitement.<br> Retourne la liste d'option mise a jour par la ligne de commande dans le fichier de conf.
 	 *
-	 * @param string|array $parametre_xml Parametre de l'option en fichier de conf.
-	 * @param string $valeur_defaut Valeur par defaut (optionnel).
-	 * @return TRUE
+	 * @param array|string $parametre_xml Parametre de l'option en fichier de conf.
+	 * @return bool
 	 */
 	public function verifie_parametre_standard(
-			$parametre_xml) {
+		array|string $parametre_xml): bool
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		// On prepare la ligne de commande logique
 		$donnees = $this->construit_parametre_standard ( $parametre_xml );
@@ -557,11 +573,12 @@ class options extends xml {
 	/**
 	 * Prend un variable au format "fichier de conf" et la transforme au format standard "ligne de commande".
 	 *
-	 * @param string|array $option_xml variable au format "fichier de conf".
+	 * @param array|string $option_xml variable au format "fichier de conf".
 	 * @return string option en ligne de commande.
 	 */
 	public function construit_variable_ligne_commande_standard(
-			$option_xml) {
+		array|string $option_xml): string
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		if (! is_array ( $option_xml )) {
 			$option_ligne_commande = $option_xml;
@@ -574,11 +591,12 @@ class options extends xml {
 	/**
 	 * Verifie la presence d'une variable necessaires au traitement.<br>
 	 *
-	 * @param string|array $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
-	 * @return integer 1 si la variable existe en ligne de commande, 2 si la variable existe en fichier de conf, FALSE sinon
+	 * @param array|string $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
+	 * @return bool|int 1 si la variable existe en ligne de commande, 2 si la variable existe en fichier de conf, FALSE sinon
 	 */
 	public function verifie_variable_standard(
-			$option_xml) {
+		array|string $option_xml): bool|int
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$option_ligne_commande = $this->construit_variable_ligne_commande_standard ( $option_xml );
 		// Priorite a la ligne de commande
@@ -597,13 +615,14 @@ class options extends xml {
 	/**
 	 * Verifie la présence et/ou ajoute la variable necessaires au traitement au format "fichier de conf".<br> Retourne la liste d'option mise a jour avec la variable standard.
 	 *
-	 * @param string|array $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
+	 * @param array|string $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
 	 * @param string $valeur_defaut Valeur par defaut (optionnel).
 	 * @return TRUE
+	 * @throws Exception
 	 */
 	public function prepare_variable_standard(
-			$option_xml,
-			$valeur_defaut = "") {
+		array|string $option_xml,
+		string       $valeur_defaut = "") {
 		$this->onDebug ( __METHOD__, 2 );
 		$retour = $this->verifie_variable_standard ( $option_xml );
 		if ($retour === 1) {
@@ -620,12 +639,13 @@ class options extends xml {
 	/**
 	 * Renvoi la valeur d'une variable necessaires au traitement.<br>
 	 *
-	 * @param string|array $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
+	 * @param array|string $option_xml Nom l'option en fichier de conf et/ou en ligne de commande.
 	 * @return mixed|false si la variable n'existe pas.
 	 */
 	public function renvoi_variables_standard(
-			$option_xml,
-			$valeur_defaut = false) {
+		array|string $option_xml,
+		             $valeur_defaut = false): mixed
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$retour = $this->verifie_variable_standard ( $option_xml );
 		switch ($retour) {
@@ -646,13 +666,15 @@ class options extends xml {
 	/**
 	 * Extrait des parametres d'une liste d'option
 	 * @codeCoverageIgnore
-	 * @param string|array $chemin_option
+	 * @param array|string $chemin_option
+	 * @param null $valeur_par_defaut
 	 * @return boolean|string|array
 	 * @throws Exception
 	 */
 	public function _valideOption(
-			$chemin_option,
-			$valeur_par_defaut = null) {
+		array|string $chemin_option,
+		             $valeur_par_defaut = null): mixed
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		if ($this->verifie_variable_standard ( $chemin_option ) === false && $valeur_par_defaut === null) {
 			if (is_array ( $chemin_option )) {
@@ -677,7 +699,8 @@ class options extends xml {
 	 * ACCESSEURS get
 	 * @codeCoverageIgnore
 	 */
-	public function getRegexpConfDir() {
+	public function getRegexpConfDir(): string
+	{
 		return $this->regexp_conf_dir;
 	}
 
@@ -687,7 +710,8 @@ class options extends xml {
 	 * @return options
 	 */
 	public function &setRegexpConfDir(
-			$regexp_conf_dir) {
+			$regexp_conf_dir): static
+	{
 		$this->regexp_conf_dir = $regexp_conf_dir;
 		return $this;
 	}
@@ -696,7 +720,8 @@ class options extends xml {
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
 	 */
-	public function getListeClass() {
+	public function getListeClass(): array
+	{
 		return $this->liste_class;
 	}
 
@@ -704,7 +729,8 @@ class options extends xml {
 	 * ACCESSEURS get
 	 * @codeCoverageIgnore
 	 */
-	public function getListeDossiersConf() {
+	public function getListeDossiersConf(): array
+	{
 		return $this->liste_dossier_conf;
 	}
 
@@ -714,7 +740,8 @@ class options extends xml {
 	 * @return options
 	 */
 	public function &setListeDossiersConf(
-			$liste_dossier_conf) {
+			$liste_dossier_conf): static
+	{
 		$this->liste_dossier_conf = $liste_dossier_conf;
 		return $this;
 	}
@@ -725,7 +752,8 @@ class options extends xml {
 	 * @return options
 	 */
 	public function &ajoute_Dossiers_conf(
-			$dossier) {
+			$dossier): static
+	{
 		if ($dossier != "" && ! isset ( $this->liste_dossier_conf [$dossier] )) {
 			$this->liste_dossier_conf [$dossier] = array (
 					"nom" => $dossier,
@@ -739,17 +767,20 @@ class options extends xml {
 	 * ACCESSEURS get
 	 * @codeCoverageIgnore
 	 */
-	public function getListeFichiersConf() {
+	public function getListeFichiersConf(): array
+	{
 		return $this->liste_fichier_conf;
 	}
 
 	/**
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
+	 * @param $liste_fichier_conf
 	 * @return options
 	 */
 	public function &setListeFichiersConf(
-			$liste_fichier_conf) {
+			$liste_fichier_conf): static
+	{
 		$this->liste_fichier_conf = $liste_fichier_conf;
 		return $this;
 	}
@@ -757,10 +788,12 @@ class options extends xml {
 	/**
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
+	 * @param $fichier
 	 * @return options
 	 */
 	public function &ajoute_fichier_conf(
-			$fichier) {
+			$fichier): static
+	{
 		if ($fichier != "" && ! isset ( $this->liste_fichier_conf [$fichier] )) {
 			$this->liste_fichier_conf [$fichier] = array (
 					"nom" => $fichier,
@@ -773,12 +806,16 @@ class options extends xml {
 	/**
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
+	 * @param $fichier
+	 * @param $champ
+	 * @param $valeur
 	 * @return options
 	 */
 	public function setChampFichierConf(
 			$fichier,
 			$champ,
-			$valeur) {
+			$valeur): static
+	{
 		if ($fichier != "" && isset ( $this->liste_fichier_conf [$fichier] )) {
 			$this->liste_fichier_conf [$fichier] [$champ] = $valeur;
 		}
@@ -800,11 +837,14 @@ class options extends xml {
 	/**
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
+	 * @param $nom
+	 * @param $class
 	 * @return options
 	 */
 	public function &ajouter_class(
 			$nom,
-			$class) {
+			$class): static
+	{
 		if (! isset ( $this->liste_class [$nom] )) {
 			$this->liste_class [$nom] = $class;
 		}
@@ -814,10 +854,12 @@ class options extends xml {
 	/**
 	 * ACCESSEURS set
 	 * @codeCoverageIgnore
+	 * @param $nom
 	 * @return options
 	 */
 	public function &supprimer_class(
-			$nom) {
+			$nom): static
+	{
 		if (isset ( $this->liste_class [$nom] )) {
 			unset ( $this->liste_class [$nom] );
 		}
@@ -832,7 +874,8 @@ class options extends xml {
 	 * @codeCoverageIgnore
 	 * @return options
 	 */
-	public function debug_options() {
+	public function debug_options(): static
+	{
 		$this->onDebug ( $this->getListeFichiersConf (), 2 );
 		$this->onDebug ( $this->getListeDossiersConf (), 2 );
 		$this->onDebug ( $this->getListeOption (), 2 );
@@ -843,10 +886,10 @@ class options extends xml {
 	 * @static
 	 * @codeCoverageIgnore
 	 *
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Gestion des configurations :";
@@ -856,4 +899,3 @@ class options extends xml {
 		return $help;
 	}
 } // Fin de la class
-?>

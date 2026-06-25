@@ -56,11 +56,12 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_hostgroup
 	 */
-	static function &creer_zabbix_hostgroup(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_hostgroup(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_hostgroup
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_hostgroup ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -73,9 +74,9 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_hostgroup
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -87,7 +88,6 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -96,10 +96,11 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return zabbix_hostgroup True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		//Gestion des hostgroup
 		$hostgroup = $this->_valideOption ( array (
@@ -117,21 +118,22 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	 * 
 	 * @return array;
 	 */
-	public function creer_definition_hostGroup_create_ws() {
+	public function creer_definition_hostGroup_create_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$hostGroup = array (
-				"name" => $this->getName () 
+		return array (
+				"name" => $this->getName ()
 		);
-		
-		return $hostGroup;
 	}
 
 	/**
 	 * Creer un hostGroup dans zabbix
-	 * 
+	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_hostGroup() {
+	public function creer_hostGroup(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_hostGroup_create_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -143,14 +145,16 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGroupsId() {
+	public function getGroupsId(): string
+	{
 		return $this->groupid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGroupsId($groupid) {
+	public function &setGroupsId($groupid): static
+	{
 		$this->groupid = $groupid;
 		return $this;
 	}
@@ -158,14 +162,16 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getName() {
+	public function getName(): string
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setName($name) {
+	public function &setName($name): static
+	{
 		$this->name = $name;
 		return $this;
 	}
@@ -173,14 +179,16 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFlags() {
+	public function getFlags(): int
+	{
 		return $this->flags;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFlags($flags) {
+	public function &setFlags($flags): static
+	{
 		$this->flags = $flags;
 		return $this;
 	}
@@ -188,14 +196,16 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getInternal() {
+	public function getInternal(): int|string
+	{
 		return $this->internal;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setInternal($internal) {
+	public function &setInternal($internal): static
+	{
 		$this->internal = $internal;
 		return $this;
 	}
@@ -206,7 +216,8 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -216,4 +227,3 @@ class zabbix_hostgroup extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

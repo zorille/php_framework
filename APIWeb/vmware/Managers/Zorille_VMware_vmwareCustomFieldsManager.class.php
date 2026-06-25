@@ -58,7 +58,7 @@ class vmwareCustomFieldsManager extends Core\abstract_log {
 	 * @return vmwareCustomFieldsManager
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjectVmwareWsclient ( $liste_class ['vmwareWsclient'] )
@@ -239,7 +239,7 @@ class vmwareCustomFieldsManager extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

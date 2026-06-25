@@ -40,7 +40,7 @@ class WMI extends Core\abstract_log {
 	 * @param array $liste_class
 	 * @return Core\abstract_log
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->prepare_wmi ();
 		
@@ -54,7 +54,6 @@ class WMI extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de abstract_log
@@ -213,7 +212,7 @@ class WMI extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

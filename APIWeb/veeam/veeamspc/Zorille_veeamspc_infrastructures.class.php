@@ -6,6 +6,7 @@
  */
 namespace Zorille\veeamspc;
 
+use SimpleXMLElement;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -27,14 +28,14 @@ abstract class infrastructures extends ci {
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
 	private $liste_infrastructures = null;
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
 	private $liste_includes = null;
 
@@ -51,7 +52,8 @@ abstract class infrastructures extends ci {
 	 * @throws Exception
 	 */
 	public function valide_infrastructureid(
-			$error = true) {
+			$error = true): bool
+	{
 		if (empty ( $this->getInfrastructureId () )) {
 			$this->onDebug ( $this->getInfrastructureId (), 2 );
 			if ($error) {
@@ -62,12 +64,17 @@ abstract class infrastructures extends ci {
 		return true;
 	}
 
-	public function infrastructures_list_uri() {
+	public function infrastructures_list_uri(): string
+	{
 		return '/infrastructure';
 	}
 
-	public function infrastructure_id_uri() {
-		if ($this->valide_infrastructureid () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function infrastructure_id_uri(): bool|string
+	{
+		if (!$this->valide_infrastructureid()) {
 			return $this->onError ( "Il n'y pas d'id d'infrastructure selectionne" );
 		}
 		return $this->infrastructures_list_uri () . '/' . $this->getInfrastructureId ();
@@ -79,7 +86,8 @@ abstract class infrastructures extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getInfrastructureId() {
+	public function getInfrastructureId(): ?string
+	{
 		return $this->infrastructure_id;
 	}
 
@@ -87,7 +95,8 @@ abstract class infrastructures extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setInfrastructureId(
-			$infrastructure_id) {
+			$infrastructure_id): static
+	{
 		$this->infrastructure_id = $infrastructure_id;
 		return $this;
 	}
@@ -95,7 +104,8 @@ abstract class infrastructures extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeInfrastructures() {
+	public function getListeInfrastructures(): ?SimpleXMLElement
+	{
 		return $this->liste_infrastructures;
 	}
 
@@ -103,7 +113,8 @@ abstract class infrastructures extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeInfrastructures(
-			$liste_infrastructures) {
+			$liste_infrastructures): static
+	{
 		$this->liste_infrastructures = $liste_infrastructures;
 		return $this;
 	}
@@ -114,11 +125,10 @@ abstract class infrastructures extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "infrastructures :";
 		return $help;
 	}
 }
-?>

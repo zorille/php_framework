@@ -7,9 +7,11 @@
  */
 namespace Zorille\o365;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des information via un webservice.
@@ -54,23 +56,26 @@ class wsclient extends Core\wsclient {
 	 */
 	private $type_retour = "json";
 
+	private ?stdClass $datasFromRequest = null;
 	/**
 	 * ********************* Creation de l'objet ********************
 	 */
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param object $datas NULL
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null $datas NULL
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = null,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = null,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): Core\wsclient
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -83,15 +88,15 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return wsclient|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this->setObjeto365datas ( $liste_class ["datas"] )
 			->setContentType ( 'application/json' )
@@ -104,13 +109,12 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -118,11 +122,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Prepare l'url de connexion au o365 nomme $nom
 	 * @param string $nom
-	 * @return boolean wsclient
+	 * @return wsclient|bool wsclient
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): wsclient|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_o365 = $this->getObjeto365datas ()
 			->valide_presence_data ( $nom, 'rest' );
@@ -148,9 +153,10 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Http O365 header creator
 	 *
-	 * @return string Http Header
+	 * @return wsclient Http Header
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
 			$this->setHttpHeader ( array (
@@ -179,7 +185,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function valide_retour(
-			$retour_wsclient) {
+		mixed $retour_wsclient): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (isset ( $retour_wsclient->error )) {
 			$this->onDebug ( "Error Detectee", 2 );
@@ -196,11 +203,13 @@ class wsclient extends Core\wsclient {
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
 	 * @param string $retour_json
 	 * @param boolean $return_array
-	 * @return array
+	 * @return mixed
+	 * @throws Exception
 	 */
 	public function traite_retour_json(
-			$retour_json,
-			$return_array = false) {
+		string $retour_json,
+		bool   $return_array = false): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$tableau_resultat = json_decode ( $retour_json, $return_array );
 		if ($tableau_resultat == null && ! empty ( $retour_json )) {
@@ -209,30 +218,51 @@ class wsclient extends Core\wsclient {
 		return $tableau_resultat;
 	}
 
+	public function concatDatasFromRequest(
+		$resultats) {
+	$old_resultats = $this->getDatasFromRequest ();
+	if (isset ( $old_resultats->value )) {
+		$final = array_merge ( $old_resultats->value, ($resultats->value ?? (array)$resultats) );
+		$resultats->value = $final;
+	}
+	return $this->setDatasFromRequest ( $resultats );
+}
 	/**
 	 * Sends are prepare_requete_json to the o365 API and returns the response as object.
 	 *
-	 * @return string API JSON response.
+	 * @return bool|array|string|stdClass|null API JSON response.
 	 * @throws Exception
 	 */
-	public function prepare_requete() {
+	public function prepare_requete(): bool|array|string|stdClass|null
+	{
+        $this->setDatasFromRequest(null);
 		$this->onDebug ( __METHOD__, 1 );
+		$url = null;
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'DELETE')) {
 			$this->onInfo ( "DRY RUN :" . $this->getUrl () );
 			$this->onInfo ( "DRY RUN :" . print_r ( $this->getParams (), true ) );
 		} else {
-			$retour_wsclient = $this->prepare_html_entete ()
-				->envoi_requete ();
-			if ($this->getTypeRetour () == "json") {
-				$retour = $this->traite_retour_json ( $retour_wsclient );
-				$this->valide_retour ( $retour );
-			} else {
-				//En cas de retour MIME pour les mail par exemple
-				$retour=$retour_wsclient;
-			}
+			do {
+				$retour_wsclient = $this->prepare_html_entete ()
+				->envoi_requete ($url);
+				if ($this->getTypeRetour () == "json") {
+					$retour = $this->traite_retour_json ( $retour_wsclient );
+
+					$this->valide_retour ( $retour );
+					// On set a datasFromRequest le nouveau retour en plus des anciens
+					$this->concatDatasFromRequest($retour);
+
+					if(isset($retour->{'@odata.nextLink'}))
+						$url = $retour->{'@odata.nextLink'};
+				} else {
+					//En cas de retour MIME pour les mail par exemple
+					$retour=$retour_wsclient;
+				}
+
+			} while(isset($retour->{'@odata.nextLink'}));
 			$this->onDebug ( $retour, 2 );
-			return $retour;
+			return $this->getDatasFromRequest();
 		}
 		return "";
 	}
@@ -248,7 +278,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function userLogin(
-			$liste_data_o365 = array ()) {
+		array $liste_data_o365 = array ()): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_o365 ['host'] = $liste_data_o365 ['login_host'];
 		$this->getGestionConnexionUrl ()
@@ -276,12 +307,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return bool|array|string|stdClass
 	 * @throws Exception
 	 */
 	public function getMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -294,12 +326,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|stdClass|bool|array|string
 	 * @throws Exception
 	 */
 	public function jsonPatchMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): SimpleXMLElement|stdClass|bool|array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -312,12 +345,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return bool|array|string|stdClass
 	 * @throws Exception
 	 */
 	public function postMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_array ( $params )) {
 			$full_params = array_merge ( $this->getDefaultParams (), $params );
@@ -337,12 +371,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return bool|array|string|stdClass|null
 	 * @throws Exception
 	 */
 	public function jsonPostMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass|null
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -355,12 +390,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return bool|array|string|stdClass
 	 * @throws Exception
 	 */
 	public function putMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -373,13 +409,14 @@ class wsclient extends Core\wsclient {
 	 * O365 put file content
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @param $content
+	 * @return bool|array|string|stdClass
 	 * @throws Exception
 	 */
 	public function putContentMethod(
-			$resource,
-			$content) {
+		string $resource,
+		       $content): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "PUT" )
@@ -391,12 +428,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return bool|array|string|stdClass
 	 * @throws Exception
 	 */
 	public function deleteMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -410,9 +448,10 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return datas
+	 * @return datas|null
 	 */
-	public function &getObjeto365datas() {
+	public function &getObjeto365datas(): ?datas
+	{
 		return $this->datas;
 	}
 
@@ -420,7 +459,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjeto365datas(
-			&$datas) {
+			&$datas): static
+	{
 		$this->datas = $datas;
 		return $this;
 	}
@@ -429,7 +469,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string
+	{
 		return $this->auth;
 	}
 
@@ -437,7 +478,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static
+	{
 		$this->auth = $auth;
 		return $this;
 	}
@@ -446,7 +488,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAjoutHeader() {
+	public function getAjoutHeader(): string
+	{
 		return $this->ajout_header;
 	}
 
@@ -454,7 +497,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAjoutHeader(
-			$ajout_header) {
+			$ajout_header): static
+	{
 		$this->ajout_header = $ajout_header;
 		return $this;
 	}
@@ -463,18 +507,20 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore @brief Returns the default params.
 	 * @retval array Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array
+	{
 		return $this->defaultParams;
 	}
 
 	/**
 	 * @codeCoverageIgnore @brief Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params. @retval o365ApiAbstract
+	 * @param $defaultParams array with default params. @retval o365ApiAbstract
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): static
+	{
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -484,9 +530,10 @@ class wsclient extends Core\wsclient {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return bool
 	 */
-	public function getConnected() {
+	public function getConnected(): bool
+	{
 		return $this->connected;
 	}
 
@@ -494,7 +541,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setConnected(
-			$connected) {
+			$connected): static
+	{
 		$this->connected = $connected;
 		return $this;
 	}
@@ -503,7 +551,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getTypeRetour() {
+	public function getTypeRetour(): string
+	{
 		return $this->type_retour;
 	}
 
@@ -511,9 +560,29 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTypeRetour(
-			$type_retour) {
+			$type_retour): static
+	{
 		$this->type_retour = $type_retour;
 		return $this;
+	}
+
+	/**
+	 * Summary of setDatasFromRequest
+	 * @param stdClass|null $datasFromRequest
+	 */
+	public function &setDatasFromRequest(stdClass|null $datasFromRequest): static
+	{
+		$this->datasFromRequest = $datasFromRequest;
+		return $this;
+	}
+
+	/** 
+	 * Summary of getDatasFromRequest
+	 * @return stdClass|null
+	*/
+	public function getDatasFromRequest(): stdClass|null
+	{
+		return $this->datasFromRequest;
 	}
 
 	/**
@@ -522,13 +591,11 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "o365 Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, datas::help () );
-		return $help;
+		return array_merge ( $help, datas::help () );
 	}
 }
-?>

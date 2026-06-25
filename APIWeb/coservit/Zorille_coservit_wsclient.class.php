@@ -7,9 +7,10 @@
  */
 namespace Zorille\coservit;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
-use SimpleXMLElement as SimpleXMLElement;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des informations via un webservice. https://coservit.readme.io/docs/core-api-concepts-requests Endpoints : Activities ActivityFields ActivityTypes CallLogs Currencies Deals DealFields Files Filters GlobalMessages Goals ItemSearch MailMessages MailThreads Notes NoteFields OrganizationFields Organizations OrganizationRelationships PermissionSets Persons PersonFields Pipelines Products ProductFields Recents Roles SearchResults Stages Teams Users UserConnections UserSettings
@@ -43,18 +44,19 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param datas &$datas Reference sur un objet datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null $datas &$datas Reference sur un objet datas
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = null,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = null,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): wsclient
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -68,15 +70,15 @@ class wsclient extends Core\wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return static|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this->setObjetcoservitDatas ( $liste_class ["datas"] )
 			->setContentType ( 'application/json' )
@@ -92,7 +94,6 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -108,7 +109,7 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): bool|wsclient|static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_coservit = $this->getObjetcoservitDatas ()
 			->valide_presence_data ( $nom );
@@ -140,7 +141,7 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @return wsclient
 	 */
-	public function prepare_params() {
+	public function prepare_params(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		// if ( $this ->getAuth () ) {
 		// $this ->setParams ( 'output_mode', 'xml', true );
@@ -148,14 +149,14 @@ class wsclient extends Core\wsclient {
 		return $this;
 	}
 
-	/**
-	 * Convert return data to array
-	 *
-	 * @return array
-	 * @throws Exception
-	 */
+    /**
+     * Convert return data to array
+     *
+     * @param $retour_wsclient
+     * @return array|stdClass|null
+     */
 	public function prepare_retour(
-			$retour_wsclient) {
+			$retour_wsclient): array|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->traite_retour_json ( $retour_wsclient, false );
 	}
@@ -165,7 +166,7 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @return $this
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		if (! empty ( $this->getAuth () )) {
 			$this->setHttpHeader ( array (
@@ -185,7 +186,7 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function valide_retour(
-			$retour_wsclient) {
+		mixed $retour_wsclient): bool {
 		$this->onDebug ( __METHOD__, 1 );
 		// En cas de retour avec un code erreur
 		if (isset ( $retour_wsclient->code )) {
@@ -216,13 +217,13 @@ class wsclient extends Core\wsclient {
 		return true;
 	}
 
-	/**
-	 * Sends are prepare_requete_json to the coservit API and returns the response as object.
-	 *
-	 * @return string API JSON response.
-	 * @throws Exception
-	 */
-	public function prepare_requete() {
+    /**
+     * Sends are prepare_requete_json to the coservit API and returns the response as object.
+     *
+     * @return array|string|stdClass|null API JSON response.
+     * @throws Exception
+     */
+	public function prepare_requete(): array|string|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
@@ -241,12 +242,13 @@ class wsclient extends Core\wsclient {
 
 	/**
 	 * @param string $param
-	 * @param string|integer|boolean $valeur
+	 * @param boolean|integer|string $valeur
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	public function modifie_default_param(
-			$param,
-			$valeur) {
+		string          $param,
+		bool|int|string $valeur): static {
 		$default_params = $this->getDefaultParams ();
 		$default_params [$param] = $valeur;
 		return $this->setDefaultParams ( $default_params );
@@ -263,11 +265,12 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	final public function userLogin(
-			$params = array ()) {
+		array $params = array ()): bool|static {
 		$this->onDebug ( __METHOD__, 1 );
+		$resultat = null;
 		if (isset ( $params ['password'] )) {
 			$this->onDebug ( $params, 1 );
-			$resultat = $this->postMethod ( "/servicenav/auth/token", array (
+			$resultat = $this->postMethod ( "servicenav/auth/token", array (
 					"username" => $params ['login'],
 					"password" => $params ['password']
 			) );
@@ -282,16 +285,16 @@ class wsclient extends Core\wsclient {
 		return $this->onError ( "Erreur durant l'autentification", $resultat );
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
+    /**
+     * @codeCoverageIgnore
+     * @param string $resource Url Resource
+     * @param array $params Data to send
+     * @return bool|array|string|stdClass|null
+     * @throws Exception
+     */
 	public function getMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -300,16 +303,16 @@ class wsclient extends Core\wsclient {
 		return $this->prepare_requete ();
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
+    /**
+     * @codeCoverageIgnore
+     * @param string $resource Url Resource
+     * @param array $params Data to send
+     * @return bool|array|string|stdClass|null
+     * @throws Exception
+     */
 	public function postMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "POST" )
@@ -319,16 +322,16 @@ class wsclient extends Core\wsclient {
 		return $this->prepare_requete ();
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
+    /**
+     * @codeCoverageIgnore
+     * @param string $resource Url Resource
+     * @param array $params Data to send
+     * @return bool|array|string|stdClass|null
+     * @throws Exception
+     */
 	public function putMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "PUT" )
@@ -339,16 +342,16 @@ class wsclient extends Core\wsclient {
 		return $this->prepare_requete ();
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
+    /**
+     * @codeCoverageIgnore
+     * @param string $resource Url Resource
+     * @param array $params Data to send
+     * @return bool|array|string|stdClass|null
+     * @throws Exception
+     */
 	public function patchMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( $resource )
 			->setHttpMethod ( "PATCH" )
@@ -358,16 +361,16 @@ class wsclient extends Core\wsclient {
 		return $this->prepare_requete ();
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @param string $resource Url Resource
-	 * @param array $params Data to send
-	 * @return SimpleXMLElement
-	 * @throws Exception
-	 */
+    /**
+     * @codeCoverageIgnore
+     * @param string $resource Url Resource
+     * @param array $params Data to send
+     * @return bool|array|string|stdClass|null
+     * @throws Exception
+     */
 	public function deleteMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass|null {
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -384,9 +387,9 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return datas
+	 * @return datas|null
 	 */
-	public function &getObjetcoservitDatas() {
+	public function &getObjetcoservitDatas(): ?datas {
 		return $this->datas;
 	}
 
@@ -394,7 +397,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetcoservitDatas(
-			&$datas) {
+			&$datas): static {
 		$this->datas = $datas;
 		return $this;
 	}
@@ -403,7 +406,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string {
 		return $this->auth;
 	}
 
@@ -411,7 +414,7 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static {
 		$this->auth = $auth;
 		return $this;
 	}
@@ -422,7 +425,7 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array {
 		return $this->defaultParams;
 	}
 
@@ -430,13 +433,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retrun wsclient
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): bool|static {
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -451,7 +454,7 @@ class wsclient extends Core\wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "coservit Wsclient :";
@@ -460,4 +463,3 @@ class wsclient extends Core\wsclient {
 		return $help;
 	}
 }
-?>

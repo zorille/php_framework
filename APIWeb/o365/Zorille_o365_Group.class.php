@@ -38,15 +38,16 @@ class Group extends Item {
 	 * Instancie un objet de type Group. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice Reference sur un objet webservice
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Group
 	 */
 	static function &creer_Group(
-			&$liste_option,
-			&$webservice,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Group
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Group ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -62,7 +63,7 @@ class Group extends Item {
 	 * @return Group
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetO365Wsclient ( $liste_class ['wsclient'] );
 	}
@@ -74,7 +75,6 @@ class Group extends Item {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -90,9 +90,11 @@ class Group extends Item {
 	 * Retrouve l'ID d'un utilisateur dans le champ displayname
 	 * @param string $nom
 	 * @return $this|false
+	 * @throws Exception
 	 */
 	public function retrouve_groupid_par_nom(
-			$nom) {
+		string $nom): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->list_groups ();
 		foreach ( $this->getListeGroup () as $personne ) {
@@ -109,7 +111,8 @@ class Group extends Item {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_groupid() {
+	public function valide_groupid(): bool
+	{
 		if (empty ( $this->getGroupId () )) {
 			$this->onDebug ( $this->getGroupId (), 2 );
 			$this->onError ( "Il faut un group id renvoye par O365 pour travailler" );
@@ -121,12 +124,17 @@ class Group extends Item {
 	/**
 	 * ******************************* DRIVE URI ******************************
 	 */
-	public function groups_list_uri() {
+	public function groups_list_uri(): string
+	{
 		return '/groups';
 	}
 
-	public function group_id_uri() {
-		if ($this->valide_groupid () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function group_id_uri(): bool|string
+	{
+		if (!$this->valide_groupid()) {
 			return $this->onError ( "Il n'y pas d'user-id selectionne" );
 		}
 		return '/groups/' . $this->getGroupId ();
@@ -137,10 +145,12 @@ class Group extends Item {
 	/**
 	 * Recuperer la liste des groupes O365
 	 * @param array $params
-	 * @return \Zorille\o365\Group|false
+	 * @return Group|false
+	 * @throws Exception
 	 */
 	public function list_groups(
-			$params = array ()) {
+		array $params = array ()): bool|Group|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_groups_o365 = $this->getObjetO365Wsclient ()
 			->getMethod ( $this->groups_list_uri (), $params );
@@ -150,15 +160,17 @@ class Group extends Item {
 		}
 		return $this->onError ( "Pas de liste groupes", $liste_groups_o365, 1 );
 	}
-	
+
 	/**
 	 * Recuperer les membres d'un groupe O365. Utilise le getGroupId pour le selectionner le groupe.
-	 * 
+	 *
 	 * @param array $params
-	 * @return \Zorille\o365\Group|false
+	 * @return array|bool|\SimpleXMLElement|string
+	 * @throws Exception
 	 */
 	public function list_members_group(
-			$params = array ()) {
+		array $params = array ()): \SimpleXMLElement|bool|array|string
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				$liste_groups_o365 = $this->getObjetO365Wsclient ()
 				->getMethod ( $this->group_id_uri ()."/members", $params );
@@ -174,7 +186,8 @@ class Group extends Item {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGroupId() {
+	public function getGroupId(): ?string
+	{
 		return $this->group_id;
 	}
 
@@ -182,7 +195,8 @@ class Group extends Item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setGroupId(
-			&$group_id) {
+			&$group_id): static
+	{
 		$this->group_id = $group_id;
 		return $this;
 	}
@@ -190,7 +204,8 @@ class Group extends Item {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeGroup() {
+	public function getListeGroup(): array
+	{
 		return $this->liste_group;
 	}
 
@@ -198,7 +213,8 @@ class Group extends Item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeGroup(
-			&$liste_group) {
+			&$liste_group): static
+	{
 		$this->liste_group = $liste_group;
 		return $this;
 	}
@@ -209,11 +225,10 @@ class Group extends Item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Group :";
 		return $help;
 	}
 }
-?>

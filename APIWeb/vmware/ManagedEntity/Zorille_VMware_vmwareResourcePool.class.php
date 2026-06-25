@@ -24,11 +24,13 @@ class vmwareResourcePool extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareResourcePool
+	 * @throws Exception
 	 */
-	static function &creer_vmwareResourcePool(&$liste_option, &$ObjectVmwareWsclient, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareResourcePool(options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwareResourcePool
+	{
 		$objet = new vmwareResourcePool ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -44,7 +46,7 @@ class vmwareResourcePool extends vmwareManagedEntity {
 	 * @return vmwareResourcePool
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -57,7 +59,6 @@ class vmwareResourcePool extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -70,7 +71,8 @@ class vmwareResourcePool extends vmwareManagedEntity {
 	 * To Delete des qu'une autre methode apparait
 	 * @return string
 	 */
-	public function affiche_les_Tests() {
+	public function affiche_les_Tests(): string
+	{
 		return "affiche";
 	}
 	/************************* Methodes VMWare ***********************/
@@ -80,14 +82,16 @@ class vmwareResourcePool extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getResourcePool() {
+	public function &getResourcePool(): stdClass
+	{
 		return $this->getManagedObject();
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setResourcePool($ResourcePool) {
+	public function &setResourcePool($ResourcePool): vmwareResourcePool
+	{
 		return $this->setManagedObject($ResourcePool);
 	}
 
@@ -97,7 +101,7 @@ class vmwareResourcePool extends vmwareManagedEntity {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -105,5 +109,3 @@ class vmwareResourcePool extends vmwareManagedEntity {
 		return $help;
 	}
 }
-
-?>

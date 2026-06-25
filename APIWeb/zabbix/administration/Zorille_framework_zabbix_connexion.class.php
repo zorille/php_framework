@@ -34,7 +34,7 @@ class zabbix_connexion extends zabbix_fonctions_standard {
 	 * @param array $liste_class
 	 * @return abstract_log
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this ->setObjetZabbixWsclient ( zabbix_wsclient::creer_zabbix_wsclient ( $liste_class ['options'], zabbix_datas::creer_zabbix_datas ( $liste_class ['options'] ) ) );
@@ -81,7 +81,7 @@ class zabbix_connexion extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

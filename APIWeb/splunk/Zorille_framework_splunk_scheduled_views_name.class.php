@@ -48,7 +48,7 @@ class splunk_scheduled_views_name extends splunk_scheduled_views {
 	 * @param array $liste_class
 	 * @return splunk_scheduled_views_name
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		$this ->setViewsName ( $liste_class ['views_name'] );
 		parent::_initialise ( $liste_class );
 		
@@ -155,7 +155,8 @@ class splunk_scheduled_views_name extends splunk_scheduled_views {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

@@ -6,6 +6,8 @@
  */
 namespace Zorille\o365;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
@@ -31,15 +33,16 @@ class Sharepoint extends Drive {
 	 * Instancie un objet de type Sharepoint. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice Reference sur un objet webservice
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Sharepoint
 	 */
 	static function &creer_Sharepoint(
-			&$liste_option,
-			&$webservice,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Sharepoint
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Sharepoint ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -55,7 +58,7 @@ class Sharepoint extends Drive {
 	 * @return Sharepoint
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -67,7 +70,6 @@ class Sharepoint extends Drive {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -78,9 +80,11 @@ class Sharepoint extends Drive {
 
 	/**
 	 * ******************************* SHAREPOINT *********************************
+	 * @throws Exception
 	 */
 	public function retrouve_siteid(
-			$nom_site) {
+			$nom_site): bool|static
+	{
 		$Liste_mgt = $this->sharepoints_chercher_site ( $this->prepare_nom_pour_url ( $nom_site ) );
 		$this->onDebug ( $Liste_mgt, 2 );
 		if (! $this->valide_champ_value ( $Liste_mgt )) {
@@ -93,6 +97,9 @@ class Sharepoint extends Drive {
 		return $this->onError ( "Aucun site avec le nom " . $nom_site . " n'a ete trouve", $Liste_mgt, 1 );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function recherche_dossier(
 			$nom_du_dossier = "") {
 		$Liste_drive = $this->sharepoints_search_in_drive ( $this->prepare_nom_pour_url ( $nom_du_dossier ) );
@@ -113,7 +120,8 @@ class Sharepoint extends Drive {
 	 * @return boolean
 	 */
 	public function retrouve_donnee_dans_le_dossier(
-			$recherche) {
+		string $recherche): bool
+	{
 		$Liste_items = $this->sharepoints_list_items_enfant ();
 		$this->onDebug ( $Liste_items, 2 );
 		if ($this->valide_champ_value ( $Liste_items )) {
@@ -129,11 +137,15 @@ class Sharepoint extends Drive {
 		return false;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function creer_dossier(
-			$nom_du_dossier) {
+			$nom_du_dossier): Sharepoint|bool
+	{
 		$params = array (
 				"name" => $nom_du_dossier,
-				"folder" => new \stdClass (),
+				"folder" => new stdClass (),
 				"@microsoft.graph.conflictBehavior" => "rename"
 		);
 		$this->onDebug ( json_encode ( $params ), 2 );
@@ -151,7 +163,8 @@ class Sharepoint extends Drive {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_siteid() {
+	public function valide_siteid(): bool
+	{
 		if (empty ( $this->getSiteId () )) {
 			$this->onError ( "Il faut un site id renvoye par O365 pour travailler" );
 			return false;
@@ -165,31 +178,42 @@ class Sharepoint extends Drive {
 	/**
 	 * Liste de differents sites Sharepoint (SiteId=moncto.sharepoint.com par exemples)
 	 * @param array $params
-	 * @return \Zorille\o365\Sharepoint
+	 * @return array|SimpleXMLElement|string
+	 * @throws Exception
 	 */
 	public function sharepoints_site_informations(
-			$params = array ()) {
+		array $params = array ()): array|SimpleXMLElement|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
 			->getMethod ( '/sites/' . $this->getSiteId (), $params );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_chercher_site(
 			$site,
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->getObjetO365Wsclient ()
 			->getMethod ( '/sites?search=' . $site, $params );
 	}
 
 	// Recupere la liste des items du site
+
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_get_site_items_list(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -197,10 +221,15 @@ class Sharepoint extends Drive {
 	}
 
 	// Recupere la liste des items du site
+
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_get_site_permissions(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -208,10 +237,15 @@ class Sharepoint extends Drive {
 	}
 
 	// Gestion des drives (sous composant de chaque sharepoint)
+
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_list_drives(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -219,20 +253,29 @@ class Sharepoint extends Drive {
 	}
 
 	// File/Folder mgmt
+
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_create_folder(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
 			->jsonPostMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri () . '/children', $params );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_rename(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		// PATCH /sites/{site-id}/drive/items/{item-id}
@@ -240,10 +283,14 @@ class Sharepoint extends Drive {
 			->jsonPatchMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri (), $params );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_move(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		// PATCH /sites/{site-id}/drive/items/{item-id}
@@ -252,11 +299,15 @@ class Sharepoint extends Drive {
 			->jsonPatchMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri (), $params );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_put_to_site_minus_4Mo(
 			$filename,
-			$content) {
+			$content): SimpleXMLElement|stdClass|array|string|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		// return $this->putContentMethod('/drives/'.$drive_id.'/items/root:/'.$filename.':/content',$content);
@@ -264,11 +315,15 @@ class Sharepoint extends Drive {
 			->putContentMethod ( '/sites/' . $this->getSiteId () . $this->drive_item_uri () . ':/' . $filename . ':/content', $content );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_search_in_drive(
 			$search,
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -276,10 +331,15 @@ class Sharepoint extends Drive {
 	}
 
 	// List
+
+	/**
+	 * @throws Exception
+	 */
 	public function sharepoints_list_items_enfant(
-			$params = array ()) {
+			$params = array ()): SimpleXMLElement|array|string|static|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		if ($this->valide_siteid () == false) {
+		if (!$this->valide_siteid()) {
 			return $this;
 		}
 		return $this->getObjetO365Wsclient ()
@@ -292,7 +352,8 @@ class Sharepoint extends Drive {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSiteId() {
+	public function getSiteId(): ?string
+	{
 		return $this->site_id;
 	}
 
@@ -300,7 +361,8 @@ class Sharepoint extends Drive {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSiteId(
-			$site_id) {
+			$site_id): static
+	{
 		$this->site_id = $site_id;
 		return $this;
 	}
@@ -311,11 +373,10 @@ class Sharepoint extends Drive {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Sharepoint :";
 		return $help;
 	}
 }
-?>

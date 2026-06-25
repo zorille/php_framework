@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class sftp_z<br>
  * 
@@ -31,11 +33,12 @@ class sftp_z extends ssh_z {
 	 * Instancie un objet de type sftp_z.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return sftp_z
 	 */
-	static function &creer_sftp_z(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_sftp_z(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): sftp_z
+	{
 		$objet = new sftp_z ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -50,7 +53,7 @@ class sftp_z extends ssh_z {
 	 * @param array $liste_class
 	 * @return sftp_z
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -69,8 +72,10 @@ class sftp_z extends ssh_z {
 	 * Ouvre la connexion SFTP sur une machine distante.
 	 * @codeCoverageIgnore
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function sftp_connect() {
+	public function sftp_connect(): bool
+	{
 		$this->onDebug ( "Sftp connect", 1 );
 		$this->sftp_connexion = ssh2_sftp ( $this->getConnexion () );
 		
@@ -86,7 +91,8 @@ class sftp_z extends ssh_z {
 	 *
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	public function tester_sftp_existe() {
+	public function tester_sftp_existe(): bool
+	{
 		if ($this->sftp_connexion !== false) {
 			$this->tester_sftp_existe = true;
 		} else {
@@ -102,7 +108,8 @@ class sftp_z extends ssh_z {
 	 * @param string $repertoire Chemin complet du repertoire a creer.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	public function creer_nouveau_repertoire($repertoire) {
+	public function creer_nouveau_repertoire($repertoire): bool
+	{
 		if (! $this->tester_sftp_existe) {
 			return false;
 		}
@@ -126,7 +133,8 @@ class sftp_z extends ssh_z {
 	 * @param string $repertoire Chemin complet du repertoire.
 	 * @return array|Bool Renvoi les stats, FALSE en cas d'erreur.
 	 */
-	public function recupere_info_repertoire($repertoire) {
+	public function recupere_info_repertoire($repertoire): bool|array
+	{
 		if (! $this->tester_sftp_existe) {
 			return false;
 		}
@@ -140,7 +148,8 @@ class sftp_z extends ssh_z {
 	 * @param string $to Chemin complet du fichier renomer.
 	 * @return Bool TRUE si OK, FALSE en cas d'erreur.
 	 */
-	public function renome_repertoire($from, $to) {
+	public function renome_repertoire(string $from, string $to): bool
+	{
 		if (! $this->tester_sftp_existe) {
 			return false;
 		}
@@ -153,7 +162,8 @@ class sftp_z extends ssh_z {
 	 * @param string $repertoire Chemin complet du repertoire a supprimer.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	public function supprimer_repertoire($repertoire = "no_file") {
+	public function supprimer_repertoire(string $repertoire = "no_file"): bool
+	{
 		if (! $this->tester_sftp_existe) {
 			return false;
 		}
@@ -165,8 +175,10 @@ class sftp_z extends ssh_z {
 	 * @codeCoverageIgnore
 	 * @param string $source fichier source avec chemin absolu
 	 * @param string $dest fichier destination avec chemin absolu
+	 * @throws Exception
 	 */
-	public function envoi_fichier($source, $dest) {
+	public function envoi_fichier(string $source, string $dest): bool
+	{
 		$this->onDebug ( "Envoi en SFTP", 1 );
 		if (! $this->tester_sftp_existe) {
 			return $this->onError ( "Pas de connexion active." );
@@ -200,8 +212,10 @@ class sftp_z extends ssh_z {
 	 * @codeCoverageIgnore
 	 * @param string $source fichier source avec chemin absolu
 	 * @param string $dest fichier destination avec chemin absolu
+	 * @throws Exception
 	 */
-	public function recupere_fichier($source, $dest) {
+	public function recupere_fichier(string $source, string $dest): bool
+	{
 		if (! $this->tester_sftp_existe) {
 			return $this->onError ( "Pas de connexion active." );
 		}
@@ -226,8 +240,10 @@ class sftp_z extends ssh_z {
 	 * Recupere la taille d'un fichier distant
 	 * @codeCoverageIgnore
 	 * @param string $file fichier avec chemin absolu
+	 * @throws Exception
 	 */
-	public function getFileSize($file) {
+	public function getFileSize(string $file): bool|int
+	{
 		if (! $this->tester_sftp_existe) {
 			return $this->onError ( "Pas de connexion active." );
 		}
@@ -238,9 +254,11 @@ class sftp_z extends ssh_z {
 	 * Lit un dossier distant
 	 * @codeCoverageIgnore
 	 * @param string $remote_file
-	 * @return multitype:string
+	 * @return bool:string
+	 * @throws Exception
 	 */
-	public function lire_dossier($remote_file) {
+	public function lire_dossier(string $remote_file): bool|array
+	{
 		if (! $this->tester_sftp_existe) {
 			return $this->onError ( "Pas de connexion active." );
 		}
@@ -249,10 +267,8 @@ class sftp_z extends ssh_z {
 		$handle = opendir ( $dir );
 		//Liste tous les fichiers
 		while ( false !== ($file = readdir ( $handle )) ) {
-			if (substr ( "$file", 0, 1 ) != ".") {
-				if (is_dir ( $file )) {
-					//C'est un dossier, on ne fait rien
-				} else {
+			if (!str_starts_with("$file", ".")) {
+				if (!is_dir ( $file )) {
 					$tempArray [] = $file;
 				}
 			}
@@ -266,12 +282,15 @@ class sftp_z extends ssh_z {
 	 * @codeCoverageIgnore
 	 * @param string $remote_file
 	 * @return boolean
+	 * @throws Exception
 	 */
-	public function supprime_fichier($remote_file) {
+	public function supprime_fichier(string $remote_file): bool
+	{
 		if (! $this->tester_sftp_existe) {
 			return $this->onError ( "Pas de connexion active." );
 		}
 		unlink ( "ssh2.sftp://" . $this->sftp_connexion . $remote_file );
+		return true;
 	}
 	
 	/**
@@ -292,11 +311,11 @@ class sftp_z extends ssh_z {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSftpConnexion($sftp_connexion) {
+	public function &setSftpConnexion($sftp_connexion): static
+	{
 			$this->sftp_connexion = $sftp_connexion;
 			return $this;
 	}
 	
 	/******************************* ACCESSEURS ********************************/
 }
-?>

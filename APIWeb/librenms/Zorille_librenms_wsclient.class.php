@@ -7,9 +7,12 @@
  */
 namespace Zorille\librenms;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
+use Zorille\framework\gestion_connexion_url;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des informations via un webservice.
@@ -42,18 +45,19 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param datas &$datas Reference sur un objet datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null &$datas Reference sur un objet datas
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = NULL,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = NULL,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): Core\wsclient
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -67,15 +71,15 @@ class wsclient extends Core\wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return wsclient|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this->setObjetLibrenmsDatas ( $liste_class ["datas"] )
 			->setContentType ( 'application/json-rpc' )
@@ -89,13 +93,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -107,7 +110,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): wsclient|bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_librenms = $this->getObjetlibrenmsDatas ()
 			->valide_presence_data ( $nom );
@@ -129,9 +133,10 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Http Librenms header creator
 	 *
-	 * @return string Http Header
+	 * @return wsclient Http Header
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
 			return $this->setHttpHeader ( array (
@@ -149,11 +154,13 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Convert return data to array
 	 *
-	 * @return array
+	 * @param $retour_wsclient
+	 * @return array|stdClass|bool
 	 * @throws Exception
 	 */
 	public function prepare_retour(
-			$retour_wsclient) {
+			$retour_wsclient): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( "Accept Method :" . $this->getAccept (), 1 );
 		switch ($this->getAccept ()) {
@@ -169,12 +176,13 @@ class wsclient extends Core\wsclient {
 
 	/**
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
-	 * @param string $retour_json
-	 * @param boolean $return_array
-	 * @return array
+	 * @param $retour_image
+	 * @return bool
+	 * @throws Exception
 	 */
 	public function traite_retour_image(
-			$retour_image) {
+			$retour_image): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( "Retour Image selectionne", 2 );
 		if ($this->is_png ( $retour_image )) {
@@ -184,12 +192,14 @@ class wsclient extends Core\wsclient {
 	}
 
 	public function is_jpeg(
-			&$pict) {
+			&$pict): bool
+	{
 		return (bin2hex ( $pict [0] ) == 'ff' && bin2hex ( $pict [1] ) == 'd8');
 	}
 
 	public function is_png(
-			&$pict) {
+			&$pict): bool
+	{
 		return (bin2hex ( $pict [0] ) == '89' && $pict [1] == 'P' && $pict [2] == 'N' && $pict [3] == 'G');
 	}
 
@@ -197,11 +207,13 @@ class wsclient extends Core\wsclient {
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
 	 * @param string $retour_json
 	 * @param boolean $return_array
-	 * @return array
+	 * @return mixed
+	 * @throws Exception
 	 */
 	public function traite_retour_json(
-			$retour_json,
-			$return_array = true) {
+		string $retour_json,
+		bool   $return_array = true): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( "Retour JSON selectionne", 2 );
 		$this->onDebug ( $retour_json, 2 );
@@ -214,7 +226,6 @@ class wsclient extends Core\wsclient {
 				if ($donnees != "ok") {
 					return $this->onError ( "Erreur durant la requete sur LibreNMS", $tableau_resultat, 1 );
 				}
-				continue;
 			}
 		}
 		return $tableau_resultat;
@@ -223,10 +234,11 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Sends are prepare_requete_json to the librenms API and returns the response as object.
 	 *
-	 * @return string API JSON response.
+	 * @return array|string API JSON response.
 	 * @throws Exception
 	 */
-	public function prepare_requete() {
+	public function prepare_requete(): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'PUT' || $this->getHttpMethod () == 'DELETE')) {
@@ -249,13 +261,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function getMethod(
-			$resource,
-			$params = array (),
-			$type_mime = "") {
+		string $resource,
+		array  $params = array (),
+		       $type_mime = ""): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -268,12 +281,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function getImageMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -289,12 +303,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function postMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -307,12 +322,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function putMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -325,12 +341,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function deleteMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -348,10 +365,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getBilling(
-			$params = array ()) {
+		array $params = array ()): array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills", $params );
-		return $resultat;
+		return $this->getMethod ( "/bills", $params );
 	}
 
 	/**
@@ -360,11 +377,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getBill(
-			$id,
-			$params = array ()) {
+		$id,
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills/" . $id, $params );
-		return $resultat;
+		return $this->getMethod ( "/bills/" . $id, $params );
 	}
 
 	/**
@@ -373,11 +390,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getBillHistory(
-			$id,
-			$params = array ()) {
+		$id,
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills/" . $id . "/history", $params );
-		return $resultat;
+		return $this->getMethod ( "/bills/" . $id . "/history", $params );
 	}
 
 	/**
@@ -385,31 +402,31 @@ class wsclient extends Core\wsclient {
 	 * @param int $id
 	 * @param string $graph_type Must be bits or monthly
 	 * @param array $params Can contain from in timestamp, to in timestamp
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function getBillGraph(
-			$id,
-			$graph_type,
-			$params = array ()) {
+		int    $id,
+		string $graph_type,
+		array  $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getImageMethod ( "/bills/" . $id . "/graphs/" . $graph_type, $params );
-		return $resultat;
+		return $this->getImageMethod ( "/bills/" . $id . "/graphs/" . $graph_type, $params );
 	}
 
 	/**
 	 * Return graph data for billing
 	 * @param int $id
 	 * @param array $params can contain from in timestamp, to in timestamp and reducefactor
-	 * @return SimpleXMLElement
+	 * @return array|string
 	 * @throws Exception
 	 */
 	public function getBillGraphData(
-			$id,
-			$params = array ()) {
+		int   $id,
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( "/bills/" . $id . "/graphdata/bits", $params );
-		return $resultat;
+		return $this->getMethod ( "/bills/" . $id . "/graphdata/bits", $params );
 	}
 
 	/**
@@ -417,9 +434,10 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return datas
+	 * @return datas|null
 	 */
-	public function &getObjetLibrenmsDatas() {
+	public function &getObjetLibrenmsDatas(): ?datas
+	{
 		return $this->datas;
 	}
 
@@ -427,7 +445,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetLibrenmsDatas(
-			&$datas) {
+			&$datas): static
+	{
 		$this->datas = $datas;
 		return $this;
 	}
@@ -436,7 +455,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string
+	{
 		return $this->auth;
 	}
 
@@ -444,7 +464,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static
+	{
 		$this->auth = $auth;
 		return $this;
 	}
@@ -455,7 +476,8 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array
+	{
 		return $this->defaultParams;
 	}
 
@@ -463,13 +485,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retrun wsclient
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): bool|static
+	{
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -484,13 +507,11 @@ class wsclient extends Core\wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "librenms Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, datas::help () );
-		return $help;
+		return array_merge ( $help, datas::help () );
 	}
 }
-?>

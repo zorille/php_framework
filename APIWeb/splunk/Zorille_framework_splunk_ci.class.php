@@ -4,8 +4,10 @@
  * @author dvargas
  */
 namespace Zorille\framework;
-use \Exception as Exception;
-use \SimpleXMLElement as SimpleXMLElement;
+use Exception;
+use SimpleXMLElement;
+use stdClass;
+
 /**
  * class splunk_ci
  *
@@ -57,8 +59,9 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return splunk_ci
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this ->setObjetSplunkWsclient ( $liste_class ['splunk_wsclient'] );
@@ -71,7 +74,8 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	 * Remet l'url par defaut
 	 * @return splunk_ci
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): static
+	{
 		return $this ->setResource ( array ( 
 				0 => 'services' ) );
 	}
@@ -80,17 +84,19 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	 * Construit l'url REST
 	 * @return string
 	 */
-	public function prepare_url() {
+	public function prepare_url(): string
+	{
 		return implode ( '/', $this ->getResource () );
 	}
 
 	/**
-	 * 
+	 *
 	 * @param object|array $retour
-	 * @return splunk_ci
+	 * @return bool|splunk_ci
 	 * @throws Exception
 	 */
-	public function verifie_erreur($retour) {
+	public function verifie_erreur($retour): bool|static
+	{
 		if (is_object ( $retour ) && isset ( $retour->messages ) && isset ( $retour->messages->msg ) && $retour->messages->msg != '') {
 			return $this ->onError ( "Erreur durant la requete : " . $retour->messages->msg, $retour );
 		} elseif (is_array ( $retour ) && isset ( $retour ['messages'] ) && isset ( $retour ['messages'] ['msg'] ) && $retour ['messages'] ['msg'] != '') {
@@ -101,11 +107,13 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param array $params
-	 * @return SimpleXMLElement
+	 * @return SimpleXMLElement|stdClass
+	 * @throws Exception
 	 */
-	public function get($params) {
+	public function get(array $params): SimpleXMLElement|stdClass
+	{
 		$results = $this ->getObjetSplunkWsclient () 
 			->getMethod ( $this ->prepare_url (), $params );
 		$this ->verifie_erreur ( $results );
@@ -114,11 +122,13 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param array $params
 	 * @return SimpleXMLElement
+	 * @throws Exception
 	 */
-	public function post($params) {
+	public function post(array $params): SimpleXMLElement|stdClass
+	{
 		$results = $this ->getObjetSplunkWsclient () 
 			->postMethod ( $this ->prepare_url (), $params );
 		$this ->verifie_erreur ( $results );
@@ -127,11 +137,13 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param array $params
 	 * @return SimpleXMLElement
+	 * @throws Exception
 	 */
-	public function delete($params) {
+	public function delete(array $params): SimpleXMLElement|stdClass
+	{
 		$results = $this ->getObjetSplunkWsclient () 
 			->deleteMethod ( $this ->prepare_url (), $params );
 		$this ->verifie_erreur ( $results );
@@ -144,16 +156,18 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return splunk_wsclient
+	 * @return splunk_wsclient|null
 	 */
-	public function &getObjetSplunkWsclient() {
+	public function &getObjetSplunkWsclient(): ?splunk_wsclient
+	{
 		return $this->splunk_wsclient_rest;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetSplunkWsclient(&$splunk_wsclient) {
+	public function &setObjetSplunkWsclient(&$splunk_wsclient): static
+	{
 		$this->splunk_wsclient_rest = $splunk_wsclient;
 		
 		return $this;
@@ -162,38 +176,44 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getResource() {
+	public function getResource(): array
+	{
 		return $this->ressource;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setResource($ressource) {
+	public function &setResource($ressource): static
+	{
 		$this->ressource = $ressource;
 		return $this;
 	}
 
 	/**
+	 * @param $ressource
 	 * @return splunk_ci
 	 * @codeCoverageIgnore
 	 */
-	public function &addResource($ressource) {
-		array_push ( $this->ressource, $ressource );
+	public function &addResource($ressource): static
+	{
+		$this->ressource[] = $ressource;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTitle() {
+	public function getTitle(): string
+	{
 		return $this->title;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTitle($title) {
+	public function &setTitle($title): static
+	{
 		$this->title = $title;
 		return $this;
 	}
@@ -201,14 +221,16 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getContent() {
+	public function getContent(): array
+	{
 		return $this->content;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setContent($content) {
+	public function &setContent($content): static
+	{
 		$this->content = $content;
 		return $this;
 	}
@@ -216,14 +238,16 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListEntry() {
+	public function getListEntry(): array
+	{
 		return $this->liste_entry;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListEntry($liste_entry) {
+	public function &setListEntry($liste_entry): static
+	{
 		$this->liste_entry = $liste_entry;
 		return $this;
 	}
@@ -235,7 +259,8 @@ abstract class splunk_ci extends splunk_AtomFeed {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -244,4 +269,3 @@ abstract class splunk_ci extends splunk_AtomFeed {
 		return $help;
 	}
 }
-?>

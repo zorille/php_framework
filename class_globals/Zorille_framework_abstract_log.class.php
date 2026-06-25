@@ -7,7 +7,6 @@
 namespace Zorille\framework;
 
 use Exception as Exception;
-use Zorille\framework\abstract_log as abstract_log;
 use Zorille\framework\logs as logs;
 
 /**
@@ -61,17 +60,18 @@ abstract class abstract_log {
 	/**
 	 * ********************* Initialisation de l'objet ********************
 	 */
-	/**
-	 * Initialisation de l'objet
-	 * @codeCoverageIgnore
-	 * @param array $liste_class
-	 * @return abstract_log
-	 */
+    /**
+     * Initialisation de l'objet
+     * @codeCoverageIgnore
+     * @param array $liste_class
+     * @return abstract_log
+     * @throws Exception
+     */
 	public function &_initialise(
-			$liste_class) {
+		array $liste_class): static {
 		$this->onDebug ( __METHOD__, 1 );
 		if (! isset ( $liste_class ["options"] )) {
-			return $this->onError ( "Il faut un objet de type options" );
+			$this->onError ( "Il faut un objet de type options" );
 		}
 		$this->setListeOptions ( $liste_class ["options"] );
 		return $this;
@@ -84,11 +84,11 @@ abstract class abstract_log {
 	 * set la valeur du sort_en_erreur et le nom du module appelant.
 	 *
 	 * @param string $nom_module Nom du module lors de l'affichage.
-	 * @param string|bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 */
 	function __construct(
-			$sort_en_erreur = false,
-			$nom_module = "abstract_log") {
+        bool|string $sort_en_erreur = false,
+        string      $nom_module = "abstract_log") {
 		if (is_bool ( $sort_en_erreur )) {
 			$this->setSortEnErreur ( $sort_en_erreur );
 		} else {
@@ -100,41 +100,47 @@ abstract class abstract_log {
 		$this->setEntete ( $nom_module );
 	}
 
-	/**
-	 * @param string $message Message de debug a afficher
-	 * @return object $this
-	 */
+    /**
+     * @param mixed $message Message de debug a afficher
+     * @param $niveau
+     * @param null $entete
+     * @return self
+     */
 	public function onDebug(
-			$message,
-			$niveau) {
+		mixed $message,
+              $niveau,
+              $entete = null): static {
 		if (! is_array ( $message ) && ! is_object ( $message )) {
-			$message = "(" . $this->getEntete () . ") " . $message;
+			$message = "(" . (empty($entete) ? $this->getEntete () : $entete) . ") " . $message;
 		}
 		abstract_log::onDebug_standard ( $message, $niveau );
 		return $this;
 	}
 
-	/**
-	 * @param string $message Message d'info a afficher
-	 * @return object $this
-	 */
+    /**
+     * @param mixed $message Message d'info a afficher
+     * @param null $entete
+     * @return self
+     */
 	public function onInfo(
-			$message) {
+        mixed $message,
+               $entete = null): static {
 		if (! is_array ( $message ) && ! is_object ( $message )) {
-			$message = "(" . $this->getEntete () . ") " . $message;
+			$message = "(" . (empty($entete) ? $this->getEntete () : $entete) . ") " . $message;
 		}
 		abstract_log::onInfo_standard ( $message );
 		return $this;
 	}
 
 	/**
-	 * @param string $message Message de warning a afficher
+	 * @param mixed $message Message de warning a afficher
 	 * @return false
 	 */
 	public function onWarning(
-			$message) {
+        mixed $message,
+               $entete = null): bool {
 		if (! is_array ( $message ) && ! is_object ( $message )) {
-			$message = "(" . $this->getEntete () . ") " . $message;
+			$message = "(" . (empty($entete) ? $this->getEntete () : $entete) . ") " . $message;
 		}
 		abstract_log::onWarning_standard ( $message );
 		return false;
@@ -143,16 +149,17 @@ abstract class abstract_log {
 	/**
 	 * Cette fonction sort si $sort_en_erreur est a TRUE.
 	 *
-	 * @param string $message Message d'erreur a afficher
+	 * @param mixed $message Message d'erreur a afficher
 	 * @return false
 	 * @throws Exception
 	 */
 	public function onError(
-			$message,
-			$donnee_sup = "",
-			$code_retour = 1) {
+        mixed $message,
+              $donnee_sup = "",
+              $code_retour = 1,
+              $entete = null): bool {
 		if (! is_array ( $message ) && ! is_object ( $message )) {
-			$message = "(" . $this->getEntete () . ") " . $message;
+			$message = "(" . (empty($entete) ? $this->getEntete () : $entete) . ") " . $message;
 		}
 		if ($code_retour == 0) {
 			$code_retour = 1;
@@ -161,7 +168,7 @@ abstract class abstract_log {
 			abstract_log::onError_standard ( $message, $donnee_sup, $code_retour );
 		}
 		if ($this->getSortEnErreur ()) {
-			$this->onWarning ( "SortEnErreur TRUE/OUI" );
+			$this->onWarning ( "SortEnErreur TRUE/OUI : {$message}" );
 			// @codeCoverageIgnoreStart
 			if (abstract_log::$logs instanceof logs) {
 				abstract_log::$logs->renvoiExit ();
@@ -189,17 +196,17 @@ abstract class abstract_log {
 	/**
 	 * Affiche une erreur suivant le verbose et l'ajoute dans un fichier s'il existe.
 	 *
-	 * @param string $ligne Ligne a affiche.
-	 * @param array $tableau_output Tableau de ligne d'erreur a affiche.
+	 * @param mixed $ligne Ligne a affiche.
+	 * @param string|array $tableau_output Tableau de ligne d'erreur a affiche.
+	 * @param int $code_retour
 	 * @param Bool $verbose Affichage en cas d'objet logs inexistant.
-	 * @param string $tab Tabulation entre les affichages.
-	 * @return true Renvoi TRUE.
+	 * @return false Renvoi TRUE.
 	 */
 	static public function onError_standard(
-			$ligne,
-			$tableau_output = "",
-			$code_retour = 1,
-			$verbose = true) {
+        mixed $ligne,
+        string|array $tableau_output = "",
+        int    $code_retour = 1,
+        bool   $verbose = true): bool {
 		if (abstract_log::$logs instanceof logs) {
 			abstract_log::$logs->setExit ( $code_retour );
 			// Permet d'afficher l'erreur sur stderr dans la methode verbose
@@ -224,17 +231,16 @@ abstract class abstract_log {
 		return false;
 	}
 
-	/**
-	 * Affiche un warning suivant le verbose et l'ajoute dans un fichier s'il existe.<br>
-	 *
-	 * @param string $ligne Ligne a affiche.
-	 * @param Bool $verbose Affichage en cas d'objet logs inexistant.
-	 * @param string $tab Tabulation entre les affichages.
-	 * @return true Renvoi TRUE.
-	 */
+    /**
+     * Affiche un warning suivant le verbose et l'ajoute dans un fichier s'il existe.<br>
+     *
+     * @param mixed $ligne Ligne a affiche.
+     * @param Bool $verbose Affichage en cas d'objet logs inexistant.
+     * @return true Renvoi TRUE.
+     */
 	static public function onWarning_standard(
-			$ligne,
-			$verbose = true) {
+        mixed $ligne,
+        bool   $verbose = true): bool {
 		$entete = abstract_log::prepare_entete ( "Warning" );
 		if (abstract_log::affiche_object ( $ligne, $entete, 0, $verbose )) {
 		} elseif (abstract_log::affiche_tableau ( $ligne, $entete, 0, $verbose )) {
@@ -243,17 +249,16 @@ abstract class abstract_log {
 		return true;
 	}
 
-	/**
-	 * Affiche une info suivant le verbose et l'ajoute dans un fichier s'il existe.<br>
-	 *
-	 * @param string $ligne Ligne a affiche.
-	 * @param Bool $verbose Affichage en cas d'objet logs inexistant.
-	 * @param string $tab Tabulation entre les affichages.
-	 * @return true Renvoi TRUE.
-	 */
+    /**
+     * Affiche une info suivant le verbose et l'ajoute dans un fichier s'il existe.<br>
+     *
+     * @param mixed $ligne Ligne a affiche.
+     * @param Bool $verbose Affichage en cas d'objet logs inexistant.
+     * @return true Renvoi TRUE.
+     */
 	static public function onInfo_standard(
-			$ligne,
-			$verbose = false) {
+        mixed $ligne,
+        bool   $verbose = false): bool {
 		$entete = abstract_log::prepare_entete ( "Info" );
 		if (abstract_log::affiche_object ( $ligne, $entete, 0, $verbose )) {
 		} elseif (abstract_log::affiche_tableau ( $ligne, $entete, 0, $verbose )) {
@@ -265,21 +270,24 @@ abstract class abstract_log {
 	/**
 	 * Affiche un debug suivant le niveau de verbose et l'ajoute dans un fichier s'il existe.<br>
 	 *
-	 * @param string $ligne Ligne a affiche.
+	 * @param mixed $ligne Ligne a affiche.
 	 * @param int $niveau Niveau de verbose.
 	 * @param Bool $verbose Affichage en cas d'objet logs inexistant.
 	 * @return true Renvoi TRUE.
 	 */
 	static public function onDebug_standard(
-			$ligne,
-			$niveau = 2,
-			$verbose = false) {
+		mixed $ligne,
+		int $niveau = 2,
+		bool $verbose = false): bool {
 		if (abstract_log::verifie_niveau_verbose ( $niveau )) {
 			$entete = abstract_log::prepare_entete ( "Debug" );
-			if (abstract_log::affiche_object ( $ligne, $entete, $niveau, $verbose )) {
-			} elseif (abstract_log::affiche_tableau ( $ligne, $entete, $niveau, $verbose )) {
-			} elseif (abstract_log::affiche_ligne ( $entete . $ligne, $niveau, $verbose )) {
-			}
+            if (is_object($ligne)) {
+                abstract_log::affiche_object ( $ligne, $entete, $niveau, $verbose );
+            } elseif (is_array($ligne)) {
+                abstract_log::affiche_tableau ( $ligne, $entete, $niveau, $verbose );
+            } elseif (is_string($ligne)) {
+                abstract_log::affiche_ligne ( $entete . $ligne, $niveau, $verbose );
+            }
 		}
 		return true;
 	}
@@ -290,7 +298,7 @@ abstract class abstract_log {
 	 * @param int $niveau niveau de verbose demende
 	 */
 	static function verifie_niveau_verbose(
-			$niveau) {
+        int $niveau): bool {
 		$retour = false;
 		if (abstract_log::$logs instanceof logs) {
 			if (abstract_log::$logs->valideVerbose ( $niveau )) {
@@ -309,7 +317,7 @@ abstract class abstract_log {
 	 * @return string entete complete.
 	 */
 	static function prepare_entete(
-			$type) {
+        string $type): string {
 		return "[" . $type . "] " . date ( "H:i:s", time () ) . " (" . getmypid () . ") : ";
 	}
 
@@ -322,16 +330,12 @@ abstract class abstract_log {
 	 * @return bool true si affiche,false sinon.
 	 */
 	static public function affiche_ligne(
-			$ligne,
-			$niveau = 0,
-			$verbose = false) {
+        string $ligne,
+        int    $niveau = 0,
+        bool   $verbose = false): bool {
 		// Dans ce cas la ligne ne peut etre qu'un simple ligne
 		if (is_bool ( $ligne )) {
-			if ($ligne === false) {
-				$ligne = "FALSE";
-			} else {
-				$ligne = "TRUE";
-			}
+            $ligne = !$ligne ? "FALSE" : "TRUE";
 		}
 		if (abstract_log::$logs instanceof logs) {
 			abstract_log::$logs->verbose ( $ligne, $niveau );
@@ -346,17 +350,17 @@ abstract class abstract_log {
 	/**
 	 * Affiche un tableau.
 	 *
-	 * @param array $tableau tableau a afficher.
+	 * @param array|string $tableau tableau a afficher.
 	 * @param string $entete entete d'affichage (Info/Warning/Error/Debug)
 	 * @param int $niveau
 	 * @param bool $verbose
 	 * @return bool true si affiche,false sinon.
 	 */
 	static public function affiche_tableau(
-			$tableau,
-			$entete,
-			$niveau = 0,
-			$verbose = false) {
+        array|string  $tableau,
+        string $entete,
+        int    $niveau = 0,
+        bool   $verbose = false): bool {
 		// Dans ce cas on a un tableau
 		$retour = false;
 		if (is_array ( $tableau )) {
@@ -372,17 +376,17 @@ abstract class abstract_log {
 	/**
 	 * Affiche une classe.
 	 *
-	 * @param object $class objet a afficher.
+	 * @param object|string $class objet a afficher.
 	 * @param string $entete entete d'affichage (Info/Warning/Error/Debug)
 	 * @param int $niveau
 	 * @param bool $verbose
 	 * @return bool true si affiche,false sinon.
 	 */
 	static public function affiche_object(
-			$class,
-			$entete,
-			$niveau = 0,
-			$verbose = false) {
+        object|string|array $class,
+        string $entete,
+        int    $niveau = 0,
+        bool   $verbose = false): bool {
 		// Dans ce cas on a un object
 		$retour = false;
 		if (is_object ( $class )) {
@@ -397,12 +401,12 @@ abstract class abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string $text
 	 * @param string $couleur
-	 * @throws Exception
 	 * @return string
+	 *@throws Exception
 	 */
 	static function colorize(
-			$text,
-			$couleur) {
+        string $text,
+        string $couleur): string {
 		$out = abstract_log::retrouve_couleur ( $couleur );
 		return chr ( 27 ) . $out . $text . chr ( 27 ) . "[0m";
 	}
@@ -485,125 +489,67 @@ abstract class abstract_log {
 	 * @return string
 	 */
 	static function retrouve_couleur(
-			$couleur) {
-		switch ($couleur) {
-			# Reset
-			case 'Color_Off' :
-				return '[0m'; # Text Reset
-			case 'Black' :
-				return '[0;30m'; # Black
-			case 'Red' :
-				return '[0;31m'; # Red
-			case 'Green' :
-				return '[0;32m'; # Green
-			case 'Yellow' :
-				return '[0;33m'; # Yellow
-			case 'Blue' :
-				return '[0;34m'; # Blue
-			case 'Purple' :
-				return '[0;35m'; # Purple
-			case 'Cyan' :
-				return '[0;36m'; # Cyan
-			case 'White' :
-				return '[0;37m'; # White
-			case 'BBlack' :
-				return '[1;30m'; # Black
-			case 'BRed' :
-				return '[1;31m'; # Red
-			case 'BGreen' :
-				return '[1;32m'; # Green
-			case 'BYellow' :
-				return '[1;33m'; # Yellow
-			case 'BBlue' :
-				return '[1;34m'; # Blue
-			case 'BPurple' :
-				return '[1;35m'; # Purple
-			case 'BCyan' :
-				return '[1;36m'; # Cyan
-			case 'BWhite' :
-				return '[1;37m'; # White
-			case 'UBlack' :
-				return '[4;30m'; # Black
-			case 'URed' :
-				return '[4;31m'; # Red
-			case 'UGreen' :
-				return '[4;32m'; # Green
-			case 'UYellow' :
-				return '[4;33m'; # Yellow
-			case 'UBlue' :
-				return '[4;34m'; # Blue
-			case 'UPurple' :
-				return '[4;35m'; # Purple
-			case 'UCyan' :
-				return '[4;36m'; # Cyan
-			case 'UWhite' :
-				return '[4;37m'; # White
-			case 'On_Black' :
-				return '[40m'; # Black
-			case 'On_Red' :
-				return '[41m'; # Red
-			case 'On_Green' :
-				return '[42m'; # Green
-			case 'On_Yellow' :
-				return '[43m'; # Yellow
-			case 'On_Blue' :
-				return '[44m'; # Blue
-			case 'On_Purple' :
-				return '[45m'; # Purple
-			case 'On_Cyan' :
-				return '[46m'; # Cyan
-			case 'On_White' :
-				return '[47m'; # White
-			case 'IBlack' :
-				return '[0;90m'; # Black
-			case 'IRed' :
-				return '[0;91m'; # Red
-			case 'IGreen' :
-				return '[0;92m'; # Green
-			case 'IYellow' :
-				return '[0;93m'; # Yellow
-			case 'IBlue' :
-				return '[0;94m'; # Blue
-			case 'IPurple' :
-				return '[0;95m'; # Purple
-			case 'ICyan' :
-				return '[0;96m'; # Cyan
-			case 'IWhite' :
-				return '[0;97m'; # White
-			case 'BIBlack' :
-				return '[1;90m'; # Black
-			case 'BIRed' :
-				return '[1;91m'; # Red
-			case 'BIGreen' :
-				return '[1;92m'; # Green
-			case 'BIYellow' :
-				return '[1;93m'; # Yellow
-			case 'BIBlue' :
-				return '[1;94m'; # Blue
-			case 'BIPurple' :
-				return '[1;95m'; # Purple
-			case 'BICyan' :
-				return '[1;96m'; # Cyan
-			case 'BIWhite' :
-				return '[1;97m'; # White
-			case 'On_IBlack' :
-				return '[0;100m'; # Black
-			case 'On_IRed' :
-				return '[0;101m'; # Red
-			case 'On_IGreen' :
-				return '[0;102m'; # Green
-			case 'On_IYellow' :
-				return '[0;103m'; # Yellow
-			case 'On_IBlue' :
-				return '[0;104m'; # Blue
-			case 'On_IPurple' :
-				return '[0;105m'; # Purple
-			case 'On_ICyan' :
-				return '[0;106m'; # Cyan
-			case 'On_IWhite' :
-				return '[0;107m'; # White
-		}
-		return '[0m'; # Text Reset
+        string $couleur): string {
+		return match ($couleur) {
+			'Black' => '[0;30m',
+			'Red' => '[0;31m',
+			'Green' => '[0;32m',
+			'Yellow' => '[0;33m',
+			'Blue' => '[0;34m',
+			'Purple' => '[0;35m',
+			'Cyan' => '[0;36m',
+			'White' => '[0;37m',
+			'BBlack' => '[1;30m',
+			'BRed' => '[1;31m',
+			'BGreen' => '[1;32m',
+			'BYellow' => '[1;33m',
+			'BBlue' => '[1;34m',
+			'BPurple' => '[1;35m',
+			'BCyan' => '[1;36m',
+			'BWhite' => '[1;37m',
+			'UBlack' => '[4;30m',
+			'URed' => '[4;31m',
+			'UGreen' => '[4;32m',
+			'UYellow' => '[4;33m',
+			'UBlue' => '[4;34m',
+			'UPurple' => '[4;35m',
+			'UCyan' => '[4;36m',
+			'UWhite' => '[4;37m',
+			'On_Black' => '[40m',
+			'On_Red' => '[41m',
+			'On_Green' => '[42m',
+			'On_Yellow' => '[43m',
+			'On_Blue' => '[44m',
+			'On_Purple' => '[45m',
+			'On_Cyan' => '[46m',
+			'On_White' => '[47m',
+			'IBlack' => '[0;90m',
+			'IRed' => '[0;91m',
+			'IGreen' => '[0;92m',
+			'IYellow' => '[0;93m',
+			'IBlue' => '[0;94m',
+			'IPurple' => '[0;95m',
+			'ICyan' => '[0;96m',
+			'IWhite' => '[0;97m',
+			'BIBlack' => '[1;90m',
+			'BIRed' => '[1;91m',
+			'BIGreen' => '[1;92m',
+			'BIYellow' => '[1;93m',
+			'BIBlue' => '[1;94m',
+			'BIPurple' => '[1;95m',
+			'BICyan' => '[1;96m',
+			'BIWhite' => '[1;97m',
+			'On_IBlack' => '[0;100m',
+			'On_IRed' => '[0;101m',
+			'On_IGreen' => '[0;102m',
+			'On_IYellow' => '[0;103m',
+			'On_IBlue' => '[0;104m',
+			'On_IPurple' => '[0;105m',
+			'On_ICyan' => '[0;106m',
+			'On_IWhite' => '[0;107m',
+			default => '[0m',
+		};
+		# Text Reset
 	}
 
 	/**
@@ -612,7 +558,7 @@ abstract class abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEntete() {
+	public function getEntete(): string {
 		return $this->log_module;
 	}
 
@@ -620,7 +566,7 @@ abstract class abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setEntete(
-			$entete) {
+		$entete): static {
 		$this->log_module = $entete;
 		return $this;
 	}
@@ -628,7 +574,7 @@ abstract class abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSortEnErreur() {
+	public function getSortEnErreur(): bool {
 		return $this->sort_en_erreur;
 	}
 
@@ -636,7 +582,7 @@ abstract class abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setSortEnErreur(
-			$sort_en_erreur) {
+		$sort_en_erreur): static {
 		$this->sort_en_erreur = $sort_en_erreur;
 		return $this;
 	}
@@ -644,7 +590,7 @@ abstract class abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getThrowException() {
+	public function getThrowException(): bool {
 		return $this->throw_exception;
 	}
 
@@ -652,7 +598,7 @@ abstract class abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setThrowException(
-			$throw_exception) {
+        $throw_exception): static {
 		$this->throw_exception = $throw_exception;
 		return $this;
 	}
@@ -660,7 +606,7 @@ abstract class abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMessage() {
+	public function getMessage(): string {
 		return $this->message_erreur;
 	}
 
@@ -668,16 +614,16 @@ abstract class abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function setMessage(
-			$message_erreur) {
+        $message_erreur): static {
 		$this->message_erreur = $message_erreur;
 		return $this;
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @return options
-	 */
-	public function &getListeOptions() {
+    /**
+     * @codeCoverageIgnore
+     * @return options|string
+     */
+	public function &getListeOptions(): options|string {
 		return $this->liste_option_local;
 	}
 
@@ -685,7 +631,7 @@ abstract class abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeOptions(
-			&$ListeOptions) {
+        &$ListeOptions): static {
 		$this->liste_option_local = $ListeOptions;
 		return $this;
 	}
@@ -693,19 +639,18 @@ abstract class abstract_log {
 	/**
 	 * *********** Accesseurs ***************
 	 */
-	/**
-	 * @static
-	 * @codeCoverageIgnore
-	 *
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
-	 */
-	static function help() {
+    /**
+     * @static
+     * @codeCoverageIgnore
+     *
+     * @return array|string Renvoi le help
+     */
+	static function help(): array|string {
 		$help = logs::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "affiche du texte au format standard";
-		$help [__CLASS__] ["text"] [] .= "\t--verbose 0/1/2\t\t\t\tPar defaut : 0";
+		$help [__CLASS__] ["text"] = [
+            "affiche du texte au format standard",
+            "\t--verbose 0/1/2\t\t\t\tPar defaut : 0"
+        ];
 		return $help;
 	}
 }
-?>

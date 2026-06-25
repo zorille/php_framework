@@ -83,13 +83,15 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	 * Instancie un objet de type VirtualMachineConfigSpec.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return VirtualMachineConfigSpec
+	 * @throws Exception
 	 */
-	static function &creer_VirtualMachineConfigSpec(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_VirtualMachineConfigSpec(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): VirtualMachineConfigSpec
+	{
 		
-		$objet = new VirtualMachineConfigSpec ( $sort_en_erreur, $entete );
+		$objet = new static( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
 		) );
@@ -103,7 +105,7 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	 * @return VirtualMachineConfigSpec
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -114,12 +116,11 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -130,7 +131,8 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	 * @param string $arrayObject Permet de choisir entre un array ou un arrayObject en retour
 	 * @return ArrayObject|array
 	 */
-	public function renvoi_donnees_soap($arrayObject = false) {
+	public function renvoi_donnees_soap($arrayObject = false): ArrayObject|array
+	{
 		$liste_proprietes = parent::renvoi_donnees_soap ( true );
 		if ( $this->getDeviceChange () ) {
 			$liste_proprietes ["deviceChange"] = $this->getDeviceChange ();
@@ -175,7 +177,8 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	 * @param boolean $arrayObject Permet de choisir entre un array ou un arrayObject en retour de renvoi_donnees_soap
 	 * @return soapvar
 	 */
-	public function &renvoi_objet_soap($arrayObject = false) {
+	public function &renvoi_objet_soap(bool $arrayObject = false): soapvar
+	{
 		$soap_var = new soapvar ( $this->renvoi_donnees_soap ( $arrayObject ), SOAP_ENC_OBJECT, "VirtualMachineConfigSpec" );
 		return $soap_var;
 	}
@@ -186,14 +189,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDeviceChange() {
+	public function getDeviceChange(): array
+	{
 		return $this->deviceChange;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDeviceChange($deviceChange) {
+	public function &setDeviceChange($deviceChange): static
+	{
 		$this->deviceChange = $deviceChange;
 		return $this;
 	}
@@ -201,14 +206,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMemoryMB() {
+	public function getMemoryMB(): int
+	{
 		return $this->memoryMB;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMemoryMB($memoryMB) {
+	public function &setMemoryMB($memoryMB): static
+	{
 		$this->memoryMB = $memoryMB;
 		return $this;
 	}
@@ -216,14 +223,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNpivWorldWideNameOp() {
+	public function getNpivWorldWideNameOp(): string
+	{
 		return $this->npivWorldWideNameOp;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNpivWorldWideNameOp($npivWorldWideNameOp) {
+	public function &setNpivWorldWideNameOp($npivWorldWideNameOp): static
+	{
 		$this->npivWorldWideNameOp = $npivWorldWideNameOp;
 		return $this;
 	}
@@ -231,14 +240,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNumCoresPerSocket() {
+	public function getNumCoresPerSocket(): int
+	{
 		return $this->numCoresPerSocket;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNumCoresPerSocket($numCoresPerSocket) {
+	public function &setNumCoresPerSocket($numCoresPerSocket): static
+	{
 		$this->numCoresPerSocket = $numCoresPerSocket;
 		return $this;
 	}
@@ -246,30 +257,34 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNumCPUs() {
+	public function getNumCPUs(): int
+	{
 		return $this->numCPUs;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNumCPUs($numCPUs) {
+	public function &setNumCPUs($numCPUs): static
+	{
 		$this->numCPUs = $numCPUs;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineDefaultPowerOpInfo
+	 * @return VirtualMachineDefaultPowerOpInfo|null
 	 */
-	public function &getPowerOpInfo() {
+	public function &getPowerOpInfo(): ?VirtualMachineDefaultPowerOpInfo
+	{
 		return $this->powerOpInfo;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPowerOpInfo(&$powerOpInfo) {
+	public function &setPowerOpInfo(&$powerOpInfo): static
+	{
 		$this->powerOpInfo = $powerOpInfo;
 		return $this;
 	}
@@ -277,14 +292,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVAppConfigRemoved() {
+	public function getVAppConfigRemoved(): bool
+	{
 		return $this->vAppConfigRemoved;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVAppConfigRemoved($vAppConfigRemoved) {
+	public function &setVAppConfigRemoved($vAppConfigRemoved): static
+	{
 		$this->vAppConfigRemoved = $vAppConfigRemoved;
 		return $this;
 	}
@@ -292,14 +309,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVirtualICH7MPresent() {
+	public function getVirtualICH7MPresent(): bool
+	{
 		return $this->virtualICH7MPresent;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVirtualICH7MPresent($virtualICH7MPresent) {
+	public function &setVirtualICH7MPresent($virtualICH7MPresent): static
+	{
 		$this->virtualICH7MPresent = $virtualICH7MPresent;
 		return $this;
 	}
@@ -307,14 +326,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVirtualSMCPresent() {
+	public function getVirtualSMCPresent(): bool
+	{
 		return $this->virtualSMCPresent;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVirtualSMCPresent($virtualSMCPresent) {
+	public function &setVirtualSMCPresent($virtualSMCPresent): static
+	{
 		$this->virtualSMCPresent = $virtualSMCPresent;
 		return $this;
 	}
@@ -322,14 +343,16 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getVmProfile() {
+	public function getVmProfile(): bool|array
+	{
 		return $this->vmProfile;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVmProfile($vmProfile) {
+	public function &setVmProfile($vmProfile): static
+	{
 		$this->vmProfile = $vmProfile;
 		return $this;
 	}
@@ -340,7 +363,7 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -348,5 +371,3 @@ class VirtualMachineConfigSpec extends VirtualMachineConfig {
 		return $help;
 	}
 }
-
-?>

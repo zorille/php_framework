@@ -134,11 +134,13 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param vmwareWsclient $ObjectVmwareWsclient Reference sur un objet vmwareWsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareVirtualMachine
+	 * @throws Exception
 	 */
-	static function &creer_vmwareVirtualMachine(&$liste_option, &$ObjectVmwareWsclient, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_vmwareVirtualMachine(options &$liste_option, vmwareWsclient &$ObjectVmwareWsclient, bool|string $sort_en_erreur = false, string $entete = __CLASS__): vmwareVirtualMachine
+	{
 		$objet = new vmwareVirtualMachine ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -154,7 +156,7 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @return vmwareVirtualMachine
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -167,7 +169,6 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -181,9 +182,10 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @param string $name
 	 * @param vmwareFolder $folder
 	 * @param VirtualMachineCloneSpec $spec
-	 * @return array|false
+	 * @return bool
 	 */
-	public function CloneVM_Task($name, $folder, $spec) {
+	public function CloneVM_Task(string $name, vmwareFolder $folder, VirtualMachineCloneSpec $spec): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -202,9 +204,10 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	
 	/**
 	 * Fait un ExportVm sur la VM
-	 * @return array|false
+	 * @return bool
 	 */
-	public function ExportVm() {
+	public function ExportVm(): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 	
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -222,7 +225,8 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * Fait un ExtractOvfEnvironment sur la VM
 	 * @return array|false
 	 */
-	public function ExtractOvfEnvironment() {
+	public function ExtractOvfEnvironment(): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 	
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -235,12 +239,15 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 		$this->onDebug ( $resultat, 2 );
 		return $resultat;
 	}
-	
+
 	/**
 	 * Fait un MarkAsVirtualMachine sur la VM
-	 * @return array|false
+	 * @param string $ResourcePool
+	 * @param string $host
+	 * @return bool
 	 */
-	public function MarkAsVirtualMachine( $ResourcePool="", $host="") {
+	public function MarkAsVirtualMachine(string $ResourcePool="", string $host=""): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 	
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -260,7 +267,8 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * Fait un PowerOff sur la VM
 	 * @return array|false
 	 */
-	public function PowerOffVM_Task() {
+	public function PowerOffVM_Task(): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -276,10 +284,11 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 
 	/**
 	 * Fait un PowerOn sur la VM
-	 * @param vmwareHostSystem $host (optional) The host where the virtual machine is to be powered on
+	 * @param string|vmwareHostSystem $host (optional) The host where the virtual machine is to be powered on
 	 * @return array|false
 	 */
-	public function PowerOnVM_Task($host = "") {
+	public function PowerOnVM_Task(vmwareHostSystem|string $host = ""): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -301,7 +310,8 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @param array $VirtualMachineConfigSpec
 	 * @return array|false
 	 */
-	public function ReconfigVM_Task($VirtualMachineConfigSpec) {
+	public function ReconfigVM_Task(array $VirtualMachineConfigSpec): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -320,7 +330,8 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * Fait un ShutdownGuest sur la VM
 	 * @return array|false
 	 */
-	public function ShutdownGuest() {
+	public function ShutdownGuest(): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$request = $this->creer_entete_ManagedObject_this ();
@@ -337,9 +348,10 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * Remplace les annotations d'une VM
 	 * @param string $annotation
-	 * @return array
+	 * @return bool|array
 	 */
-	public function remplace_annotation($annotation) {
+	public function remplace_annotation($annotation): bool|array
+	{
 		return $this->ReconfigVM_Task ( array (
 				"annotation" => $annotation 
 		) );
@@ -352,29 +364,33 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return stdClass
 	 */
-	public function &getMoIDVirtualMachine() {
+	public function &getMoIDVirtualMachine(): stdClass
+	{
 		return $this->getManagedObject ();
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMoIDVirtualMachine($VirtualMachine) {
+	public function &setMoIDVirtualMachine($VirtualMachine): vmwareVirtualMachine
+	{
 		return $this->setManagedObject ( $VirtualMachine );
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineConfigInfo
+	 * @return VirtualMachineConfigInfo|null
 	 */
-	public function &getConfig() {
+	public function &getConfig(): ?VirtualMachineConfigInfo
+	{
 		return $this->config;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setConfig(&$config) {
+	public function &setConfig(&$config): static
+	{
 		$this->config=$config;
 		return $this;
 	}
@@ -382,14 +398,16 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDatastore() {
+	public function getDatastore(): array
+	{
 		return $this->datastore;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDatastore($datastore) {
+	public function &setDatastore($datastore): static
+	{
 		$this->datastore=$datastore;
 		return $this;
 	}
@@ -398,14 +416,16 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return EnvironmentBrowser
 	 */
-	public function &get_environmentBrowser() {
+	public function &get_environmentBrowser(): ?EnvironmentBrowser
+	{
 		return $this->environmentBrowser;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &set_environmentBrowser(&$environmentBrowser) {
+	public function &set_environmentBrowser(&$environmentBrowser): static
+	{
 		$this->environmentBrowser=$environmentBrowser;
 		return $this;
 	}
@@ -414,46 +434,52 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * @codeCoverageIgnore
 	 * @return GuestInfo
 	 */
-	public function &getGuest() {
+	public function &getGuest(): ?GuestInfo
+	{
 		return $this->guest;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGuest(&$guest) {
+	public function &setGuest(&$guest): static
+	{
 		$this->guest=$guest;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return ManagedEntityStatus
+	 * @return ManagedEntityStatus|null
 	 */
-	public function &getGuestHeartbeatStatus() {
+	public function &getGuestHeartbeatStatus(): ?ManagedEntityStatus
+	{
 		return $this->guestHeartbeatStatus;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGuestHeartbeatStatus(&$guestHeartbeatStatus) {
+	public function &setGuestHeartbeatStatus(&$guestHeartbeatStatus): static
+	{
 		$this->guestHeartbeatStatus=$guestHeartbeatStatus;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineFileLayoutEx
+	 * @return VirtualMachineFileLayoutEx|null
 	 */
-	public function &get_layoutEx() {
+	public function &get_layoutEx(): ?VirtualMachineFileLayoutEx
+	{
 		return $this->layoutEx;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &set_layoutEx(&$layoutEx) {
+	public function &set_layoutEx(&$layoutEx): static
+	{
 		$this->layoutEx=$layoutEx;
 		return $this;
 	}
@@ -461,14 +487,16 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNetwork() {
+	public function getNetwork(): array
+	{
 		return $this->network;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNetwork($network) {
+	public function &setNetwork($network): static
+	{
 		$this->network=$network;
 		return $this;
 	}
@@ -476,30 +504,34 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getParentVApp() {
+	public function getParentVApp(): array
+	{
 		return $this->parentVApp;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setParentVApp($parentVApp) {
+	public function &setParentVApp($parentVApp): static
+	{
 		$this->parentVApp=$parentVApp;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return ResourceConfigSpec
+	 * @return ResourceConfigSpec|null
 	 */
-	public function &getRessourceConfig() {
+	public function &getRessourceConfig(): ?ResourceConfigSpec
+	{
 		return $this->resourceConfig;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRessourceConfig(&$resourceConfig) {
+	public function &setRessourceConfig(&$resourceConfig): static
+	{
 		$this->resourceConfig=$resourceConfig;
 		return $this;
 	}
@@ -507,14 +539,16 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRessourcePool() {
+	public function getRessourcePool(): array
+	{
 		return $this->resourcePool;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRessourcePool($resourcePool) {
+	public function &setRessourcePool($resourcePool): static
+	{
 		$this->resourcePool=$resourcePool;
 		return $this;
 	}
@@ -522,78 +556,88 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRootSnapshot() {
+	public function getRootSnapshot(): array
+	{
 		return $this->rootSnapshot;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRootSnapshot($rootSnapshot) {
+	public function &setRootSnapshot($rootSnapshot): static
+	{
 		$this->rootSnapshot=$rootSnapshot;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineRuntimeInfo
+	 * @return VirtualMachineRuntimeInfo|null
 	 */
-	public function &getRuntime() {
+	public function &getRuntime(): ?VirtualMachineRuntimeInfo
+	{
 		return $this->runtime;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRuntime(&$runtime) {
+	public function &setRuntime(&$runtime): static
+	{
 		$this->runtime=$runtime;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineSnapshotInfo
+	 * @return VirtualMachineSnapshotInfo|null
 	 */
-	public function &getSnapshot() {
+	public function &getSnapshot(): ?VirtualMachineSnapshotInfo
+	{
 		return $this->snapshot;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnapshot(&$snapshot) {
+	public function &setSnapshot(&$snapshot): static
+	{
 		$this->snapshot=$snapshot;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineStorageInfo
+	 * @return VirtualMachineStorageInfo|null
 	 */
-	public function &getStorage() {
+	public function &getStorage(): ?VirtualMachineStorageInfo
+	{
 		return $this->storage;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStorage(&$storage) {
+	public function &setStorage(&$storage): static
+	{
 		$this->storage=$storage;
 		return $this;
 	}
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return VirtualMachineSummary
+	 * @return VirtualMachineSummary|null
 	 */
-	public function &getSummary() {
+	public function &getSummary(): ?VirtualMachineSummary
+	{
 		return $this->summary;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSummary(&$summary) {
+	public function &setSummary(&$summary): static
+	{
 		$this->summary=$summary;
 		return $this;
 	}
@@ -604,7 +648,7 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -612,5 +656,3 @@ class vmwareVirtualMachine extends vmwareManagedEntity {
 		return $help;
 	}
 }
-
-?>

@@ -37,7 +37,7 @@ class pingdom_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return pingdom_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_pingdom_param ();
@@ -91,7 +91,7 @@ class pingdom_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

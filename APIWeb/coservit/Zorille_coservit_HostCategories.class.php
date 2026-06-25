@@ -6,8 +6,9 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
-use Zorille\framework\abstract_log;
+use Zorille\framework\options;
 
 /**
  * class HostCategories
@@ -29,17 +30,18 @@ class HostCategories extends globalapi {
 	 */
 	/**
 	 * Instancie un objet de type HostCategories. @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
+	 * @param options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return HostCategories
+	 * @return self
+	 * @throws Exception
 	 */
 	static function &creer_HostCategories(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): static {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new HostCategories ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -53,9 +55,10 @@ class HostCategories extends globalapi {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return HostCategories
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->retrouve_param ();
 		return $this;
@@ -66,18 +69,17 @@ class HostCategories extends globalapi {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_param() {
+	public function retrouve_param(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -85,26 +87,30 @@ class HostCategories extends globalapi {
 	/**
 	 * ******************************* HostCategories URI ******************************
 	 */
-	public function categories_list_uri() {
+	public function categories_list_uri(): string {
 		return $this->globalapi_uri () . '/host_categories';
 	}
 
 	/**
 	 * ******************************* Coservit HostCategories *********************************
 	 */
-	public function retrouve_id_categorie(
-			$categorie) {
+
+	/**
+	 * @throws Exception
+	 */
+	public function retrouve_id_category(
+		$category) {
 		$this->onDebug ( __METHOD__, 1 );
 		if (empty ( $this->getHostCategories () )) {
 			$this->retrouve_categories ();
 		}
-		if (isset ( $this->getHostCategories () [mb_strtoupper ( $categorie )] )) {
-			return $this->getHostCategories () [mb_strtoupper ( $categorie )];
+		if (isset ( $this->getHostCategories () [mb_strtoupper ( $category )] )) {
+			return $this->getHostCategories () [mb_strtoupper ( $category )];
 		}
-		return $this->onError ( "Le categorie " . $categorie . " n'existe pas dans la liste", "", 1 );
+		return $this->onError ( "Le categorie " . $category . " n'existe pas dans la liste" );
 	}
 
-	public function prepare_categories() {
+	public function prepare_categories(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_categories = array ();
 		if (isset ( $this->getDonnees ()->_embedded->items )) {
@@ -116,10 +122,13 @@ class HostCategories extends globalapi {
 		return $this->setHostCategories ( $liste_categories );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_categories(
 			$params = array (
 					"sort" => "+name"
-			)) {
+			)): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->categories_list_uri (), $params );
@@ -130,10 +139,10 @@ class HostCategories extends globalapi {
 	/**
 	 * Creer un host la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande host. (parametres obligatoires) : 'host_alias',"host_address","company","collector"
-	 * @return \Zorille\coservit\Company
+	 * @return self
 	 */
 	public function creerHostCategories(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -143,9 +152,9 @@ class HostCategories extends globalapi {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array
 	 */
-	public function getHostCategories() {
+	public function getHostCategories(): array {
 		return $this->categories;
 	}
 
@@ -153,7 +162,7 @@ class HostCategories extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHostCategories(
-			$liste_categories) {
+			$liste_categories): static {
 		$this->categories = $liste_categories;
 		return $this;
 	}
@@ -164,11 +173,11 @@ class HostCategories extends globalapi {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "HostCategories :";
+		$help [__CLASS__] ["text"] = [
+			'HostCategories :'
+		];
 		return $help;
 	}
 }
-?>

@@ -10,22 +10,28 @@ date_default_timezone_set ( "Europe/Paris" );
 // Gestion de l'autochargement des classes
 spl_autoload_extensions ( '.class.php' );
 
-function my_autoloader(
-		$class) {
-			if (strpos($class,"Zorille\\")!==false) {
-				if (strpos ( $class, '\\' )) {
-					$class = str_replace ( '\\', '_', $class );
-				}
-				require_once $class . spl_autoload_extensions ();
-			} else if (strpos($class,".php")!==false) {
-				require_once str_replace ( '\\', '/', $class );
-			} else if (strpos($class,"iTop")!==false) {
-				//En cas d'appelle aux namspace iTop
-			} else {
-				require_once str_replace ( '\\', '/', $class ).".php";
-			}
+if (!function_exists('my_autoloader')) {
+    function my_autoloader(
+        $class): void
+    {
+        if (str_contains($class, "Zorille\\")) {
+            if (strpos($class, '\\')) {
+                $class = str_replace('\\', '_', $class);
+            }
+            require_once $class . spl_autoload_extensions();
+        }
+        elseif (str_contains($class, ".php")) {
+            require_once str_replace('\\', '/', $class);
+        }
+        elseif (!str_contains($class, "iTop")) {
+            //En cas d'appelle aux namespace iTop
+            require_once str_replace('\\', '/', $class) . ".php";
+        }
+    }
+
+    spl_autoload_register('my_autoloader');
 }
-spl_autoload_register ( 'my_autoloader' );
+/** @var string $rep_document */
 if (! isset ( $rep_document ) && $rep_document != "")
 	$rep_document = ".";
 $rep_lib = $rep_document . "/php_framework";
@@ -177,10 +183,20 @@ if (isset ( $INCLUDE_EXCEL )) {
 }
 
 
+/**
+ * Inclue Les class d'appel a ldap
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/ldap" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/ldap/data_models" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_lib . "/ldap/query_fetchers" );
 /*
  * Gestion des API REST ou SOAP
  */
 $rep_APIWeb = $rep_lib . "/APIWeb";
+/**
+ * Inclue Les classes Globales aux API Web
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb );
 /**
  * Inclue Les class d'appel a Zabbix
  */
@@ -190,6 +206,8 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/zabbix
  * Inclue Les class d'appel a iTop
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop/query_fetchers" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop/data_models" );
 /**
  * Inclue Les class d'appel a OPNSense
  */
@@ -198,6 +216,12 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/opnsen
  * Inclue Les class d'appel a Office 365
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/o365" );
+/**
+ * Inclue Les class d'appel a Salesforce
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/salesforce" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/salesforce/query_fetchers" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/salesforce/data_models" );
 /**
  * Inclue Les class d'appel a PingDom
  */
@@ -226,6 +250,10 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/libren
  * Inclue Les class d'appel a SolarWinds
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/solarwinds" );
+/**
+ * Inclue Les class d'appel a LibreNMS
+ */
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/enedis" );
 /**
  * Inclue Les class d'appel a Veeam
  */
@@ -261,4 +289,4 @@ $rep_Stars = $rep_HP . "/Stars";
 $rep_UCMDB = $rep_HP . "/ucmdb";
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_HP . PATH_SEPARATOR . $rep_sitescope . PATH_SEPARATOR . $rep_HPOM . PATH_SEPARATOR . $rep_Stars . PATH_SEPARATOR . $rep_UCMDB );
 
-?>
+require_once __DIR__ . '/polyfills.php';

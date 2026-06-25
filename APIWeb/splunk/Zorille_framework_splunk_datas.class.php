@@ -37,7 +37,7 @@ class splunk_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return splunk_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_splunk_param ();
@@ -51,7 +51,6 @@ class splunk_datas extends serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de serveur_datas
@@ -91,7 +90,8 @@ class splunk_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

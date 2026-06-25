@@ -137,11 +137,10 @@ class logs {
 	 * --verbose[=int]--mail_using=oui/non <br>
 	 *
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @param string $entete Entete des logs de l'objet
 	 * @return logs
 	 */
-	static public function creer_logs(&$liste_option) {
+	static public function creer_logs(options &$liste_option): logs
+	{
 		if ($liste_option ->verifie_option_existe ( "create_log_file", true ) !== false) {
 			$create_log_file = $liste_option ->getOption ( "create_log_file" );
 		}
@@ -230,7 +229,7 @@ class logs {
 	 * @param array $liste_class
 	 * @return logs
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		return $this;
 	}
 
@@ -248,7 +247,7 @@ class logs {
 	 * @param string $compresse Compresse le fichier de log.
 	 * @param string $append Ajoute les donnees au fichier de log.
 	 */
-	public function __construct($verbose = -1, $create_log_file = "non", $dossier = ".", $fichier = "log", $unique = "oui", $sort_en_erreur = "non", $compresse = "non", $append = "non") {
+	public function __construct(int $verbose = -1, string $create_log_file = "non", string $dossier = ".", string $fichier = "log", string $unique = "oui", string $sort_en_erreur = "non", string $compresse = "non", string $append = "non") {
 		$this ->setVerbose ( $verbose );
 		if ($dossier == "")
 			$dossier = ".";
@@ -283,8 +282,10 @@ class logs {
 	 *
 	 * @param options $liste_option
 	 * @return Bool Renvoi TRUE si OK, FALSE si aucun fichier n'est ouvert.
+	 * @throws \Exception
 	 */
-	public function ouvre_fichier_log(&$liste_option) {
+	public function ouvre_fichier_log(options &$liste_option): bool
+	{
 		if ($this ->getUsingLogFile ()) {
 			if ($this ->getCompresse ()) {
 				$this ->setFichier ( fichier_gz::creer_fichier_gz ( $liste_option, $this ->getRepFichier () . "/" . $this ->getNomFichier (), "oui" ) );
@@ -320,7 +321,8 @@ class logs {
 	 *
 	 * @param string $message Ligne a ecrire.
 	 */
-	public function ajouter_fichier_log($message) {
+	public function ajouter_fichier_log(string $message): bool
+	{
 		if ($this ->getUsingLogFile () && ($this ->getFichier () instanceof fichier_gz || $this ->getFichier () instanceof fichier)) {
 			$this ->getFichier () 
 				->ecrit ( $message . $this ->_finDeLigne () );
@@ -335,7 +337,8 @@ class logs {
 	 *
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	public function ferme_fichier_log() {
+	public function ferme_fichier_log(): bool
+	{
 		if ($this ->getUsingLogFile () && ($this ->getFichier () instanceof fichier || $this ->getFichier () instanceof fichier_gz)) {
 			$this ->getFichier () 
 				->close ();
@@ -350,11 +353,10 @@ class logs {
 	 * On peut force un autre valeur grace au parametres.<br>
 	 * Ajoute l'affichage du [Exit].
 	 *
-	 * @param Bool $force_retour Pour force un valeur.
-	 * @param int $retour Valeur forcee.
 	 * @return int Renvoi la valeur du exit.
 	 */
-	public function renvoiExit() {
+	public function renvoiExit(): int
+	{
 		// Sortie Perso
 		$exit = $this ->getExit ();
 		if ($exit === false)
@@ -372,7 +374,8 @@ class logs {
 	/**
 	 * Renvoi un json  'success'=>Boolean, 'return_code'=integer et 'message'=>liste d'erreur
 	 */
-	public function valide_exit_web() {
+	public function valide_exit_web(): void
+	{
 		if ($this ->getIsWeb () === true) {
 			
 			if ($this ->getExit () != 0) {
@@ -393,7 +396,8 @@ class logs {
 	}
 	
 	// FIN de la gestion du fichier de log
-	public function valideVerbose($niveau) {
+	public function valideVerbose($niveau): bool
+	{
 		$verbose = $this ->getVerbose ();
 		if ($verbose == "") {
 			$verbose = 2;
@@ -409,7 +413,8 @@ class logs {
 	 * @param string $message
 	 * @return string message pour l'affichage
 	 */
-	public function prepare_affichage($message) {
+	public function prepare_affichage(string $message): string
+	{
 		if (is_object ( $message )) {
 			return print_r ( $message, true ) . $this ->_finDeLigne ();
 		} elseif (is_array ( $message )) {
@@ -420,14 +425,16 @@ class logs {
 	}
 	
 	// Gestion du verbose
+
 	/**
 	 * Affiche un debug suivant le niveau de verbose et l'ajoute dans un fichier s'il existe.
 	 *
 	 * @param string $message Ligne a affiche.
 	 * @param int $niveau Niveau de verbose.
-	 * @return int Renvoi 0 si OK, 1 sinon.
+	 * @return bool|int Renvoi 0 si OK, 1 sinon.
 	 */
-	public function verbose($message, $niveau = 0) {
+	public function verbose(string $message, int $niveau = 0): bool|int
+	{
 		$this ->ajouter_fichier_log ( $message );
 		
 		if ($this ->getIsError () === true) {
@@ -448,7 +455,8 @@ class logs {
 	 * @param string $message
 	 * @return logs
 	 */
-	public function affiche_erreur($message) {
+	public function affiche_erreur(string $message): static
+	{
 		$this ->setErrorList ( $message );
 		
 		if ($this ->getIsWeb () === false && $this ->getIsErrorStdout () === false) {
@@ -474,7 +482,8 @@ class logs {
 	 * @param string $message Message d'erreur a afficher
 	 * @return false
 	 */
-	public function logs_onError($message) {
+	public function logs_onError(string $message): bool
+	{
 		$message = "(logs) " . $message;
 		// En cas de web, on envoi l'affichage sur le stdout (navigateur)
 		$this ->setIsError ( true );
@@ -496,12 +505,12 @@ class logs {
 	 * Prepare la fin de ligne
 	 * @return string
 	 */
-	private function _finDeLigne() {
+	private function _finDeLigne(): string
+	{
 		if ($this ->getIsWeb () === false) {
-			switch ($this ->getOs ()) {
-				case "WIN" :
-					// @codeCoverageIgnoreStart
-					return "\n\r";
+			// @codeCoverageIgnoreStart
+			if ($this->getOs() == "WIN") {
+				return "\n\r";
 			}
 			// @codeCoverageIgnoreEnd
 			
@@ -518,14 +527,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getExit() {
+	function getExit(): int
+	{
 		return $this->exit;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setExit($code, $force = false) {
+	function &setExit($code, $force = false): static
+	{
 		if ($this->exit == 0) {
 			$this->exit = $code;
 		} elseif ($force) {
@@ -537,14 +548,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getIsWeb() {
+	function getIsWeb(): bool|int
+	{
 		return $this->is_web;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setIsWeb($is_web) {
+	function &setIsWeb($is_web): static
+	{
 		$this->is_web = $is_web;
 		return $this;
 	}
@@ -552,14 +565,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getOs() {
+	function getOs(): int|string
+	{
 		return $this->os;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setOs($os) {
+	function &setOs($os): static
+	{
 		$this->os = $os;
 		return $this;
 	}
@@ -567,14 +582,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getNomFichier() {
+	function getNomFichier(): string
+	{
 		return $this->nom_fichier;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setNomFichier($nom_fichier) {
+	function &setNomFichier($nom_fichier): static
+	{
 		$this->nom_fichier = $nom_fichier;
 		return $this;
 	}
@@ -582,14 +599,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getRepFichier() {
+	function getRepFichier(): string
+	{
 		return $this->rep_fichier;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setRepFichier($rep_fichier) {
+	function &setRepFichier($rep_fichier): static
+	{
 		$this->rep_fichier = $rep_fichier;
 		return $this;
 	}
@@ -597,14 +616,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &getFichier() {
+	function &getFichier(): string
+	{
 		return $this->fichier;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setFichier(&$fichier) {
+	function &setFichier(&$fichier): static
+	{
 		$this->fichier = $fichier;
 		return $this;
 	}
@@ -612,14 +633,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getCompresse() {
+	function getCompresse(): bool
+	{
 		return $this->compresse;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setCompresse($compresse) {
+	function &setCompresse($compresse): static
+	{
 		$this->compresse = $compresse;
 		return $this;
 	}
@@ -627,14 +650,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getAppend() {
+	function getAppend(): bool
+	{
 		return $this->append;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setAppend($append) {
+	function &setAppend($append): static
+	{
 		$this->append = $append;
 		return $this;
 	}
@@ -642,14 +667,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getUsingLogFile() {
+	function getUsingLogFile(): bool
+	{
 		return $this->using_log_file;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setUsingLogFile($using_log_file) {
+	function &setUsingLogFile($using_log_file): static
+	{
 		$this->using_log_file = $using_log_file;
 		return $this;
 	}
@@ -657,14 +684,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getSortEnErreur() {
+	function getSortEnErreur(): bool
+	{
 		return $this->sort_en_erreur;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setSortEnErreur($sort_en_erreur) {
+	function &setSortEnErreur($sort_en_erreur): static
+	{
 		$this->sort_en_erreur = $sort_en_erreur;
 		return $this;
 	}
@@ -672,14 +701,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getIsError() {
+	function getIsError(): bool|int
+	{
 		return $this->is_error;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setIsError($is_error) {
+	function &setIsError($is_error): static
+	{
 		$this->is_error = $is_error;
 		return $this;
 	}
@@ -687,14 +718,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getIsErrorStdout() {
+	function getIsErrorStdout(): bool|int
+	{
 		return $this->is_error_stdout;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setIsErrorStdout($is_error_stdout) {
+	function &setIsErrorStdout($is_error_stdout): static
+	{
 		$this->is_error_stdout = $is_error_stdout;
 		return $this;
 	}
@@ -702,14 +735,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getVerbose() {
+	function getVerbose(): int
+	{
 		return $this->verbose;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setVerbose($verbose) {
+	function &setVerbose($verbose): static
+	{
 		$this->verbose = $verbose;
 		return $this;
 	}
@@ -717,14 +752,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getErrorList() {
+	function getErrorList(): array
+	{
 		return $this->erreur_liste;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function &setErrorList($erreur) {
+	function &setErrorList($erreur): static
+	{
 		$this->erreur_liste [] .= $erreur;
 		return $this;
 	}
@@ -732,14 +769,16 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getResultat() {
+	public function getResultat(): array
+	{
 		return $this->resultat;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setResultat($resultat) {
+	public function &setResultat($resultat): static
+	{
 		$this->resultat = $resultat;
 		return $this;
 	}
@@ -747,7 +786,8 @@ class logs {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &AjouteMessageResultat($message, $champ = "message") {
+	public function &AjouteMessageResultat($message, $champ = "message"): static
+	{
 		$this->resultat [$champ] = $message;
 		return $this;
 	}
@@ -755,14 +795,14 @@ class logs {
 	/**
 	 * ****************** Accesseurs ************************
 	 */
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|array[] Renvoi le help
 	 */
-	static function help() {
+	static function help(): array
+	{
 		$help = array ( 
 				__CLASS__ => array () );
 		
@@ -790,4 +830,3 @@ class logs {
 		return true;
 	}
 }
-?>

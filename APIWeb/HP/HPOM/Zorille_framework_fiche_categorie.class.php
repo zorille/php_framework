@@ -4,6 +4,8 @@
  * @author dvargas
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class fiche_categorie
  * 
@@ -80,11 +82,12 @@ class fiche_categorie extends abstract_log {
 	 * Instancie un objet de type fiche_categorie.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fiche_categorie
 	 */
-	static function &creer_fiche_categorie(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fiche_categorie(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fiche_categorie
+	{
 		$objet = new fiche_categorie ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
 				"options" => $liste_option 
@@ -96,8 +99,11 @@ class fiche_categorie extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fiche_categorie
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+		array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_fiche_categorie_param ();
@@ -110,11 +116,10 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -122,9 +127,11 @@ class fiche_categorie extends abstract_log {
 
 	/**
 	 *
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|fiche_categorie True est OK, False sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_fiche_categorie_param() {
+	public function retrouve_fiche_categorie_param(): bool|static
+	{
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( array (
 				"fiche_categorie",
@@ -160,12 +167,13 @@ class fiche_categorie extends abstract_log {
 
 	/**
 	 * Rempli le $fonction avec la valeur trouve ou la valeur par defaut
-	 * @param string|array $recherche
+	 * @param array|string $recherche
 	 * @param string $valeurDefaut
 	 * @param string $fonction
 	 * @return fiche_categorie
 	 */
-	public function remplir_variable($recherche, $valeurDefaut, $fonction) {
+	public function remplir_variable(array|string $recherche, string $valeurDefaut, string $fonction): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( $recherche ) === false) {
 			$this->$fonction ( $valeurDefaut );
@@ -183,16 +191,17 @@ class fiche_categorie extends abstract_log {
 	 * @param boolean $generic
 	 * @return fiche_categorie
 	 */
-	public function lit_fiche_cat($fiche_cat, $generic = false) {
+	public function lit_fiche_cat(string $fiche_cat, bool $generic = false): static
+	{
 		$donnees = fichier::Lit_integralite_fichier_en_tableau ( $fiche_cat );
 		$donnees_FCAT = $this->getFCAT ();
 		foreach ( $donnees as $ligne ) {
 			$ligne = trim ( $ligne );
 			$this->onDebug ( $ligne, 1 );
-			if ($ligne == "" || strpos ( $ligne, "#" ) === 0) {
+			if ($ligne == "" || str_starts_with($ligne, "#")) {
 				continue;
 			}
-			if (strpos ( $ligne, "GENERIQUE:" ) === 0) {
+			if (str_starts_with($ligne, "GENERIQUE:")) {
 				$this->lit_fiche_cat ( $this->getDossierFCAT () . "/" . str_replace ( "GENERIQUE:", "", $ligne ), true );
 				$donnees_FCAT = $this->getFCAT ();
 				continue;
@@ -230,7 +239,8 @@ class fiche_categorie extends abstract_log {
 	 * Retrouve une fiche categorie et la charge en memoire
 	 * @return fiche_categorie|boolean
 	 */
-	public function retrouve_fiche_cat() {
+	public function retrouve_fiche_cat(): fiche_categorie|bool|static
+	{
 		$this->onDebug ( "retrouve_fiche_cat", 1 );
 		if (fichier::tester_fichier_existe ( $this->getDossierFCAT () . "/" . $this->getHpomObject ()
 			->getCustomer () . "/" . $this->getHpomObject ()
@@ -255,7 +265,8 @@ class fiche_categorie extends abstract_log {
 	 * Gere les donnees arrivant de Xymon
 	 * @return boolean True Donnees Xymon trouvees, False Pas de Xymon dans les CMAs
 	 */
-	public function valide_xymon() {
+	public function valide_xymon(): bool
+	{
 		$this->onDebug ( "valide_xymon", 1 );
 		//Special Xymon
 		$CMAs = $this->getHpomObject ()
@@ -282,8 +293,10 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * Retrouve les informations de la fiche categorie pour une ressource
 	 * @return boolean True si la ressource existe, False si la ressource n'existe pas et pas de valeur par defaut
+	 * @throws Exception
 	 */
-	public function valide_donnees_ressource() {
+	public function valide_donnees_ressource(): bool
+	{
 		$donnees_FCAT = $this->getFCAT ();
 		//Si on ne trouve pas la ressource dans la liste
 		
@@ -313,7 +326,8 @@ class fiche_categorie extends abstract_log {
 	 * Retrouve les informations de la fiche categorie pour une instance
 	 * @return fiche_categorie|boolean
 	 */
-	public function valide_instance() {
+	public function valide_instance(): fiche_categorie|bool
+	{
 		//On part du principe que la ressource (Objet) est valide
 		$intermediaire_FCAT = $this->getFCAT ();
 		$donnees_FCAT = $intermediaire_FCAT [$this->getHpomObject ()
@@ -348,8 +362,10 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * Charge la fiche cat et trouve la ligne correspondante
 	 * @return fiche_categorie
+	 * @throws Exception
 	 */
-	public function gestion_fiche_categorie() {
+	public function gestion_fiche_categorie(): static
+	{
 		if ($this->valide_xymon ()) {
 			return $this;
 		}
@@ -368,26 +384,22 @@ class fiche_categorie extends abstract_log {
 	 * @param string $HOB_serv Niveau de service dans HobInv
 	 * @return number
 	 */
-	public function convert_hobinv_service_vers_priorite($HOB_serv) {
-		switch ($HOB_serv) {
-			Case "GOLD" :
-			Case "1" :
-				return 1;
-			Case "SILVER" :
-			Case "2" :
-				return 2;
-			Case "BRONZE" :
-			Case "3" :
-				return 3;
-		}
-		return 4;
+	public function convert_hobinv_service_vers_priorite($HOB_serv): int
+	{
+		return match ($HOB_serv) {
+			"GOLD", "1" => 1,
+			"SILVER", "2" => 2,
+			"BRONZE", "3" => 3,
+			default => 4,
+		};
 	}
 
 	/**
 	 * Retrouve la priorite en fonction du niveau de service dans HobInv
 	 * @return fiche_categorie|false
 	 */
-	public function retrouve_priorite() {
+	public function retrouve_priorite(): bool|fiche_categorie
+	{
 		switch ($this->getHpomObject ()
 			->getCustomer ()) {
 			case "CUSTOMER" :
@@ -403,19 +415,21 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	
+
 	/**
 	 * @codeCoverageIgnore
-	 * @return hpom
+	 * @return hpom|null
 	 */
-	public function &getHpomObject() {
+	public function &getHpomObject(): ?hpom
+	{
 		return $this->hpom;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHpomObject(&$hpom) {
+	public function &setHpomObject(&$hpom): static
+	{
 		$this->hpom = $hpom;
 		
 		return $this;
@@ -424,14 +438,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getDbTools() {
+	public function &getDbTools(): ?requete_complexe_tools
+	{
 		return $this->db_tools;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDbTools(&$db_tools) {
+	public function &setDbTools(&$db_tools): static
+	{
 		$this->db_tools = $db_tools;
 		
 		return $this;
@@ -440,14 +456,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getDossierFCAT() {
+	public function &getDossierFCAT(): string
+	{
 		return $this->dossier_FCAT;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDossierFCAT($dossier_FCAT) {
+	public function &setDossierFCAT($dossier_FCAT): static
+	{
 		$this->dossier_FCAT = $dossier_FCAT;
 		
 		return $this;
@@ -456,14 +474,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getFCATGeneric() {
+	public function &getFCATGeneric(): string
+	{
 		return $this->FCAT_generic;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFCATGeneric($FCAT_generic) {
+	public function &setFCATGeneric($FCAT_generic): static
+	{
 		$this->FCAT_generic = $FCAT_generic;
 		
 		return $this;
@@ -472,14 +492,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFA() {
+	public function getFA(): string
+	{
 		return $this->FA;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFA($FA) {
+	public function &setFA($FA): static
+	{
 		$this->FA = $FA;
 		return $this;
 	}
@@ -487,14 +509,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getImpact() {
+	public function getImpact(): int
+	{
 		return $this->impact;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setImpact($impact) {
+	public function &setImpact($impact): static
+	{
 		$this->impact = $impact;
 		return $this;
 	}
@@ -502,14 +526,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPriorite() {
+	public function getPriorite(): int
+	{
 		return $this->priorite;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPriorite($priorite) {
+	public function &setPriorite($priorite): static
+	{
 		$this->priorite = $priorite;
 		return $this;
 	}
@@ -517,14 +543,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGroupe() {
+	public function getGroupe(): string
+	{
 		return $this->groupe;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGroupe($groupe) {
+	public function &setGroupe($groupe): static
+	{
 		$this->groupe = $groupe;
 		return $this;
 	}
@@ -532,14 +560,16 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFCAT() {
+	public function getFCAT(): array
+	{
 		return $this->fcat;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFCAT($fcat) {
+	public function &setFCAT($fcat): static
+	{
 		$this->fcat = $fcat;
 		return $this;
 	}
@@ -547,7 +577,8 @@ class fiche_categorie extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function AjouteEntreeFCAT($champ, $valeur) {
+	public function AjouteEntreeFCAT($champ, $valeur): static
+	{
 		$this->fcat [$champ] = $valeur;
 		return $this;
 	}
@@ -560,7 +591,8 @@ class fiche_categorie extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -568,4 +600,4 @@ class fiche_categorie extends abstract_log {
 		return $help;
 	}
 }
-?>
+

@@ -130,11 +130,12 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * Instancie un objet de type zabbix_action_operation_command.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_action_operation_command
 	 */
-	static function &creer_zabbix_action_operation_command(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_action_operation_command(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_action_operation_command
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_action_operation_command ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -146,9 +147,9 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_action_operation_command
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -160,7 +161,6 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -169,9 +169,11 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return zabbix_action_operation_command|bool True est OK, False sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): zabbix_action_operation_command|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setCommand ( $this->_valideOption ( array (
 				"zabbix",
@@ -266,7 +268,8 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * @return array|false;
 	 * @throws Exception
 	 */
-	public function creer_definition_zabbix_operation_command_ws() {
+	public function creer_definition_zabbix_operation_command_ws(): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getType () === "") {
 			return array ();
@@ -317,9 +320,10 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * 3 - Telnet;
 	 * 4 - global_script.
 	 * @param string $type 
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Type($type) {
+	public function retrouve_Type($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
@@ -345,9 +349,10 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * 0 - Zabbix agent;
 	 * 1 - Zabbix server.
 	 * @param string $type 
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_ExecuteOn($type) {
+	public function retrouve_ExecuteOn($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
@@ -367,9 +372,10 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * 0 - (default) use the data from the operation;
 	 * 1 - use the data from the action.
 	 * @param string $type operation ou action
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Authtype($type) {
+	public function retrouve_Authtype($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
@@ -388,14 +394,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperationId() {
+	public function getOperationId(): string
+	{
 		return $this->operationid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperationId($operationid) {
+	public function &setOperationId($operationid): static
+	{
 		$this->operationid = $operationid;
 		return $this;
 	}
@@ -403,14 +411,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCommand() {
+	public function getCommand(): string
+	{
 		return $this->command;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCommand($command) {
+	public function &setCommand($command): static
+	{
 		$this->command = $command;
 		return $this;
 	}
@@ -418,14 +428,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getType() {
+	public function getType(): string
+	{
 		return $this->type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setType($type) {
+	public function &setType($type): static
+	{
 		$this->type = $this->retrouve_Type ( $type );
 		return $this;
 	}
@@ -433,14 +445,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getExecuteOn() {
+	public function getExecuteOn(): string
+	{
 		return $this->execute_on;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setExecuteOn($execute_on) {
+	public function &setExecuteOn($execute_on): static
+	{
 		$this->execute_on = $this->retrouve_ExecuteOn ( $execute_on );
 		return $this;
 	}
@@ -448,14 +462,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAuthtype() {
+	public function getAuthtype(): string
+	{
 		return $this->authtype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAuthtype($authtype) {
+	public function &setAuthtype($authtype): static
+	{
 		$this->authtype = $this->retrouve_Authtype ( $authtype );
 		return $this;
 	}
@@ -463,14 +479,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->username;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsername($username) {
+	public function &setUsername($username): static
+	{
 		$this->username = $username;
 		return $this;
 	}
@@ -478,14 +496,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword() {
+	public function getPassword(): string
+	{
 		return $this->passwd;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPassword($passwd) {
+	public function &setPassword($passwd): static
+	{
 		$this->passwd = $passwd;
 		return $this;
 	}
@@ -493,14 +513,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPort() {
+	public function getPort(): string
+	{
 		return $this->port;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPort($port) {
+	public function &setPort($port): static
+	{
 		$this->port = $port;
 		return $this;
 	}
@@ -508,14 +530,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrivatekey() {
+	public function getPrivatekey(): string
+	{
 		return $this->privatekey;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPrivatekey($privatekey) {
+	public function &setPrivatekey($privatekey): static
+	{
 		$this->privatekey = $privatekey;
 		return $this;
 	}
@@ -523,14 +547,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPublickey() {
+	public function getPublickey(): string
+	{
 		return $this->publickey;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPublickey($publickey) {
+	public function &setPublickey($publickey): static
+	{
 		$this->publickey = $publickey;
 		return $this;
 	}
@@ -538,14 +564,16 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getScriptid() {
+	public function getScriptid(): string
+	{
 		return $this->scriptid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setScriptid($scriptid) {
+	public function &setScriptid($scriptid): static
+	{
 		$this->scriptid = $scriptid;
 		return $this;
 	}
@@ -556,7 +584,7 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -576,4 +604,3 @@ class zabbix_action_operation_command extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

@@ -24,15 +24,17 @@ class contacts extends ci {
 	 * Instancie un objet de type contacts. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $dolibarr_webservice_rest Reference sur un objet wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return contacts
+	 * @throws Exception
 	 */
 	static function &creer_contacts(
-			&$liste_option,
-			&$dolibarr_webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$dolibarr_webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): contacts
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new contacts ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -47,9 +49,10 @@ class contacts extends ci {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return contacts
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->reset_resource ();
 	}
@@ -59,13 +62,12 @@ class contacts extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion du parent
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -74,7 +76,7 @@ class contacts extends ci {
 	 * Remet l'url par defaut
 	 * @return contacts
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): static {
 		return parent::reset_resource ()->addResource ( 'contacts' );
 	}
 
@@ -85,7 +87,7 @@ class contacts extends ci {
 	 * @throws Exception
 	 */
 	public function getAllContacts(
-			$params = array()) {
+		array $params = array()): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->reset_resource ()
 			->setMessage404Error ( 'Contacts not found' )
@@ -97,11 +99,12 @@ class contacts extends ci {
 	 * Resource: contacts Method: Post Start a new search and return the search ID (<sid>)
 	 *
 	 * @codeCoverageIgnore
-	 * @param array $params Request Parameters
+	 * @param $liste_donnees
+	 * @return ci|contacts
 	 * @throws Exception
 	 */
 	public function insertSingleContact(
-			$liste_donnees) {
+			$liste_donnees): ci|contacts {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->insertSingleEntry ( $liste_donnees );
 	}
@@ -115,11 +118,10 @@ class contacts extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "contacts :";
 		return $help;
 	}
 }
-?>

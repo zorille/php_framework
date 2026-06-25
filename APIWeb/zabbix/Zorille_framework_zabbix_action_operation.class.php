@@ -194,11 +194,12 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_action_operation
 	 */
-	static function &creer_zabbix_action_operation(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_action_operation(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_action_operation
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_action_operation ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -211,9 +212,9 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_action_operation
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetZabbixWsclient ( $liste_class ["zabbix_wsclient"] )
@@ -233,7 +234,6 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -245,7 +245,8 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @return zabbix_action_operation
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setOperationType ( $this->_valideOption ( array (
 				"zabbix",
@@ -333,8 +334,10 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve les parametres operation_conditions
 	 * @return zabbix_action_operation
+	 * @throws Exception
 	 */
-	public function retrouve_opconditions() {
+	public function retrouve_opconditions(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$opconditions = $this->_valideOption ( array (
 				"zabbix",
@@ -360,8 +363,10 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * Creer un definition de l'action operation sous forme de tableau
 	 * @return array;
+	 * @throws Exception
 	 */
-	public function creer_definition_action_operation_ws() {
+	public function creer_definition_action_operation_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$action_operation = array (
 				"operationtype" => $this->getOperationType (),
@@ -387,7 +392,8 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @return array;
 	 * @throws Exception
 	 */
-	public function creer_definition_action_operation_conditions_ws() {
+	public function creer_definition_action_operation_conditions_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$opconditions = array (
 				"opconditions" => array () 
@@ -401,10 +407,11 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 
 	/**
 	 * Creer un definition de l'action operation command sous forme de tableau
-	 * @return array;
+	 * @return array|bool
 	 * @throws Exception
 	 */
-	public function creer_definition_action_operation_command_ws() {
+	public function creer_definition_action_operation_command_ws(): array|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$opcommand = array (
 				"opcommand" => $this->getObjetOpCommand ()
@@ -429,7 +436,8 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @return array;
 	 * @throws Exception
 	 */
-	public function creer_definition_action_operation_message_ws() {
+	public function creer_definition_action_operation_message_ws(): array|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$opmessage_local = $this->getObjetOpMessage ()
 			->creer_definition_zabbix_operation_message_ws ();
@@ -456,7 +464,8 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @throws Exception
 	 * @return zabbix_action_operation
 	 */
-	public function retrouve_userId() {
+	public function retrouve_userId(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$userids = array ();
 		foreach ( $this->getOpMessageUser () as $user_alias ) {
@@ -466,7 +475,7 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 				->recherche_userid_by_Alias ()
 				->creer_definition_userid_get_ws ();
 			if ($user_local->getUsrId () !== "") {
-				$userids [count ( $userids )] = $userid_desc;
+				$userids[] = $userid_desc;
 			} else {
 				return $this->onError ( "Aucun User avec le nom " . $user_local->getAlias () );
 			}
@@ -480,7 +489,8 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @throws Exception
 	 * @return zabbix_action_operation
 	 */
-	public function retrouve_usrgrpId() {
+	public function retrouve_usrgrpId(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$usergrpids = array ();
 		foreach ( $this->getOpMessageGroup () as $usergrp_nom ) {
@@ -490,7 +500,7 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 				->recherche_userGroupid_by_Name ()
 				->creer_definition_usrgrpid_get_ws ();
 			if ($usergroup_local->getUsrgrpId () !== "") {
-				$usergrpids [count ( $usergrpids )] = $usergrpid_desc;
+				$usergrpids[] = $usergrpid_desc;
 			} else {
 				return $this->onError ( "Aucun UserGroup avec le nom " . $usergroup_local->getName () );
 			}
@@ -511,46 +521,27 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * 8 - enable host;
 	 * 9 - disable host. 
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_OperationType($type) {
+	public function retrouve_OperationType(string $type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "remote command" :
-				return 1;
-				break;
-			case "add host" :
-				return 2;
-				break;
-			case "remove host" :
-				return 3;
-				break;
-			case "add to host group" :
-				return 4;
-				break;
-			case "remove from host group" :
-				return 5;
-				break;
-			case "link to template" :
-				return 6;
-				break;
-			case "unlink from template" :
-				return 7;
-				break;
-			case "enable host" :
-				return 8;
-				break;
-			case "disable host" :
-				return 9;
-				break;
-			case "send message" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"remote command" => 1,
+			"add host" => 2,
+			"remove host" => 3,
+			"add to host group" => 4,
+			"remove from host group" => 5,
+			"link to template" => 6,
+			"unlink from template" => 7,
+			"enable host" => 8,
+			"disable host" => 9,
+			default => 0,
+		};
+
 	}
 
 	/**
@@ -558,39 +549,36 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * 1 - AND;
 	 * 2 - OR.
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_EvalType($type) {
+	public function retrouve_EvalType($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "and" :
-				return 1;
-				break;
-			case "or" :
-				return 2;
-				break;
-			case "and/or" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"and" => 1,
+			"or" => 2,
+			default => 0,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperationId() {
+	public function getOperationId(): string
+	{
 		return $this->operationid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperationId($operationid) {
+	public function &setOperationId($operationid): static
+	{
 		$this->operationid = $operationid;
 		return $this;
 	}
@@ -598,14 +586,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getActionId() {
+	public function getActionId(): string
+	{
 		return $this->actionid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setActionId($actionid) {
+	public function &setActionId($actionid): static
+	{
 		$this->actionid = $actionid;
 		return $this;
 	}
@@ -613,14 +603,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperationType() {
+	public function getOperationType(): string
+	{
 		return $this->operationtype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperationType($operationtype) {
+	public function &setOperationType($operationtype): static
+	{
 		$this->operationtype = $this->retrouve_OperationType ( $operationtype );
 		return $this;
 	}
@@ -628,14 +620,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEscPeriod() {
+	public function getEscPeriod(): string
+	{
 		return $this->esc_period;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setEscPeriod($esc_period) {
+	public function &setEscPeriod($esc_period): static
+	{
 		$this->esc_period = $esc_period;
 		return $this;
 	}
@@ -643,14 +637,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEscStepFrom() {
+	public function getEscStepFrom(): string
+	{
 		return $this->esc_step_from;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setEscStepFrom($esc_step_from) {
+	public function &setEscStepFrom($esc_step_from): static
+	{
 		$this->esc_step_from = $esc_step_from;
 		return $this;
 	}
@@ -658,14 +654,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEscStepTo() {
+	public function getEscStepTo(): string
+	{
 		return $this->esc_step_to;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setEscStepTo($esc_step_to) {
+	public function &setEscStepTo($esc_step_to): static
+	{
 		$this->esc_step_to = $esc_step_to;
 		return $this;
 	}
@@ -673,30 +671,34 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getEvalType() {
+	public function getEvalType(): int
+	{
 		return $this->evaltype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setEvalType($evaltype) {
+	public function &setEvalType($evaltype): static
+	{
 		$this->evaltype = $this->retrouve_EvalType ( $evaltype );
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_action_operation_command
+	 * @return zabbix_action_operation_command|array
 	 */
-	public function &getObjetOpCommand() {
+	public function &getObjetOpCommand(): zabbix_action_operation_command|array
+	{
 		return $this->opcommand;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetOpCommand($opcommand) {
+	public function &setObjetOpCommand($opcommand): static
+	{
 		$this->opcommand = $opcommand;
 		return $this;
 	}
@@ -704,14 +706,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpCommandGrp() {
+	public function getOpCommandGrp(): array
+	{
 		return $this->opcommand_grp;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpCommandGrp($opcommand_grp) {
+	public function &setOpCommandGrp($opcommand_grp): static
+	{
 		if (! is_array ( $opcommand_grp )) {
 			$opcommand_grp = array (
 					$opcommand_grp 
@@ -725,14 +729,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @return zabbix_hostgroup
 	 */
-	public function &getObjetHostGroupRef() {
+	public function &getObjetHostGroupRef(): ?zabbix_hostgroup
+	{
 		return $this->hostgroup_ref;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetHostGroupRef(&$hostgroup) {
+	public function &setObjetHostGroupRef(&$hostgroup): static
+	{
 		$this->hostgroup_ref = $hostgroup;
 		return $this;
 	}
@@ -740,14 +746,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpCommandHst() {
+	public function getOpCommandHst(): array
+	{
 		return $this->opcommand_hst;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpCommandHst($opcommand_hst) {
+	public function &setOpCommandHst($opcommand_hst): static
+	{
 		if (! is_array ( $opcommand_hst )) {
 			$opcommand_hst = array (
 					$opcommand_hst 
@@ -759,32 +767,36 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_host
+	 * @return zabbix_host|null
 	 */
-	public function &getObjetHostRef() {
+	public function &getObjetHostRef(): ?zabbix_host
+	{
 		return $this->host_ref;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetHostRef(&$host) {
+	public function &setObjetHostRef(&$host): static
+	{
 		$this->host_ref = $host;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_action_operation_condition
+	 * @return zabbix_action_operation_condition|null
 	 */
-	public function &getObjetOpConditionRef() {
+	public function &getObjetOpConditionRef(): ?zabbix_action_operation_condition
+	{
 		return $this->opcondition_ref;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetOpConditionRef(&$opcondition_ref) {
+	public function &setObjetOpConditionRef(&$opcondition_ref): static
+	{
 		$this->opcondition_ref = $opcondition_ref;
 		return $this;
 	}
@@ -792,14 +804,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpConditions() {
+	public function getOpConditions(): array
+	{
 		return $this->opconditions;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpConditions($opconditions) {
+	public function &setOpConditions($opconditions): static
+	{
 		$this->opconditions = $opconditions;
 		return $this;
 	}
@@ -807,38 +821,43 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAjoutOpConditions(&$opcondition) {
-		$this->opconditions [count ( $this->opconditions )] = $opcondition;
+	public function &setAjoutOpConditions(&$opcondition): static
+	{
+		$this->opconditions[] = $opcondition;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpGroup() {
+	public function getOpGroup(): array
+	{
 		return $this->opgroup;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpGroup($opgroup) {
+	public function &setOpGroup($opgroup): static
+	{
 		$this->opgroup = $opgroup;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_action_operation_message
+	 * @return zabbix_action_operation_message|null
 	 */
-	public function &getObjetOpMessage() {
+	public function &getObjetOpMessage(): ?zabbix_action_operation_message
+	{
 		return $this->opmessage;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetOpMessage($opmessage) {
+	public function &setObjetOpMessage($opmessage): static
+	{
 		$this->opmessage = $opmessage;
 		return $this;
 	}
@@ -846,14 +865,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpMessageGroup() {
+	public function getOpMessageGroup(): array
+	{
 		return $this->opmessage_grp;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpMessageGroup($opmessage_grp) {
+	public function &setOpMessageGroup($opmessage_grp): static
+	{
 		if (! is_array ( $opmessage_grp )) {
 			$opmessage_grp = array (
 					$opmessage_grp 
@@ -867,14 +888,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @return zabbix_usergroup
 	 */
-	public function &getObjetUserGroupRef() {
+	public function &getObjetUserGroupRef(): ?zabbix_usergroup
+	{
 		return $this->usergroup_ref;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetUserGroupRef(&$usergroup_ref) {
+	public function &setObjetUserGroupRef(&$usergroup_ref): static
+	{
 		$this->usergroup_ref = $usergroup_ref;
 		return $this;
 	}
@@ -882,14 +905,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpMessageUser() {
+	public function getOpMessageUser(): array
+	{
 		return $this->opmessage_usr;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpMessageUser($opmessage_usr) {
+	public function &setOpMessageUser($opmessage_usr): static
+	{
 		if (! is_array ( $opmessage_usr )) {
 			$opmessage_usr = array (
 					$opmessage_usr 
@@ -903,14 +928,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @return zabbix_user
 	 */
-	public function &getObjetUserRef() {
+	public function &getObjetUserRef(): ?zabbix_user
+	{
 		return $this->user_ref;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetUserRef(&$user) {
+	public function &setObjetUserRef(&$user): static
+	{
 		$this->user_ref = $user;
 		return $this;
 	}
@@ -918,14 +945,16 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpTemplate() {
+	public function getOpTemplate(): array
+	{
 		return $this->optemplate;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpTemplate($optemplate) {
+	public function &setOpTemplate($optemplate): static
+	{
 		$this->optemplate = $optemplate;
 		return $this;
 	}
@@ -936,7 +965,7 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -965,9 +994,6 @@ class zabbix_action_operation extends zabbix_fonctions_standard {
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_action_operation_conditions 'type|operator|value' '' liste de conditions (voir le help de zabbix_action_operation_condition )";
 		$help = array_merge ( $help, zabbix_action_operation_command::help () );
 		$help = array_merge ( $help, zabbix_action_operation_condition::help () );
-		$help = array_merge ( $help, zabbix_action_operation_message::help () );
-		
-		return $help;
+		return array_merge ( $help, zabbix_action_operation_message::help () );
 	}
 }
-?>

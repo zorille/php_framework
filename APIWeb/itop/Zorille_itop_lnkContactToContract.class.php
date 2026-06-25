@@ -54,7 +54,7 @@ class lnkContactToContract extends ci {
 	 * @param array $liste_class
 	 * @return lnkContactToContract
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this ->setFormat ( 'lnkContactToContract' ) 
@@ -70,7 +70,6 @@ class lnkContactToContract extends ci {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de serveur_datas
@@ -82,11 +81,12 @@ class lnkContactToContract extends ci {
 			->retrouve_ci ();
 	}
 
-	public function creer_oql($Contract_name='', $Contact_name='',$Contact_email='', $org_name='') {
+	public function creer_oql(array|string $fields=''): static
+	{
 		$where="";
 		$join="";
-		if(!empty($Contract_name)){
-			$where .= " contract_name='" . $Contract_name . "'";
+		if(!empty($fields)){
+			$where .= " contract_name='" . $fields . "'";
 		}
 		if(!empty($Contact_name)||!empty($Contact_email)||!empty($org_name)){
 			$person=$this->getObjetItopContact () ->getFormat ();
@@ -186,7 +186,8 @@ class lnkContactToContract extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

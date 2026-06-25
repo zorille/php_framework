@@ -95,7 +95,7 @@ class CustomizationIPSettings extends Core\abstract_log {
 	 * @return CustomizationIPSettings
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -328,7 +328,7 @@ class CustomizationIPSettings extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

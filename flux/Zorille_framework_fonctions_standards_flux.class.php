@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class fonctions_standards_flux<br>
  * 
@@ -24,11 +26,12 @@ class fonctions_standards_flux extends abstract_log {
 	 * Instancie un objet de type fonctions_standards_flux.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fonctions_standards_flux
 	 */
-	static function &creer_fonctions_standards_flux(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fonctions_standards_flux(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fonctions_standards_flux
+	{
 		$objet = new fonctions_standards_flux ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -42,8 +45,10 @@ class fonctions_standards_flux extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fonctions_standards_flux
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -65,10 +70,13 @@ class fonctions_standards_flux extends abstract_log {
 
 	/**
 	 * Creer un objet ssh_z
-	 * 
-	 * @return ssh_z|false Renvoi un objet SSH_Z, FALSE sinon.
+	 *
+	 * @param $nom_machine_distante
+	 * @param int $nbretry
+	 * @return fonctions_standards|ssh_z|bool Renvoi un objet SSH_Z, FALSE sinon.
 	 */
-	public function creer_connexion_ssh($nom_machine_distante, $nbretry = 3) {
+	public function creer_connexion_ssh($nom_machine_distante, $nbretry = 3): fonctions_standards|ssh_z|bool
+	{
 		//voir help SSH
 		if ($this->getConnexion () !== false && $this->getConnexion () instanceof ssh_z && $this->getConnexion ()
 			->getSshConnexion () !== false) {
@@ -86,9 +94,11 @@ class fonctions_standards_flux extends abstract_log {
 	/**
 	 * Parse les options passees en ligne de commande ou par xml et creer un objet SFTP (sftp_z).<br>
 	 * @codeCoverageIgnore
-	 * @return ssh_z|false Renvoi un objet SFTP_Z, FALSE sinon.
+	 * @param $machine_distante
+	 * @return fonctions_standards|ssh_z|bool Renvoi un objet SFTP_Z, FALSE sinon.
 	 */
-	public function creer_connexion_sftp($machine_distante) {
+	public function creer_connexion_sftp($machine_distante): fonctions_standards|ssh_z|bool
+	{
 		//voir help SSH
 		if ($this->getConnexion () !== false && $this->getConnexion () instanceof sftp_z && $this->getConnexion ()
 			->getSshConnexion () !== false) {
@@ -108,7 +118,8 @@ class fonctions_standards_flux extends abstract_log {
 	 * options &$liste_option
 	 * @return Bool TRUE si OK, FALSE sinon.
 	 */
-	public function verifie_variables_ftp(&$liste_option, $compte = 'compte') {
+	public function verifie_variables_ftp(&$liste_option, $compte = 'compte'): bool
+	{
 		$tableau_retour = false;
 		
 		if ($this->getListeOptions ()
@@ -165,7 +176,8 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param options &$liste_option Pointeur sur les arguments
 	 * @return ftp|false Renvoi un objet FTP, FALSE sinon.
 	 */
-	public function creer_connexion_ftp(&$liste_option, $compte = 'compte', $connect = true, $force = false, $nbretry = 3) {
+	public function creer_connexion_ftp(options &$liste_option, $compte = 'compte', $connect = true, $force = false, $nbretry = 3): ftp|bool
+	{
 		//voir help FTP
 		if ($force === false && $this->getConnexion () !== false && $this->getConnexion () instanceof ftp) {
 			$this->onInfo ( "On utilise la connexion ftp active." );
@@ -219,7 +231,8 @@ class fonctions_standards_flux extends abstract_log {
 	 * options &$liste_option
 	 * @return Bool TRUE si OK, FALSE sinon.
 	 */
-	public function verifie_variables_socket(&$liste_option) {
+	public function verifie_variables_socket(&$liste_option): bool
+	{
 		$tableau_retour = false;
 		
 		if ($this->getListeOptions ()
@@ -256,7 +269,8 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param options &$liste_option Pointeur sur les arguments
 	 * @return socket|false Renvoi un objet socket, FALSE sinon.
 	 */
-	public function creer_connexion_socket_tcp(&$liste_option) {
+	public function creer_connexion_socket_tcp(options &$liste_option): bool|socket
+	{
 		//voir help socket
 		$liste_donnees = $this->verifie_variables_socket ( $liste_option );
 		
@@ -283,7 +297,8 @@ class fonctions_standards_flux extends abstract_log {
 	 * options &$liste_option
 	 * @return Bool TRUE si OK, FALSE sinon.
 	 */
-	public function verifie_variables_rsync(&$liste_option) {
+	public function verifie_variables_rsync(&$liste_option): bool
+	{
 		$retour = false;
 		
 		//if ($this->getListeOptions()->verifie_parametre_standard("rsync[@using='oui']")!==false) {
@@ -318,8 +333,10 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param options $liste_option Pointeur sur un objet options.
 	 * @param string $type_connexion Type de connexion ssh/rsync/ftp.
 	 * @param String $compte user du comte a utiliser (compte par defaut).
+	 * @throws Exception
 	 */
-	public function creer_objet_flux(&$liste_option, $type_connexion, $compte = 'compte') {
+	public function creer_objet_flux(options &$liste_option, string $type_connexion, string $compte = 'compte'): bool
+	{
 		switch ($type_connexion) {
 			case "ssh" :
 				$this->onDebug ( "creer_connexion::protocole : SSH", 1 );
@@ -357,11 +374,12 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param string $source Chemin complet de la source a copier.
 	 * @param string $dest	Chemin complet de la destination local.
 	 * @param string $type_connexion Type de connexion ssh/rsync.
-	 * @param string|false $machine_dest Machine de destination.
-	 * @param string|false $machine_source|false Machine source.
+	 * @param bool|string $machine_dest Machine de destination.
+	 * @param bool|string $machine_source|false Machine source.
 	 * @return true
 	 */
-	public function affiche_resume_debug($protocole, $source, $dest, $type_connexion, $machine_dest = false, $machine_source = false, $compte = 'compte') {
+	public function affiche_resume_debug(string $protocole, string $source, string $dest, string $type_connexion, bool|string $machine_dest = false, bool|string $machine_source = false, $compte = 'compte'): bool
+	{
 		$this->onDebug ( "Type de copie : " . $protocole, 2 );
 		if ($machine_dest) {
 			$this->onDebug ( "Machine_dest : " . $machine_dest, 2 );
@@ -380,11 +398,12 @@ class fonctions_standards_flux extends abstract_log {
 	/**
 	 * recupere la cle privee
 	 *
-	 * @param options $liste_option Pointeur sur un objet options.
-	 * @param bool $rsync commande rsync ou ssh.
+	 * @param bool $ssh
+	 * @param bool $sftp
 	 * @return string private key.
 	 */
-	public function retrouve_privkey($ssh = false, $sftp = false) {
+	public function retrouve_privkey(bool $ssh = false, bool $sftp = false): string
+	{
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( array (
 				"ssh",
@@ -424,15 +443,17 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param options &$liste_option Pointeur sur un objet options.
 	 * @param string $machine_dest Machine de destination.
 	 * @param string $source Chemin complet de la source a copier.
-	 * @param string $dest	Chemin complet de la destination local.
-	 * @param string $type_connexion Type de connexion ssh/rsync.
+	 * @param string $dest Chemin complet de la destination local.
 	 * @param string $compte compte de connexion (compte/compte2).
+	 * @param string $type_connexion Type de connexion ssh/rsync.
+	 * @param string $option_scp
 	 * @param Bool $erreur Affiche les erreurs true/false.
 	 * @param Bool $dest_is_dir Permet de savoir si la destination est un dossier.
-	 * @param ssh_z|ftp $connexion_active connexion ftp/ssh existante
 	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function envoi_donnee_standard(&$liste_option, $machine_dest, $source, $dest, $compte = "compte", $type_connexion = "ssh", $option_scp = "-r", $erreur = true, $dest_is_dir = true) {
+	public function envoi_donnee_standard(options &$liste_option, string $machine_dest, string $source, string $dest, string $compte = "compte", string $type_connexion = "ssh", string $option_scp = "-r", bool $erreur = true, bool $dest_is_dir = true): bool
+	{
 		$this->onDebug ( "fonctions_standards_flux::envoi_donnee_standard", 2 );
 		if ($liste_option->verifie_option_existe ( "netname" ) === false) {
 			$liste_option->setOption ( "netname", "" );
@@ -574,15 +595,17 @@ class fonctions_standards_flux extends abstract_log {
 	 * @param options &$liste_option Pointeur sur un objet options.
 	 * @param string $machine_source Machine source.
 	 * @param string $source Chemin complet de la source a copier.
-	 * @param string $dest	Chemin complet de la destination local.
+	 * @param string $dest Chemin complet de la destination local.
 	 * @param string $compte compte de connexion (compte/compte2).
 	 * @param string $type_connexion Type de connexion ssh/rsync.
+	 * @param string $option_scp
 	 * @param Bool $erreur Affiche les erreurs true/false.
 	 * @param Bool $dest_is_dir Permet de savoir si la destination est un dossier.
-	 * @param ssh_z|ftp $connexion_active connexion ftp/ssh existante
 	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function copie_donnee_standard(&$liste_option, $machine_source, $source, $dest, $compte = "compte", $type_connexion = "ssh", $option_scp = "-r", $erreur = true, $dest_is_dir = true) {
+	public function copie_donnee_standard(options &$liste_option, string $machine_source, string $source, string $dest, string $compte = "compte", string $type_connexion = "ssh", string $option_scp = "-r", bool $erreur = true, bool $dest_is_dir = true): bool
+	{
 		$this->onDebug ( "fonctions_standards_flux::copie_donnee_standard", 2 );
 		
 		if ($liste_option->verifie_option_existe ( "netname" ) === false) {
@@ -598,7 +621,7 @@ class fonctions_standards_flux extends abstract_log {
 				$dossier_dest = dirname ( $dest );
 			else
 				$dossier_dest = $dest;
-			if (repertoire::tester_repertoire_existe ( $dossier_dest ) != true)
+			if (!repertoire::tester_repertoire_existe($dossier_dest))
 				repertoire::creer_nouveau_repertoire ( $dossier_dest );
 			
 			switch ($type_connexion) {
@@ -680,15 +703,17 @@ class fonctions_standards_flux extends abstract_log {
 	 * Necessite une connexion SSH sans mot de passe (cle partagee).
 	 * @codeCoverageIgnore
 	 * @param options &$liste_option Pointeur sur un objet options.
-	 * @param ssh_z &$ssh Connexion ssh active.
 	 * @param string $source Chemin complet de la source a copier.
-	 * @param string $dest	Chemin complet de la destination local.
+	 * @param string $dest Chemin complet de la destination local.
 	 * @param string $machine_source Machine source.
 	 * @param string $type_copie Type de copie envoi/recupere.
 	 * @param Bool $erreur Affiche les erreurs true/false.
+	 * @param string $option_scp
 	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function copie_ssh(&$liste_option, $source, $dest, $machine_source, $type_copie = "recupere", $erreur = true, $option_scp = "-r") {
+	public function copie_ssh(options &$liste_option, string $source, string $dest, string $machine_source, string $type_copie = "recupere", bool $erreur = true, string $option_scp = "-r"): bool
+	{
 		$CODE_RETOUR = false;
 		$this->onInfo ( "(SSH) Copie de type " . $type_copie . " en SCP avec les parametres suivants : Machine " . $machine_source . ", fichier source : " . $source . ", fichier destination : " . $dest );
 		
@@ -719,30 +744,26 @@ class fonctions_standards_flux extends abstract_log {
 	 * Necessite une connexion SSH sans mot de passe (cle partagee).
 	 * @codeCoverageIgnore
 	 * @param options &$liste_option Pointeur sur un objet options.
-	 * @param ssh_z &$ssh Connexion ssh active.
 	 * @param string $source Chemin complet de la source a copier.
-	 * @param string $dest	Chemin complet de la destination local.
+	 * @param string $dest Chemin complet de la destination local.
 	 * @param string $machine_source Machine source.
 	 * @param string $type_copie Type de copie envoi/recupere.
 	 * @param Bool $erreur Affiche les erreurs true/false.
 	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function copie_sftp(&$liste_option, $source, $dest, $machine_source, $type_copie = "recupere", $erreur = true) {
+	public function copie_sftp(options &$liste_option, string $source, string $dest, string $machine_source, string $type_copie = "recupere", bool $erreur = true): bool
+	{
 		$CODE_RETOUR = false;
 		$this->onInfo ( "(SFTP) Copie de type " . $type_copie . " en SFTP avec les parametres suivants : Machine " . $machine_source . ", fichier source : " . $source . ", fichier destination : " . $dest );
-		
-		switch ($type_copie) {
-			case "recupere" :
-				$var_return = $this->getConnexion ()
-					->recupere_fichier ( $source, $dest );
-				break;
-			case "envoi" :
-				$var_return = $this->getConnexion ()
-					->envoi_fichier ( $source, $dest );
-				break;
-			default :
-				$var_return = false;
-		}
+
+		$var_return = match ($type_copie) {
+			"recupere" => $this->getConnexion()
+				->recupere_fichier($source, $dest),
+			"envoi" => $this->getConnexion()
+				->envoi_fichier($source, $dest),
+			default => false,
+		};
 		$this->onDebug ( "(SFTP) Retour de la copie : " . $var_return, 2 );
 		
 		if ($var_return)
@@ -769,13 +790,15 @@ class fonctions_standards_flux extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param options &$liste_option Pointeur sur un objet options.
 	 * @param string $source Chemin complet de la source a copier.
-	 * @param string $dest	Chemin complet de la destination local.
+	 * @param string $dest Chemin complet de la destination local.
 	 * @param string $machine_source Machine source.
 	 * @param string $type_copie Type de copie envoi/recupere.
 	 * @param Bool $erreur Affiche les erreurs true/false.
 	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function copie_rsync(&$liste_option, $source, $dest, $machine_source, $type_copie = "recupere", $erreur = true) {
+	public function copie_rsync(options &$liste_option, string $source, $dest, string $machine_source, string $type_copie = "recupere", bool $erreur = true): bool
+	{
 		$CODE_RETOUR = false;
 		
 		$this->onInfo ( "(RSYNC) Copie de type " . $type_copie . " en RSYNC avec les parametres suivants : Machine " . $machine_source . ", fichier source : " . $source . ", fichier destination : " . $dest );
@@ -815,14 +838,16 @@ class fonctions_standards_flux extends abstract_log {
 	 * Fait un copie FTP.<br>
 	 * @codeCoverageIgnore
 	 * @param options &$liste_option Pointeur sur un objet options.
-	 * @param ftp &$ftp Connexion ftp active.
+	 * @param $machine_source
 	 * @param string $source Chemin complet de la source a copier.
-	 * @param string $dest	Chemin complet de la destination local.
+	 * @param string $dest Chemin complet de la destination local.
 	 * @param string $type_copie Type de copie envoi/recupere.
 	 * @param Bool $erreur Affiche les erreurs true/false.
 	 * @return bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function copie_ftp(&$liste_option, $machine_source, $source, $dest, $type_copie = "recupere", $erreur = true) {
+	public function copie_ftp(options &$liste_option, $machine_source, string $source, string $dest, string $type_copie = "recupere", bool $erreur = true): bool
+	{
 		$CODE_RETOUR = false;
 		$this->onInfo ( "(FTP) Copie de type " . $type_copie . " en FTP avec les parametres suivants : Machine " . $machine_source . ", fichier source : " . $source . ", fichier destination : " . $dest );
 		if ($type_copie == "recupere") {
@@ -854,17 +879,18 @@ class fonctions_standards_flux extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getConnexion() {
+	public function &getConnexion(): fonctions_standards|bool
+	{
 		return $this->connexion;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setConnexion($connexion) {
+	public function &setConnexion($connexion): static
+	{
 		$this->connexion = $connexion;
 		return $this;
 	}
 /***************** ACCESSEURS *********************/
 }
-?>

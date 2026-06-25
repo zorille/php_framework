@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class socket<br>
  * 
@@ -51,16 +53,19 @@ class socket extends abstract_log {
     private $identite;
 
     /*********************** Creation de l'objet *********************/
-    /**
-     * Instancie un objet de type socket.
-     * @codeCoverageIgnore
-     * @param options $liste_option Reference sur un objet options
-     * @param string $nom_socket Nom de la socket.
-     * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
-     * @param string $entete Entete des logs de l'objet
-     * @return socket
-     */
-    static function &creer_socket(&$liste_option, $nom_socket="/tmp/zsocket.sock",$port_socket="",$type_socket="unix",$sort_en_erreur = false, $entete = __CLASS__) {
+	/**
+	 * Instancie un objet de type socket.
+	 * @codeCoverageIgnore
+	 * @param options $liste_option Reference sur un objet options
+	 * @param string $nom_socket Nom de la socket.
+	 * @param string $port_socket
+	 * @param string $type_socket
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param string $entete Entete des logs de l'objet
+	 * @return socket
+	 */
+    static function &creer_socket(options &$liste_option, string $nom_socket="/tmp/zsocket.sock", $port_socket="", $type_socket="unix", bool|string $sort_en_erreur = false, string $entete = __CLASS__): socket
+    {
     	$objet = new socket ( $nom_socket,$port_socket,$type_socket,$sort_en_erreur, $entete );
     	$objet->_initialise ( array (
     			"options" => $liste_option
@@ -68,14 +73,15 @@ class socket extends abstract_log {
     
     	return $objet;
     }
-    
-    /**
-     * Initialisation de l'objet
-     * @codeCoverageIgnore
-     * @param array $liste_class
-     * @return socket
-     */
-    public function &_initialise($liste_class) {
+
+	/**
+	 * Initialisation de l'objet
+	 * @codeCoverageIgnore
+	 * @param array $liste_class
+	 * @return socket
+	 * @throws Exception
+	 */
+    public function &_initialise(array $liste_class): static {
     	parent::_initialise($liste_class);
     	return $this;
     }
@@ -86,9 +92,9 @@ class socket extends abstract_log {
      * Creer l'objet et prepare la valeur du sort_en_erreur.
      * @codeCoverageIgnore
      * @param string $nom_socket Nom de la socket.
-     * @param string $sort_en_erreur Prend les valeurs true/false.
+     * @param bool|string $sort_en_erreur Prend les valeurs true/false.
      */
-    public function __construct($nom_socket="/tmp/zsocket.sock",$port_socket="",$type_socket="unix",$sort_en_erreur=true, $entete = __CLASS__) {
+    public function __construct($nom_socket="/tmp/zsocket.sock", $port_socket="", $type_socket="unix", bool|string $sort_en_erreur=true, $entete = __CLASS__) {
     //Gestion de abstract_log
         parent::__construct( $entete,$sort_en_erreur);
 
@@ -98,12 +104,14 @@ class socket extends abstract_log {
         $this->type_socket=$type_socket;
     }
 
-    /**
-     * Ouvre la socket.<br>
-     * @codeCoverageIgnore
-     * @return Bool Renvoi TRUE si OK, FALSE sinon.
-     */
-    public function init($retry=1,$timeout=30,$retry_time=500000) {
+	/**
+	 * Ouvre la socket.<br>
+	 * @codeCoverageIgnore
+	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
+	 */
+    public function init($retry=1,$timeout=30,$retry_time=500000): bool
+    {
         $errno=61;
         $errstr="";
         $tentative=0;
@@ -129,13 +137,15 @@ class socket extends abstract_log {
 
     }
 
-    /**
-     * Active ou desactive le "No Hang Up" sur la socket.
-     * @codeCoverageIgnore
-     * @param Bool $active TRUE active le NOHANGUP, FALSE le des-active.
-     * @return Bool Renvoi TRUE si OK, FALSE sinon.
-     */
-    public function active_NOHUP($active=true) {
+	/**
+	 * Active ou desactive le "No Hang Up" sur la socket.
+	 * @codeCoverageIgnore
+	 * @param Bool $active TRUE active le NOHANGUP, FALSE le des-active.
+	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
+	 */
+    public function active_NOHUP($active=true): bool
+    {
         if($active) {
             $CODE_RETOUR=stream_set_blocking($this->socket,0);
         } else {
@@ -150,28 +160,27 @@ class socket extends abstract_log {
     }
 
 
-    /**
-     * Active ou desactive le "No Hang Up" sur la socket.
-     * @codeCoverageIgnore
-     * @param Bool $active TRUE active le NOHANGUP, FALSE le des-active.
-     * @return Bool Renvoi TRUE si OK, FALSE sinon.
-     */
-	public function setTimeout($timeout) {
+	/**
+	 * Active ou desactive le "No Hang Up" sur la socket.
+	 * @codeCoverageIgnore
+	 * @param $timeout
+	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 */
+	public function setTimeout($timeout): bool
+	{
         stream_setTimeout($this->socket,$timeout);
 
         return true;
     }
 
-    /**
-     * Active ou desactive le "No Hang Up" sur la socket.
-     * @codeCoverageIgnore
-     * @param Bool $active TRUE active le NOHANGUP, FALSE le des-active.
-     * @return Bool Renvoi TRUE si OK, FALSE sinon.
-     */
-    public function renvoi_infos() {
-        $info = stream_get_meta_data($this->socket);
-
-        return $info;
+	/**
+	 * Active ou desactive le "No Hang Up" sur la socket.
+	 * @codeCoverageIgnore
+	 * @return array Renvoi TRUE si OK, FALSE sinon.
+	 */
+    public function renvoi_infos(): array
+    {
+	    return stream_get_meta_data($this->socket);
     }
 
     /**
@@ -179,13 +188,12 @@ class socket extends abstract_log {
      * @codeCoverageIgnore
      * @return string Donnees lue.
      */
-    public function lire() {
+    public function lire(): string
+    {
         $donnee_recu="";
-        $char="";
         if(is_resource($this->socket)) {
             while (!feof($this->socket)) {
-                $char=fgets($this->socket);
-                $donnee_recu .= $char;
+                $donnee_recu .= fgets($this->socket);
             }
             $donnee_recu=trim($donnee_recu);
         }
@@ -193,12 +201,14 @@ class socket extends abstract_log {
         return $donnee_recu;
     }
 
-    /**
-     * Ecrit des donnees sur la socket.
-     * @codeCoverageIgnore
-     * @param string $message Donnees a ecrire.
-     */
-    public function ecrit($message) {
+	/**
+	 * Ecrit des donnees sur la socket.
+	 * @codeCoverageIgnore
+	 * @param string $message Donnees a ecrire.
+	 * @throws Exception
+	 */
+    public function ecrit(string $message): bool|int
+    {
         $retour=fputs($this->socket,$message."\n");
         if ($retour===false) {
             return $this->onError("Impossible d'ecrire sur la socket.");
@@ -213,18 +223,19 @@ class socket extends abstract_log {
      * Ferme une socket.
      * @codeCoverageIgnore
      */
-    public function close_connexion() {
+    public function close_connexion(): void
+    {
         fclose($this->socket);
         $this->socket=false;
     }
 
-    /**
-     * @static
-     * @codeCoverageIgnore
-     * @param string $echo Affiche le help
-     * @return string Renvoi le help
-     */
-    static function help() {
+	/**
+	 * @static
+	 * @codeCoverageIgnore
+	 * @return array|string Renvoi le help
+	 */
+    static function help(): array|string
+    {
     	$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -232,4 +243,3 @@ class socket extends abstract_log {
 		return $help;
     }
 }
-?>

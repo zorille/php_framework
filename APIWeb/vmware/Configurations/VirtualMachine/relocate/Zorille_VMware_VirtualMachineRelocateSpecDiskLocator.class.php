@@ -73,7 +73,7 @@ class VirtualMachineRelocateSpecDiskLocator extends VirtualMachineCommun {
 	 * @return VirtualMachineRelocateSpecDiskLocator
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;

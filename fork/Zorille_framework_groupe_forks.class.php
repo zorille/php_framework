@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class groupe_fork.<br>
  * @codeCoverageIgnore
@@ -50,11 +52,12 @@ class groupe_forks extends abstract_log
 	 * Instancie un objet de type groupe_forks.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return groupe_forks
 	 */
-	static function &creer_groupe_forks(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_groupe_forks(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): groupe_forks
+	{
 		$objet = new groupe_forks ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -62,14 +65,15 @@ class groupe_forks extends abstract_log
 	
 		return $objet;
 	}
-	
+
 	/**
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return groupe_forks
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise($liste_class);
 		
 		$this->prepare_signaux();
@@ -94,7 +98,8 @@ class groupe_forks extends abstract_log
 	 * Active les signaus de pcntl pour la communication entre processus
 	 * @return groupe_forks
 	 */
-	public function prepare_signaux(){
+	public function prepare_signaux(): static
+	{
 		if($this->getListeOptions()->verifie_option_existe("groupe_forks_gestion_par_signaux",true)!==false
 		&& $this->getListeOptions()->getOption("groupe_forks_gestion_par_signaux")==="non"){
 			$this->setGestionParSignaux(false);
@@ -134,10 +139,10 @@ class groupe_forks extends abstract_log
 	 * var privee
 	 * @access private
 	 *
-	 * @param signaux Signaux systeme.
+	 * @param int $signo Signaux systeme.
 	 * @return true
 	 */
-	static function traitement_retour($signo)
+	static function traitement_retour($signo): bool
 	{
 		switch ($signo) {
 			case SIGCHLD:
@@ -172,7 +177,8 @@ class groupe_forks extends abstract_log
 		return true;
 	}
 
-	static function wait_pid($nohup=false){
+	static function wait_pid($nohup=false): bool|int
+	{
 		if($nohup){
 			abstract_log::onDebug_standard("Wait_pid NOHUP ",1);
 			$pid=pcntl_wait($status,WNOHANG OR WUNTRACED);
@@ -193,8 +199,8 @@ class groupe_forks extends abstract_log
 		}
 	}
 
-	static function clean_pid($pid,$status){
-
+	static function clean_pid($pid,$status): void
+	{
 		$nom_fork=groupe_forks::getPid($pid);
 		if($nom_fork!==false){
 			groupe_forks::setCodeRetour($nom_fork, $status);
@@ -210,7 +216,7 @@ class groupe_forks extends abstract_log
 	 * var privee
 	 * @access private
 	 *
-	 * @param signaux Signaux systeme.
+	 * @param int $signo Signaux systeme.
 	 * @return true
 	 */
 	static function traitement_retour_fils($signo)
@@ -236,7 +242,8 @@ class groupe_forks extends abstract_log
 	/**
 	 * Reset les signaux systeme.
 	 */
-	public function reset_signals(){
+	public function reset_signals(): void
+	{
 		pcntl_signal(SIGINT,  array("groupe_forks","traitement_retour_fils"));
 		pcntl_signal(SIGQUIT,  array("groupe_forks","traitement_retour_fils"));
 		pcntl_signal(SIGTERM,  array("groupe_forks","traitement_retour_fils"));
@@ -248,15 +255,16 @@ class groupe_forks extends abstract_log
 	 *
 	 * @param string $nom_process_fork Nom utilisateur du processus fils.
 	 * @return int Renvoi 0 en cas de fork deja fait, -1 en cas d'erreur, 1 on est dans le pere, 2 on est dans le fils.
+	 * @throws Exception
 	 */
-	public function fork($nom_process_fork)
+	public function fork(string $nom_process_fork): int
 	{
 		if(!in_array($nom_process_fork,groupe_forks::getPids()))
 		{
 			$pid = pcntl_fork();
 			if ($pid == -1) {
-				return $this->onError('Duplication impossible');
 				$CODE_RETOUR=-1;
+				return $this->onError('Duplication impossible');
 			} elseif ($pid) {
 				// le pere
 				groupe_forks::setPids($nom_process_fork, $pid);
@@ -282,7 +290,7 @@ class groupe_forks extends abstract_log
 	 * @param array $arguments Arguments de la commande systeme.
 	 * @return int Renvoi -1 le processus fils existe.
 	 */
-	public function execute_process($nom_process_fork,$commande,$arguments=array())
+	public function execute_process(string $nom_process_fork, string $commande, array $arguments=array()): int
 	{
 		if(!in_array($nom_process_fork,groupe_forks::getPids()))
 		{
@@ -299,7 +307,7 @@ class groupe_forks extends abstract_log
 	 *
 	 * @return array Liste des processus fils en erreur.
 	 */
-	public function renvoi_liste_erreur()
+	public function renvoi_liste_erreur(): array
 	{
 		$liste=array();
 		foreach(groupe_forks::getCodeRetour() as $code_retour=>$nom_process_fork)
@@ -314,9 +322,10 @@ class groupe_forks extends abstract_log
 	/**
 	 * Attend la fin de tous les processus fils (fonction bloquante).
 	 *
-	 * @return int Renvoi le code retour ou -1 si il n'y a pas de processus fils.
+	 * @param int $nb_erreur_max
+	 * @return bool|int Renvoi le code retour ou -1 si il n'y a pas de processus fils.
 	 */
-	public function wait_all_children($nb_erreur_max=100)
+	public function wait_all_children($nb_erreur_max=100): bool|int
 	{
 		while(groupe_forks::nombre_fork_en_cours()>0
 				&& groupe_forks::getNbErreurWait()<$nb_erreur_max){
@@ -343,7 +352,7 @@ class groupe_forks extends abstract_log
 	 *
 	 * @return int|Bool TRUE, FALSE ou -1 si il n'y a pas de processus fils.
 	 */
-	public function wait_one_of_all_children($nb_erreur_max=100)
+	public function wait_one_of_all_children($nb_erreur_max=100): bool|int
 	{
 		if(groupe_forks::nombre_fork_en_cours()>0){
 			$timing=0;
@@ -388,7 +397,7 @@ class groupe_forks extends abstract_log
 	 *
 	 * @return int Renvoi le nombre de processus fils en cours.
 	 */
-	static function nombre_fork_en_cours()
+	static function nombre_fork_en_cours(): int
 	{
 		return count(groupe_forks::getPids());
 	}
@@ -397,7 +406,8 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function getCodeRetour(){
+	static function getCodeRetour(): array
+	{
 		return groupe_forks::$code_retour;
 	}
 	/**
@@ -414,7 +424,8 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function setCodeRetour($nom_process_fork,$code){
+	static function setCodeRetour($nom_process_fork,$code): void
+	{
 		$code_local=pcntl_wexitstatus($code);
 		if($code_local==236){
 			$code_local=0;
@@ -424,7 +435,8 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function removeCodeRetour($nom_process_fork){
+	static function removeCodeRetour($nom_process_fork): void
+	{
 		if(isset(groupe_forks::$code_retour[$nom_process_fork])){
 			unset(groupe_forks::$code_retour[$nom_process_fork]);
 		}
@@ -432,7 +444,8 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function getPids(){
+	static function getPids(): array
+	{
 		return groupe_forks::$pids;
 	}
 	/**
@@ -448,7 +461,8 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function validPids($pid){
+	static function validPids($pid): bool
+	{
 		if(isset(groupe_forks::$pids[$pid])){
 			return true;
 		}
@@ -457,13 +471,15 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function setPids($nom_process_fork,$pid){
+	static function setPids($nom_process_fork,$pid): void
+	{
 		groupe_forks::$pids[$pid]=$nom_process_fork;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function removePids($pid){
+	static function removePids($pid): void
+	{
 		if(isset(groupe_forks::$pids[$pid])){
 			unset(groupe_forks::$pids[$pid]);
 		}
@@ -471,37 +487,43 @@ class groupe_forks extends abstract_log
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function getNbErreurWait(){
+	static function getNbErreurWait(): int|array
+	{
 		return groupe_forks::$nb_erreur_wait;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	static function setNbErreurWait(){
+	static function setNbErreurWait(): void
+	{
 		groupe_forks::$nb_erreur_wait++;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGestionParSignaux(){
+	public function getGestionParSignaux(): bool|array
+	{
 		return $this->gestion_par_signaux;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setGestionParSignaux($gestion_par_signaux){
+	public function setGestionParSignaux($gestion_par_signaux): void
+	{
 		$this->gestion_par_signaux=$gestion_par_signaux;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNoHangUp(){
+	public function getNoHangUp(): bool|array
+	{
 		return $this->nohangup;
 	}
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setNoHangUp($NoHangUp){
+	public function setNoHangUp($NoHangUp): void
+	{
 		$this->nohangup=$NoHangUp;
 	}
 	/***************** ACCESSEURS **********************/
@@ -509,10 +531,9 @@ class groupe_forks extends abstract_log
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help()
+	static function help(): array|string
 	{
 		$help = parent::help ();
 		
@@ -524,4 +545,3 @@ class groupe_forks extends abstract_log
 		return $help;
 	}
 } //Fin de la class
-?>

@@ -119,14 +119,15 @@ class enveloppe extends abstract_log {
 	 * Instancie un objet de type message. Arguments reconnus :<br> --mail_using=oui/non <br> --mail_to=\"xx xx ... xx\" <br> --mail_cc=\"xx xx ... xx\" <br> --mail_bcc=\"xx xx ... xx\" <br> --mail_from=xx <br> --mail_charset=xx <br> --mail_sort_en_erreur=oui/non<br> --no_mail <br> Permet de desactiver l'envoi du mail dans la fonction creer_liste_mail.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return message
+	 * @return enveloppe|message
 	 */
 	static function &creer_enveloppe(
-			&$liste_option,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): enveloppe|message
+	{
 		$objet = new enveloppe ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -139,9 +140,11 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return message
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		$this->prepare_param ();
 		return $this;
@@ -166,8 +169,10 @@ class enveloppe extends abstract_log {
 	/**
 	 * Prepare les parametres recuperes en ligne de commande
 	 * @return enveloppe
+	 * @throws Exception
 	 */
-	public function prepare_param() {
+	public function prepare_param(): static
+	{
 		$this->prepare_to ()
 			->prepare_cc ()
 			->prepare_bcc ()
@@ -189,7 +194,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 * @throws Exception
 	 */
-	public function prepare_to() {
+	public function prepare_to(): static
+	{
 		$liste_mail = array ();
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "mail_to", true ) !== false) {
@@ -226,7 +232,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 * @throws Exception
 	 */
-	public function prepare_cc() {
+	public function prepare_cc(): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "mail_cc", true ) !== false) {
 			$liste_mail = $this->getListeOptions ()
@@ -259,7 +266,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 * @throws Exception
 	 */
-	public function prepare_bcc() {
+	public function prepare_bcc(): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "mail_bcc", true ) !== false) {
 			$liste_mail = explode ( " ", $this->getListeOptions ()
@@ -289,7 +297,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 * @throws Exception
 	 */
-	public function prepare_from() {
+	public function prepare_from(): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "mail_from", true ) !== false) {
 			$mail_from = $this->getListeOptions ()
@@ -314,7 +323,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 * @throws Exception
 	 */
-	public function prepare_charset() {
+	public function prepare_charset(): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "mail_charset", true ) !== false) {
 			$charset = $this->getListeOptions ()
@@ -341,7 +351,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 */
 	public function ecrit_text(
-			$texte) {
+		string $texte): static
+	{
 		$this->setMailCorpText ( $this->getMailCorpText () . $texte );
 		$this->setMailCorpTextFlag ( true );
 		return $this;
@@ -354,7 +365,8 @@ class enveloppe extends abstract_log {
 	 * @return enveloppe
 	 */
 	public function ecrit_html(
-			$texte) {
+		string $texte): static
+	{
 		$this->setMailCorpHtml ( $this->getMailCorpHtml () . $texte );
 		$this->setMailCorpHtmlFlag ( true );
 		return $this;
@@ -365,7 +377,8 @@ class enveloppe extends abstract_log {
 	 *
 	 * @return string Renvoi le sujet du mail.
 	 */
-	public function prepare_sujet() {
+	public function prepare_sujet(): string
+	{
 		if ($this->getMailSujetEncode ())
 			$sujet_local = "=?" . $this->getCharset () . "?B?" . base64_encode ( $this->getSujet () ) . "?=";
 		else
@@ -380,7 +393,8 @@ class enveloppe extends abstract_log {
 	 * @throws Exception
 	 */
 	public function prepare_liste_fichiers_attaches(
-			$liste_fichiers) {
+		array $liste_fichiers): enveloppe|static
+	{
 		if (! empty ( $liste_fichiers )) {
 			if (is_array ( $liste_fichiers )) {
 				return $this->setFichierAttache ( $liste_fichiers )
@@ -398,7 +412,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailTo() {
+	public function getMailTo(): array
+	{
 		return $this->mail_to;
 	}
 
@@ -406,7 +421,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailTo(
-			$mail_to) {
+			$mail_to): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "force_mail", true )) {
 			$this->mail_to = array (
@@ -423,7 +439,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailFrom() {
+	public function getMailFrom(): string
+	{
 		return $this->mail_from;
 	}
 
@@ -431,7 +448,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailFrom(
-			$mail_from) {
+			$mail_from): static
+	{
 		$this->mail_from = $mail_from;
 		return $this;
 	}
@@ -439,7 +457,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailCc() {
+	public function getMailCc(): array
+	{
 		return $this->mail_cc;
 	}
 
@@ -447,7 +466,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailCc(
-			$mail_cc) {
+			$mail_cc): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "force_mail", true )) {
 			$this->mail_cc = array ();
@@ -460,7 +480,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailBcc() {
+	public function getMailBcc(): array
+	{
 		return $this->mail_bcc;
 	}
 
@@ -468,7 +489,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailBcc(
-			$mail_bcc) {
+			$mail_bcc): static
+	{
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "force_mail", true )) {
 			$this->mail_bcc = array ();
@@ -481,7 +503,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function getNoMail() {
+	function getNoMail(): bool
+	{
 		return $this->no_mail;
 	}
 
@@ -489,7 +512,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	function &setNoMail(
-			$no_mail) {
+			$no_mail): static
+	{
 		$this->no_mail = $no_mail;
 		return $this;
 	}
@@ -497,7 +521,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSujet() {
+	public function getSujet(): string
+	{
 		return $this->sujet;
 	}
 
@@ -507,8 +532,9 @@ class enveloppe extends abstract_log {
 	 * @param bool $encode Encode le sujet ou pas.
 	 */
 	public function &setSujet(
-			$sujet,
-			$encode = true) {
+		string $sujet,
+		bool   $encode = true): static
+	{
 		$this->sujet = $sujet;
 		$this->setMailSujetEncode ( $encode );
 		return $this;
@@ -517,7 +543,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailSujetEncode() {
+	public function getMailSujetEncode(): bool
+	{
 		return $this->mail_sujet_encode;
 	}
 
@@ -525,7 +552,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailSujetEncode(
-			$mail_sujet_encode) {
+			$mail_sujet_encode): static
+	{
 		$this->mail_sujet_encode = $mail_sujet_encode;
 		return $this;
 	}
@@ -533,7 +561,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCharset() {
+	public function getCharset(): string
+	{
 		return $this->mail_charset;
 	}
 
@@ -541,7 +570,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCharset(
-			$charset) {
+			$charset): static
+	{
 		$this->mail_charset = $charset;
 		return $this;
 	}
@@ -549,7 +579,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSignature() {
+	public function getSignature(): string
+	{
 		return $this->signature;
 	}
 
@@ -557,7 +588,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSignature(
-			$signature) {
+			$signature): static
+	{
 		$this->signature = $signature;
 		return $this;
 	}
@@ -565,7 +597,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSignatureFlag() {
+	public function getSignatureFlag(): bool
+	{
 		return $this->signature_flag;
 	}
 
@@ -573,7 +606,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSignatureFlag(
-			$signature_flag) {
+			$signature_flag): static
+	{
 		$this->signature_flag = $signature_flag;
 		return $this;
 	}
@@ -581,7 +615,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFichierAttache() {
+	public function getFichierAttache(): array
+	{
 		return $this->fichier_attache;
 	}
 
@@ -589,7 +624,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setFichierAttache(
-			$fichier_attache) {
+			$fichier_attache): static
+	{
 		$this->fichier_attache = $fichier_attache;
 		return $this;
 	}
@@ -597,7 +633,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFichierAttacheFlag() {
+	public function getFichierAttacheFlag(): bool
+	{
 		return $this->fichier_attache_flag;
 	}
 
@@ -605,7 +642,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setFichierAttacheFlag(
-			$fichier_attache_flag) {
+			$fichier_attache_flag): static
+	{
 		$this->fichier_attache_flag = $fichier_attache_flag;
 		return $this;
 	}
@@ -613,7 +651,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailCorpText() {
+	public function getMailCorpText(): string
+	{
 		return $this->mail_corp_text;
 	}
 
@@ -621,7 +660,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailCorpText(
-			$mail_corp_text) {
+			$mail_corp_text): static
+	{
 		$this->mail_corp_text = $mail_corp_text;
 		return $this;
 	}
@@ -629,7 +669,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailCorpTextFlag() {
+	public function getMailCorpTextFlag(): bool
+	{
 		return $this->mail_corp_text_flag;
 	}
 
@@ -637,7 +678,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailCorpTextFlag(
-			$mail_corp_text_flag) {
+			$mail_corp_text_flag): static
+	{
 		$this->mail_corp_text_flag = $mail_corp_text_flag;
 		return $this;
 	}
@@ -645,7 +687,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailCorpHtml() {
+	public function getMailCorpHtml(): string
+	{
 		return $this->mail_corp_html;
 	}
 
@@ -653,7 +696,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailCorpHtml(
-			$mail_corp_html) {
+			$mail_corp_html): static
+	{
 		$this->mail_corp_html = $mail_corp_html;
 		return $this;
 	}
@@ -661,7 +705,8 @@ class enveloppe extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMailCorpHtmlFlag() {
+	public function getMailCorpHtmlFlag(): bool
+	{
 		return $this->mail_corp_html_flag;
 	}
 
@@ -669,7 +714,8 @@ class enveloppe extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMailCorpHtmlFlag(
-			$mail_corp_html_flag) {
+			$mail_corp_html_flag): static
+	{
 		$this->mail_corp_html_flag = $mail_corp_html_flag;
 		return $this;
 	}
@@ -680,10 +726,10 @@ class enveloppe extends abstract_log {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Gestion des enveloppes mails";
@@ -706,4 +752,4 @@ class enveloppe extends abstract_log {
 		return true;
 	}
 }
-?>
+

@@ -43,7 +43,7 @@ class zabbix_fonctions_standard extends abstract_log {
 	 * @param array $liste_class
 	 * @return abstract_log
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if(isset($liste_class ["zabbix_wsclient"])) {
@@ -73,7 +73,7 @@ class zabbix_fonctions_standard extends abstract_log {
 	 * @return boolean string array
 	 * @throws Exception
 	 */
-	public function _valideOption($chemin_option, $valeur_par_defaut = null) {
+	public function _valideOption($chemin_option, $valeur_par_defaut = null): mixed {
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_variable_standard ( $chemin_option ) === false && $valeur_par_defaut === null) {
@@ -115,7 +115,8 @@ class zabbix_fonctions_standard extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

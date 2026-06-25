@@ -75,7 +75,7 @@ class socket_serveur extends abstract_log {
 	 * @param array $liste_class
 	 * @return socket_serveur
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -270,7 +270,8 @@ class socket_serveur extends abstract_log {
 	 * @param string $echo Affiche le help
 	 * @return string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

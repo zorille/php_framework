@@ -4,6 +4,8 @@
  * @author dvargas
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class cacti_datas
  *
@@ -31,11 +33,14 @@ class cacti_datas extends serveur_datas {
 	 * Instancie un objet de type cacti_datas.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return cacti_datas
 	 */
-	static function &creer_cacti_datas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_cacti_datas(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): cacti_datas {
 		$objet = new cacti_datas ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -50,7 +55,7 @@ class cacti_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return cacti_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_cacti_param ();
@@ -64,7 +69,6 @@ class cacti_datas extends serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de abstract_log
@@ -73,10 +77,9 @@ class cacti_datas extends serveur_datas {
 	}
 
 	/**
-	 *
 	 * @return cacti_datas|boolean cacti_datas si OK, False sinon.
 	 */
-	public function retrouve_cacti_param() {
+	public function retrouve_cacti_param(): bool|cacti_datas {
 		$donnee_cacti = $this->_valideOption ( array (
 				"cacti_machines",
 				"serveur" 
@@ -108,7 +111,7 @@ class cacti_datas extends serveur_datas {
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
 	 */
-	public function valide_presence_cacti_data($nom) {
+	public function valide_presence_cacti_data(string $nom): array {
 		return $this->valide_presence_serveur_data ( $nom );
 	}
 
@@ -118,7 +121,7 @@ class cacti_datas extends serveur_datas {
 	 * @param string $ci_name Nom du CI
 	 * @return string
 	 */
-	public function prepare_nom_ci_version_cacti($code_client, $ci_name) {
+	public function prepare_nom_ci_version_cacti(string $code_client, string $ci_name): string {
 		return $code_client . "/" . $ci_name;
 	}
 
@@ -126,12 +129,14 @@ class cacti_datas extends serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIncludesDatas() {
+	public function getIncludesDatas(): bool|array
+	{
 		return $this->includes_data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
+	 * @throws Exception
 	 */
 	public function getIncludesData($nom_client) {
 		if (! isset ( $this->includes_data [$nom_client] )) {
@@ -144,7 +149,8 @@ class cacti_datas extends serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setIncludesData($includes_data) {
+	public function setIncludesData($includes_data): static
+	{
 		if (is_array ( $includes_data )) {
 			$this->includes_data = $includes_data;
 		}
@@ -154,12 +160,14 @@ class cacti_datas extends serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPathDatas() {
+	public function getPathDatas(): array|string
+	{
 		return $this->path_data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
+	 * @throws Exception
 	 */
 	public function getPathData($nom_client) {
 		if (! isset ( $this->path_data [$nom_client] )) {
@@ -172,7 +180,8 @@ class cacti_datas extends serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setPathData($path_data) {
+	public function setPathData($path_data): static
+	{
 		if (is_array ( $path_data )) {
 			$this->path_data = $path_data;
 		}
@@ -189,7 +198,8 @@ class cacti_datas extends serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function setPath($path) {
+	public function setPath($path): static
+	{
 		$this->path = $path;
 		return $this;
 	}
@@ -200,20 +210,11 @@ class cacti_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
 		
 		return $help;
 	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @codeCoverageIgnore
-	 * @see lib/fork/message#__destruct()
-	 */
-	public function __destruct() {
-	}
 }
-?>

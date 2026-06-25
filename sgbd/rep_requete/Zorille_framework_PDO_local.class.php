@@ -3,6 +3,7 @@
  * @author dvargas
  */
 namespace Zorille\framework;
+use Exception;
 use \PDO as PDO;
 use \PDOException as PDOException;
 /**
@@ -23,11 +24,12 @@ class PDO_local extends abstract_log {
 	 * Instancie un objet de type PDO_local.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return PDO_local
 	 */
-	static function &creer_PDO_local(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_PDO_local(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): PDO_local
+	{
 		$objet = new PDO_local ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -41,8 +43,9 @@ class PDO_local extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return PDO_local
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -72,7 +75,8 @@ class PDO_local extends abstract_log {
 	 * @return PDO_local
 	 * @throws PDOException
 	 */
-	public function connexion($dsn, $username = "", $password = "", $options) {
+	public function connexion(string $dsn, $username = "", $password = "", array $options): static
+	{
 		$this->onDebug ( "connexion", 1 );
 		
 		if ($username == "") {
@@ -94,19 +98,20 @@ class PDO_local extends abstract_log {
 	/************** Accesseur ****************/
 	/**
 	 * @codeCoverageIgnore
-	 * @return PDO
+	 * @return PDO|null
 	 */
-	public function &getPDOConnexion() {
+	public function &getPDOConnexion(): ?PDO
+	{
 		return $this->PDO_local;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPDOConnexion($PDO_local) {
+	public function &setPDOConnexion($PDO_local): static
+	{
 		$this->PDO_local = $PDO_local;
 		return $this;
 	}
 /************** Accesseur ****************/
 }
-?>

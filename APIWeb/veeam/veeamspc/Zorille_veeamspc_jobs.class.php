@@ -6,35 +6,37 @@
  */
 namespace Zorille\veeamspc;
 
+use SimpleXMLElement;
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 
 /**
- * class organizations
+ * class jobs
  *
  * @package Lib
  * @subpackage veeamspc
  */
-class organizations extends ci {
+class jobs extends backupServers {
 	/**
 	 * var privee
 	 *
 	 * @access private
 	 * @var string
 	 */
-	private $organization_id = null;
+	private $job_id = null;
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
-	private $liste_organizations = null;
+	private $liste_jobs = null;
 	/**
 	 * var privee
 	 *
 	 * @access private
-	 * @var \SimpleXMLElement
+	 * @var SimpleXMLElement
 	 */
 	private $liste_includes = null;
 
@@ -42,20 +44,21 @@ class organizations extends ci {
 	 * ********************* Creation de l'objet ********************
 	 */
 	/**
-	 * Instanorganizationse un objet de type organizations. @codeCoverageIgnore
+	 * Instanjobse un objet de type jobs. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return organizations
+	 * @return jobs
 	 */
-	static function &creer_veeamspc_organizations(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+	static function &creer_veeamspc_jobs(
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): jobs
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
-		$objet = new organizations ( $sort_en_erreur, $entete );
+		$objet = new jobs ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
 				"wsclient" => $webservice_rest
@@ -66,10 +69,10 @@ class organizations extends ci {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return organizations
+	 * @return jobs
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -79,59 +82,63 @@ class organizations extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
-		// Gestion de organizations
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
+		// Gestion de jobs
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
-	 * Recupere l'id du organization, l'ajoute à l'objet et renvoi l'Id
-	 * @return string
+	 * Recupere l'id du job, l'ajoute à l'objet et renvoi l'Id
+	 * @param $job
+	 * @return string|null
 	 * @throws Exception
 	 */
-	public function recupere_id_de_organization(
-			$organization) {
-		$this->setOrganizationId ( $this->recupere_instanceUid ( $organization ) );
-		return $this->getOrganizationId ();
+	public function recupere_id_de_job(
+			$job): ?string
+	{
+		$this->setJobId ( $this->recupere_instanceUid ( $job ) );
+		return $this->getJobId ();
 	}
 
 	/**
-	 * Recupere le nom du organization
+	 * Recupere le nom du job
+	 * @param $job
 	 * @return string
-	 * @throws Exception
 	 */
-	public function recupere_nom_du_organization(
-			$organization) {
-		return ( string ) $organization->name;
+	public function recupere_nom_du_job(
+			$job): string
+	{
+		return ( string ) $job->name;
 	}
 
 	/**
-	 * Permet de trouver la liste des organizations dans veeamspc et enregistre les donnees des organizations dans l'objet
-	 * @return organizations
+	 * Permet de trouver la liste des jobs dans veeamspc et enregistre les donnees des jobs dans l'objet
+	 * @param array $params
+	 * @return jobs
 	 * @throws Exception
 	 */
-	public function retrouve_organizations(
-			$params = array ()) {
+	public function retrouve_jobs(
+			$params = array ()): jobs
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$organizations = array ();
+		$jobs = array ();
 		while ( ! $this->getObjetVeeamWsclientRest ()
 			->getDernierePage () ) {
-			$liste_res_tenants = $this->listOrganizations ( $params );
+			$liste_res_tenants = $this->listJobs ( $params );
 			$this->onDebug ( $liste_res_tenants, 2 );
 			foreach ( $liste_res_tenants->data as $tenant ) {
-				$organizations [$this->recupere_id_de_organization ( $tenant )] = $tenant;
+				$jobs [$this->recupere_id_de_job ( $tenant )] = $tenant;
 			}
 		}
 		$this->getObjetVeeamWsclientRest ()
 			->reset_pages ();
-		return $this->setOrganizationId ( "" )
-			->setListeOrganizations ( $organizations );
+		return $this->setJobId ( "" )
+			->setListeJobs ( $jobs );
 	}
 
 	/**
@@ -141,43 +148,53 @@ class organizations extends ci {
 	 * @param array $params Request Parameters
 	 * @throws Exception
 	 */
-	public function listOrganizations(
-			$params = array ()) {
+	public function listJobs(
+		array $params = array ()): SimpleXMLElement|bool|array|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getObjetVeeamWsclientRest ()
-			->getMethod ( $this->organizations_list_uri (), $params );
-		return $resultat;
+		return $this->getObjetVeeamWsclientRest ()
+			->getMethod ( $this->jobs_list_uri (), $params );
 	}
 
 	/**
 	 * ******************************* ORGANIZATION URI ******************************
 	 */
 	/**
-	 * Verifie qu'un organization id est rempli/existe
+	 * Verifie qu'un job id est rempli/existe
+	 * @param bool $error
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_organizationid(
-			$error = true) {
-		if (empty ( $this->getOrganizationId () )) {
-			$this->onDebug ( $this->getOrganizationId (), 2 );
+	public function valide_jobid(
+		bool $error = true): bool
+	{
+		if (empty ( $this->getJobId () )) {
+			$this->onDebug ( $this->getJobId (), 2 );
 			if ($error) {
-				$this->onError ( "Il faut un organization id renvoye par VeeamSPC pour travailler" );
+				$this->onError ( "Il faut un job id renvoye par VeeamSPC pour travailler" );
 			}
 			return false;
 		}
 		return true;
 	}
 
-	public function organizations_list_uri() {
-		return '/organizations';
+	/**
+	 * @throws Exception
+	 */
+	public function jobs_list_uri(): string
+	{
+		return $this->backupServers_list_uri().'/jobs';
 	}
 
-	public function organization_id_uri() {
-		if ($this->valide_organizationid () == false) {
-			return $this->onError ( "Il n'y pas d'id d'organization selectionne" );
+	/**
+	 * @throws Exception
+	 */
+	public function job_id_uri(): bool|string
+	{
+		if (!$this->valide_jobid()) {
+			return $this->onError ( "Il n'y pas d'id d'job selectionne" );
 		}
-		return $this->organizations_list_uri () . '/' . $this->getOrganizationId ();
+		return $this->jobs_list_uri () . '/' . $this->getJobId ();
 	}
 
 	/**
@@ -186,32 +203,36 @@ class organizations extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOrganizationId() {
-		return $this->organization_id;
+	public function getJobId(): ?string
+	{
+		return $this->job_id;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOrganizationId(
-			$organization_id) {
-		$this->organization_id = $organization_id;
+	public function &setJobId(
+			$job_id): static
+	{
+		$this->job_id = $job_id;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeOrganizations() {
-		return $this->liste_organizations;
+	public function getListeJobs(): ?SimpleXMLElement
+	{
+		return $this->liste_jobs;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeOrganizations(
-			$liste_organizations) {
-		$this->liste_organizations = $liste_organizations;
+	public function &setListeJobs(
+			$liste_jobs): static
+	{
+		$this->liste_jobs = $liste_jobs;
 		return $this;
 	}
 
@@ -221,11 +242,10 @@ class organizations extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "organizations :";
+		$help [__CLASS__] ["text"] [] .= "jobs :";
 		return $help;
 	}
 }
-?>

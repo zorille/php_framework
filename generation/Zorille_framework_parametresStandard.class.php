@@ -99,7 +99,7 @@ class parametresStandard extends CommandLine {
 	 * @param array $liste_class
 	 * @return parametresStandard
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -149,9 +149,10 @@ class parametresStandard extends CommandLine {
 		if ($date != "") {
 			$this->date = $date;
 		} else {
-			return $this->onError ( "La date est obligatoire." );
+			$r = $this->onError ( "La date est obligatoire." );
+			return $r;
 		}
-		return $this;;
+		return $this;
 	}
 
 	/**
@@ -302,7 +303,8 @@ class parametresStandard extends CommandLine {
 	 * @param string $echo Affiche le help
 	 * @return string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

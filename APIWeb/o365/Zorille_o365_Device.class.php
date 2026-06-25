@@ -38,15 +38,16 @@ class Device extends Item {
 	 * Instancie un objet de type Device. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice Reference sur un objet webservice
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Device
 	 */
 	static function &creer_Device(
-			&$liste_option,
-			&$webservice,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Device
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Device ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -62,7 +63,7 @@ class Device extends Item {
 	 * @return Device
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetO365Wsclient ( $liste_class ['wsclient'] );
 	}
@@ -74,7 +75,6 @@ class Device extends Item {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -90,9 +90,11 @@ class Device extends Item {
 	 * Retrouve l'ID d'un utilisateur dans le champ displayname
 	 * @param string $nom
 	 * @return $this|false
+	 * @throws Exception
 	 */
 	public function retrouve_deviceid_par_nom(
-			$nom) {
+		string $nom): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->list_devices ();
 		foreach ( $this->getListeDevice () as $personne ) {
@@ -109,7 +111,8 @@ class Device extends Item {
 	 * @return boolean
 	 * @throws Exception
 	 */
-	public function valide_deviceid() {
+	public function valide_deviceid(): bool
+	{
 		if (empty ( $this->getDeviceId () )) {
 			$this->onDebug ( $this->getDeviceId (), 2 );
 			$this->onError ( "Il faut un device id renvoye par O365 pour travailler" );
@@ -121,12 +124,17 @@ class Device extends Item {
 	/**
 	 * ******************************* DRIVE URI ******************************
 	 */
-	public function devices_list_uri() {
+	public function devices_list_uri(): string
+	{
 		return '/devices';
 	}
 
-	public function device_id_uri() {
-		if ($this->valide_deviceid () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function device_id_uri(): bool|string
+	{
+		if (!$this->valide_deviceid()) {
 			return $this->onError ( "Il n'y pas d'user-id selectionne" );
 		}
 		return '/devices/' . $this->getDeviceId ();
@@ -137,10 +145,12 @@ class Device extends Item {
 	/**
 	 * Recuperer la liste des devicees O365
 	 * @param array $params
-	 * @return \Zorille\o365\Device|false
+	 * @return Device|false
+	 * @throws Exception
 	 */
 	public function list_devices(
-			$params = array ()) {
+		array $params = array ()): Device|bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_devices_o365 = $this->getObjetO365Wsclient ()
 			->getMethod ( $this->devices_list_uri (), $params );
@@ -150,15 +160,17 @@ class Device extends Item {
 		}
 		return $this->onError ( "Pas de liste devicees", $liste_devices_o365, 1 );
 	}
-	
+
 	/**
 	 * Recuperer les membres d'un devicee O365. Utilise le getDeviceId pour le selectionner le devicee.
-	 * 
+	 *
 	 * @param array $params
-	 * @return \Zorille\o365\Device|false
+	 * @return Device|false
+	 * @throws Exception
 	 */
 	public function list_members_device(
-			$params = array ()) {
+		array $params = array ()): Device|bool
+	{
 				$this->onDebug ( __METHOD__, 1 );
 				$liste_devices_o365 = $this->getObjetO365Wsclient ()
 				->getMethod ( $this->device_id_uri ()."/members", $params );
@@ -174,7 +186,8 @@ class Device extends Item {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDeviceId() {
+	public function getDeviceId(): ?string
+	{
 		return $this->device_id;
 	}
 
@@ -182,7 +195,8 @@ class Device extends Item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setDeviceId(
-			&$device_id) {
+			&$device_id): static
+	{
 		$this->device_id = $device_id;
 		return $this;
 	}
@@ -190,7 +204,8 @@ class Device extends Item {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeDevice() {
+	public function getListeDevice(): array
+	{
 		return $this->liste_device;
 	}
 
@@ -198,7 +213,8 @@ class Device extends Item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeDevice(
-			&$liste_device) {
+			&$liste_device): static
+	{
 		$this->liste_device = $liste_device;
 		return $this;
 	}
@@ -209,11 +225,10 @@ class Device extends Item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Device :";
 		return $help;
 	}
 }
-?>

@@ -70,14 +70,15 @@ class utilisateurs extends abstract_log {
 	 * Instancie un objet de type utilisateurs.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return utilisateurs
 	 */
 	static function &creer_utilisateurs(
-			&$liste_option, 
-			$sort_en_erreur = false, 
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): utilisateurs
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new utilisateurs ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -92,9 +93,10 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return utilisateurs
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_utilisateurs_param ();
@@ -106,13 +108,12 @@ class utilisateurs extends abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false, 
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -124,7 +125,8 @@ class utilisateurs extends abstract_log {
 	 * @return utilisateurs
 	 * @throws Exception
 	 */
-	public function retrouve_utilisateurs_param() {
+	public function retrouve_utilisateurs_param(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		if ($this->getListeOptions ()
@@ -150,7 +152,8 @@ class utilisateurs extends abstract_log {
 	 * Prepare le code de cryptage
 	 * @return utilisateurs
 	 */
-	public function prepare_cryptage() {
+	public function prepare_cryptage(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setIvSize(openssl_cipher_iv_length(self::METHOD))
 		->setCleCryptage(pack ( 'H*', "bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3" ))
@@ -160,7 +163,8 @@ class utilisateurs extends abstract_log {
 	}
 
 	public function retrouve_utilisateur_centralise(
-			$utilisateur) {
+			$utilisateur): bool|static
+	{
 		$liste_utilisateurs = $this->getListeUtilisateurs ();
 		if (isset ( $liste_utilisateurs [$utilisateur] )) {
 			$this->retrouve_utilisateurs_array ( $liste_utilisateurs [$utilisateur] );
@@ -173,9 +177,11 @@ class utilisateurs extends abstract_log {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return utilisateurs
+	 * @return bool|utilisateurs
+	 * @throws Exception
 	 */
-	public function retrouve_utilisateurs_cli() {
+	public function retrouve_utilisateurs_cli(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$username = array (
 				$this->getCliEntete (),
@@ -220,14 +226,12 @@ class utilisateurs extends abstract_log {
 	/**
 	 * Retrouve les parametres dans un tableau
 	 * username, crypt_password or password
-	 * @param array $datas
-	 * @param array $datas ["username"]
-	 * @param array $datas ["crypt_password"]
 	 * @param array $datas ["password"]
 	 * @return utilisateurs
 	 */
 	public function retrouve_utilisateurs_array(
-			$datas) {
+		array $datas): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( $datas, 1 );
 		if (isset ( $datas ["utilisateur"] )) {
@@ -252,7 +256,8 @@ class utilisateurs extends abstract_log {
 	 * @return string
 	 */
 	function encrypt(
-			$pure_string) {
+		string $pure_string): string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$encrypted_string = openssl_encrypt($pure_string,self::METHOD, $this->getCleCryptage (), OPENSSL_RAW_DATA, $this->getIv ());
 		return base64_encode ( $this->getIv () . $encrypted_string );
@@ -264,7 +269,8 @@ class utilisateurs extends abstract_log {
 	 * @return string
 	 */
 	function decrypt(
-			$encrypted_string) {
+		string $encrypted_string): string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$ciphertext_dec = base64_decode ( $encrypted_string );
 		$iv_dec = substr ( $ciphertext_dec, 0, $this->getIvSize () );
@@ -277,7 +283,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCliEntete() {
+	public function getCliEntete(): string
+	{
 		return $this->cli_entete;
 	}
 
@@ -285,7 +292,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCliEntete(
-			$cli_entete) {
+			$cli_entete): static
+	{
 		$this->cli_entete = $cli_entete;
 		return $this;
 	}
@@ -293,7 +301,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeUtilisateurs() {
+	public function getListeUtilisateurs(): array
+	{
 		return $this->liste_utilisateurs;
 	}
 
@@ -301,7 +310,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeUtilisateurs(
-			$liste_utilisateurs) {
+			$liste_utilisateurs): static
+	{
 		$this->liste_utilisateurs = $liste_utilisateurs;
 		return $this;
 	}
@@ -309,7 +319,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCleCryptage() {
+	public function getCleCryptage(): string
+	{
 		return $this->cle_cryt;
 	}
 
@@ -317,7 +328,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCleCryptage(
-			$cle_cryt) {
+			$cle_cryt): static
+	{
 		$this->cle_cryt = $cle_cryt;
 		return $this;
 	}
@@ -325,7 +337,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIv() {
+	public function getIv(): string
+	{
 		return $this->iv;
 	}
 
@@ -333,7 +346,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setIv(
-			$iv) {
+			$iv): static
+	{
 		$this->iv = $iv;
 		return $this;
 	}
@@ -341,7 +355,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIvSize() {
+	public function getIvSize(): string
+	{
 		return $this->iv_size;
 	}
 
@@ -349,7 +364,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setIvSize(
-			$iv_size) {
+			$iv_size): static
+	{
 		$this->iv_size = $iv_size;
 		return $this;
 	}
@@ -357,7 +373,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->username;
 	}
 
@@ -365,7 +382,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUsername(
-			$username) {
+			$username): static
+	{
 		$this->username = $username;
 		return $this;
 	}
@@ -373,7 +391,8 @@ class utilisateurs extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword() {
+	public function getPassword(): string
+	{
 		return $this->password;
 	}
 
@@ -381,7 +400,8 @@ class utilisateurs extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setPassword(
-			$password) {
+			$password): static
+	{
 		$this->password = $password;
 		return $this;
 	}
@@ -392,7 +412,8 @@ class utilisateurs extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -404,4 +425,4 @@ class utilisateurs extends abstract_log {
 		return $help;
 	}
 }
-?>
+

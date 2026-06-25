@@ -64,15 +64,15 @@ class splunk_wsclient extends wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return splunk_wsclient
+	 * @return self|bool
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["splunk_datas"] )) {
-			$this ->onError ( "il faut un objet de type splunk_datas" );
-			return false;
+			$r = $this ->onError ( "il faut un objet de type splunk_datas" );
+			return $r;
 		}
 		$this ->setObjetsplunkDatas ( $liste_class ["splunk_datas"] );
 		return $this;
@@ -85,7 +85,6 @@ class splunk_wsclient extends wsclient {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de wsclient
@@ -131,9 +130,10 @@ class splunk_wsclient extends wsclient {
 	/**
 	 * Http Splunk header creator
 	 *
-	 * @return  string Http Header
+	 * @return splunk_wsclient|array Http Header
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		
 		if ( $this ->getAuth () ) {
@@ -165,10 +165,10 @@ class splunk_wsclient extends wsclient {
 	/**
 	 * Convert return data to array
 	 *
-	 * @return array
-	 * @throws Exception
+	 * @param $retour_wsclient
+	 * @return bool|SimpleXMLElement
 	 */
-	public function prepare_retour($retour_wsclient) {
+	public function prepare_retour($retour_wsclient): bool|SimpleXMLElement {
 		$this ->onDebug ( __METHOD__, 1 );
 		
 		return simplexml_load_string ( $retour_wsclient );
@@ -323,10 +323,11 @@ class splunk_wsclient extends wsclient {
 	 * Autentification
 	 * 
 	 * @codeCoverageIgnore
-	 * @param   array $params				Request Parameters
+	 * @param array $params				Request Parameters
 	 * @throws  Exception
 	 */
-	final public function userLogin($params = array()) {
+	final public function userLogin(array $params = array()): bool|static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$resultat = $this ->postMethod ( 'services/auth/login', $params );
 		
@@ -460,7 +461,7 @@ class splunk_wsclient extends wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -30,15 +31,16 @@ class Middleware extends FunctionalCI {
 	 * Instancie un objet de type Middleware. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Middleware
 	 */
 	static function &creer_Middleware(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): Middleware
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Middleware ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -54,7 +56,7 @@ class Middleware extends FunctionalCI {
 	 * @return Middleware
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Middleware' )
 			->champ_obligatoire_standard ()
@@ -69,7 +71,6 @@ class Middleware extends FunctionalCI {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -80,9 +81,10 @@ class Middleware extends FunctionalCI {
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return Middleware
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): Middleware
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -94,9 +96,13 @@ class Middleware extends FunctionalCI {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Middleware(
 			$name,
-			$server_name) {
+			$server_name): ci|Middleware|bool
+	{
 		return $this->creer_oql ( array (
 				'friendlyname' => $name,
 				'server_name' => $server_name
@@ -110,7 +116,8 @@ class Middleware extends FunctionalCI {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_Middleware(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = $this->prepare_standard_params ( $parametres );
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
@@ -156,7 +163,8 @@ class Middleware extends FunctionalCI {
 	 * @return Middleware
 	 */
 	public function creer_oql_Middleware(
-			$fields = array ()) {
+		array $fields = array ()): Middleware
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -178,10 +186,13 @@ class Middleware extends FunctionalCI {
 
 	/**
 	 * Champs standards : name, org_name, status, business_criticity, path, move2production, system_name, software_name, software_vendor, software_version
+	 * @param $parametres
 	 * @return Middleware
+	 * @throws Exception
 	 */
 	public function gestion_Middleware(
-			$parametres) {
+			$parametres): Middleware
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Middleware ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -195,9 +206,10 @@ class Middleware extends FunctionalCI {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return Software
+	 * @return Software|null
 	 */
-	public function &getObjetItopSoftware() {
+	public function &getObjetItopSoftware(): ?Software
+	{
 		return $this->Software;
 	}
 
@@ -205,7 +217,8 @@ class Middleware extends FunctionalCI {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopSoftware(
-			&$Software) {
+			&$Software): static
+	{
 		$this->Software = $Software;
 		return $this;
 	}
@@ -216,11 +229,10 @@ class Middleware extends FunctionalCI {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Middleware :";
 		return $help;
 	}
 }
-?>

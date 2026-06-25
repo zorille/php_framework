@@ -5,6 +5,7 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
 use Zorille\framework\relation_fichier_machine as relation_fichier_machine;
 /**
  * class copie_donnees<br>
@@ -44,12 +45,13 @@ class copie_donnees extends abstract_log {
 	 * Instancie un objet de type copie_donnees.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param ssh_z|ftp $connexion connexion ftp/ssh existante.
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param bool|ftp|ssh_z $connexion connexion ftp/ssh existante.
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return copie_donnees
 	 */
-	static function &creer_copie_donnees(&$liste_option, $connexion = false, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_copie_donnees(options &$liste_option, ftp|ssh_z|bool $connexion = false, bool|string $sort_en_erreur = false, string $entete = __CLASS__): copie_donnees
+	{
 		$objet = new copie_donnees ( $connexion, $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -63,8 +65,10 @@ class copie_donnees extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return copie_donnees
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		
 		$fctsStandards = fonctions_standards::creer_fonctions_standards ( $liste_class ["options"] );
@@ -73,16 +77,15 @@ class copie_donnees extends abstract_log {
 	}
 
 	/*********************** Creation de l'objet *********************/
-	
+
 	/**
 	 * Constructeur.
 	 *
-	 * @param options $liste_options Pointeur sur les arguments.
-	 * @param ssh_z|ftp $connexion connexion ftp/ssh existante.
+	 * @param bool $connexion connexion ftp/ssh existante.
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
+	 * @param string $entete
 	 */
-	public function __construct($connexion = false, $sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct($connexion = false, $sort_en_erreur = false, string $entete = __CLASS__) {
 		$this->connexion = $connexion;
 		
 		//Gestion de abstract_log
@@ -94,9 +97,10 @@ class copie_donnees extends abstract_log {
 	/**
 	 * Retrouve le chemin complet des commandes shells necessaire au traitement.
 	 *
-	 * @return TRUE
+	 * @return bool
+	 * @throws Exception
 	 */
-	private function _commandesShellCopieDonnees() {
+	private function _commandesShellCopieDonnees(): bool {
 		//traitement des commandes
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( array (
@@ -190,7 +194,7 @@ class copie_donnees extends abstract_log {
 		$this->onDebug ( "Liste des commandes shells : ", 2 );
 		$this->onDebug ( $this->getListeOptions ()
 			->getOption ( "commande" ), 2 );
-		
+
 		return true;
 	}
 
@@ -200,9 +204,9 @@ class copie_donnees extends abstract_log {
 	 * si --type_donnees=report_cumul_week => on prend les dates de type week.<br>
 	 * sinon on prend les dates de type day.<br>
 	 *
-	 * @return TRUE
+	 * @return bool
 	 */
-	private function _retrouveDatesCopie() {
+	private function _retrouveDatesCopie(): bool {
 		//On creer la liste des dates a creer
 		$this->liste_dates_tableau = array ();
 		$liste_dates = dates::creer_dates ( $this->getListeOptions () );
@@ -230,10 +234,10 @@ class copie_donnees extends abstract_log {
 
 	/**
 	 * Creer (si elle n'existe pas) ou verifie une structure de fichier.
-	 * @param relation_fichier_machine|false $structure_fichier_origine Structure du fichier d'origine.
-	 * @return TRUE
+	 * @param bool|relation_fichier_machine $structure_fichier_origine Structure du fichier d'origine.
+	 * @return bool
 	 */
-	private function _creerStructureFichier($structure_fichier_origine) {
+	private function _creerStructureFichier(\Zorille\framework\relation_fichier_machine|bool $structure_fichier_origine): bool {
 		$this->onDebug ( "On creer la structure du fichier.", 1 );
 		
 		if ($structure_fichier_origine === false) {
@@ -260,8 +264,9 @@ class copie_donnees extends abstract_log {
 	 * Verifie et charge les variable obligatoire.
 	 *
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	private function _verifieVariablesNecessaire() {
+	private function _verifieVariablesNecessaire(): bool {
 		$flag_erreur = false;
 		//on ajoute la definition passe en argument dans --conf_copie
 		if ($this->getListeOptions ()
@@ -309,7 +314,8 @@ class copie_donnees extends abstract_log {
 	 * @param Bool $is_dir Si le $nom_fichier_standard et $nom_fichier_final sont des dossier ou non.
 	 * @return Bool true si copie OK, false sinon.
 	 */
-	private function _choisiTypeCopie($nom_fichier_standard, $nom_fichier_final, $type_copie, $is_dir) {
+	private function _choisiTypeCopie(string $nom_fichier_standard, string $nom_fichier_final, string $type_copie, bool $is_dir): bool
+	{
 		$this->onDebug ( "Nom fichier standard :" . $nom_fichier_standard, 2 );
 		$this->onDebug ( "Nom fichier final :" . $nom_fichier_final, 2 );
 		$this->onDebug ( "Type de copie :" . $type_copie, 2 );
@@ -330,8 +336,10 @@ class copie_donnees extends abstract_log {
 	 * renvoi le type de copie.
 	 *
 	 * @return String Type de copie
+	 * @throws Exception
 	 */
-	public function renvoieTypeCopie() {
+	public function renvoieTypeCopie(): string
+	{
 		$type_copie = $this->fichier_a_traiter->renvoi_parametre_fichier ( "type_copie" );
 		if ($type_copie == "") {
 			$type_copie = $this->getListeOptions ()
@@ -349,8 +357,10 @@ class copie_donnees extends abstract_log {
 	 * Fait la copie d'un (et d'un seul) fichier.
 	 *
 	 * @return true
+	 * @throws Exception
 	 */
-	private function _copieStandardFichier() {
+	private function _copieStandardFichier(): bool
+	{
 		$this->onInfo ( "On copie les donnees." );
 		
 		if ($this->fichier_a_traiter->renvoi_parametre_fichier ( "nom" ) == "") {
@@ -385,8 +395,10 @@ class copie_donnees extends abstract_log {
 	 * Fait la copie d'un (et d'un seul) dossier.
 	 *
 	 * @return true
+	 * @throws Exception
 	 */
-	private function _copieStandardDossier() {
+	private function _copieStandardDossier(): bool
+	{
 		$this->onInfo ( "On copie le dossier." );
 		//$fichier_log=self::$logs;
 		$flag_erreur = false;
@@ -421,11 +433,13 @@ class copie_donnees extends abstract_log {
 	/**
 	 * Fait la copie d'un ou plusieurs fichier(s).
 	 *
-	 * @param string $uuid uuid au format standard.
-	 * @param relation_fichier_machine|false $structure_fichier_origine Structure du fichier a telecharger ou false si la programme cree la structure.
-	 * @return array Liste des structure de fichier(s) telecharge(s).
+	 * @param bool|string $uuid uuid au format standard.
+	 * @param bool|relation_fichier_machine $structure_fichier_origine Structure du fichier a telecharger ou false si la programme cree la structure.
+	 * @return array|bool Liste des structure de fichier(s) telecharge(s).
+	 * @throws Exception
 	 */
-	public function copie_donnees($uuid = false, $structure_fichier_origine = false) {
+	public function copie_donnees(bool|string $uuid = false, \Zorille\framework\relation_fichier_machine|bool $structure_fichier_origine = false): array|bool
+	{
 		//On creer la liste des dates a creer
 		$this->_retrouveDatesCopie ();
 		
@@ -462,7 +476,8 @@ class copie_donnees extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -484,18 +499,19 @@ class copie_donnees extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getFonctionsStandards() {
+	public function &getFonctionsStandards(): fonctions_standards
+	{
 		return $this->class_standard;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFonctionsStandards(&$class_standard) {
+	public function &setFonctionsStandards(&$class_standard): static
+	{
 		$this->class_standard = $class_standard;
 		
 		return $this;
 	}
 /***************** ACCESSEURS *********************/
 }
-?>

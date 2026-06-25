@@ -21,14 +21,16 @@ class fonctions_standards_sgbd extends abstract_log {
 	/**
 	 * Instancie un objet de type fonctions_standards_sgbd. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fonctions_standards_sgbd
+	 * @throws Exception
 	 */
 	static function &creer_fonctions_standards_sgbd(
-			&$liste_option,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): fonctions_standards_sgbd
+	{
 		$objet = new fonctions_standards_sgbd ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -40,9 +42,10 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fonctions_standards_sgbd
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -52,13 +55,12 @@ class fonctions_standards_sgbd extends abstract_log {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -70,7 +72,8 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * @return array Renvoi un tableau avec toutes les variables pre-charge.
 	 */
 	static public function parse_option_sgbd(
-			&$liste_option) {
+		options &$liste_option): array
+	{
 		$sgbd_options = array ();
 		$sql = $liste_option->getOption ( "sql" );
 		if (is_array ( $sql )) {
@@ -103,11 +106,13 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * Verifie et set par defaut les variables necessaires a une connexion SGBD.<br> Sous-fonction de creer_connexion_liste_option.
 	 *
 	 * @param array $liste_donnees_db
+	 * @param string $nom_base
 	 * @return array Renvoi un tableau de valeur.
 	 */
 	static public function verifie_variable_sgbd(
-			$liste_donnees_db,
-			$nom_base = "") {
+		array  $liste_donnees_db,
+		string $nom_base = ""): array
+	{
 		$CODE_RETOUR = array ();
 		if ($nom_base !== "")
 			$nom_base .= "_";
@@ -183,11 +188,12 @@ class fonctions_standards_sgbd extends abstract_log {
 	 *
 	 * @param options $liste_option
 	 * @param string $db_recherche nom de la base recherche
-	 * @return array boolean des variales, False sinon
+	 * @return bool|array boolean des variales, False sinon
 	 */
 	static function renvoi_parametres_database(
-			&$liste_option,
-			$db_recherche) {
+		options &$liste_option,
+		string  $db_recherche): bool|array
+	{
 		$liste_sgbd = fonctions_standards_sgbd::parse_option_sgbd ( $liste_option );
 		// Pour chaque base on recupere la liste des donnees et on cree la connexion
 		if (isset ( $liste_sgbd ["liste_bases"] ) && is_array ( $liste_sgbd ["liste_bases"] )) {
@@ -216,7 +222,8 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * @return connexion|array|false un objet DB, soit un tableau d'objet DB, soit FALSE en cas d'erreur.
 	 */
 	static public function creer_connexion_liste_option(
-			&$liste_option) {
+		options &$liste_option): connexion|bool|array
+	{
 		// voir help SQL
 		// Si on a une base dans les options
 		abstract_log::onDebug_standard ( "creer_connexion_liste_option", 1 );
@@ -311,13 +318,14 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * Applique une requete sur la base defini dans les options.<br> Si la connexion n'existe pas, la fonction cree la connexion et la referme.<br> Include : $INCLUDE_FONCTIONS<br> @codeCoverageIgnore
 	 * @param options &$liste_option Liste d'options.
 	 * @param string $requete Requete a appliquer.
-	 * @param connexion $connexion_local Connexion des type bd pour appliquer la requete.
-	 * @return array false un tableau de resultat, FALSE sinon.
+	 * @param string|connexion $connexion_local Connexion des type bd pour appliquer la requete.
+	 * @return bool|array false un tableau de resultat, FALSE sinon.
 	 */
 	static public function requete_sql(
-			&$liste_option,
-			$requete,
-			$connexion_local = "non") {
+		options          &$liste_option,
+		string           $requete,
+		connexion|string $connexion_local = "non"): bool|array
+	{
 		$flag_connexion = false;
 		// si on a pas de connexion alors on en creer une et on la ferme a la fin
 		// On creer la connexion a la base de donnees
@@ -362,13 +370,15 @@ class fonctions_standards_sgbd extends abstract_log {
 	 * Set le $db_cacti avec la base cacti standard.
 	 *
 	 * @param array $connexion
+	 * @param $db_name
 	 * @param bool $sort_en_erreur
-	 * @return requete_complexe_cacti false renvoi l'objet requete_complexe_cacti, false en cas d'erreur.
+	 * @return bool|requete_complexe_cacti false renvoi l'objet requete_complexe_cacti, false en cas d'erreur.
 	 */
 	static public function recupere_db(
-			&$connexion,
-			$db_name,
-			$sort_en_erreur = false) {
+		array &$connexion,
+		      $db_name,
+		bool  $sort_en_erreur = false): bool|requete_complexe_cacti
+	{
 		if ($connexion && isset ( $connexion [$db_name . "_prod"] )) {
 			$db = $connexion [$db_name . "_prod"];
 		} elseif ($connexion && isset ( $connexion [$db_name . "_preprod"] )) {
@@ -448,47 +458,50 @@ class fonctions_standards_sgbd extends abstract_log {
 	 *
 	 * @param array $connexion
 	 * @param bool $sort_en_erreur
-	 * @return requete_complexe_power false renvoi l'objet requete_complexe_power, false en cas d'erreur.
+	 * @return bool|requete_complexe_cacti|requete_complexe_power false renvoi l'objet requete_complexe_power, false en cas d'erreur.
 	 */
 	static public function recupere_db_power(
-			&$connexion,
-			$sort_en_erreur = false) {
+		array &$connexion,
+		bool  $sort_en_erreur = false): bool|requete_complexe_cacti|requete_complexe_power
+	{
 		return fonctions_standards_sgbd::recupere_db ( $connexion, "power", $sort_en_erreur );
 	}
-	
+
 	/**
 	 * Set le $db_power avec la base power standard.
 	 *
 	 * @param array $connexion
 	 * @param bool $sort_en_erreur
-	 * @return requete_complexe_fmanager false renvoi l'objet requete_complexe_power, false en cas d'erreur.
+	 * @return requete_complexe_fmanager|bool|requete_complexe_cacti false renvoi l'objet requete_complexe_power, false en cas d'erreur.
 	 */
 	static public function recupere_db_fmanager(
-			&$connexion,
-			$sort_en_erreur = false) {
+		array &$connexion,
+		bool  $sort_en_erreur = false): requete_complexe_fmanager|bool|requete_complexe_cacti
+	{
 				return fonctions_standards_sgbd::recupere_db ( $connexion, "fmanager", $sort_en_erreur );
 	}
-	
+
 	/**
 	 * Set le $db_itop avec la base itop standard.
 	 *
 	 * @param array $connexion
 	 * @param bool $sort_en_erreur
-	 * @return requete_complexe_itop false renvoi l'objet requete_complexe_itop, false en cas d'erreur.
+	 * @return requete_complexe_itop|bool|requete_complexe_cacti false renvoi l'objet requete_complexe_itop, false en cas d'erreur.
 	 */
 	static public function recupere_db_itop(
-			&$connexion,
-			$sort_en_erreur = false) {
+		array &$connexion,
+		bool  $sort_en_erreur = false): requete_complexe_itop|bool|requete_complexe_cacti
+	{
 				return fonctions_standards_sgbd::recupere_db ( $connexion, "itop", $sort_en_erreur );
 	}
-	
+
 
 	/**
 	 * @static @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Permet de se connecter a des bases connues";
@@ -504,4 +517,4 @@ class fonctions_standards_sgbd extends abstract_log {
 		return $help;
 	}
 }
-?>
+

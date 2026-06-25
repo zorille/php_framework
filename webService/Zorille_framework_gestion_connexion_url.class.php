@@ -74,11 +74,12 @@ class gestion_connexion_url extends abstract_log {
 	 * Instancie un objet de type gestion_connexion_url.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return gestion_connexion_url
 	 */
-	static function &creer_gestion_connexion_url(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_gestion_connexion_url(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): gestion_connexion_url
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new gestion_connexion_url ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -93,8 +94,9 @@ class gestion_connexion_url extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return gestion_connexion_url
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetUtilisateurs ( utilisateurs::creer_utilisateurs ( $liste_class ["options"] ) );
@@ -106,20 +108,20 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * @param array $serveur_data
-	 * @return gestion_connexion_url Reference sur gestion_connexion_url.
+	 * @return bool|gestion_connexion_url Reference sur gestion_connexion_url.
 	 * @throws Exception
 	 */
-	public function retrouve_connexion_params($serveur_data) {
+	public function retrouve_connexion_params(array $serveur_data): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! isset ( $serveur_data ["host"] ) || ! isset ( $serveur_data ["port"] )) {
 			return $this->onError ( "Il faut un Host ou Port pour creer une connexion.", "", 5100 );
@@ -158,11 +160,11 @@ class gestion_connexion_url extends abstract_log {
 
 	/**
 	 * Valide qu'un tunnel existe pour ce serveur.
-	 * 
-	 * @param string $serveur        	
+	 *
 	 * @return Bool
 	 */
-	public function valide_tunnel_existe() {
+	public function valide_tunnel_existe(): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (count ( $this->getTunnel () ) == 0) {
 			return false;
@@ -172,10 +174,12 @@ class gestion_connexion_url extends abstract_log {
 
 	/**
 	 * Active le tunnel s'il existe.
-	 *      	
-	 * @return boolean True un tunnel est actif, false il n'y a pas de tunnel
+	 *
+	 * @return bool|gestion_connexion_url True un tunnel est actif, false il n'y a pas de tunnel
+	 * @throws Exception
 	 */
-	public function utilise_tunnel() {
+	public function utilise_tunnel(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->valide_tunnel_existe ()) {
 			// @codeCoverageIgnoreStart
@@ -205,11 +209,11 @@ class gestion_connexion_url extends abstract_log {
 
 	/**
 	 * Valide qu'un proxy existe pour ce serveur.
-	 * 
-	 * @param string $serveur        	
+	 *
 	 * @return Bool
 	 */
-	public function valide_proxy_existe() {
+	public function valide_proxy_existe(): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (count ( $this->getProxy () ) == 0) {
 			return false;
@@ -219,11 +223,11 @@ class gestion_connexion_url extends abstract_log {
 
 	/**
 	 * Active le proxy au format soap s'il existe.
-	 * 
-	 * @param array	
+	 *
 	 * @return array
 	 */
-	public function utilise_proxy() {
+	public function utilise_proxy(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$serveur_data = array ();
 		if ($this->valide_proxy_existe ()) {
@@ -259,10 +263,10 @@ class gestion_connexion_url extends abstract_log {
 
 	/**
 	 * ajoute l'utilisation de https en cas de useSSL dans les parametres
-	 * @param array &$serveur_data
 	 * @return string
 	 */
-	public function utilise_SSL() {
+	public function utilise_SSL(): string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getHttps ()) {
 			return "https://";
@@ -273,9 +277,11 @@ class gestion_connexion_url extends abstract_log {
 
 	/**
 	 * Creer le prepend de l'url (http://host:port$url)
+	 * @param string $url
 	 * @return gestion_connexion_url
 	 */
-	public function prepare_prepend_url($url = "") {
+	public function prepare_prepend_url(string $url = ""): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		//mise au propre appel URL
 		$http = $this->utilise_SSL ();
@@ -289,7 +295,8 @@ class gestion_connexion_url extends abstract_log {
 	 * Active un tunnel ou declare un proxy
 	 * @return gestion_connexion_url
 	 */
-	public function reset_datas() {
+	public function reset_datas(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setTunnel ( array () )
 			->setProxy ( array () )
@@ -314,14 +321,16 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHost() {
+	public function getHost(): string
+	{
 		return $this->host;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHost($host) {
+	public function &setHost($host): static
+	{
 		$this->host = $host;
 		return $this;
 	}
@@ -329,14 +338,16 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPort() {
+	public function getPort(): string
+	{
 		return $this->port;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPort($port) {
+	public function &setPort($port): static
+	{
 		$this->port = $port;
 		return $this;
 	}
@@ -344,14 +355,16 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrependUrl() {
+	public function getPrependUrl(): string
+	{
 		return $this->url;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPrependUrl($url) {
+	public function &setPrependUrl($url): static
+	{
 		$this->url = $url;
 		return $this;
 	}
@@ -359,14 +372,16 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUri() {
+	public function getUri(): string
+	{
 		return $this->uri;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUri($uri) {
+	public function &setUri($uri): static
+	{
 		$this->uri = $uri;
 		return $this;
 	}
@@ -374,14 +389,16 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTunnel() {
+	public function getTunnel(): array
+	{
 		return $this->tunnel;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTunnel($Tunnels) {
+	public function &setTunnel($Tunnels): static
+	{
 		if (is_array ( $Tunnels )) {
 			$this->tunnel = $Tunnels;
 		}
@@ -391,14 +408,16 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getProxy() {
+	public function getProxy(): array
+	{
 		return $this->proxy;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setProxy($Proxys) {
+	public function &setProxy($Proxys): static
+	{
 		if (is_array ( $Proxys )) {
 			$this->proxy = $Proxys;
 		}
@@ -408,30 +427,34 @@ class gestion_connexion_url extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHttps() {
+	public function getHttps(): bool
+	{
 		return $this->https;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHttps($https) {
+	public function &setHttps($https): static
+	{
 		$this->https = $https;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return utilisateurs
+	 * @return utilisateurs|bool
 	 */
-	public function &getObjetUtilisateurs() {
+	public function &getObjetUtilisateurs(): utilisateurs|bool
+	{
 		return $this->class_utilisateurs;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetUtilisateurs(&$class_utilisateurs) {
+	public function &setObjetUtilisateurs(&$class_utilisateurs): static
+	{
 		$this->class_utilisateurs = $class_utilisateurs;
 		return $this;
 	}
@@ -442,7 +465,7 @@ class gestion_connexion_url extends abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -462,9 +485,6 @@ class gestion_connexion_url extends abstract_log {
 		$help [__CLASS__] ["text"] [] .= "\t\t<crypt_password></crypt_password>";
 		$help [__CLASS__] ["text"] [] .= "\t\t<!-- <password></password> -->";
 		$help [__CLASS__] ["text"] [] .= "\t</proxy>";
-		$help=array_merge($help,utilisateurs::help());
-		
-		return $help;
+		return array_merge($help,utilisateurs::help());
 	}
 }
-?>

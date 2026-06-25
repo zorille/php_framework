@@ -40,7 +40,7 @@ class serveur_pipe extends pipe {
 	 * @param array $liste_class
 	 * @return serveur_pipe
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise($liste_class);
 		return $this;
 	}
@@ -101,11 +101,11 @@ class serveur_pipe extends pipe {
 	 * Permet de fermer pipe du serveur.<br>
 	 * Si le message = "close", le pipe se ferme.
 	 *
-	 * @return true
+	 * @return void
 	 */
-	function close() {
+	function close(): void
+	{
 		$this->close_serveur ();
-		return true;
 	}
 }
 ?>

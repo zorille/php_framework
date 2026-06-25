@@ -17,11 +17,14 @@ class aws_datas extends serveur_datas {
 	 * Instancie un objet de type aws_datas.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return aws_datas
 	 */
-	static function &creer_aws_datas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_aws_datas(
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): aws_datas {
 		$objet = new aws_datas ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -36,7 +39,7 @@ class aws_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return aws_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_aws_param ();
@@ -50,7 +53,6 @@ class aws_datas extends serveur_datas {
 	 *
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de abstract_log
@@ -61,13 +63,13 @@ class aws_datas extends serveur_datas {
 	 *
 	 * @return aws_datas|boolean aws_datas si OK, False sinon.
 	 */
-	public function retrouve_aws_param() {
+	public function retrouve_aws_param(): aws_datas|bool {
 		$donnee_aws = $this->_valideOption ( array (
 				"aws_machines",
 				"serveur" 
 		) );
 		
-		if ($donnee_aws == false) {
+		if (!$donnee_aws) {
 			return false;
 		}
 		
@@ -80,7 +82,7 @@ class aws_datas extends serveur_datas {
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
 	 */
-	public function valide_presence_aws_data($nom) {
+	public function valide_presence_aws_data(string $nom): array {
 		return $this->valide_presence_serveur_data ( $nom );
 	}
 
@@ -92,20 +94,11 @@ class aws_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
 		
 		return $help;
 	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @codeCoverageIgnore
-	 * @see lib/fork/message#__destruct()
-	 */
-	public function __destruct() {
-	}
 }
-?>

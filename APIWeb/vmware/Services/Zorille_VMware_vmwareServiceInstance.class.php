@@ -35,11 +35,13 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * Instancie un objet de type vmwareServiceInstance.
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return vmwareServiceInstance
+	 * @throws Exception
 	 */
-	static function &creer_vmwareServiceInstance(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__ ) {
+	static function &creer_vmwareServiceInstance(Core\options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__ ): vmwareServiceInstance
+	{
 		$objet = new vmwareServiceInstance ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -52,8 +54,9 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return vmwareServiceInstance
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -64,21 +67,22 @@ class vmwareServiceInstance extends Core\abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__ ) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__ ) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * creer l'objet contenant _this
-	 * @return stdClass objet contenant le _this charge viewManager.
+	 * @return stdClass|bool objet contenant le _this charge viewManager.
+	 * @throws Exception
 	 */
-	public function getViewManager() {
+	public function getViewManager(): stdClass|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! isset ( $this->getAuth()->viewManager )) {
 			return $this->onError ( "Pas de propriete viewManager dans la liste des ServiceInstances", $this->getAuth() );
@@ -90,14 +94,19 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge viewManager.
 	 */
-	public function creer_entete_viewManager_this() {
+	public function creer_entete_viewManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->viewManager;
 		return $soap_message;
 	}
-	
-	public function CreateContainerView($managedObjectType) {
+
+	/**
+	 * @throws Exception
+	 */
+	public function CreateContainerView($managedObjectType): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		$soap_message =  $this->creer_entete_viewManager_this();
@@ -112,7 +121,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * renvoi les donnees contenu dans about de l'ESXi ou vcenter
 	 * @return array
 	 */
-	public function about() {
+	public function about(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return ( array ) $this->getAuth ()->about;
 	}
@@ -120,11 +130,11 @@ class vmwareServiceInstance extends Core\abstract_log {
 	/***************************** RootFolder ****************************/
 	/**
 	 * creer l'objet contenant _this
-	 * @param stdClass $auth Reponse contenant la liste des ServiceInstances
-	 * @return stdClass objet contenant le _this charge avec le MOID du rootFolder.
+	 * @return stdClass|bool objet contenant le _this charge avec le MOID du rootFolder.
 	 * @throws Exception
 	 */
-	public function getRootFolder() {
+	public function getRootFolder(): stdClass|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 	
 		if (! isset ( $this->getAuth()->rootFolder )) {
@@ -139,7 +149,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * @return stdClass objet contenant le _this charge rootFolder.
 	 * @throws Exception
 	 */
-	public function creer_entete_rootFolder_this() {
+	public function creer_entete_rootFolder_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 	
 		$soap_message = new stdClass ();
@@ -152,7 +163,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge setting (HostAgentSettings).
 	 */
-	public function creer_entete_setting_this() {
+	public function creer_entete_setting_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->setting;
@@ -163,7 +175,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge userDirectory.
 	 */
-	public function creer_entete_userDirectory_this() {
+	public function creer_entete_userDirectory_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->userDirectory;
@@ -174,7 +187,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge sessionManager.
 	 */
-	public function creer_entete_sessionManager_this() {
+	public function creer_entete_sessionManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->sessionManager;
@@ -185,7 +199,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge authorizationManager.
 	 */
-	public function creer_entete_authorizationManager_this() {
+	public function creer_entete_authorizationManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->authorizationManager;
@@ -196,7 +211,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge serviceManager.
 	 */
-	public function creer_entete_serviceManager_this() {
+	public function creer_entete_serviceManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->serviceManager;
@@ -207,7 +223,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge perfManager (PerformanceManager).
 	 */
-	public function creer_entete_perfManager_this() {
+	public function creer_entete_perfManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->perfManager;
@@ -218,7 +235,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge eventManager.
 	 */
-	public function creer_entete_eventManager_this() {
+	public function creer_entete_eventManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->eventManager;
@@ -229,7 +247,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge taskManager.
 	 */
-	public function creer_entete_taskManager_this() {
+	public function creer_entete_taskManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->taskManager;
@@ -240,7 +259,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge accountManager (HostLocalAccountManager).
 	 */
-	public function creer_entete_accountManager_this() {
+	public function creer_entete_accountManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->accountManager;
@@ -251,7 +271,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge diagnosticManager.
 	 */
-	public function creer_entete_diagnosticManager_this() {
+	public function creer_entete_diagnosticManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->diagnosticManager;
@@ -262,7 +283,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge licenseManager.
 	 */
-	public function creer_entete_licenseManager_this() {
+	public function creer_entete_licenseManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->licenseManager;
@@ -273,7 +295,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge searchIndex.
 	 */
-	public function creer_entete_searchIndex_this() {
+	public function creer_entete_searchIndex_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->searchIndex;
@@ -284,7 +307,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge fileManager.
 	 */
-	public function creer_entete_fileManager_this() {
+	public function creer_entete_fileManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->fileManager;
@@ -295,7 +319,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge datastoreNamespaceManager.
 	 */
-	public function creer_entete_datastoreNamespaceManager_this() {
+	public function creer_entete_datastoreNamespaceManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->datastoreNamespaceManager;
@@ -306,7 +331,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge virtualDiskManager.
 	 */
-	public function creer_entete_virtualDiskManager_this() {
+	public function creer_entete_virtualDiskManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->virtualDiskManager;
@@ -317,7 +343,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge ovfManager.
 	 */
-	public function creer_entete_ovfManager_this() {
+	public function creer_entete_ovfManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->ovfManager;
@@ -328,7 +355,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge dvSwitchManager (DistributedVirtualSwitchManager).
 	 */
-	public function creer_entete_dvSwitchManager_this() {
+	public function creer_entete_dvSwitchManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->dvSwitchManager;
@@ -339,7 +367,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge localizationManager.
 	 */
-	public function creer_entete_localizationManager_this() {
+	public function creer_entete_localizationManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->localizationManager;
@@ -350,7 +379,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge storageResourceManager.
 	 */
-	public function creer_entete_storageResourceManager_this() {
+	public function creer_entete_storageResourceManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->storageResourceManager;
@@ -361,7 +391,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * creer l'objet contenant _this
 	 * @return stdClass objet contenant le _this charge guestOperationsManager.
 	 */
-	public function creer_entete_guestOperationsManager_this() {
+	public function creer_entete_guestOperationsManager_this(): stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$soap_message = new stdClass ();
 		$soap_message->_this = $this->getAuth ()->guestOperationsManager;
@@ -369,7 +400,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	}
 
 	/******************************* vimService ********************************/
-	public function prepare_SoapMessage() {
+	public function prepare_SoapMessage(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( "prepare_SoapMessage", 1 );
 		$soap_message = array ();
@@ -391,16 +423,18 @@ class vmwareServiceInstance extends Core\abstract_log {
 	}
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return stdClass|null
 	 */
-	public function getAuth() {
+	public function getAuth(): ?stdClass
+	{
 		return $this->auth;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAuth($auth) {
+	public function &setAuth($auth): static
+	{
 		$this->auth = $auth;
 		return $this;
 	}
@@ -409,7 +443,8 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getNomFonction() {
+	public function getNomFonction(): string
+	{
 		return $this->fonction;
 	}
 
@@ -419,7 +454,7 @@ class vmwareServiceInstance extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -427,5 +462,3 @@ class vmwareServiceInstance extends Core\abstract_log {
 		return $help;
 	}
 }
-
-?>

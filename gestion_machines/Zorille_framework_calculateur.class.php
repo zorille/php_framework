@@ -4,6 +4,8 @@
  * @package Lib
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class calculateur<br>
  *
@@ -119,11 +121,30 @@ class calculateur extends abstract_log {
 	 * @param int $CPUUnit Somme max des CPUJobs sur la machine
 	 * @param int $MinCPUJob Taille min d'un Job sur la machine
 	 * @param int $MaxCPUJob Taille max d'un job sur la machine
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param int $MaxNbJob
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return calculateur
+	 * @throws Exception
 	 */
-	static function &creer_calculateur(&$liste_option, $Nom, $NetName, $IP, $Username, $Password, $FTPPassword, $DiskSpace, $RamSpace, $MaxRamJob, $CPUUnit, $MinCPUJob, $MaxCPUJob, $MaxNbJob = 20, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_calculateur(
+		options &$liste_option,
+		string $Nom,
+		string $NetName,
+		string      $IP,
+		string      $Username,
+		string      $Password,
+		string      $FTPPassword,
+		int         $DiskSpace,
+		int         $RamSpace,
+		int         $MaxRamJob,
+		int         $CPUUnit,
+		int         $MinCPUJob,
+		int         $MaxCPUJob,
+		int         $MaxNbJob = 20,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): calculateur
+	{
 		$objet = new calculateur ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -150,8 +171,10 @@ class calculateur extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return calculateur
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -161,14 +184,10 @@ class calculateur extends abstract_log {
 	/**
 	 * Prend  les valeurs intrinsecs du calculateur et les charges en memoire
 	 * @codeCoverageIgnore
-	 * @return TRUE
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
-		
-		
-		return true;
 	}
 
 	/**
@@ -178,9 +197,10 @@ class calculateur extends abstract_log {
 	 * @param int $ram RAM utilise par le job
 	 * @param int $disk Disque utilise par le job
 	 * @param int $cpu CPUUnit utilise par le job
-	 * @return Bool|-1 Renvoi TRUE si le job est acceptable ou FALSE sinon. -1 le calculateur ne supporte pas ce job.
+	 * @return bool|int -1 Renvoi TRUE si le job est acceptable ou FALSE sinon. -1 le calculateur ne supporte pas ce job.
 	 */
-	public function compare_valeur($ram = 0, $disk = 0, $cpu = 0) {
+	public function compare_valeur(int $ram = 0, int $disk = 0, int $cpu = 0): bool|int
+	{
 		if (! $this->compare_maxcpu ( $cpu ) || ! $this->compare_maxram ( $ram ) || ! $this->compare_diskspace ( $disk )) {
 			return - 1;
 		} elseif ($this->getUsedParType ( "RamSpace" ) + $ram <= $this->getRamSpace () && $this->getUsedParType ( "DiskSpace" ) + $disk < $this->getDiskSpace () && $this->getUsedParType ( "CPUUnit" ) + $cpu < $this->getCPUUnit () && $this->compare_nbjob ())
@@ -196,7 +216,8 @@ class calculateur extends abstract_log {
 	 * @param int $cpu CPUUnit utilise par le job
 	 * @return Bool Renvoi TRUE si le job est acceptable ou FALSE sinon.
 	 */
-	public function compare_maxcpu($cpu) {
+	public function compare_maxcpu(int $cpu): bool
+	{
 		if ($cpu <= $this->getMaxCPUJob ())
 			return true;
 		
@@ -210,7 +231,8 @@ class calculateur extends abstract_log {
 	 * @param int $disk Disque utilise par le job
 	 * @return Bool Renvoi TRUE si le job est acceptable ou FALSE sinon.
 	 */
-	public function compare_diskspace($disk) {
+	public function compare_diskspace(int $disk): bool
+	{
 		if ($disk <= $this->getDiskSpace ())
 			return true;
 		
@@ -224,7 +246,8 @@ class calculateur extends abstract_log {
 	 * @param int $RamSpace RAM utilise par le job
 	 * @return Bool Renvoi TRUE si le job est acceptable ou FALSE sinon.
 	 */
-	public function compare_maxram($RamSpace) {
+	public function compare_maxram(int $RamSpace): bool
+	{
 		if ($RamSpace <= $this->getMaxRamJob ())
 			return true;
 		
@@ -237,7 +260,8 @@ class calculateur extends abstract_log {
 	 *
 	 * @return Bool Renvoi TRUE si le job est acceptable ou FALSE sinon.
 	 */
-	public function compare_nbjob() {
+	public function compare_nbjob(): bool
+	{
 		if ($this->getUsedParType ( "NBJob" ) < $this->getMaxNbJob ())
 			return true;
 		
@@ -251,9 +275,10 @@ class calculateur extends abstract_log {
 	 * @param int $ram RAM utilise par le job
 	 * @param int $disk Disque utilise par le job
 	 * @param int $cpu CPUUnit utilise par le job
-	 * @return Bool|-1 Renvoi TRUE si le job est attribue ou FALSE sinon. -1 le calculateur ne supporte pas ce job.
+	 * @return bool|int -1 Renvoi TRUE si le job est attribue ou FALSE sinon. -1 le calculateur ne supporte pas ce job.
 	 */
-	public function utilise_puissance_calculateur($ram = 0, $disk = 0, $cpu = 0) {
+	public function utilise_puissance_calculateur(int $ram = 0, int $disk = 0, int $cpu = 0): bool|int
+	{
 		$attribue = $this->compare_valeur ( $ram, $disk, $cpu );
 		$CODE_RETOUR = $attribue;
 		if ($attribue === true) {
@@ -275,7 +300,8 @@ class calculateur extends abstract_log {
 	 * @param int $cpu CPUUnit utilise par le job
 	 * @return Bool Renvoi TRUE si le job est bien des-attribue ou FALSE si il n'y a plus de job sur la machine.
 	 */
-	public function libere_puissance_calculateur($ram = 0, $disk = 0, $cpu = 0) {
+	public function libere_puissance_calculateur(int $ram = 0, int $disk = 0, int $cpu = 0): bool
+	{
 		if ($this->getUsedParType ( "NBJob" ) > 0) {
 			$ram = $this->getUsedParType ( "RamSpace" ) - $ram;
 			if ($ram < 0)
@@ -300,19 +326,17 @@ class calculateur extends abstract_log {
 	 * Accesseur en lecture des infos sur la machine
 	 *
 	 * @param string $choix Type d'info demande (Name, Netname)
-	 * @return string|false Renvoi la valeur demande ou FALSE si cette valeur n'existe pas.
+	 * @return bool|int|string Renvoi la valeur demande ou FALSE si cette valeur n'existe pas.
 	 */
-	public function renvoi_donnees_machine($choix) {
-		switch ($choix) {
-			case "Name" :
-				return $this->getNom ();
-			case "NetName" :
-				return $this->getNetName ();
-			case "MaxNbJob" :
-				return $this->getMaxNbJob ();
-		}
-		
-		return false;
+	public function renvoi_donnees_machine(string $choix): bool|int|string
+	{
+		return match ($choix) {
+			"Name" => $this->getNom(),
+			"NetName" => $this->getNetName(),
+			"MaxNbJob" => $this->getMaxNbJob(),
+			default => false,
+		};
+
 	}
 
 	/**
@@ -320,7 +344,8 @@ class calculateur extends abstract_log {
 	 *
 	 * @return int Renvoi le nombre de job en cours
 	 */
-	public function renvoi_nb_job_en_cours() {
+	public function renvoi_nb_job_en_cours(): int
+	{
 		return $this->getUsedParType ( "NBJob" );
 	}
 
@@ -328,14 +353,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNom() {
+	public function getNom(): string
+	{
 		return $this->Nom;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNom($Nom) {
+	public function &setNom($Nom): static
+	{
 		$this->Nom = $Nom;
 		return $this;
 	}
@@ -343,14 +370,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNetName() {
+	public function getNetName(): string
+	{
 		return $this->NetName;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNetName($NetName) {
+	public function &setNetName($NetName): static
+	{
 		$this->NetName = $NetName;
 		return $this;
 	}
@@ -358,14 +387,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIP() {
+	public function getIP(): string
+	{
 		return $this->IP;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setIP($IP) {
+	public function &setIP($IP): static
+	{
 		$this->IP = $IP;
 		return $this;
 	}
@@ -373,14 +404,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->Username;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsername($Username) {
+	public function &setUsername($Username): static
+	{
 		$this->Username = $Username;
 		return $this;
 	}
@@ -388,14 +421,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword() {
+	public function getPassword(): string
+	{
 		return $this->Password;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPassword($Password) {
+	public function &setPassword($Password): static
+	{
 		$this->Password = $Password;
 		return $this;
 	}
@@ -403,14 +438,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFTPPassword() {
+	public function getFTPPassword(): string
+	{
 		return $this->FTPPassword;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFTPPassword($FTPPassword) {
+	public function &setFTPPassword($FTPPassword): static
+	{
 		$this->FTPPassword = $FTPPassword;
 		return $this;
 	}
@@ -418,14 +455,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDiskSpace() {
+	public function getDiskSpace(): int|string
+	{
 		return $this->DiskSpace;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDiskSpace($DiskSpace) {
+	public function &setDiskSpace($DiskSpace): static
+	{
 		$this->DiskSpace = $DiskSpace;
 		return $this;
 	}
@@ -433,14 +472,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRamSpace() {
+	public function getRamSpace(): int|string
+	{
 		return $this->RamSpace;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setRamSpace($RamSpace) {
+	public function &setRamSpace($RamSpace): static
+	{
 		$this->RamSpace = $RamSpace;
 		return $this;
 	}
@@ -448,14 +489,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMaxRamJob() {
+	public function getMaxRamJob(): int|string
+	{
 		return $this->MaxRamJob;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMaxRamJob($MaxRamJob) {
+	public function &setMaxRamJob($MaxRamJob): static
+	{
 		$this->MaxRamJob = $MaxRamJob;
 		return $this;
 	}
@@ -463,14 +506,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCPUUnit() {
+	public function getCPUUnit(): int|string
+	{
 		return $this->CPUUnit;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCPUUnit($CPUUnit) {
+	public function &setCPUUnit($CPUUnit): static
+	{
 		$this->CPUUnit = $CPUUnit;
 		return $this;
 	}
@@ -478,14 +523,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMinCPUJob() {
+	public function getMinCPUJob(): int|string
+	{
 		return $this->MinCPUJob;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMinCPUJob($MinCPUJob) {
+	public function &setMinCPUJob($MinCPUJob): static
+	{
 		$this->MinCPUJob = $MinCPUJob;
 		return $this;
 	}
@@ -493,14 +540,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMaxCPUJob() {
+	public function getMaxCPUJob(): int|string
+	{
 		return $this->MaxCPUJob;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMaxCPUJob($MaxCPUJob) {
+	public function &setMaxCPUJob($MaxCPUJob): static
+	{
 		$this->MaxCPUJob = $MaxCPUJob;
 		return $this;
 	}
@@ -508,14 +557,16 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMaxNbJob() {
+	public function getMaxNbJob(): int
+	{
 		return $this->MaxNbJob;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMaxNbJob($MaxNbJob) {
+	public function &setMaxNbJob($MaxNbJob): static
+	{
 		$this->MaxNbJob = $MaxNbJob;
 		return $this;
 	}
@@ -523,7 +574,8 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getUsed() {
+	public function &getUsed(): array
+	{
 		return $this->used;
 	}
 
@@ -537,7 +589,8 @@ class calculateur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsed($used) {
+	public function &setUsed($used): static
+	{
 		$this->used = $used;
 		return $this;
 	}
@@ -546,10 +599,10 @@ class calculateur extends abstract_log {
 	 * Creer ou modifie le champ $type avec la valeur $used
 	 * @codeCoverageIgnore
 	 */
-	public function &setAddUsed($type, $used) {
+	public function &setAddUsed($type, $used): static
+	{
 		$this->used [$type] = $used;
 		return $this;
 	}
 /************************* Accesseurs ************************/
 }
-?>

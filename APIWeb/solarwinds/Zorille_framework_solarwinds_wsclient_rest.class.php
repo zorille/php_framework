@@ -63,15 +63,15 @@ class solarwinds_wsclient_rest extends wsclient {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return solarwinds_wsclient_rest
+	 * @return self|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["solarwinds_datas"] )) {
-			$this->onError ( "il faut un objet de type solarwinds_datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type solarwinds_datas" );
+			return $r;
 		}
 		$this->setObjetSolarwindsDatas ( $liste_class ["solarwinds_datas"] )
 			->setContentType ( 'application/json' )
@@ -280,7 +280,7 @@ class solarwinds_wsclient_rest extends wsclient {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "solarwinds Wsclient :";

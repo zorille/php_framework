@@ -480,11 +480,12 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_item
 	 */
-	static function &creer_zabbix_item(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_item(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_item
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_item ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -497,9 +498,9 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_item
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -511,7 +512,6 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -520,10 +520,11 @@ class zabbix_item extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return zabbix_item True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param($nom_seulement = false) {
+	public function retrouve_zabbix_param($nom_seulement = false): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		//Gestion d'un $host
 		$this->setName ( $this->_valideOption ( array (
@@ -564,9 +565,11 @@ class zabbix_item extends zabbix_fonctions_standard {
 
 	/**
 	 * insere les donnees d'un item a partir du retour d'un WS zabbix item.get
+	 * @param $donnees_item
 	 * @return zabbix_item
 	 */
-	public function inserer_ws_item($donnees_item) {
+	public function inserer_ws_item($donnees_item): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		foreach ( $donnees_item as $type => $valeur ) {
 			$method = "set" . $type;
@@ -582,9 +585,10 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * Creer la definition JSON a transmettre au serveur Zabbix
 	 * @return array
 	 */
-	public function creer_definition_item_ws() {
+	public function creer_definition_item_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$item = array (
+		return array (
 				"delay" => $this->getDelay (),
 				"hostId" => $this->getHostId (),
 				"interfaceid" => $this->getInterfaceId (),
@@ -625,18 +629,18 @@ class zabbix_item extends zabbix_fonctions_standard {
 				"units" => $this->getUnits (),
 				"username" => $this->getUsername (),
 				"valuemapid" => $this->getValuemapId (),
-				"applications" => $this->getApplications () 
+				"applications" => $this->getApplications ()
 		);
-		
-		return $item;
 	}
 
 	/**
 	 * Creer un item dans zabbix
-	 * 
+	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_item() {
+	public function creer_item(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_item_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -648,7 +652,8 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * Creer un definition d'un item sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_item_delete_ws() {
+	public function creer_definition_item_delete_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = array ();
 		
@@ -662,8 +667,10 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * supprime un item dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprime_item() {
+	public function supprime_item(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_item_delete_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -680,7 +687,8 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * @param string $output Type d'output pour la variable zabbix du meme nom
 	 * @return array;
 	 */
-	public function creer_definition_itemByName_get_ws($output = "extend") {
+	public function creer_definition_itemByName_get_ws(string $output = "extend"): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"output" => $output,
@@ -693,8 +701,10 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * recherche un item dans zabbix a partir de son sendto
 	 * @return zabbix_item
+	 * @throws Exception
 	 */
-	public function recherche_itemid_by_Name() {
+	public function recherche_itemid_by_Name(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_itemByName_get_ws ( "itemid" );
 		$this->onDebug ( $datas, 1 );
@@ -709,16 +719,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 
 	/**
 	 * recherche un item dans zabbix a partir de son sendto
-	 * @return zabbix_item
+	 * @return array|\stdClass|string
+	 * @throws Exception
 	 */
-	public function recherche_donnees_by_Name() {
+	public function recherche_donnees_by_Name(): array|string|\stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_itemByName_get_ws ( "extend" );
 		$this->onDebug ( $datas, 1 );
-		$liste_resultat = $this->getObjetZabbixWsclient ()
+		return $this->getObjetZabbixWsclient ()
 			->itemGet ( $datas );
-		
-		return $liste_resultat;
 	}
 
 	/**
@@ -727,7 +737,8 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * @param zabbix_item $zabbix_item_compare
 	 * @return boolean True si les items correspondent, false sinon
 	 */
-	public function compare_item($zabbix_item_compare) {
+	public function compare_item(zabbix_item $zabbix_item_compare): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getItemId () !== "" && $zabbix_item_compare->getItemId () != "" && $zabbix_item_compare->getItemId () != $this->getItemId ()) {
 			return false;
@@ -757,72 +768,37 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * 14 - TELNET agent;
 	 * 15 - calculated;
 	 * 16 - JMX agent;
-	 * 17 - SNMP trap. 
+	 * 17 - SNMP trap.
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Type($type) {
+	public function retrouve_Type(string $type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "snmpv1 agent" :
-				return 1;
-				break;
-			case "zabbix trapper" :
-				return 2;
-				break;
-			case "simple check" :
-				return 3;
-				break;
-			case "snmpv2 agent" :
-				return 4;
-				break;
-			case "zabbix internal" :
-				return 5;
-				break;
-			case "snmpv3 agent" :
-				return 6;
-				break;
-			case "zabbix agent (active)" :
-				return 7;
-				break;
-			case "zabbix aggregate" :
-				return 8;
-				break;
-			case "web item" :
-				return 9;
-				break;
-			case "external check" :
-				return 10;
-				break;
-			case "database monitor" :
-				return 11;
-				break;
-			case "ipmi agent" :
-				return 12;
-				break;
-			case "ssh agent" :
-				return 13;
-				break;
-			case "telnet agent" :
-				return 14;
-				break;
-			case "calculated" :
-				return 15;
-				break;
-			case "jmx agent" :
-				return 16;
-				break;
-			case "snmp trap" :
-				return 17;
-				break;
-			case "zabbix agent" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"snmpv1 agent" => 1,
+			"zabbix trapper" => 2,
+			"simple check" => 3,
+			"snmpv2 agent" => 4,
+			"zabbix internal" => 5,
+			"snmpv3 agent" => 6,
+			"zabbix agent (active)" => 7,
+			"zabbix aggregate" => 8,
+			"web item" => 9,
+			"external check" => 10,
+			"database monitor" => 11,
+			"ipmi agent" => 12,
+			"ssh agent" => 13,
+			"telnet agent" => 14,
+			"calculated" => 15,
+			"jmx agent" => 16,
+			"snmp trap" => 17,
+			default => 0,
+		};
+
 	}
 
 	/**
@@ -832,53 +808,41 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * 3 - numeric unsigned;
 	 * 4 - text. 
 	 * @param string $valueType
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_ValueType($valueType) {
+	public function retrouve_ValueType($valueType): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $valueType )) {
 			return $valueType;
 		}
-		switch (strtolower ( $valueType )) {
-			case "character" :
-				return 1;
-				break;
-			case "log" :
-				return 2;
-				break;
-			case "numeric unsigned" :
-				return 3;
-				break;
-			case "text" :
-				return 4;
-				break;
-			case "numeric float" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($valueType)) {
+			"character" => 1,
+			"log" => 2,
+			"numeric unsigned" => 3,
+			"text" => 4,
+			default => 0,
+		};
+
 	}
 
 	/**
 	 * 0 - enabled item;
 	 * 1 - disabled item;
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Authtype($type) {
+	public function retrouve_Authtype($type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "public key" :
-				return 1;
-				break;
-			case "password" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"public key" => 1,
+			default => 0,
+		};
+
 	}
 
 	/**
@@ -887,28 +851,20 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * 2 - hexadecimal;
 	 * 3 - boolean. 
 	 * @param string $dataType
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_DataType($dataType) {
+	public function retrouve_DataType(string $dataType): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $dataType )) {
 			return $dataType;
 		}
-		switch (strtolower ( $dataType )) {
-			case "octal" :
-				return 1;
-				break;
-			case "hexadecimal" :
-				return 2;
-				break;
-			case "boolean" :
-				return 3;
-				break;
-			case "decimal" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($dataType)) {
+			"octal" => 1,
+			"hexadecimal" => 2,
+			"boolean" => 3,
+			default => 0,
+		};
 	}
 
 	/**
@@ -916,67 +872,58 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * 1 - Delta, speed per second;
 	 * 2 - Delta, simple change. 
 	 * @param string $delta
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Delta($delta) {
+	public function retrouve_Delta($delta): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $delta )) {
 			return $delta;
 		}
-		switch (strtolower ( $delta )) {
-			case "speed per second" :
-				return 1;
-				break;
-			case "simple change" :
-				return 2;
-				break;
-			case "as is" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($delta)) {
+			"speed per second" => 1,
+			"simple change" => 2,
+			default => 0,
+		};
+
 	}
 
 	/**
 	 * 0 - MD5;
 	 * 1 - SHA;
 	 * @param string $data
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Snmpv3Authprotocol($data) {
+	public function retrouve_Snmpv3Authprotocol($data): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $data )) {
 			return $data;
 		}
-		switch (strtoupper ( $data )) {
-			case "SHA" :
-				return 1;
-			case "MD5" :
-			default :
-		}
-		
-		return 0;
+		return match (strtoupper($data)) {
+			"SHA" => 1,
+			default => 0,
+		};
+
 	}
 
 	/**
 	 * 0 - DES;
 	 * 1 - AES;
 	 * @param string $data
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Snmpv3Privprotocol($data) {
+	public function retrouve_Snmpv3Privprotocol(string $data): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $data )) {
 			return $data;
 		}
-		switch (strtoupper ( $data )) {
-			case "AES" :
-				return 1;
-			case "DES" :
-			default :
-		}
-		
-		return 0;
+		return match (strtoupper($data)) {
+			"AES" => 1,
+			default => 0,
+		};
+
 	}
 
 	/**
@@ -984,83 +931,72 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * 1 - authNoPriv;
 	 * 2 - authPriv. 
 	 * @param string $data
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Snmpv3Securitylevel($data) {
+	public function retrouve_Snmpv3Securitylevel(string $data): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $data )) {
 			return $data;
 		}
-		switch (strtolower ( $data )) {
-			case "authnopriv" :
-				return 1;
-				break;
-			case "authpriv" :
-				return 2;
-				break;
-			case "noauthnopriv" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($data)) {
+			"authnopriv" => 1,
+			"authpriv" => 2,
+			default => 0,
+		};
 	}
 
 	/**
 	 * 0 - (default) normal;
 	 * 1 - not supported. 
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_State($type) {
+	public function retrouve_State(string $type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "not supported" :
-				return 1;
-				break;
-			case "normal" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"not supported" => 1,
+			default => 0,
+		};
 	}
 
 	/**
 	 * 0 - enabled item;
 	 * 1 - disabled item;
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Status($type) {
+	public function retrouve_Status(string $type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "disabled item" :
-				return 1;
-				break;
-			case "enabled item" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($type)) {
+			"disabled item" => 1,
+			default => 0,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getItemId() {
+	public function getItemId(): int|string
+	{
 		return $this->itemid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setItemId($itemid) {
+	public function &setItemId($itemid): static
+	{
 		$this->itemid = $itemid;
 		return $this;
 	}
@@ -1068,14 +1004,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDelay() {
+	public function getDelay(): int|string
+	{
 		return $this->delay;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDelay($delay) {
+	public function &setDelay($delay): static
+	{
 		$this->delay = $delay;
 		return $this;
 	}
@@ -1083,14 +1021,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHostId() {
+	public function getHostId(): int|string
+	{
 		return $this->hostId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHostId($hostId) {
+	public function &setHostId($hostId): static
+	{
 		$this->hostId = $hostId;
 		return $this;
 	}
@@ -1098,14 +1038,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getInterfaceId() {
+	public function getInterfaceId(): int|string
+	{
 		return $this->interfaceid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setInterfaceId($interfaceid) {
+	public function &setInterfaceId($interfaceid): static
+	{
 		$this->interfaceid = $interfaceid;
 		return $this;
 	}
@@ -1113,14 +1055,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getKey_() {
+	public function getKey_(): int|string
+	{
 		return $this->key_;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setKey_($key_) {
+	public function &setKey_($key_): static
+	{
 		$this->key_ = $key_;
 		return $this;
 	}
@@ -1128,14 +1072,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getName() {
+	public function getName(): string
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setName($name) {
+	public function &setName($name): static
+	{
 		$this->name = $name;
 		return $this;
 	}
@@ -1143,59 +1089,43 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getType() {
+	public function getType(): int|string
+	{
 		return $this->type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTypeStringValue() {
-		switch ($this->type) {
-			case 1 :
-				return "SNMPv1 agent";
-			case 2 :
-				return "Zabbix trapper";
-			case 3 :
-				return "simple check";
-			case 4 :
-				return "SNMPv2 agent";
-			case 5 :
-				return "Zabbix internal";
-			case 6 :
-				return "SNMPv3 agent";
-			case 7 :
-				return "Zabbix agent (active)";
-			case 8 :
-				return "Zabbix aggregate";
-			case 9 :
-				return "web item";
-			case 10 :
-				return "external check";
-			case 11 :
-				return "database monitor";
-			case 12 :
-				return "IPMI agent";
-			case 13 :
-				return "SSH agent";
-			case 14 :
-				return "TELNET agent";
-			case 15 :
-				return "calculated";
-			case 16 :
-				return "JMX agent";
-			case 17 :
-				return "SNMP trap";
-			case 0 :
-			default :
-		}
-		return "Zabbix agent";
+	public function getTypeStringValue(): string
+	{
+		return match ($this->type) {
+			1 => "SNMPv1 agent",
+			2 => "Zabbix trapper",
+			3 => "simple check",
+			4 => "SNMPv2 agent",
+			5 => "Zabbix internal",
+			6 => "SNMPv3 agent",
+			7 => "Zabbix agent (active)",
+			8 => "Zabbix aggregate",
+			9 => "web item",
+			10 => "external check",
+			11 => "database monitor",
+			12 => "IPMI agent",
+			13 => "SSH agent",
+			14 => "TELNET agent",
+			15 => "calculated",
+			16 => "JMX agent",
+			17 => "SNMP trap",
+			default => 'Zabbix agent',
+		};
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setType($type) {
+	public function &setType($type): static
+	{
 		$this->type = $this->retrouve_Type ( $type );
 		return $this;
 	}
@@ -1203,14 +1133,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getValueType() {
+	public function getValueType(): int|string
+	{
 		return $this->value_type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setValueType($value_type) {
+	public function &setValueType($value_type): static
+	{
 		$this->value_type = $this->retrouve_ValueType ( $value_type );
 		return $this;
 	}
@@ -1218,14 +1150,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getAuthtype() {
+	public function getAuthtype(): int|string
+	{
 		return $this->authtype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAuthtype($authtype) {
+	public function &setAuthtype($authtype): static
+	{
 		$this->authtype = $this->retrouve_Authtype ( $authtype );
 		return $this;
 	}
@@ -1233,14 +1167,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDataType() {
+	public function getDataType(): int|string
+	{
 		return $this->data_type;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDataType($data_type) {
+	public function &setDataType($data_type): static
+	{
 		$this->data_type = $this->retrouve_DataType ( $data_type );
 		return $this;
 	}
@@ -1248,14 +1184,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDelayFlex() {
+	public function getDelayFlex(): int|string
+	{
 		return $this->delay_flex;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDelayFlex($delay_flex) {
+	public function &setDelayFlex($delay_flex): static
+	{
 		$this->delay_flex = $delay_flex;
 		return $this;
 	}
@@ -1263,14 +1201,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDelta() {
+	public function getDelta(): int|string
+	{
 		return $this->delta;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDelta($delta) {
+	public function &setDelta($delta): static
+	{
 		$this->delta = $this->retrouve_Delta ( $delta );
 		return $this;
 	}
@@ -1278,14 +1218,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDescription() {
+	public function getDescription(): string
+	{
 		return $this->description;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDescription($description) {
+	public function &setDescription($description): static
+	{
 		$this->description = $description;
 		return $this;
 	}
@@ -1293,14 +1235,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getError() {
+	public function getError(): string
+	{
 		return $this->error;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setError($error) {
+	public function &setError($error): static
+	{
 		$this->error = $error;
 		return $this;
 	}
@@ -1308,14 +1252,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFlags() {
+	public function getFlags(): int|string
+	{
 		return $this->flags;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFlags($flags) {
+	public function &setFlags($flags): static
+	{
 		$this->flags = $flags;
 		return $this;
 	}
@@ -1323,14 +1269,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFormula() {
+	public function getFormula(): float|int|string
+	{
 		return $this->formula;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setFormula($formula) {
+	public function &setFormula($formula): static
+	{
 		$this->formula = $formula;
 		return $this;
 	}
@@ -1338,14 +1286,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHistory() {
+	public function getHistory(): int|string
+	{
 		return $this->history;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setHistory($history) {
+	public function &setHistory($history): static
+	{
 		$this->history = $history;
 		return $this;
 	}
@@ -1353,14 +1303,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getInventoryLink() {
+	public function getInventoryLink(): int|string
+	{
 		return $this->inventory_link;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setInventoryLink($inventory_link) {
+	public function &setInventoryLink($inventory_link): static
+	{
 		$this->inventory_link = $inventory_link;
 		return $this;
 	}
@@ -1368,14 +1320,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIpmiSensor() {
+	public function getIpmiSensor(): string
+	{
 		return $this->ipmi_sensor;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setIpmiSensor($ipmi_sensor) {
+	public function &setIpmiSensor($ipmi_sensor): static
+	{
 		$this->ipmi_sensor = $ipmi_sensor;
 		return $this;
 	}
@@ -1383,14 +1337,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLastclock() {
+	public function getLastclock(): int|string
+	{
 		return $this->lastclock;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLastclock($lastclock) {
+	public function &setLastclock($lastclock): static
+	{
 		$this->lastclock = $lastclock;
 		return $this;
 	}
@@ -1398,14 +1354,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLastns() {
+	public function getLastns(): int|string
+	{
 		return $this->lastns;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLastns($lastns) {
+	public function &setLastns($lastns): static
+	{
 		$this->lastns = $lastns;
 		return $this;
 	}
@@ -1413,14 +1371,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLastvalue() {
+	public function getLastvalue(): string
+	{
 		return $this->lastvalue;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLastvalue($lastvalue) {
+	public function &setLastvalue($lastvalue): static
+	{
 		$this->lastvalue = $lastvalue;
 		return $this;
 	}
@@ -1428,14 +1388,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLogtimefmt() {
+	public function getLogtimefmt(): string
+	{
 		return $this->logtimefmt;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLogtimefmt($logtimefmt) {
+	public function &setLogtimefmt($logtimefmt): static
+	{
 		$this->logtimefmt = $logtimefmt;
 		return $this;
 	}
@@ -1443,14 +1405,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMtime() {
+	public function getMtime(): int|string
+	{
 		return $this->mtime;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMtime($mtime) {
+	public function &setMtime($mtime): static
+	{
 		$this->mtime = $mtime;
 		return $this;
 	}
@@ -1458,14 +1422,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getMultiplier() {
+	public function getMultiplier(): int|string
+	{
 		return $this->multiplier;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setMultiplier($multiplier) {
+	public function &setMultiplier($multiplier): static
+	{
 		$this->multiplier = $multiplier;
 		return $this;
 	}
@@ -1473,14 +1439,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getParams() {
+	public function getParams(): string
+	{
 		return $this->params;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setParams($params) {
+	public function &setParams($params): static
+	{
 		$this->params = $params;
 		return $this;
 	}
@@ -1488,14 +1456,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPassword() {
+	public function getPassword(): string
+	{
 		return $this->password;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPassword($password) {
+	public function &setPassword($password): static
+	{
 		$this->password = $password;
 		return $this;
 	}
@@ -1503,14 +1473,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPort() {
+	public function getPort(): string
+	{
 		return $this->port;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPort($port) {
+	public function &setPort($port): static
+	{
 		$this->port = $port;
 		return $this;
 	}
@@ -1518,14 +1490,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrevvalue() {
+	public function getPrevvalue(): string
+	{
 		return $this->prevvalue;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPrevvalue($prevvalue) {
+	public function &setPrevvalue($prevvalue): static
+	{
 		$this->prevvalue = $prevvalue;
 		return $this;
 	}
@@ -1533,14 +1507,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPrivatekey() {
+	public function getPrivatekey(): string
+	{
 		return $this->privatekey;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPrivatekey($privatekey) {
+	public function &setPrivatekey($privatekey): static
+	{
 		$this->privatekey = $privatekey;
 		return $this;
 	}
@@ -1548,14 +1524,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getPublickey() {
+	public function getPublickey(): string
+	{
 		return $this->publickey;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setPublickey($publickey) {
+	public function &setPublickey($publickey): static
+	{
 		$this->publickey = $publickey;
 		return $this;
 	}
@@ -1563,14 +1541,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmp_Community() {
+	public function getSnmp_Community(): string
+	{
 		return $this->snmp_community;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmp_Community($snmp_community) {
+	public function &setSnmp_Community($snmp_community): static
+	{
 		$this->snmp_community = $snmp_community;
 		return $this;
 	}
@@ -1578,14 +1558,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmp_Oid() {
+	public function getSnmp_Oid(): string
+	{
 		return $this->snmp_oid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmp_Oid($snmp_oid) {
+	public function &setSnmp_Oid($snmp_oid): static
+	{
 		$this->snmp_oid = $snmp_oid;
 		return $this;
 	}
@@ -1593,14 +1575,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Authpassphrase() {
+	public function getSnmpv3_Authpassphrase(): string
+	{
 		return $this->snmpv3_authpassphrase;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Authpassphrase($snmp_authpassphrase) {
+	public function &setSnmpv3_Authpassphrase($snmp_authpassphrase): static
+	{
 		$this->snmp_authpassphrase = $snmp_authpassphrase;
 		return $this;
 	}
@@ -1608,14 +1592,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Authprotocol() {
+	public function getSnmpv3_Authprotocol(): string
+	{
 		return $this->snmpv3_authprotocol;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Authprotocol($snmp_authprotocol) {
+	public function &setSnmpv3_Authprotocol($snmp_authprotocol): static
+	{
 		$this->snmpv3_authprotocol = $this->retrouve_Snmpv3Authprotocol ( $snmp_authprotocol );
 		return $this;
 	}
@@ -1623,14 +1609,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Contextname() {
+	public function getSnmpv3_Contextname(): string
+	{
 		return $this->snmpv3_contextname;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Contextname($snmp_contextname) {
+	public function &setSnmpv3_Contextname($snmp_contextname): static
+	{
 		$this->snmpv3_contextname = $snmp_contextname;
 		return $this;
 	}
@@ -1638,14 +1626,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Privpassphrase() {
+	public function getSnmpv3_Privpassphrase(): string
+	{
 		return $this->snmpv3_privpassphrase;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Privpassphrase($snmp_privpassphrase) {
+	public function &setSnmpv3_Privpassphrase($snmp_privpassphrase): static
+	{
 		$this->snmpv3_privpassphrase = $snmp_privpassphrase;
 		return $this;
 	}
@@ -1653,14 +1643,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Privprotocol() {
+	public function getSnmpv3_Privprotocol(): string
+	{
 		return $this->snmpv3_privprotocol;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Privprotocol($snmp_privprotocol) {
+	public function &setSnmpv3_Privprotocol($snmp_privprotocol): static
+	{
 		$this->snmpv3_privprotocol = $this->retrouve_Snmpv3Privprotocol ( $snmp_privprotocol );
 		return $this;
 	}
@@ -1668,14 +1660,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Securitylevel() {
+	public function getSnmpv3_Securitylevel(): string
+	{
 		return $this->snmpv3_securitylevel;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Securitylevel($snmp_securitylevel) {
+	public function &setSnmpv3_Securitylevel($snmp_securitylevel): static
+	{
 		$this->snmpv3_securitylevel = $this->retrouve_Snmpv3Securitylevel ( $snmp_securitylevel );
 		return $this;
 	}
@@ -1683,14 +1677,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getSnmpv3_Securityname() {
+	public function getSnmpv3_Securityname(): string
+	{
 		return $this->snmpv3_securityname;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setSnmpv3_Securityname($snmp_securityname) {
+	public function &setSnmpv3_Securityname($snmp_securityname): static
+	{
 		$this->snmpv3_securityname = $snmp_securityname;
 		return $this;
 	}
@@ -1698,14 +1694,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getState() {
+	public function getState(): int|string
+	{
 		return $this->state;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setState($state) {
+	public function &setState($state): static
+	{
 		$this->state = $this->retrouve_State ( $state );
 		return $this;
 	}
@@ -1713,14 +1711,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getStatus() {
+	public function getStatus(): int|string
+	{
 		return $this->status;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStatus($status) {
+	public function &setStatus($status): static
+	{
 		$this->status = $this->retrouve_Status ( $status );
 		return $this;
 	}
@@ -1728,14 +1728,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTemplateId() {
+	public function getTemplateId(): string
+	{
 		return $this->templateid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTemplateId($templateid) {
+	public function &setTemplateId($templateid): static
+	{
 		$this->templateid = $templateid;
 		return $this;
 	}
@@ -1743,14 +1745,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTrapperHosts() {
+	public function getTrapperHosts(): string
+	{
 		return $this->trapper_hosts;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTrapperHosts($trapper_hosts) {
+	public function &setTrapperHosts($trapper_hosts): static
+	{
 		$this->trapper_hosts = $trapper_hosts;
 		return $this;
 	}
@@ -1758,14 +1762,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTrends() {
+	public function getTrends(): int|string
+	{
 		return $this->trends;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTrends($trends) {
+	public function &setTrends($trends): static
+	{
 		$this->trends = $trends;
 		return $this;
 	}
@@ -1773,14 +1779,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUnits() {
+	public function getUnits(): string
+	{
 		return $this->units;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUnits($units) {
+	public function &setUnits($units): static
+	{
 		$this->units = $units;
 		return $this;
 	}
@@ -1788,14 +1796,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->username;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsername($username) {
+	public function &setUsername($username): static
+	{
 		$this->username = $username;
 		return $this;
 	}
@@ -1803,14 +1813,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getValuemapId() {
+	public function getValuemapId(): string
+	{
 		return $this->valuemapid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setValuemapId($valuemapid) {
+	public function &setValuemapId($valuemapid): static
+	{
 		$this->valuemapid = $valuemapid;
 		return $this;
 	}
@@ -1818,14 +1830,16 @@ class zabbix_item extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getApplications() {
+	public function getApplications(): array
+	{
 		return $this->applications;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setApplications($applications) {
+	public function &setApplications($applications): static
+	{
 		$this->applications = $applications;
 		return $this;
 	}
@@ -1836,7 +1850,7 @@ class zabbix_item extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -1848,4 +1862,4 @@ class zabbix_item extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>
+

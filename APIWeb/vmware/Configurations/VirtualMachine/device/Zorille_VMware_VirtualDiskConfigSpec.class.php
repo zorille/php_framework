@@ -46,7 +46,7 @@ class VirtualDiskConfigSpec extends VirtualDeviceConfigSpec {
 	 * @return VirtualDiskConfigSpec
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -71,10 +71,10 @@ class VirtualDiskConfigSpec extends VirtualDeviceConfigSpec {
 	/************************* Methodes VMWare ***********************/
 	/**
 	 * Prepare les donnees sous forme de tableau pour une requete SOAP
-	 * @param string $arrayObject Permet de choisir entre un array ou un arrayObject en retour
+	 * @param bool $arrayObject Permet de choisir entre un array ou un arrayObject en retour
 	 * @return ArrayObject|array
 	 */
-	public function renvoi_donnees_soap($arrayObject = false) {
+	public function renvoi_donnees_soap(bool $arrayObject = false) {
 		$liste_proprietes = parent::renvoi_donnees_soap(true);
 		$liste_proprietes ["migrateCache"] = $this->getMigrateCache ();
 	
@@ -89,7 +89,7 @@ class VirtualDiskConfigSpec extends VirtualDeviceConfigSpec {
 	 * @param boolean $arrayObject Permet de choisir entre un array ou un arrayObject en retour de renvoi_donnees_soap
 	 * @return soapvar
 	 */
-	public function &renvoi_objet_soap($arrayObject = false) {
+	public function &renvoi_objet_soap(bool $arrayObject = false) {
 		$soap_var= new soapvar ( $this->renvoi_donnees_soap(true), SOAP_ENC_OBJECT, 'VirtualDiskConfigSpec' );
 		return $soap_var;
 	}
@@ -114,7 +114,7 @@ class VirtualDiskConfigSpec extends VirtualDeviceConfigSpec {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

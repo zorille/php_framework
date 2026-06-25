@@ -72,7 +72,8 @@ class fichier extends repertoire {
 	 * @param array $liste_class
 	 * @return fichier
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -86,10 +87,10 @@ class fichier extends repertoire {
 	 * @codeCoverageIgnore
 	 * @param string $fichier Chemin complet du fichier.
 	 * @param string $creer Si le fichier n'existe pas, doit-on le creer oui/non ?
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @throws Exception
 	 */
-	public function __construct($fichier, $creer = "non", $sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct($fichier, $creer = "non", bool|string $sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de repertoire
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -99,7 +100,7 @@ class fichier extends repertoire {
 		$this->etat = false;
 		$this->creer = false;
 		if (! $exist && $creer == "non") {
-			return $this->onError ( "Erreur le fichier : " . $this->fichier . " n'existe pas" );
+			$this->onError ( "Erreur le fichier : " . $this->fichier . " n'existe pas" );
 		} elseif (! $exist && $creer == "oui") {
 			$this->creer = true;
 		}
@@ -112,7 +113,8 @@ class fichier extends repertoire {
 	 * @param string $mode Mode d'ouverture du fichier.
 	 * @throws Exception
 	 */
-	public function ouvrir($mode = "r") {
+	public function ouvrir(string $mode = "r"): bool
+	{
 		if (fichier::tester_fichier_existe ( $this->fichier ) === false && $this->creer) {
 			touch ( $this->fichier );
 		}
@@ -134,8 +136,10 @@ class fichier extends repertoire {
 	 * Ecrit une ligne dans un fichier.
 	 *
 	 * @param string $texte Ligne a ecrire.
+	 * @throws Exception
 	 */
-	public function ecrit($texte) {
+	public function ecrit(string $texte): bool
+	{
 		if ($this->etat === false) {
 			// @codeCoverageIgnoreStart
 			return $this->onError ( "Erreur le fichier n'est pas ouvert : " . $this->fichier );
@@ -143,21 +147,20 @@ class fichier extends repertoire {
 		} elseif (fwrite ( $this->handler, $texte ) == FALSE) {
 			// @codeCoverageIgnoreStart
 			return $this->onError ( "Erreur lors de l'ecriture dans le fichier : " . $this->fichier );
-		} else {
-			// @codeCoverageIgnoreEnd
-			$retour = true;
 		}
-		
-		return $retour;
+
+		// @codeCoverageIgnoreEnd
+		return true;
 	}
 
 	/**
 	 * Lit une ligne dans un fichier.
 	 *
-	 * @param string $nb_caracteres Nombre de caractere a lire
+	 * @param int|string $nb_caracteres Nombre de caractere a lire
 	 * @return string|false Renvoi la ligne lue, FALSE sinon.
 	 */
-	public function lit_une_ligne($nb_caracteres = 4096, $fin_de_ligne = "\n\r") {
+	public function lit_une_ligne(int|string $nb_caracteres = 4096, $fin_de_ligne = "\n\r"): bool|string
+	{
 		if ($this->etat && ! feof ( $this->handler )) {
 			$ligne = stream_get_line ( $this->handler, $nb_caracteres, $fin_de_ligne );
 			
@@ -174,11 +177,12 @@ class fichier extends repertoire {
 	/**
 	 * Lit le fichier.
 	 *
-	 * @param string $nb_caracteres Nombre de caractere a lire
+	 * @param int|string $nb_caracteres Nombre de caractere a lire
 	 * @param bool $return_array Renvoi le resultat sous forme de tableau
 	 * @return string|array|false Renvoi toutes les lignes lues en string ou en array, FALSE sinon.
 	 */
-	public function charge_fichier($nb_caracteres = 4096, $return_array = false, $fin_de_ligne = "\n\r") {
+	public function charge_fichier(int|string $nb_caracteres = 4096, bool $return_array = false, $fin_de_ligne = "\n\r"): bool|array|string
+	{
 		if ($return_array) {
 			$ligne = array ();
 		} else {
@@ -207,7 +211,8 @@ class fichier extends repertoire {
 	 * @param int $chmod Peut etre sous la forme 755 ou 0755.
 	 * @return bool true si OK, false sinon.
 	 */
-	public function ajoute_droits($chmod) {
+	public function ajoute_droits(int $chmod): bool
+	{
 		if ($this->etat) {
 			return chmod ( $this->fichier, octdec($chmod) );
 		}
@@ -228,7 +233,8 @@ class fichier extends repertoire {
 	 * @param string $ecrase Ecrase le fichier de destination s'il existe oui/non.
 	 * @return int Renvoi O si OK, different de 0 sinon.
 	 */
-	static function copie($source, $dest, $ecrase = "oui") {
+	static function copie(string $source, string $dest, string $ecrase = "oui"): int
+	{
 		if (! ($dest != "" && $source != "" && fichier::tester_fichier_existe ( $source ))) {
 			return 2;
 		}
@@ -257,7 +263,8 @@ class fichier extends repertoire {
 	 * @param string $ecrase Ecrase le fichier de destination s'il existe oui/non.
 	 * @return int Renvoi O si OK, different de 0 sinon.
 	 */
-	static function deplace($source, $dest, $ecrase = "oui") {
+	static function deplace(string $source, string $dest, string $ecrase = "oui"): int
+	{
 		if ($ecrase == "non" && is_file ( $dest )) {
 			$continu = FALSE;
 		} else {
@@ -286,7 +293,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier a supprimer.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	static function supprime_fichier($fichier = "") {
+	static function supprime_fichier(string $fichier = ""): bool
+	{
 		if (fichier::tester_fichier_existe ( $fichier )) {
 			if (unlink ( $fichier ) === FALSE) {
 				// @codeCoverageIgnoreStart
@@ -306,7 +314,8 @@ class fichier extends repertoire {
 	 * @param string $dest Chemin du fichier destination
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	static function renomme($source, $dest) {
+	static function renomme(string $source, string $dest): bool
+	{
 		// @codeCoverageIgnoreStart
 		if ($source != "" && $dest != "" && fichier::tester_fichier_existe ( $source )) {
 			if (@rename ( $source, $dest ))
@@ -320,7 +329,8 @@ class fichier extends repertoire {
 	 * Ferme un fichier ouvert.
 	 *
 	 */
-	public function close() {
+	public function close(): bool
+	{
 		if ($this->etat) {
 			fclose ( $this->handler );
 			$this->etat = false;
@@ -336,7 +346,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier a tester.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	static function tester_fichier_existe($fichier = "no_file") {
+	static function tester_fichier_existe(string $fichier = "no_file"): bool
+	{
 		$state = file_exists ( $fichier );
 		clearstatcache ();
 		return $state;
@@ -349,7 +360,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier a tester.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
 	 */
-	static function tester_fichier_standard($fichier = "no_file") {
+	static function tester_fichier_standard(string $fichier = "no_file"): bool
+	{
 		$state = is_file ( $fichier );
 		clearstatcache ();
 		return $state;
@@ -362,7 +374,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier.
 	 * @return array|Bool Renvoi les stats en appel static sinon TRUE si OK, FALSE en cas d'erreur.
 	 */
-	static function recupere_info_fichier($fichier = "no_file") {
+	static function recupere_info_fichier(string $fichier = "no_file"): bool|array
+	{
 		if (fichier::tester_fichier_existe ( $fichier )) {
 			$CODE_RETOUR = stat ( $fichier );
 		} else {
@@ -379,7 +392,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier.
 	 * @return int|false Renvoi la taille, FALSE sinon.
 	 */
-	static function recupere_taille_fichier($fichier = "no_file") {
+	static function recupere_taille_fichier(string $fichier = "no_file"): bool|int
+	{
 		if (fichier::tester_fichier_existe ( $fichier )) {
 			$CODE_RETOUR = filesize ( $fichier );
 		} else {
@@ -396,7 +410,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier.
 	 * @return int|false Renvoi la taille, FALSE sinon.
 	 */
-	static function Lit_integralite_fichier($fichier = "no_file") {
+	static function Lit_integralite_fichier(string $fichier = "no_file"): bool|int
+	{
 		if (fichier::tester_fichier_existe ( $fichier )) {
 			return file_get_contents ( $fichier );
 		}
@@ -411,7 +426,8 @@ class fichier extends repertoire {
 	 * @param string $fichier Chemin complet du fichier.
 	 * @return int|false Renvoi la taille, FALSE sinon.
 	 */
-	static function Lit_integralite_fichier_en_tableau($fichier = "no_file") {
+	static function Lit_integralite_fichier_en_tableau(string $fichier = "no_file"): bool|int|array
+	{
 		if (fichier::tester_fichier_existe ( $fichier )) {
 			return file ( $fichier, FILE_SKIP_EMPTY_LINES );
 		}
@@ -423,7 +439,8 @@ class fichier extends repertoire {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function renvoi_nom_fichier() {
+	public function renvoi_nom_fichier(): string
+	{
 		return $this->fichier;
 	}
 
@@ -439,10 +456,9 @@ class fichier extends repertoire {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -451,5 +467,3 @@ class fichier extends repertoire {
 		return $help;
 	}
 }
-
-?>

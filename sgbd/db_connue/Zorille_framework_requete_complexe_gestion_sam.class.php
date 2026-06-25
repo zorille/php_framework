@@ -38,7 +38,7 @@ class requete_complexe_gestion_sam extends desc_bd_gestion_sam {
 	 * @param array $liste_class
 	 * @return requete_complexe_gestion_sam
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

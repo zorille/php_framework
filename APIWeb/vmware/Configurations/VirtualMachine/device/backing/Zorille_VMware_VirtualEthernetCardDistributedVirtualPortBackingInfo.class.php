@@ -47,7 +47,7 @@ class VirtualEthernetCardDistributedVirtualPortBackingInfo extends VirtualDevice
 	 * @return VirtualEthernetCardDistributedVirtualPortBackingInfo
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;

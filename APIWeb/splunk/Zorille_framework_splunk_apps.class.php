@@ -14,20 +14,19 @@ abstract class splunk_apps extends splunk_ci {
 	
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__) {
 		// Gestion du parent
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 	
 	/**
 	 * Remet l'url par defaut
-	 * @return splunk_apps
 	 */
-	public function &reset_resource() {
+	public function &reset_resource(): static
+	{
 		return parent::reset_resource () ->addResource ( 'apps' );
 	}
 
@@ -42,7 +41,7 @@ abstract class splunk_apps extends splunk_ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -51,4 +50,4 @@ abstract class splunk_apps extends splunk_ci {
 		return $help;
 	}
 }
-?>
+

@@ -17,11 +17,12 @@ class zabbix_datas extends serveur_datas {
 	 * Instancie un objet de type zabbix_datas.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return zabbix_datas
 	 */
-	static function &creer_zabbix_datas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_datas(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_datas
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_datas ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -37,7 +38,7 @@ class zabbix_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return zabbix_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_zabbix_param ();
@@ -51,7 +52,6 @@ class zabbix_datas extends serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de serveur_datas
@@ -60,9 +60,10 @@ class zabbix_datas extends serveur_datas {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return zabbix_datas True est OK, False sinon.
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): zabbix_datas
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$donnee_zabbix = $this->_valideOption ( array (
 				"zabbix_machines",
@@ -78,7 +79,8 @@ class zabbix_datas extends serveur_datas {
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
 	 */
-	public function valide_presence_zabbix_data($nom) {
+	public function valide_presence_zabbix_data($nom): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->valide_presence_serveur_data ( $nom );
 	}
@@ -91,7 +93,8 @@ class zabbix_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -101,4 +104,4 @@ class zabbix_datas extends serveur_datas {
 		return $help;
 	}
 }
-?>
+

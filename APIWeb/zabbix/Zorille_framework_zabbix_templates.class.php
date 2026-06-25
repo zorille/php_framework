@@ -40,11 +40,12 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_templates
+	 * @return abstract_log|zabbix_templates
 	 */
-	static function &creer_zabbix_templates(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_templates(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): abstract_log|zabbix_templates
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_templates ( $sort_en_erreur, $entete  );
 		return $objet->_initialise ( array (
@@ -57,9 +58,9 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_templates
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetTemplateRef ( zabbix_template::creer_zabbix_template ( $liste_class ["options"], $liste_class ["zabbix_wsclient"] ) );
@@ -72,7 +73,6 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__ ) {
 		// Gestion de zabbix_fonctions_standard
@@ -82,10 +82,11 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
 	 * @param boolean $ajoute_template Permet d'ajouter le template a la liste des templates ou non
-	 * @return false|zabbix_templates.
+	 * @return zabbix_templates.
 	 * @throws Exception
 	 */
-	public function &retrouve_zabbix_param($ajoute_template = true) {
+	public function &retrouve_zabbix_param(bool $ajoute_template = true): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		//Gestion des template
 		$liste_template = $this->_valideOption ( array (
@@ -116,7 +117,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return zabbix_templates.
 	 * @throws Exception
 	 */
-	public function &ajoute_template_a_partir_cli() {
+	public function &ajoute_template_a_partir_cli(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		foreach ( $this->getListeTemplatesCli() as $template ) {
 			$this->RemplaceValeurListeTemplates ( $template, "exist", true );
@@ -130,7 +132,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return zabbix_templates.
 	 * @throws Exception
 	 */
-	public function &retire_template_a_partir_cli() {
+	public function &retire_template_a_partir_cli(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		foreach ( $this->getListeTemplatesCli() as $template ) {
 			$this->RemplaceValeurListeTemplates ( $template, "exist", false );
@@ -147,13 +150,15 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return false|zabbix_templates
 	 * @throws Exception
 	 */
-	public function &RemplaceValeurListeTemplates($template_name, $champ, $valeur, $erreur = true) {
+	public function &RemplaceValeurListeTemplates($template_name, string $champ, bool|string $valeur, bool $erreur = true): bool|zabbix_templates|static
+	{
 		$this->onDebug ( __METHOD__, 2 );
 		$liste_template = $this->getListeTemplates ();
 		if (isset ( $liste_template [$template_name] )) {
 			$liste_template [$template_name] [$champ] = $valeur;
 		} elseif ($erreur) {
-			return $this->onError ( "le template " . $template_name . " n'existe pas." );
+			$r = $this->onError ( "le template " . $template_name . " n'existe pas." );
+			return $r;
 		}
 		$this->setListeTemplates ( $liste_template );
 		
@@ -165,7 +170,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return zabbix_templates
 	 * @throws Exception
 	 */
-	public function &creer_liste_templates() {
+	public function &creer_liste_templates(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		foreach ( $this->getListeTemplates () as $donnees_templatee ) {
 			if ($donnees_templatee ["exist"] === false) {
@@ -190,8 +196,10 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	/**
 	 * Recupere la liste des Templates defini dans zabbix
 	 * @return zabbix_templates
+	 * @throws Exception
 	 */
-	public function &recherche_liste_templates() {
+	public function &recherche_liste_templates(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_templates_zabbix = $this->getObjetZabbixWsclient ()
 			->templateGet ( array (
@@ -214,7 +222,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return zabbix_templates
 	 * @throws Exception
 	 */
-	public function &valide_liste_templates() {
+	public function &valide_liste_templates(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_templates_zabbix = $this->getObjetZabbixWsclient ()
 			->templateGet ( array (
@@ -234,10 +243,12 @@ class zabbix_templates extends zabbix_fonctions_standard {
 
 	/**
 	 * Valide les templates zabbix qui correspondent au templateid dans la liste en argument
+	 * @param $liste_templateids
 	 * @return zabbix_templates
 	 * @throws Exception
 	 */
-	public function &ajoute_liste_templates_a_partir_de_tableau($liste_templateids) {
+	public function &ajoute_liste_templates_a_partir_de_tableau($liste_templateids): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		foreach ( $this->getListeTemplates () as $template ) {
@@ -254,7 +265,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return zabbix_templates
 	 * @throws Exception
 	 */
-	public function &valide_liste_templates_a_partir_de_tableau($liste_templateids) {
+	public function &valide_liste_templates_a_partir_de_tableau($liste_templateids): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		foreach ( $this->getListeTemplates () as $template ) {
@@ -273,7 +285,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * @return zabbix_templates
 	 * @throws Exception
 	 */
-	public function &invalide_liste_templates_a_partir_de_tableau($liste_templateids) {
+	public function &invalide_liste_templates_a_partir_de_tableau($liste_templateids): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		
 		foreach ( $this->getListeTemplates () as $template ) {
@@ -289,7 +302,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * Creer un tableau de templateids
 	 * @return array
 	 */
-	public function creer_definition_templatesids_ws() {
+	public function creer_definition_templatesids_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_id = array ();
 		foreach ( $this->getListeTemplates () as $template ) {
@@ -305,12 +319,13 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * Creer un tableau de templateids
 	 * @return array
 	 */
-	public function creer_definition_templatesids_sans_champ_templateid_ws() {
+	public function creer_definition_templatesids_sans_champ_templateid_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_id = array ();
 		foreach ( $this->getListeTemplates () as $template ) {
 			if ($template ["exist"] === true) {
-				$liste_id [count ( $liste_id )] = $template ["templateid"];
+				$liste_id[] = $template ["templateid"];
 			}
 		}
 	
@@ -321,14 +336,16 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getObjetTemplateRef() {
+	public function &getObjetTemplateRef(): zabbix_template|string
+	{
 		return $this->zabbix_template_reference;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetTemplateRef(&$zabbix_template_reference) {
+	public function &setObjetTemplateRef(&$zabbix_template_reference): static
+	{
 		$this->zabbix_template_reference = $zabbix_template_reference;
 		return $this;
 	}
@@ -336,7 +353,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setAjoutListeTemplates($template_name, $template_id, $exist = true) {
+	public function &setAjoutListeTemplates($template_name, $template_id, $exist = true): static
+	{
 		$this->liste_templates [$template_name] = array (
 				"templateid" => $template_id,
 				"name" => $template_name,
@@ -348,14 +366,16 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeTemplates() {
+	public function getListeTemplates(): array
+	{
 		return $this->liste_templates;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeTemplates($liste_templates) {
+	public function &setListeTemplates($liste_templates): static
+	{
 		$this->liste_templates = $liste_templates;
 		return $this;
 	}
@@ -363,14 +383,16 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeTemplatesCli() {
+	public function getListeTemplatesCli(): array
+	{
 		return $this->liste_templates_cli;
 	}
 	
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeTemplatesCli($liste_templates_cli) {
+	public function &setListeTemplatesCli($liste_templates_cli): static
+	{
 		$this->liste_templates_cli = $liste_templates_cli;
 		return $this;
 	}
@@ -381,7 +403,8 @@ class zabbix_templates extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -391,4 +414,3 @@ class zabbix_templates extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

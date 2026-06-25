@@ -38,7 +38,7 @@ class requete_complexe_gestion_zabbix extends desc_bd_gestion_zabbix {
 	 * @param array $liste_class
 	 * @return requete_complexe_gestion_zabbix
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

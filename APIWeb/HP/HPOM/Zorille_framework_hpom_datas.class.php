@@ -48,7 +48,8 @@ class hpom_datas extends serveur_datas {
 	 * @param array $liste_class
 	 * @return hpom_datas
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setSoapConnection ( soap::creer_soap ( $liste_class ["options"] ) )
@@ -64,7 +65,6 @@ class hpom_datas extends serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string $entete Entete des logs de l'objet
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de serveur_datas
@@ -208,7 +208,7 @@ class hpom_datas extends serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

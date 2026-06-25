@@ -31,15 +31,17 @@ class Location extends ci {
 	 * Instancie un objet de type Location. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Location
+	 * @throws Exception
 	 */
 	static function &creer_Location(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): Location
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Location ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -53,9 +55,10 @@ class Location extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Location
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Location' )
 			->champ_obligatoire_standard ()
@@ -67,22 +70,22 @@ class Location extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return Location
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -91,10 +94,14 @@ class Location extends ci {
 		}
 		return $this;
 	}
-	
+
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Location(
 			$name,
-			$org_name) {
+			$org_name): ci|bool|Location
+	{
 				if (is_array ( $name )) {
 					return $this->creer_oql ( $name )
 					->retrouve_ci ();
@@ -113,9 +120,9 @@ class Location extends ci {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_Location(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		return $params;
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
@@ -124,7 +131,8 @@ class Location extends ci {
 	 * @return Location
 	 */
 	public function creer_oql_Location(
-			$fields = array ()) {
+		array $fields = array ()): Location
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -142,9 +150,11 @@ class Location extends ci {
 	 * name, org_name, status, postal_code,city,country,address
 	 * @param array $parametres
 	 * @return Location
+	 * @throws Exception
 	 */
 	public function gestion_Location(
-			$parametres) {
+		array $parametres): Location
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Location( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -160,7 +170,8 @@ class Location extends ci {
 	 * @codeCoverageIgnore
 	 * @return Organization
 	 */
-	public function &getObjetItopOrganization() {
+	public function &getObjetItopOrganization(): ?Organization
+	{
 		return $this->Organization;
 	}
 
@@ -168,7 +179,8 @@ class Location extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopOrganization(
-			&$Organization) {
+			&$Organization): static
+	{
 		$this->Organization = $Organization;
 		return $this;
 	}
@@ -179,11 +191,11 @@ class Location extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Location :";
 		return $help;
 	}
 }
-?>

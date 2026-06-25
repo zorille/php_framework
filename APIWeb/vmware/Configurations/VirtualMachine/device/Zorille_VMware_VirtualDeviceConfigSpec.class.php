@@ -46,11 +46,13 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * Instancie un objet de type VirtualDeviceConfigSpec.
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return VirtualDeviceConfigSpec
+	 * @throws Exception
 	 */
-	static function &creer_VirtualDeviceConfigSpec(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_VirtualDeviceConfigSpec(Core\options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): VirtualDeviceConfigSpec
+	{
 		
 		$objet = new VirtualDeviceConfigSpec ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -66,7 +68,7 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * @return VirtualDeviceConfigSpec
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -77,12 +79,11 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct(bool|string $sort_en_erreur = false, string $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -93,7 +94,8 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * @param boolean $arrayObject Permet de choisir entre un array ou un arrayObject en retour
 	 * @return ArrayObject|array
 	 */
-	public function renvoi_donnees_soap($arrayObject = false) {
+	public function renvoi_donnees_soap(bool $arrayObject = false): ArrayObject|array
+	{
 		$liste_proprietes = new ArrayObject ();
 		if ( $this->getOperation () ) {
 			$liste_proprietes ["operation"] = $this->getOperation ();
@@ -123,7 +125,8 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * @param boolean $arrayObject Permet de choisir entre un array ou un arrayObject en retour de renvoi_donnees_soap
 	 * @return soapvar
 	 */
-	public function &renvoi_objet_soap($arrayObject = false) {
+	public function &renvoi_objet_soap(bool $arrayObject = false): soapvar
+	{
 		$soap_var = new soapvar ( $this->renvoi_donnees_soap ( $arrayObject ), SOAP_ENC_OBJECT, 'VirtualDeviceConfigSpec' );
 		return $soap_var;
 	}
@@ -135,14 +138,16 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @return VirtualDevice
 	 */
-	public function &getDevice() {
+	public function &getDevice(): ?VirtualDevice
+	{
 		return $this->device;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDevice(&$device) {
+	public function &setDevice(&$device): static
+	{
 		$this->device = $device;
 		return $this;
 	}
@@ -150,7 +155,8 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getFileOperation() {
+	public function getFileOperation(): string
+	{
 		return $this->fileOperation;
 	}
 
@@ -158,16 +164,12 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * create/destroy/replace
 	 * @codeCoverageIgnore
 	 */
-	public function &setFileOperation($fileOperation) {
-		switch ($fileOperation) {
-			case 'create' :
-			case 'destroy' :
-			case 'replace' :
-				$this->fileOperation = $fileOperation;
-				break;
-			default :
-				$this->fileOperation = "";
-		}
+	public function &setFileOperation($fileOperation): static
+	{
+		$this->fileOperation = match ($fileOperation) {
+			'create', 'destroy', 'replace' => $fileOperation,
+			default => "",
+		};
 		
 		return $this;
 	}
@@ -175,7 +177,8 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperation() {
+	public function getOperation(): string
+	{
 		return $this->operation;
 	}
 
@@ -183,16 +186,12 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * add/edit/remove
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperation($operation) {
-		switch ($operation) {
-			case 'add' :
-			case 'edit' :
-			case 'remove' :
-				$this->operation = $operation;
-				break;
-			default :
-				$this->operation = "";
-		}
+	public function &setOperation($operation): static
+	{
+		$this->operation = match ($operation) {
+			'add', 'edit', 'remove' => $operation,
+			default => "",
+		};
 		
 		return $this;
 	}
@@ -200,14 +199,16 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getProfile() {
+	public function getProfile(): array
+	{
 		return $this->profile;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setProfile($profile) {
+	public function &setProfile($profile): static
+	{
 		$this->profile = $profile;
 		return $this;
 	}
@@ -218,7 +219,7 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -226,5 +227,3 @@ class VirtualDeviceConfigSpec extends Core\abstract_log {
 		return $help;
 	}
 }
-
-?>

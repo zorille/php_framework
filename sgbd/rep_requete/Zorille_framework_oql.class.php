@@ -36,8 +36,9 @@ class oql extends xql {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return oql
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -48,22 +49,24 @@ class oql extends xql {
 	 * @param string $entete
 	 * @param string $sort_en_erreur
 	 */
-	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct($sort_en_erreur = false, string $entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 	
 	// Requete SELECT FROM WHERE
+
 	/**
 	 * Creer un requete SQL type SELECT...FROM...WHERE.
 	 *
 	 * @param string $from Liste de champ du FROM.
-	 * @param string|array $where Liste de champ du WHERE.
+	 * @param array|string $where Liste de champ du WHERE.
 	 * @param string $option Option supplementaire (ORDER BY, GROUP BY ...).
-	 * @return oql
+	 * @return bool|oql
 	 * @throws Exception
 	 */
-	public function creer_select($from, $where, $option = "") {
+	public function creer_select(string $from, array|string $where, string $option = ""): bool|static
+	{
 		// creation de la requete
 		$oql = "SELECT ";
 		if (is_string ( $from )) {
@@ -83,10 +86,12 @@ class oql extends xql {
 	 * Creer un requete SQL type FROM .
 	 * . JOIN .. ON ...
 	 *
-	 * @param string|array $fromListe de champ du FROM.
+	 * @param $from
+	 * @return bool|string
 	 * @throws Exception
 	 */
-	public function creer_from_join($from) {
+	public function creer_from_join($from): bool|string
+	{
 		$from_join = "";
 		// creation de la requete
 		if (is_array ( $from )) {
@@ -97,23 +102,13 @@ class oql extends xql {
 					}
 					$from_join .= $data;
 				} else {
-					switch ($data ["type"]) {
-						case "BELOW" :
-							$join_op = " BELOW ";
-							break;
-						case "BELOW STRICT" :
-							$join_op = " BELOW STRICT ";
-							break;
-						case "ABOVE" :
-							$join_op = " ABOVE ";
-							break;
-						case "ABOVE STRICT" :
-							$join_op = " ABOVE STRICT ";
-							break;
-						case "BOTH" :
-						default :
-							$join_op = "=";
-					}
+					$join_op = match ($data ["type"]) {
+						"BELOW" => " BELOW ",
+						"BELOW STRICT" => " BELOW STRICT ",
+						"ABOVE" => " ABOVE ",
+						"ABOVE STRICT" => " ABOVE STRICT ",
+						default => "=",
+					};
 					$from_join .= " JOIN " . $data ["table"] . " ON " . $data ["champ1"] . $join_op . $data ["champ2"];
 				}
 			}
@@ -124,14 +119,14 @@ class oql extends xql {
 	/***************** Accesseurs ********************/
 	
 	/***************** Accesseurs ********************/
-	
+
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -139,4 +134,3 @@ class oql extends xql {
 		return $help;
 	}
 }
-?>

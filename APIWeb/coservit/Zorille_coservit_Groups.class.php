@@ -6,8 +6,6 @@
  */
 namespace Zorille\coservit;
 
-use Zorille\framework as Core;
-
 /**
  * class Groups
  *
@@ -24,9 +22,10 @@ abstract class Groups extends item {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Groups
+	 * @throws \Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -40,7 +39,7 @@ abstract class Groups extends item {
 	/**
 	 * ******************************* Groups URI ******************************
 	 */
-	public function groups_list_uri() {
+	public function groups_list_uri(): string {
 		return '/bigdata/groups';
 	}
 	/**
@@ -58,11 +57,10 @@ abstract class Groups extends item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Groups :";
 		return $help;
 	}
 }
-?>

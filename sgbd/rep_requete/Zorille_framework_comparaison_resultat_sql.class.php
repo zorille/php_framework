@@ -32,11 +32,13 @@ class comparaison_resultat_sql extends abstract_log {
 	 * Instancie un objet de type comparaison_resultat_sql.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return comparaison_resultat_sql
+	 * @throws Exception
 	 */
-	static function &creer_comparaison_resultat_sql(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_comparaison_resultat_sql(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): comparaison_resultat_sql
+	{
 		$objet = new comparaison_resultat_sql ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -50,8 +52,10 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return comparaison_resultat_sql
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -73,12 +77,12 @@ class comparaison_resultat_sql extends abstract_log {
 	 * Applique les requetes et renvoi un tableau "de hash" representant la liste des tuples : <br>
 	 * $tableau["champ1"]["champ2"].....["champN"]=1
 	 *
-	 * @param connexion $connexion Connexion ouverte sur une base (objet BD).
-	 * @param string $requete Requete a appliquer sur la base.
-	 * @return array false de resultat (liste des tuples), FALSE sinon.
+	 * @param $resultat_sql
+	 * @return array|bool false de resultat (liste des tuples), FALSE sinon.
 	 * @throws Exception
 	 */
-	public function prepare_donnees($resultat_sql) {
+	public function prepare_donnees($resultat_sql): array|bool
+	{
 		$this->onDebug ( "Preparation des donnees.", 2 );
 		if (! is_array ( $resultat_sql )) {
 			return $this->onError ( "La liste de donnees n'est pas un tableau pour la comparaison.", $resultat_sql, 3005 );
@@ -121,7 +125,8 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param array &$tableau2 Pointeur vers la liste des tuples de la table de destination.
 	 * @return comparaison_resultat_sql
 	 */
-	public function compare_tuple($tableau1, &$tableau2) {
+	public function compare_tuple(array $tableau1, array &$tableau2): static
+	{
 		if (is_array ( $tableau1 ) && count ( $tableau1 ) > 0) {
 			foreach ( $tableau1 as $key => $value ) {
 				if (! isset ( $tableau2 [$key] ))
@@ -149,7 +154,8 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param int $code Prend les valeurs 0 ou 1.
 	 * @return array Liste des tuples a modifier en fonction du code.
 	 */
-	public function retrouve_donnees_a_modifier($tableau, $code) {
+	public function retrouve_donnees_a_modifier(array $tableau, int $code): array
+	{
 		$CODE_RETOUR = array ();
 		$flag = false;
 		if (is_array ( $tableau ) && count ( $tableau ) > 0) {
@@ -193,24 +199,21 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param string $requete Requete contenant des champs.
 	 * @return array Liste des champs de la requete.
 	 */
-	public function recuperer_liste_champ($requete) {
+	public function recuperer_liste_champ(string $requete): array
+	{
 		$liste_string = substr ( $requete, 0, stripos ( $requete, "FROM " ) );
 		$liste = explode ( ",", trim ( $liste_string ) );
-		//if ($liste && count ( $liste ) > 0) {
-			// On vire le select et autres distinct ..
-			$tempo = explode ( " ", $liste [0] );
-			$liste [0] = $tempo [(count ( $tempo ) - 1)];
-			foreach ( $liste as $pos => $champ ) {
-				if (stripos ( $champ, " AS " ) !== false) {
-					$tempo2 = explode ( " ", $champ );
-					$liste [$pos] = $tempo2 [3];
-				}
+		// On vire le select et autres distinct ..
+		$tempo = explode ( " ", $liste [0] );
+		$liste [0] = $tempo [(count ( $tempo ) - 1)];
+		foreach ( $liste as $pos => $champ ) {
+			if (stripos ( $champ, " AS " ) !== false) {
+				$tempo2 = explode ( " ", $champ );
+				$liste [$pos] = $tempo2 [3];
 			}
-			$CODE_RETOUR = $liste;
-// 		} else
-// 			$CODE_RETOUR = false;
-		
-		return $CODE_RETOUR;
+		}
+
+		return $liste;
 	}
 
 	/**
@@ -219,12 +222,11 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param string $data        	
 	 * @return string
 	 */
-	public function encode_donnee($data) {
+	public function encode_donnee(string $data): string
+	{
 		$RETOUR = str_replace ( "\'", "'", $data );
 		$RETOUR = str_replace ( "\\", "%2bs%", $RETOUR );
-		$RETOUR = urlencode ( $RETOUR );
-		
-		return $RETOUR;
+		return urlencode ( $RETOUR );
 	}
 
 	/**
@@ -233,10 +235,11 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param string $data        	
 	 * @return string
 	 */
-	public function decode_donnee($data) {
+	public function decode_donnee(string $data): string
+	{
 		$RETOUR = str_replace ( "'", "''", urldecode ( $data ) );
 		$RETOUR = str_replace ( "%2bs%", "\\\\", $RETOUR );
-		if (strpos ( $RETOUR, "ZINT" ) === 0) {
+		if (str_starts_with($RETOUR, "ZINT")) {
 			$RETOUR = str_replace ( "ZINT", "", $RETOUR );
 		}
 		
@@ -249,10 +252,11 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param array $tableau_comparee Tableau renvoye par compare_tuple.
 	 * @param string $table Table a modifier dans la base de destination.
 	 * @param array $liste_champs Liste des champs de la table de destination.
-	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @return bool|array TRUE si OK, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function liste_suppression_donnees($tableau_comparee, $table, $liste_champs) {
+	public function liste_suppression_donnees(array $tableau_comparee, string $table, array $liste_champs): bool|array
+	{
 		$CODE_RETOUR = array ();
 		$liste_a_supprimer = $this->retrouve_donnees_a_modifier ( $tableau_comparee, 1 );
 		$nb_ligne = count ( $liste_a_supprimer );
@@ -297,10 +301,11 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param array $tableau_comparee Tableau renvoye par compare_tuple.
 	 * @param string $table Table a modifier dans la base de destination.
 	 * @param array $liste_champs Liste des champs de la table de destination.
-	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @return bool|array TRUE si OK, FALSE sinon.
 	 * @throws Exception
 	 */
-	public function liste_ajout_donnees($tableau_comparee, $table, $liste_champs) {
+	public function liste_ajout_donnees(array $tableau_comparee, string $table, array $liste_champs): bool|array
+	{
 		$CODE_RETOUR = array ();
 		$liste_a_ajouter = $this->retrouve_donnees_a_modifier ( $tableau_comparee, 0 );
 		$nb_ligne = count ( $liste_a_ajouter );
@@ -352,7 +357,8 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param array $tableau2 Tableau quelconque.
 	 * @return array Renvoi les tableaux concatenes.
 	 */
-	public function concatene_tableau($tableau1, $tableau2) {
+	public function concatene_tableau(array $tableau1, array $tableau2): array
+	{
 		if (is_array ( $tableau2 )) {
 			foreach ( $tableau2 as $key => $data ) {
 				if (is_array ( $data ) && count ( $data ) > 0)
@@ -368,7 +374,7 @@ class comparaison_resultat_sql extends abstract_log {
 	/**
 	 * *****************************************************************
 	 */
-	
+
 	/**
 	 * Ordonnance la synchronisation de chaque table du fichier de configuration.
 	 *
@@ -376,10 +382,11 @@ class comparaison_resultat_sql extends abstract_log {
 	 * @param array &$resultat_sql_sortie Connexion vers la base de destination.
 	 * @param string $table Nom de la table a modifier.
 	 * @param array $liste_champs Liste des champs de la table a modifier.
-	 * @return comparaison_resultat_sql|FALSE
+	 * @return comparaison_resultat_sql
 	 * @throws Exception
 	 */
-	public function synchro_table(&$resultat_sql_entree, &$resultat_sql_sortie, $table, $liste_champs = array()) {
+	public function synchro_table(array &$resultat_sql_entree, array &$resultat_sql_sortie, string $table, array $liste_champs = array()): static
+	{
 		$this->onDebug ( "On synchronise la table : " . $table, 1 );
 		//On reset les tableaux au depart
 		$this->setTableauSupprime ( array () );
@@ -417,14 +424,16 @@ class comparaison_resultat_sql extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTableauAjoute() {
+	public function getTableauAjoute(): array
+	{
 		return $this->tableau_ajoute;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTableauAjoute($tableau_ajoute) {
+	public function &setTableauAjoute($tableau_ajoute): static
+	{
 		$this->tableau_ajoute = $tableau_ajoute;
 		return $this;
 	}
@@ -432,14 +441,16 @@ class comparaison_resultat_sql extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTableauSupprime() {
+	public function getTableauSupprime(): array
+	{
 		return $this->tableau_supprime;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setTableauSupprime($tableau_supprime) {
+	public function &setTableauSupprime($tableau_supprime): static
+	{
 		$this->tableau_supprime = $tableau_supprime;
 		return $this;
 	}
@@ -453,7 +464,8 @@ class comparaison_resultat_sql extends abstract_log {
 	 * --help
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -491,4 +503,3 @@ class comparaison_resultat_sql extends abstract_log {
 		return $help;
 	}
 }
-?>

@@ -6,6 +6,7 @@
  */
 namespace Zorille\veeamspc;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -33,9 +34,10 @@ abstract class restapi extends Core\abstract_log {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest( $liste_class ['wsclient'] );
 	}
@@ -45,9 +47,10 @@ abstract class restapi extends Core\abstract_log {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return wsclient
+	 * @return wsclient|null
 	 */
-	public function &getObjetVeeamWsclientRest() {
+	public function &getObjetVeeamWsclientRest(): ?wsclient
+	{
 		return $this->wsclient;
 	}
 
@@ -55,7 +58,8 @@ abstract class restapi extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetVeeamWsclientRest(
-			&$wsclient) {
+			&$wsclient): static
+	{
 		$this->wsclient = $wsclient;
 		return $this;
 	}
@@ -63,7 +67,8 @@ abstract class restapi extends Core\abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsReponse() {
+	public function getWsReponse(): ?string
+	{
 		return $this->ws_reponse;
 	}
 
@@ -71,7 +76,8 @@ abstract class restapi extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setWsReponse(
-			$ws_reponse) {
+			$ws_reponse): static
+	{
 		$this->ws_reponse = $ws_reponse;
 		return $this;
 	}
@@ -79,4 +85,3 @@ abstract class restapi extends Core\abstract_log {
  * ***************************** ACCESSEURS *******************************
  */
 }
-?>

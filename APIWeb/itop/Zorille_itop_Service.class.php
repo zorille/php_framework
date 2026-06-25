@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -38,15 +39,16 @@ class Service extends ci {
 	 * Instancie un objet de type Service.
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Service
 	 */
 	static function &creer_Service(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): Service
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Service ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -61,9 +63,10 @@ class Service extends ci {
 	 * Initialisation de l'objet
 	 * @param array $liste_class
 	 * @return Service
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Service' )
 			->champ_obligatoire_standard ()
@@ -76,22 +79,22 @@ class Service extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return Service
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -101,8 +104,12 @@ class Service extends ci {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Service(
-			$name) {
+			$name): ci|bool|Service
+	{
 		return $this->creer_oql ( array (
 				'name' => $name
 		) )
@@ -115,21 +122,20 @@ class Service extends ci {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_Service(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = $this->prepare_standard_params ( $parametres );
 		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				case 'serviceFamily_name' :
-					$params ['servicefamily_id'] = $this->getObjetItopServiceFamily ()
-						->creer_oql ( array (
-							'name' => $valeur
-					) )
-						->getOqlCi ();
-					$this->valide_mandatory_field_filled ( 'servicefamily_id', $params ['servicefamily_id'] );
-					if (isset ( $params ['serviceFamily_name'] )) {
-						unset ( $params ['serviceFamily_name'] );
-					}
-					break;
+			if ($champ == 'serviceFamily_name') {
+				$params ['servicefamily_id'] = $this->getObjetItopServiceFamily()
+					->creer_oql(array(
+						'name' => $valeur
+					))
+					->getOqlCi();
+				$this->valide_mandatory_field_filled('servicefamily_id', $params ['servicefamily_id']);
+				if (isset ($params ['serviceFamily_name'])) {
+					unset ($params ['serviceFamily_name']);
+				}
 			}
 		}
 		return $params;
@@ -141,7 +147,8 @@ class Service extends ci {
 	 * @return Service
 	 */
 	public function creer_oql_Service(
-			$fields = array ()) {
+		array $fields = array ()): Service
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -158,9 +165,11 @@ class Service extends ci {
 	/**
 	 * Creer une entree Service Champs standards : name, org_name, status, description, serviceFamily_name
 	 * @return Service
+	 * @throws Exception
 	 */
 	public function gestion_Service(
-			$parametres) {
+			$parametres): Service
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Service ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -174,9 +183,10 @@ class Service extends ci {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return Organization
+	 * @return Organization|null
 	 */
-	public function &getObjetItopOrganization() {
+	public function &getObjetItopOrganization(): ?Organization
+	{
 		return $this->Organization;
 	}
 
@@ -184,16 +194,18 @@ class Service extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopOrganization(
-			&$Organization) {
+			&$Organization): static
+	{
 		$this->Organization = $Organization;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return ServiceFamily
+	 * @return ServiceFamily|null
 	 */
-	public function &getObjetItopServiceFamily() {
+	public function &getObjetItopServiceFamily(): ?ServiceFamily
+	{
 		return $this->ServiceFamily;
 	}
 
@@ -201,7 +213,8 @@ class Service extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopServiceFamily(
-			&$ServiceFamily) {
+			&$ServiceFamily): static
+	{
 		$this->ServiceFamily = $ServiceFamily;
 		return $this;
 	}
@@ -212,11 +225,11 @@ class Service extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Service :";
 		return $help;
 	}
 }
-?>

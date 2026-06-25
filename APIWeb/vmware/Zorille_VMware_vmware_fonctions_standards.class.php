@@ -50,7 +50,7 @@ class vmware_fonctions_standards extends Core\abstract_log {
 	 * @param array $liste_class
 	 * @return vmware_fonctions_standards
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetVmwareSoapConfigurationRef ( vmwareWsclient::creer_vmwareWsclient ( $liste_class["options"], vmwareDatas::creer_vmwareDatas ( $liste_class["options"] ) ) );
@@ -64,7 +64,6 @@ class vmware_fonctions_standards extends Core\abstract_log {
 	 * @codeCoverageIgnore
 	 * @param options &$liste_option pointeur sur liste_option
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de abstract_log
@@ -175,7 +174,7 @@ class vmware_fonctions_standards extends Core\abstract_log {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

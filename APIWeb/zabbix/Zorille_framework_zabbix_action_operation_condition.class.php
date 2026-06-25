@@ -63,11 +63,12 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * Instancie un objet de type zabbix_action_operation_condition.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return zabbix_action_operation_condition
 	 */
-	static function &creer_zabbix_action_operation_condition(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_action_operation_condition(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_action_operation_condition
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_action_operation_condition ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -79,9 +80,9 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_action_operation_condition
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -93,7 +94,6 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -102,11 +102,12 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @param string $contition creation d'une condition a partir d'une string au format "type|operator|valeur"
+	 * @param bool|string $contition creation d'une condition a partir d'une string au format "type|operator|valeur"
 	 * @return boolean True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param($contition = false) {
+	public function retrouve_zabbix_param(bool|string $contition = false): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($contition !== false) {
 			$liste_condition = explode ( "|", trim ( $contition ) );
@@ -147,7 +148,8 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * Creer un definition de condition sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_zabbix_operation_condition_ws() {
+	public function creer_definition_zabbix_operation_condition_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getValue () == "") {
 			return array ();
@@ -167,7 +169,7 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 
 	/**
 	 * Condition operator.
-	 * 
+	 *
 	 * Possible values:
 	 * 0 - (default) =;
 	 * 1 - <>;
@@ -176,42 +178,16 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * 4 - in;
 	 * 5 - >=;
 	 * 6 - <=;
-	 * 7 - not in. 
-	 * @param string $type
-	 * @return number
+	 * 7 - not in.
+	 * @param $operator
+	 * @return float|int|string
 	 */
 	public function retrouve_ConditionOperator($operator) {
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $operator )) {
 			return $operator;
 		}
-		switch (strtolower ( $operator )) {
-			/* NON utilise pour ce type de condition
-			 * case "<>" :
-				return 1;
-				break;
-			case "like" :
-				return 2;
-				break;
-			case "not like" :
-				return 3;
-				break;
-			case "in" :
-				return 4;
-				break;
-			case ">=" :
-				return 5;
-				break;
-			case "<=" :
-				return 6;
-				break;
-			case "not in" :
-				return 7;
-				break;*/
-			case "=" :
-			default :
-		}
-		
+
 		return 0;
 	}
 
@@ -219,16 +195,13 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * conditiontype : Possible values for trigger actions:
 	 * 14 - event acknowledged
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_ConditionType($type) {
+	public function retrouve_ConditionType(string $type): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
-		}
-		switch (strtolower ( $type )) {
-			case "event acknowledged" :
-			default :
 		}
 		
 		return 14;
@@ -238,14 +211,16 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOpConditionId() {
+	public function getOpConditionId(): string
+	{
 		return $this->opconditionid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOpConditionId($opconditionid) {
+	public function &setOpConditionId($opconditionid): static
+	{
 		$this->opconditionid = $opconditionid;
 		return $this;
 	}
@@ -260,7 +235,8 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setConditionId($conditionid) {
+	public function &setConditionId($conditionid): static
+	{
 		$this->conditionid = $conditionid;
 		return $this;
 	}
@@ -268,14 +244,16 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getConditionType() {
+	public function getConditionType(): string
+	{
 		return $this->conditiontype;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setConditionType($conditiontype) {
+	public function &setConditionType($conditiontype): static
+	{
 		$this->conditiontype = $this->retrouve_ConditionType ( $conditiontype );
 		return $this;
 	}
@@ -283,14 +261,16 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getValue() {
+	public function getValue(): string
+	{
 		return $this->value;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setValue($value) {
+	public function &setValue($value): static
+	{
 		$this->value = $value;
 		return $this;
 	}
@@ -298,14 +278,16 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOperator() {
+	public function getOperator(): int
+	{
 		return $this->operator;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setOperator($operator) {
+	public function &setOperator($operator): static
+	{
 		$this->operator = $this->retrouve_ConditionOperator ( $operator );
 		return $this;
 	}
@@ -316,7 +298,7 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -328,4 +310,4 @@ class zabbix_action_operation_condition extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>
+

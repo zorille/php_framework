@@ -44,7 +44,7 @@ class gestion_bd_mongoDB extends requete_base_mongoDB {
 	 * @param array $liste_class
 	 * @return gestion_bd_mongoDB
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

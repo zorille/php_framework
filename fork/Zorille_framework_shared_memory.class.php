@@ -71,7 +71,7 @@ class shared_memory extends abstract_log {
 	 * @param array $liste_class
 	 * @return shared_memory
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

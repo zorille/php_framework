@@ -26,11 +26,13 @@ class vmwareDatas extends Core\serveur_datas {
 	 * Instancie un objet de type vmwareDatas.
 	 * @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet serveur_connexion_url
 	 * @return vmwareDatas
+	 * @throws Exception
 	 */
-	static function &creer_vmwareDatas(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__ ) {
+	static function &creer_vmwareDatas(Core\options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__ ): vmwareDatas
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new vmwareDatas ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -45,8 +47,9 @@ class vmwareDatas extends Core\serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return vmwareDatas
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->retrouve_vmware_param ();
@@ -60,7 +63,6 @@ class vmwareDatas extends Core\serveur_datas {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__ ) {
 		// Serveur de abstract_log
@@ -70,10 +72,11 @@ class vmwareDatas extends Core\serveur_datas {
 
 	/**
 	 *
-	 * @return boolean True est OK, False sinon.
+	 * @return vmwareDatas True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_vmware_param() {
+	public function retrouve_vmware_param(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$donnee_vmware = $this->_valideOption ( array (
 				"vmware_machines",
@@ -99,7 +102,8 @@ class vmwareDatas extends Core\serveur_datas {
 	 * @param string $nom        	
 	 * @return array false informations de configuration, false sinon.
 	 */
-	public function valide_presence_vmware_data($nom) {
+	public function valide_presence_vmware_data(string $nom): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this->valide_presence_serveur_data ( $nom );
 	}
@@ -107,10 +111,12 @@ class vmwareDatas extends Core\serveur_datas {
 	/**
 	 * Valide la presence de la definition d'un vmware nomme : $nom
 	 *
-	 * @param string $nom
-	 * @return array false informations de configuration, false sinon.
+	 * @param $wsdl
+	 * @return array|bool false informations de configuration, false sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_wsdl($wsdl) {
+	public function retrouve_wsdl($wsdl): array|bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_wsdl = $this->getWsdlDatas ();
 		if (! isset ( $liste_wsdl [$wsdl] )) {
@@ -126,9 +132,12 @@ class vmwareDatas extends Core\serveur_datas {
 	 * Connexion au soap preferences de vmware
 	 *
 	 * @param string $nom nom du vmware a connecter
-	 * @return bool TRUE si connexion ok, FALSE sinon
+	 * @param string $wsdl
+	 * @return bool|array TRUE si connexion ok, FALSE sinon
+	 * @throws Exception
 	 */
-	public function recupere_donnees_vmware_serveur($nom = "", $wsdl = "") {
+	public function recupere_donnees_vmware_serveur(string $nom = "", string $wsdl = ""): bool|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($nom == "") {
 			return $this->onError ( "Il faut un nom de vmware pour se connecter.", "", 5103 );
@@ -150,14 +159,16 @@ class vmwareDatas extends Core\serveur_datas {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getWsdlDatas() {
+	public function getWsdlDatas(): bool|array
+	{
 		return $this->wsdl_data;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setWsdlData($wsdl_data) {
+	public function &setWsdlData($wsdl_data): static
+	{
 		if (is_array ( $wsdl_data )) {
 			$this->wsdl_data = $wsdl_data;
 		}
@@ -170,7 +181,7 @@ class vmwareDatas extends Core\serveur_datas {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -178,4 +189,3 @@ class vmwareDatas extends Core\serveur_datas {
 		return $help;
 	}
 }
-?>

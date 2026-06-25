@@ -19,11 +19,12 @@ class desc_bd_sitescope extends gestion_definition_table {
 	 * Instancie un objet de type desc_bd_sitescope.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return desc_bd_sitescope
 	 */
-	static function &creer_desc_bd_sitescope(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_desc_bd_sitescope(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): desc_bd_sitescope
+	{
 		$objet = new desc_bd_sitescope ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -38,7 +39,8 @@ class desc_bd_sitescope extends gestion_definition_table {
 	 * @param array $liste_class
 	 * @return desc_bd_sitescope
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -59,7 +61,8 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->charge_champs ();
 	}
 
-	private function _chargeTable() {
+	private function _chargeTable(): void
+	{
 		$this->setTable ( 'alert', "alert" );
 		$this->setTable ( 'alert_props', "alert_props" );
 		$this->setTable ( 'ci', "ci" );
@@ -103,52 +106,47 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->_chargeChampsServersElements ();
 		$this->_chargeChampsTree ();
 		$this->_chargeChampsVcenter ();
-		
-		return true;
 	}
 
-	private function _chargeChampsAlert() {
+	private function _chargeChampsAlert(): void
+	{
 		$this->setChamp ( "id", "id", "alert", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "alert", "numeric" );
 		$this->setChamp ( "parent_id", "parent_id", "alert", "text" );
 		$this->setChamp ( "_name", "name", "alert", "text" );
 		$this->setChamp ( "_fullpathname", "fullpathname", "alert", "text" );
 		$this->setChamp ( "deleted", "deleted", "alert", "numeric" );
-		
-		return true;
 	}
 
-	private function _chargeChampsAlertProps() {
+	private function _chargeChampsAlertProps(): void
+	{
 		$this->setChamp ( "id", "id", "alert_props", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "alert_props", "numeric" );
 		$this->setChamp ( "alert_id", "alert_id", "alert_props", "numeric" );
 		$this->setChamp ( "_key", "key", "alert_props", "text" );
 		$this->setChamp ( "_value", "value", "alert_props", "text" );
 		$this->setChamp ( "deleted", "deleted", "alert_props", "numeric" );
-		
-		return true;
 	}
 
-	private function _chargeChampsCi() {
+	private function _chargeChampsCi(): void
+	{
 		$this->setChamp ( "id", "id", "ci", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "ci", "numeric" );
 		$this->setChamp ( "_name", "name", "ci", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsCredentials() {
+	private function _chargeChampsCredentials(): void
+	{
 		$this->setChamp ( "id", "id", "credentials", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "credentials", "numeric" );
 		$this->setChamp ( "type", "type", "credentials", "text" );
 		$this->setChamp ( "name", "name", "credentials", "text" );
 		$this->setChamp ( "_key", "key", "credentials", "text" );
 		$this->setChamp ( "_value", "value", "credentials", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsHistoPlanning() {
+	private function _chargeChampsHistoPlanning(): void
+	{
 		$this->setChamp ( "histo_id", "histo_id", "histo_planning", "numeric" );
 		$this->setChamp ( "id", "id", "histo_planning", "numeric" );
 		$this->setChamp ( "task_id", "task_id", "histo_planning", "numeric" );
@@ -169,42 +167,38 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->setChamp ( "_has_error", "has_error", "histo_planning", "numeric" );
 		$this->setChamp ( "_error_log", "error_log", "histo_planning", "text" );
 		$this->setChamp ( "customer", "customer", "histo_planning", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsItemRef() {
+	private function _chargeChampsItemRef(): void
+	{
 		$this->setChamp ( "id", "id", "itemRef", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "itemRef", "numeric" );
 		$this->setChamp ( "ref_id", "ref_id", "itemRef", "numeric" );
 		$this->setChamp ( "item_key", "item_key", "itemRef", "text" );
 		$this->setChamp ( "item_value", "item_value", "itemRef", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsLeaf() {
+	private function _chargeChampsLeaf(): void
+	{
 		$this->setChamp ( "id", "id", "leaf", "text" );
 		$this->setChamp ( "serveur_id", "serveur_id", "leaf", "numeric" );
 		$this->setChamp ( "parent_id", "parent_id", "leaf", "text" );
 		$this->setChamp ( "_name", "name", "leaf", "text" );
 		$this->setChamp ( "deleted", "deleted", "leaf", "numeric" );
-		
-		return true;
 	}
 
-	private function _chargeChampsMultiRef() {
+	private function _chargeChampsMultiRef(): void
+	{
 		$this->setChamp ( "id", "id", "multiRef", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "multiRef", "numeric" );
 		$this->setChamp ( "ref_id", "ref_id", "multiRef", "text" );
 		$this->setChamp ( "ref_key", "ref_key", "multiRef", "text" );
 		$this->setChamp ( "ref_name", "ref_name", "multiRef", "text" );
 		$this->setChamp ( "parent_ref_id", "parent_ref_id", "multiRef", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsPlanning() {
+	private function _chargeChampsPlanning(): void
+	{
 		$this->setChamp ( "id", "id", "planning", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "planning", "numeric" );
 		$this->setChamp ( "_fullpathname", "fullpathname", "planning", "text" );
@@ -224,51 +218,46 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->setChamp ( "source_id", "source_id", "planning", "text" );
 		$this->setChamp ( "customer", "customer", "planning", "text" );
 		$this->setChamp ( "orderby", "orderby", "planning", "numeric" );
-		
-		return true;
 	}
 
-	private function _chargeChampsPreferences() {
+	private function _chargeChampsPreferences(): void
+	{
 		$this->setChamp ( "id", "id", "preferences", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "preferences", "numeric" );
 		$this->setChamp ( "type", "type", "preferences", "text" );
 		$this->setChamp ( "_key", "key", "preferences", "text" );
 		$this->setChamp ( "_value", "value", "preferences", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsProps() {
+	private function _chargeChampsProps(): void
+	{
 		$this->setChamp ( "id", "id", "props", "numeric" );
 		$this->setChamp ( "parent_id", "parent_id", "props", "text" );
 		$this->setChamp ( "table_parent", "table_parent", "props", "text" );
 		$this->setChamp ( "_key", "key", "props", "text" );
 		$this->setChamp ( "_value", "value", "props", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsRuntime() {
+	private function _chargeChampsRuntime(): void
+	{
 		$this->setChamp ( "id", "id", "runtime", "numeric" );
 		$this->setChamp ( "parent_id", "parent_id", "runtime", "text" );
 		$this->setChamp ( "table_parent", "table_parent", "runtime", "text" );
 		$this->setChamp ( "_key", "key", "runtime", "text" );
 		$this->setChamp ( "_value", "value", "runtime", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsSchedules() {
+	private function _chargeChampsSchedules(): void
+	{
 		$this->setChamp ( "id", "id", "schedules", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "schedules", "numeric" );
 		$this->setChamp ( "schedule_id", "schedule_id", "schedules", "text" );
 		$this->setChamp ( "name", "name", "schedules", "text" );
 		$this->setChamp ( "schedule", "schedule", "schedules", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsServeur() {
+	private function _chargeChampsServeur(): void
+	{
 		$this->setChamp ( "id", "id", "serveur", "numeric" );
 		$this->setChamp ( "name", "name", "serveur", "text" );
 		$this->setChamp ( "last_check", "last_check", "serveur", "date" );
@@ -277,20 +266,18 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->setChamp ( "_doing", "doing", "serveur", "numeric" );
 		$this->setChamp ( "_error", "error", "serveur", "numeric" );
 		$this->setChamp ( "log_error", "log_error", "serveur", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsSitescopeCi() {
+	private function _chargeChampsSitescopeCi(): void
+	{
 		$this->setChamp ( "id", "id", "sitescope_ci", "numeric" );
 		$this->setChamp ( "customer", "customer", "sitescope_ci", "text" );
 		$this->setChamp ( "ci_name", "ci_name", "sitescope_ci", "text" );
 		$this->setChamp ( "trouve", "trouve", "sitescope_ci", "numeric" );
-		
-		return true;
 	}
 
-	private function _chargeChampsTasks() {
+	private function _chargeChampsTasks(): void
+	{
 		$this->setChamp ( "id", "id", "tasks", "numeric" );
 		$this->setChamp ( "user", "user", "tasks", "text" );
 		$this->setChamp ( "reason", "reason", "tasks", "text" );
@@ -315,11 +302,10 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->setChamp ( "_last_done", "last_done", "tasks", "date" );
 		$this->setChamp ( "_last_check", "last_check", "tasks", "date" );
 		$this->setChamp ( "customer", "customer", "tasks", "text" );
-		
-		return true;
 	}
 
-	private function _chargeChampsTasksElements() {
+	private function _chargeChampsTasksElements(): void
+	{
 		$this->setChamp ( "ele_id", "ele_id", "tasks_elements", "numeric" );
 		$this->setChamp ( "task_id", "task_id", "tasks_elements", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "tasks_elements", "numeric" );
@@ -330,11 +316,10 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->setChamp ( "source_id", "source_id", "tasks_elements", "text" );
 		$this->setChamp ( "not_exist", "not_exist", "tasks_elements", "numeric" );
 		$this->setChamp ( "not_exist_since", "not_exist_since", "tasks_elements", "date" );
-		
-		return true;
 	}
 	
-	private function _chargeChampsServersElements() {
+	private function _chargeChampsServersElements(): void
+	{
 		$this->setChamp ( "srv_id", "srv_id", "servers_elements", "numeric" );
 		$this->setChamp ( "task_id", "task_id", "servers_elements", "numeric" );
 		$this->setChamp ( "serveur_id", "serveur_id", "servers_elements", "numeric" );
@@ -347,36 +332,32 @@ class desc_bd_sitescope extends gestion_definition_table {
 		$this->setChamp ( "source_id", "source_id", "servers_elements", "text" );
 		$this->setChamp ( "not_exist", "not_exist", "servers_elements", "numeric" );
 		$this->setChamp ( "not_exist_since", "not_exist_since", "servers_elements", "date" );
-	
-		return true;
 	}
 
-	private function _chargeChampsTree() {
+	private function _chargeChampsTree(): void
+	{
 		$this->setChamp ( "id", "id", "tree", "text" );
 		$this->setChamp ( "serveur_id", "serveur_id", "tree", "numeric" );
 		$this->setChamp ( "parent_id", "parent_id", "tree", "text" );
 		$this->setChamp ( "_name", "name", "tree", "text" );
 		$this->setChamp ( "_fullpathname", "fullpathname", "tree", "text" );
-		
-		return true;
 	}
 	
-	private function _chargeChampsVcenter() {
+	private function _chargeChampsVcenter(): void
+	{
 		$this->setChamp ( "id", "id", "vcenter", "numeric" );
 		$this->setChamp ( "name", "name", "vcenter", "text" );
 		$this->setChamp ( "actif", "actif", "vcenter", "numeric" );
 		$this->setChamp ( "customer", "customer", "vcenter", "text" );
-	
-		return true;
 	}
 
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -384,4 +365,3 @@ class desc_bd_sitescope extends gestion_definition_table {
 		return $help;
 	}
 }
-?>

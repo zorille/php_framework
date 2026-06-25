@@ -59,7 +59,7 @@ class zabbix_usergroups extends zabbix_fonctions_standard {
 	 * @param array $liste_class
 	 * @return abstract_log
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetUserGroupRef ( zabbix_usergroup::creer_zabbix_usergroup ( $liste_class ["options"], $liste_class ["zabbix_wsclient"] ) );
@@ -310,7 +310,8 @@ class zabbix_usergroups extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

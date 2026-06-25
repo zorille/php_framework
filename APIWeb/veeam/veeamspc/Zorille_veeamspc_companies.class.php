@@ -6,6 +6,7 @@
  */
 namespace Zorille\veeamspc;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use Zorille\itop\Organization;
@@ -64,7 +65,7 @@ class companies extends organizations {
 	 * @return companies
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -76,7 +77,6 @@ class companies extends organizations {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -137,11 +137,11 @@ class companies extends organizations {
 	 * @throws Exception
 	 */
 	public function listCompanies(
-			$params = array ()) {
+		array $params = array ()): array|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getObjetVeeamWsclientRest ()
+		return $this->getObjetVeeamWsclientRest ()
 			->getMethod ( $this->companies_list_uri (), $params );
-		return $resultat;
 	}
 
 	/**
@@ -216,7 +216,7 @@ class companies extends organizations {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "companies :";

@@ -30,11 +30,12 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	 * Instancie un objet de type zabbix_mappings.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_mappings
+	 * @return abstract_log|zabbix_mappings
 	 */
-	static function &creer_zabbix_mappings(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_mappings(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): abstract_log|zabbix_mappings
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_mappings ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -46,9 +47,9 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_mappings
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;
@@ -60,7 +61,6 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -69,11 +69,11 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @param boolean $nom_seulement valide uniquement le nom (description) du mappings
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|zabbix_mappings True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_mapping = $this->_valideOption ( array (
 				"zabbix",
@@ -106,10 +106,11 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	/**
 	 * Extrait les valeurs et le Map (newvalue) correspondant a partir d'un tableau.
 	 * @param array $liste_mappings Liste de mapping au format value=>newvalue dans chaque entree du tableau
-	 * @return zabbix_mappings|False 
+	 * @return bool|zabbix_mappings
 	 * @throws Exception
 	 */
-	public function retrouve_mappings($liste_mappings) {
+	public function retrouve_mappings($liste_mappings): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (! is_array ( $liste_mappings )) {
 			return $this->onError ( "Il faut un tableau de mapping" );
@@ -136,13 +137,14 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	 * @return array;
 	 * @throws Exception
 	 */
-	public function creer_definition_mappings_create_ws() {
+	public function creer_definition_mappings_create_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$mappingsid = array ();
 		foreach ( $this->getListeMapping () as $mapping ) {
-			$mappingsid [count ( $mappingsid )] = array (
-					"value" => $mapping ["value"],
-					"newvalue" => $mapping ["newvalue"] 
+			$mappingsid[] = array(
+				"value" => $mapping ["value"],
+				"newvalue" => $mapping ["newvalue"]
 			);
 		}
 		
@@ -153,14 +155,16 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeMapping() {
+	public function getListeMapping(): array
+	{
 		return $this->liste_mapping;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setListeMapping($ListeMapping) {
+	public function &setListeMapping($ListeMapping): static
+	{
 		$this->liste_mapping = $ListeMapping;
 		return $this;
 	}
@@ -171,16 +175,14 @@ class zabbix_mappings extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Zabbix Mappings :";
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_mappings_values 'value=>mapvalue' 'value=>mapvalue' Liste des valeurs de mapping ";
 		$help [__CLASS__] ["text"] [] .= "\t--zabbix_mappings_mappingFile mapping.txt fichier contenant chaque mapping : value=>mapvalue , 1 par ligne ";
-		$help = array_merge ( $help, fichier::help () );
-		
-		return $help;
+		return array_merge ( $help, fichier::help () );
 	}
 }
-?>

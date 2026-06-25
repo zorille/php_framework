@@ -22,14 +22,15 @@ class desc_bd_itop extends gestion_definition_table {
 	 * Instancie un objet de type desc_bd_itop.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return desc_bd_itop
 	 */
 	static function &creer_desc_bd_itop(
-			&$liste_option,
-			$sort_en_erreur = true,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = true,
+		string      $entete = __CLASS__): desc_bd_itop
+	{
 		$objet = new desc_bd_itop ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -44,7 +45,8 @@ class desc_bd_itop extends gestion_definition_table {
 	 * @return desc_bd_itop
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -67,17 +69,18 @@ class desc_bd_itop extends gestion_definition_table {
 		$this->charge_champs ();
 	}
 
-	private function charge_table() {
+	private function charge_table(): void
+	{
 		$this->setTable ( 'INFORMATION_SCHEMA.TABLES', "INFORMATION_SCHEMA.TABLES" );
 		$this->setTable ( 'key_value_store', "key_value_store" );
 		$this->setTable ( 'ticket', "ticket" );
 	}
 
-	private function charge_champs() {
+	private function charge_champs(): void
+	{
 		$this->charge_champs_key_value_store ();
 		$this->charge_champs_ticket ();
 		$this->charge_champs_schema ();
-		return true;
 	}
 
 	/*
@@ -87,12 +90,12 @@ class desc_bd_itop extends gestion_definition_table {
 | value     | varchar(255) | YES  |     | 0       |                |
 
 	 */
-	private function charge_champs_key_value_store() {
+	private function charge_champs_key_value_store(): void
+	{
 		$this->setChamp ( "id", "id", "key_value_store", "numeric" );
 		$this->setChamp ( "namespace", "namespace", "key_value_store", "text" );
 		$this->setChamp ( "key_name", "key_name", "key_value_store", "text" );
 		$this->setChamp ( "value", "value", "key_value_store", "text" );
-		return true;
 	}
 	/*
 | id                 | int(11)                             | NO   | PRI | NULL    | auto_increment |
@@ -117,7 +120,8 @@ class desc_bd_itop extends gestion_definition_table {
 | related_project_id | int(11)                             | YES  | MUL | 0       |                |
 
 	 */
-	private function charge_champs_ticket() {
+	private function charge_champs_ticket(): void
+	{
 		$this->setChamp ( "id", "id", "ticket", "numeric" );
 		$this->setChamp ( "operational_status", "operational_status", "ticket", "text" );
 		$this->setChamp ( "ref", "ref", "ticket", "text" );
@@ -139,15 +143,13 @@ class desc_bd_itop extends gestion_definition_table {
 		$this->setChamp ( "archive_date", "archive_date", "ticket", "date" );
 		$this->setChamp ( "related_project_id", "related_project_id", "ticket", "numeric" );
 		$this->setChamp ( "AUTO_INCREMENT", "AUTO_INCREMENT", "ticket", "numeric" );
-		return true;
 	}
 	
-	private function charge_champs_schema() {
+	private function charge_champs_schema(): void
+	{
 		$this->setChamp ( "AUTO_INCREMENT", "AUTO_INCREMENT", "INFORMATION_SCHEMA.TABLES", "numeric" );
 		$this->setChamp ( "TABLE_SCHEMA", "TABLE_SCHEMA", "INFORMATION_SCHEMA.TABLES", "text" );
 		$this->setChamp ( "TABLE_NAME", "TABLE_NAME", "INFORMATION_SCHEMA.TABLES", "text" );
-		return true;
 	}
 
 }
-?>

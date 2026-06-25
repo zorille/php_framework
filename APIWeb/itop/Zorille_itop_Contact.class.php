@@ -31,15 +31,16 @@ class Contact extends ci {
 	 * Instancie un objet de type Contact. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return Contact
 	 */
 	static function &creer_Contact(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): Contact
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Contact ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -53,9 +54,10 @@ class Contact extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Contact
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Contact' )
 			->champ_obligatoire_standard ()
@@ -67,22 +69,22 @@ class Contact extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return Contact|Person|Team|UserLocal
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): Person|UserLocal|Team|static
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -92,10 +94,14 @@ class Contact extends ci {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Contact(
 			$name,
 			$email,
-			$org_name = '') {
+			$org_name = ''): ci|Contact|bool
+	{
 		return $this->creer_oql ( array (
 				'name' => $name,
 				'email' => $email,
@@ -110,9 +116,9 @@ class Contact extends ci {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_Contact(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		return $params;
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
@@ -121,7 +127,8 @@ class Contact extends ci {
 	 * @return Contact
 	 */
 	public function creer_oql_Contact(
-			$fields = array ()) {
+		array $fields = array ()): Contact
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -139,12 +146,13 @@ class Contact extends ci {
 	 * Creer un lnkContactToFunctionalCI en fonction de la Contact
 	 * @param string $FunctionalCI_id
 	 * @param string $FunctionalCI_name
-	 * @return array lnkContactToFunctionalCI
+	 * @return array|bool lnkContactToFunctionalCI
 	 * @throws Exception
 	 */
 	public function creer_lnkContactToFunctionalCI(
-			$FunctionalCI_id = '',
-			$FunctionalCI_name = '') {
+		string $FunctionalCI_id = '',
+		string $FunctionalCI_name = ''): array|bool
+	{
 		$lnkContactToFunctionalCI = array ();
 		if (empty ( $this->getId () )) {
 			return $this->onError ( "Il faut un ID a cette " . $this->getFormat () );
@@ -168,9 +176,10 @@ class Contact extends ci {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return Organization
+	 * @return Organization|null
 	 */
-	public function &getObjetItopOrganization() {
+	public function &getObjetItopOrganization(): ?Organization
+	{
 		return $this->Organization;
 	}
 
@@ -178,7 +187,8 @@ class Contact extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopOrganization(
-			&$Organization) {
+			&$Organization): static
+	{
 		$this->Organization = $Organization;
 		return $this;
 	}
@@ -189,11 +199,11 @@ class Contact extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Contact :";
 		return $help;
 	}
 }
-?>

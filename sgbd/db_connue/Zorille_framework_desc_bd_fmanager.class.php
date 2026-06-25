@@ -22,14 +22,15 @@ class desc_bd_fmanager extends gestion_definition_table {
 	 * Instancie un objet de type desc_bd_fmanager.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return desc_bd_fmanager
 	 */
 	static function &creer_desc_bd_fmanager(
-			&$liste_option,
-			$sort_en_erreur = true,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = true,
+		string      $entete = __CLASS__): desc_bd_fmanager
+	{
 		$objet = new desc_bd_fmanager ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -44,7 +45,8 @@ class desc_bd_fmanager extends gestion_definition_table {
 	 * @return desc_bd_fmanager
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -67,15 +69,16 @@ class desc_bd_fmanager extends gestion_definition_table {
 		$this->charge_champs ();
 	}
 
-	private function charge_table() {
+	private function charge_table(): void
+	{
 		$this->setTable ( 'fm_dns_domains', "domains" );
 		$this->setTable ( 'fm_dns_records', "records" );
 	}
 
-	private function charge_champs() {
+	private function charge_champs(): void
+	{
 		$this->charge_champs_domains ();
 		$this->charge_champs_records ();
-		return true;
 	}
 
 	/*
@@ -106,7 +109,8 @@ class desc_bd_fmanager extends gestion_definition_table {
 | domain_status                  | enum('active','disabled','deleted')     | NO   | MUL | active  |                |
 
 	 */
-	private function charge_champs_domains() {
+	private function charge_champs_domains(): void
+	{
 		$this->setChamp ( "domain_id", "domain_id", "domains", "numeric" );
 		$this->setChamp ( "account_id", "account_id", "domains", "numeric" );
 		$this->setChamp ( "domain_template", "domain_template", "domains", "text" );
@@ -132,7 +136,6 @@ class desc_bd_fmanager extends gestion_definition_table {
 		$this->setChamp ( "domain_dnssec_signed", "domain_dnssec_signed", "domains", "numeric" );
 		$this->setChamp ( "domain_reload", "domain_reload", "domains", "text" );
 		$this->setChamp ( "domain_status", "domain_status", "domains", "text" );
-		return true;
 	}
 
 	/*
@@ -161,7 +164,8 @@ class desc_bd_fmanager extends gestion_definition_table {
 | record_append    | enum('yes','no')                                                                                                                                                  | NO   |     | yes                 |                               |
 | record_status    | enum('active','disabled','deleted')     
 	 */
-	private function charge_champs_records() {
+	private function charge_champs_records(): void
+	{
 		$this->setChamp ( "record_id", "record_id", "records", "numeric" );
 		$this->setChamp ( "account_id", "account_id", "records", "numeric" );
 		$this->setChamp ( "domain_id", "domain_id", "records", "numeric" );
@@ -186,7 +190,5 @@ class desc_bd_fmanager extends gestion_definition_table {
 		$this->setChamp ( "record_comment", "record_comment", "records", "text" );
 		$this->setChamp ( "record_append", "record_append", "records", "text" );
 		$this->setChamp ( "record_status", "record_status", "records", "text" );
-		return true;
 	}
 }
-?>

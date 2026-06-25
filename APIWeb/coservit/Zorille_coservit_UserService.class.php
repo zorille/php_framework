@@ -6,6 +6,7 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -23,15 +24,16 @@ class UserService extends UserServices {
 	 * Instancie un objet de type UserService. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webuserService_rest Reference sur un objet webuserService_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return UserService
+	 * @throws Exception
 	 */
 	static function &creer_UserService(
-			&$liste_option,
-			&$webuserService_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webuserService_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): UserService {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new UserService ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -45,9 +47,10 @@ class UserService extends UserServices {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return UserService
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->champ_obligatoire_standard ()
 			->setFormat ( 'UserService' );
@@ -58,13 +61,12 @@ class UserService extends UserServices {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -76,7 +78,7 @@ class UserService extends UserServices {
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
 	 * @return UserService
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 				// 'host' => false,
@@ -91,21 +93,16 @@ class UserService extends UserServices {
 	 * @return array liste des parametres au format coservit
 	 */
 	public function prepare_params_UserService(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				default :
-			}
-		}
-		return $params;
+		array $parametres): array {
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
 	 * ******************************* UserService URI ******************************
+	 * @throws Exception
 	 */
-	public function userService_id_uri() {
-		if ($this->valide_item_id () == false) {
+	public function userService_id_uri(): bool|string {
+		if (!$this->valide_item_id()) {
 			return $this->onError ( "Il n'y pas d'id de UserService selectionne" );
 		}
 		return $this->userServices_uri () . '/' . $this->getId ();
@@ -118,9 +115,10 @@ class UserService extends UserServices {
 	 * Retrouve tous les user-Services la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande userService. (parametres obligatoires) : 'userService_alias',"userService_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function retrouve_UserServicesList(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setMandatory ( array (
 				"companies" => false
@@ -138,9 +136,10 @@ class UserService extends UserServices {
 	 * Creer un userService la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande userService. (parametres obligatoires) : 'userService_alias',"userService_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function creerUserService(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 // 		name*	string	example: User Service
 // 		description	string	example: Lorem Ipsum descriptionum.
@@ -177,9 +176,10 @@ class UserService extends UserServices {
 	 * Creer un userService la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande userService. (parametres obligatoires) : 'userService_alias',"userService_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function updateUserService(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_UserService ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -192,10 +192,11 @@ class UserService extends UserServices {
 	 * Delete un userService
 	 * @return $this
 	 */
-	public function deleteUserService() {
+	public function deleteUserService(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		// $resultat = $this->getObjetCoservitWsclient ()
 		// ->deleteMethod ( $this->userService_id_uri (), array () );
+		$resultat = null;
 		return $this->setDonnees ( $resultat );
 	}
 
@@ -208,11 +209,10 @@ class UserService extends UserServices {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "UserService :";
 		return $help;
 	}
 }
-?>

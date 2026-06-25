@@ -38,7 +38,7 @@ class requete_complexe_sitescope extends desc_bd_sitescope {
 	 * @param array $liste_class
 	 * @return requete_complexe_sitescope
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}

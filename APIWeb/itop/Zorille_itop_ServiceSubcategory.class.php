@@ -63,7 +63,7 @@ class ServiceSubcategory extends ci {
 	 * @return ServiceSubcategory
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'ServiceSubcategory' )
 			->champ_obligatoire_standard ()
@@ -78,7 +78,6 @@ class ServiceSubcategory extends ci {
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -214,7 +213,8 @@ class ServiceSubcategory extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "ServiceSubcategory :";

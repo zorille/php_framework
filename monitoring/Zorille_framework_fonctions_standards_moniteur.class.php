@@ -40,16 +40,17 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @param options $liste_option Reference sur un objet options
 	 * @param moniteur $moniteur Pointeur sur un objet moniteur
 	 * @param contraintesHoraire $horaire Pointeur sur un objet contraintesHoraire
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fonctions_standards_moniteur
 	 */
 	static function &creer_fonctions_standards_moniteur(
-			&$liste_option,
-			&$moniteur,
-			&$horaire,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options            &$liste_option,
+		moniteur           &$moniteur,
+		contraintesHoraire &$horaire,
+		bool|string        $sort_en_erreur = false,
+		string             $entete = __CLASS__): fonctions_standards_moniteur
+	{
 		$objet = new fonctions_standards_moniteur ( $entete, $sort_en_erreur );
 		$liste_class = array (
 				"options" => $liste_option,
@@ -64,16 +65,19 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return fonctions_standards_moniteur
+	 * @return fonctions_standards_moniteur|bool
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["moniteur"] )) {
-			return $this->onError ( "il faut un objet de type moniteur" );
+			$r = $this->onError ( "il faut un objet de type moniteur" );
+			return $r;
 		}
 		if (! isset ( $liste_class ["contraintesHoraire"] )) {
-			return $this->onError ( "il faut un objet de type contraintesHoraire" );
+			$r = $this->onError ( "il faut un objet de type contraintesHoraire" );
+			return $r;
 		}
 		$this->setMoniteur ( $liste_class ["moniteur"] )
 			->setHoraire ( $liste_class ["contraintesHoraire"] );
@@ -86,11 +90,11 @@ class fonctions_standards_moniteur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 * @param string $entete
-	 * @param string $sort_en_erreur
+	 * @param bool|string $sort_en_erreur
 	 */
 	public function __construct(
-			$entete = __CLASS__,
-			$sort_en_erreur = false) {
+		$entete = __CLASS__,
+		bool|string $sort_en_erreur = false) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -105,25 +109,26 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @return Bool pour indiquer si le mot [Exit] a ete trouve.
 	 */
 	public function parse_ligne_log(
-			$ligne,
-			$message_ok,
-			$message_false,
-			$active_warning = false) {
+		string $ligne,
+		       $message_ok,
+		       $message_false,
+		       $active_warning = false): bool
+	{
 		$this->onDebug ( "Ligne en cours : " . $ligne, 1 );
-		if (strpos ( $ligne, "[Info]" ) !== 0) {
-			if (strpos ( $ligne, "[Warning]" ) === 0) {
+		if (!str_starts_with($ligne, "[Info]")) {
+			if (str_starts_with($ligne, "[Warning]")) {
 				if ($active_warning) {
 					$this->onDebug ( "On a un warning.", 2 );
 					$this->getMoniteur ()
 						->yellow ()
 						->ecrit ( $ligne . "<br/>" );
 				}
-			} elseif (strpos ( $ligne, "[Error]" ) === 0) {
+			} elseif (str_starts_with($ligne, "[Error]")) {
 				$this->onDebug ( "On a une erreur.", 2 );
 				$this->getMoniteur ()
 					->red ()
 					->ecrit ( $ligne . "<br/>" );
-			} elseif (strpos ( $ligne, "[Exit]" ) === 0) {
+			} elseif (str_starts_with($ligne, "[Exit]")) {
 				// si on traite le code Exit
 				$code_retour = trim ( substr ( $ligne, strlen ( "[Exit]" ) ) );
 				switch ($code_retour) {
@@ -151,12 +156,13 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @return Bool pour indiquer si le mot [Exit] a ete trouve.
 	 */
 	public function parse_fichier_log(
-			$fichier,
-			$message_ok,
-			$message_false,
-			$active_warning = false,
-			$nb_caracteres = 4096,
-			$fin_de_ligne = "\n") {
+		string $fichier,
+		string $message_ok,
+		string $message_false,
+		       $active_warning = false,
+		       $nb_caracteres = 4096,
+		       $fin_de_ligne = "\n"): bool
+	{
 		$flag_exit = false;
 		try {
 			$fichier_en_cours = fichier::creer_fichier ( $this->getListeOptions (), $fichier, "non", false );
@@ -181,18 +187,19 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * Parse un fichier de log PHP obligatoire.<br> Permet de parser aussi un envoi de mail. Il met a jour un objet moniteur.
 	 *
 	 * @param string $fichier Chemin complet du fichier a parser.
-	 * @param string|false $check_mail Domaine a verifier pour l'envoi de mail, FALSE si pas de check.
+	 * @param bool|string $check_mail Domaine a verifier pour l'envoi de mail, FALSE si pas de check.
 	 * @param string $message_false Message a afficher en cas d'erreur.
 	 * @return Bool pour indiquer si le mot [Exit] a ete trouve.
 	 */
 	public function parse_fichier_log_with_mail(
-			$fichier,
-			$check_mail = false,
-			$message_ok = "Code Exit : 0",
-			$message_false = "Code de sortie en erreur",
-			$active_warning = false,
-			$nb_caracteres = 4096,
-			$fin_de_ligne = "\n") {
+		string      $fichier,
+		bool|string $check_mail = false,
+		            $message_ok = "Code Exit : 0",
+		string      $message_false = "Code de sortie en erreur",
+		            $active_warning = false,
+		            $nb_caracteres = 4096,
+		            $fin_de_ligne = "\n"): bool
+	{
 		$this->onDebug ( "parse_fichier_log_with_mail : " . $fichier, 1 );
 		$flag_mail = true;
 		$flag_exit = false;
@@ -209,13 +216,13 @@ class fonctions_standards_moniteur extends abstract_log {
 			if ($this->parse_ligne_log ( $ligne, $message_ok, $message_false, $active_warning )) {
 				$flag_exit = true;
 			}
-			if ($check_mail !== false && strpos ( $ligne, "Liste destinataire" ) !== false) {
+			if ($check_mail !== false && str_contains($ligne, "Liste destinataire")) {
 				$this->onDebug ( "On check le mail.", 1 );
 				$liste_mail = explode ( ",", $ligne );
 				if (is_array ( $liste_mail )) {
 					for($i = 0; $i < count ( $liste_mail ); $i ++) {
 						$liste_domaine = explode ( "@", $liste_mail [$i] );
-						if ($flag_mail && isset ( $liste_domaine [1] ) && strpos ( $liste_domaine [1], $check_mail ) !== false)
+						if ($flag_mail && isset ( $liste_domaine [1] ) && str_contains($liste_domaine [1], $check_mail))
 							$flag_mail = false;
 					}
 					// Si aucun mail n'a mis le flag a faux, alors aucun domaine ne correspond
@@ -250,25 +257,20 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @return array false des processus, false sinon.
 	 */
 	public function check_processus(
-			$nom_processus,
-			$type = "linux",
-			$processus_monitoring = "parser_log.php") {
+		string $nom_processus,
+		       $type = "linux",
+		       $processus_monitoring = "parser_log.php"): array
+	{
 		if ($nom_processus == "no_process") {
 			return array (
 					"1"
 			);
 		}
-		switch ($type) {
-			case "win" :
-				// @codeCoverageIgnoreStart
-				$cmd = "tasklist |find \"" . $nom_processus . "\"";
-				break;
-			// @codeCoverageIgnoreEnd
-			case "linux" :
-			default :
-				$cmd = "ps ax -eo pid,args | grep " . $nom_processus . "|grep -v grep |grep -v " . $processus_monitoring;
-		}
-		$liste_ps = fonctions_standards::applique_commande_systeme ( $cmd, "non" );
+		$cmd = match ($type) {
+			"win" => "tasklist |find \"" . $nom_processus . "\"",
+			default => "ps ax -eo pid,args | grep " . $nom_processus . "|grep -v grep |grep -v " . $processus_monitoring,
+		};
+		$liste_ps = fonctions_standards::applique_commande_systeme ( $cmd, false );
 		// Si il y en a un, on l'affiche
 		if (count ( $liste_ps ) > 1 && is_array ( $liste_ps )) {
 			for($i = 1; $i < count ( $liste_ps ); $i ++) {
@@ -327,7 +329,8 @@ class fonctions_standards_moniteur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getMoniteur() {
+	public function &getMoniteur(): moniteur
+	{
 		return $this->moniteur;
 	}
 
@@ -335,7 +338,8 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setMoniteur(
-			&$moniteur) {
+			&$moniteur): static
+	{
 		$this->moniteur = $moniteur;
 		return $this;
 	}
@@ -343,7 +347,8 @@ class fonctions_standards_moniteur extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getHoraire() {
+	public function &getHoraire(): contraintesHoraire
+	{
 		return $this->horaire;
 	}
 
@@ -351,7 +356,8 @@ class fonctions_standards_moniteur extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHoraire(
-			&$horaire) {
+			&$horaire): static
+	{
 		$this->horaire = $horaire;
 		return $this;
 	}
@@ -359,4 +365,3 @@ class fonctions_standards_moniteur extends abstract_log {
  * *********************** Accesseurs ***********************
  */
 }
-?>

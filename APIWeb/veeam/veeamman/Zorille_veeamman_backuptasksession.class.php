@@ -38,15 +38,16 @@ class backuptasksession extends ci {
 	 * Instanbackuptasksessione un objet de type backuptasksession. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return backuptasksession
 	 */
 	static function &creer_veeamman_backuptasksession(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): backuptasksession
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new backuptasksession ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -60,9 +61,10 @@ class backuptasksession extends ci {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return backuptasksession
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setObjetVeeamWsclientRest ( $liste_class ["wsclient"] );
 	}
@@ -72,13 +74,12 @@ class backuptasksession extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de backuptasksession
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -88,7 +89,8 @@ class backuptasksession extends ci {
 	 * @return backuptasksession
 	 * @throws Exception
 	 */
-	public function recupere_donnees_backuptasksession() {
+	public function recupere_donnees_backuptasksession(): backuptasksession
+	{
 		$backuptasksession_data = $this->getObjetVeeamWsclientRest ()
 			->BackupTaskSession ( $this->getId (), array (
 				"format" => "Entity"
@@ -99,11 +101,13 @@ class backuptasksession extends ci {
 
 	/**
 	 * Recupere l'id du backuptasksession et l'ajoute à l'objet
-	 * @return backuptasksession
+	 * @param $backuptasksession
+	 * @return backuptasksession|bool
 	 * @throws Exception
 	 */
 	public function recupere_id_du_backuptasksession(
-			$backuptasksession) {
+			$backuptasksession): backuptasksession|bool
+	{
 		if (preg_match ( '/:BackupTaskSession:(.*)/', $backuptasksession->attributes () ['UID'], $resultat ) === false) {
 			return $this->onError ( "Numero de BackupTaskSession introuvable", $resultat );
 		}
@@ -112,30 +116,33 @@ class backuptasksession extends ci {
 
 	/**
 	 * Recupere le nom du backuptasksession
+	 * @param $backuptasksession
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_nom_du_backuptasksession(
-			$backuptasksession) {
+			$backuptasksession): string
+	{
 		return $backuptasksession->attributes () ['Name'];
 	}
 
 	/**
 	 * Recupere le nom du backupsession
+	 * @param $backuptasksession
 	 * @return string
-	 * @throws Exception
 	 */
 	public function recupere_VmDisplayName_du_backuptasksession(
-			$backuptasksession) {
+			$backuptasksession): string
+	{
 		return $backuptasksession->attributes () ['VmDisplayName'];
 	}
 
 	/**
 	 * Permet de trouver la liste des backuptasksession dans veeamman et enregistre les donnees des backuptasksession dans l'objet
-	 * @return backuptasksession
+	 * @return bool|backuptasksession
 	 * @throws Exception
 	 */
-	public function retrouve_backuptasksession() {
+	public function retrouve_backuptasksession(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$backuptasksession = $this->getObjetVeeamWsclientRest ()
 			->listBackupTasksSessions ();
@@ -149,11 +156,13 @@ class backuptasksession extends ci {
 
 	/**
 	 * Permet de trouver la liste des backuptasksession dans veeamman et enregistre les donnees des backuptasksession dans l'objet
-	 * @return backuptasksession
+	 * @param $backupSessionId
+	 * @return bool|backuptasksession
 	 * @throws Exception
 	 */
 	public function retrouve_backuptasksessionparbackup(
-			$backupSessionId) {
+			$backupSessionId): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$backuptasksession = $this->getObjetVeeamWsclientRest ()
 			->listBackupTaskSessionParBackup ( $backupSessionId );
@@ -171,7 +180,8 @@ class backuptasksession extends ci {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getListeTasks() {
+	public function getListeTasks(): ?\SimpleXMLElement
+	{
 		return $this->liste_tasks;
 	}
 
@@ -179,7 +189,8 @@ class backuptasksession extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setListeTasks(
-			$liste_tasks) {
+			$liste_tasks): static
+	{
 		$this->liste_tasks = $liste_tasks;
 		return $this;
 	}
@@ -190,11 +201,10 @@ class backuptasksession extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "backuptasksession :";
 		return $help;
 	}
 }
-?>

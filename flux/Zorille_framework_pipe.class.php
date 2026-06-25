@@ -5,6 +5,8 @@
  * 
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class pipe<br>
  * 
@@ -38,12 +40,14 @@ class pipe extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param string $nom_pipe Nom du pipe.
-	 * @param string $mode Droit Unix du pipe.
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param int|string $mode Droit Unix du pipe.
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return pipe
+	 * @throws Exception
 	 */
-	static function &creer_pipe(&$liste_option, $nom_pipe = "/tmp/zpipe.pipe", $mode = 0600, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_pipe(options &$liste_option, string $nom_pipe = "/tmp/zpipe.pipe", int|string $mode = 0600, bool|string $sort_en_erreur = false, string $entete = __CLASS__): pipe
+	{
 		$objet = new pipe ( $nom_pipe, $mode, $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -57,8 +61,9 @@ class pipe extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return pipe
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -69,10 +74,10 @@ class pipe extends abstract_log {
 	 * Creer l'objet et prepare la valeur du sort_en_erreur.
 	 * @codeCoverageIgnore
 	 * @param string $nom_pipe Nom du pipe.
-	 * @param string $mode Droit Unix du pipe.
-	 * @param string $sort_en_erreur Prend les valeurs true/false.
+	 * @param int|string $mode Droit Unix du pipe.
+	 * @param bool|string $sort_en_erreur Prend les valeurs true/false.
 	 */
-	public function __construct($nom_pipe = "/tmp/zpipe.pipe", $mode = 0600, $sort_en_erreur = false, $entete = __CLASS__) {
+	public function __construct($nom_pipe = "/tmp/zpipe.pipe", int|string $mode = 0600, bool|string $sort_en_erreur = false, $entete = __CLASS__) {
 		//Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
 		
@@ -86,8 +91,10 @@ class pipe extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string $mode Mode d'ouverture du fichier.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function init_serveur($mode = "r") {
+	public function init_serveur(string $mode = "r"): bool
+	{
 		if (file_exists ( $this->nom_pipe ))
 			@unlink ( $this->nom_pipe );
 		
@@ -114,8 +121,10 @@ class pipe extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string $mode Mode d'ouverture du fichier.
 	 * @return Bool Renvoi TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function init_client($mode = "w") {
+	public function init_client(string $mode = "w"): bool
+	{
 		if (! @file_exists ( $this->nom_pipe )) {
 			return $this->onError ( "Erreur le pipe n'existe pas" );
 		} else {
@@ -132,8 +141,10 @@ class pipe extends abstract_log {
 	 * Permet de lire le pipe.
 	 * @codeCoverageIgnore
 	 * @return string Renvoi les donnees lue dans le pipe.
+	 * @throws Exception
 	 */
-	public function lire($timeout_s = NULL, $timeout_usec = NULL) {
+	public function lire($timeout_s = NULL, $timeout_usec = NULL): string
+	{
 		$read = array (
 				$this->file_desc 
 		);
@@ -142,10 +153,11 @@ class pipe extends abstract_log {
 		$num_changed_streams = stream_select ( $read, $write, $except, $timeout_s, $timeout_usec );
 		
 		if ($num_changed_streams != 0 && $num_changed_streams !== false) {
-			while ( $char != "\n" ) {
+			$donnee_recu = '';
+			do {
 				$char = @fgetc ( $this->file_desc );
 				$donnee_recu .= $char;
-			}
+			} while ( $char != "\n" );
 			$donnee_recu = trim ( $donnee_recu );
 		} elseif ($num_changed_streams === false) {
 			return $this->onError ( "stream_select a fini en erreur", "" );
@@ -160,8 +172,10 @@ class pipe extends abstract_log {
 	 * Ecrit dans le pipe.
 	 * @codeCoverageIgnore
 	 * @return Bool TRUE si OK, FALSE sinon.
+	 * @throws Exception
 	 */
-	public function ecrit($message) {
+	public function ecrit($message): bool
+	{
 		$CODE_RETOUR = @fwrite ( $this->file_desc, $message . "\n" );
 		if ($CODE_RETOUR === false)
 			return $this->onError ( "Impossible d'ecrire sur le pipe." );
@@ -175,7 +189,8 @@ class pipe extends abstract_log {
 	 * @param bool $block false debloque la lecture/ecriture.
 	 * @return true
 	 */
-	public function set_blocking($block = false) {
+	public function set_blocking(bool $block = false): bool
+	{
 		// prevent fread / fwrite blocking
 		stream_set_blocking ( $this->file_desc, $block );
 		
@@ -186,7 +201,8 @@ class pipe extends abstract_log {
 	 * Ferme le pipe.
 	 * @codeCoverageIgnore
 	 */
-	public function close() {
+	public function close(): void
+	{
 		@fclose ( $this->file_desc );
 	}
 
@@ -194,7 +210,8 @@ class pipe extends abstract_log {
 	 * Ferme le pipe et le supprime.
 	 * @codeCoverageIgnore
 	 */
-	public function close_serveur() {
+	public function close_serveur(): bool
+	{
 		@fclose ( $this->file_desc );
 		@unlink ( $this->nom_pipe );
 		
@@ -210,10 +227,10 @@ class pipe extends abstract_log {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -221,4 +238,3 @@ class pipe extends abstract_log {
 		return $help;
 	}
 }
-?>

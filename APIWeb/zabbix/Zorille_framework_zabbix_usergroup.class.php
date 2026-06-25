@@ -4,6 +4,8 @@
  * @author dvargas
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class zabbix_usergroup
  *
@@ -76,11 +78,12 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_usergroup
+	 * @return zabbix_usergroup|abstract_log
 	 */
-	static function &creer_zabbix_usergroup(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_usergroup(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): zabbix_usergroup|abstract_log
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_usergroup ( $sort_en_erreur, $entete );
 		return $objet->_initialise ( array (
@@ -93,9 +96,9 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_usergroup
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this->setObjetZabbixWsclient ( $liste_class ["zabbix_wsclient"] )
@@ -109,7 +112,6 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Constructeur.
 	 * @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -118,9 +120,11 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return bool|zabbix_usergroup True est OK, False sinon.
+	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param() {
+	public function retrouve_zabbix_param(): bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setName ( $this->_valideOption ( array (
 				"zabbix",
@@ -153,7 +157,8 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * @param zabbix_usergroup $zabbix_usergroup_compare
 	 * @return boolean True si les usergroups correspondent, false sinon
 	 */
-	public function compare_usergroup($zabbix_usergroup_compare) {
+	public function compare_usergroup(zabbix_usergroup $zabbix_usergroup_compare): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getUsrgrpId () !== "" && $zabbix_usergroup_compare->getUsrgrpId () != "" && $zabbix_usergroup_compare->getUsrgrpId () != $this->getUsrgrpId ()) {
 			return false;
@@ -179,27 +184,28 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 *  
 	 * @return array;
 	 */
-	public function creer_definition_userGroup_create_ws() {
+	public function creer_definition_userGroup_create_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$usrgrpid = array (
+		return array (
 				"name" => $this->getName (),
 				"debug_mode" => $this->getDebugMode (),
 				"gui_access" => $this->getGuiAccess (),
 				"users_status" => $this->getUsersStatus (),
 				"rights" => $this->getObjetListePermissions ()
 					->getPermissions (),
-				"userids" => array () 
+				"userids" => array ()
 		);
-		
-		return $usrgrpid;
 	}
 
 	/**
 	 * Creer un userGroup dans zabbix
-	 * 
+	 *
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_userGroup() {
+	public function creer_userGroup(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_userGroup_create_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -211,7 +217,8 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Creer un definition d'un userGroup sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_userGroup_delete_ws() {
+	public function creer_definition_userGroup_delete_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$usrgrpid = array ();
 		
@@ -225,8 +232,10 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * supprime un userGroup dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprime_userGroup() {
+	public function supprime_userGroup(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_userGroup_delete_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -238,7 +247,8 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Creer un definition d'un userGroup sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_userGroup_get_ws() {
+	public function creer_definition_userGroup_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"output" => "usrgrpid",
@@ -251,8 +261,10 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * recherche un userGroup dans zabbix a partir de son sendto
 	 * @return array
+	 * @throws Exception
 	 */
-	public function recherche_userGroup() {
+	public function recherche_userGroup(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_userGroup_get_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -264,7 +276,8 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Creer un definition d'une recherche d'un userGroupid sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_usrgrpidByName_get_ws() {
+	public function creer_definition_usrgrpidByName_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"output" => "usrgrpid",
@@ -278,7 +291,8 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Creer un definition d'un userid sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_usrgrpid_get_ws() {
+	public function creer_definition_usrgrpid_get_ws(): array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return array (
 				"usrgrpid" => $this->getUsrgrpId () 
@@ -287,9 +301,11 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 
 	/**
 	 * recherche un userGroupId dans zabbix a partir de son nom
-	 * @return array
+	 * @return array|zabbix_usergroup
+	 * @throws Exception
 	 */
-	public function recherche_userGroupid_by_Name() {
+	public function recherche_userGroupid_by_Name(): array|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$datas = $this->creer_definition_usrgrpidByName_get_ws ();
 		$this->onDebug ( $datas, 1 );
@@ -305,85 +321,76 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * 0 - disabled;
 	 * 1 - enabled;
-	 * @param string $type
-	 * @return number
+	 * @param $debug_mode
+	 * @return float|int|string
 	 */
-	public function retrouve_DebugMode($debug_mode) {
+	public function retrouve_DebugMode($debug_mode): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $debug_mode )) {
 			return $debug_mode;
 		}
-		switch (strtolower ( $debug_mode )) {
-			case "enabled" :
-				return 1;
-				break;
-			case "disabled" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($debug_mode)) {
+			"enabled" => 1,
+			default => 0,
+		};
+
 	}
 
 	/**
 	 * 0 - system : (default) use the system default authentication method;
 	 * 1 - internal : use internal authentication;
 	 * 2 - frontend : disable access to the frontend.
-	 * @param string $type
-	 * @return number
+	 * @param $gui_access
+	 * @return float|int|string
 	 */
-	public function retrouve_GuiAccess($gui_access) {
+	public function retrouve_GuiAccess($gui_access): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $gui_access )) {
 			return $gui_access;
 		}
-		switch (strtolower ( $gui_access )) {
-			case "internal" :
-				return 1;
-				break;
-			case "frontend" :
-				return 2;
-				break;
-			case "system" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($gui_access)) {
+			"internal" => 1,
+			"frontend" => 2,
+			default => 0,
+		};
+
 	}
 
 	/**
 	 * 0 - enabled;
 	 * 1 - disabled;
-	 * @param string $type
-	 * @return number
+	 * @param $users_status
+	 * @return float|int|string
 	 */
-	public function retrouve_UsersStatus($users_status) {
+	public function retrouve_UsersStatus($users_status): float|int|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $users_status )) {
 			return $users_status;
 		}
-		switch (strtolower ( $users_status )) {
-			case "disabled" :
-				return 1;
-				break;
-			case "enabled" :
-			default :
-		}
-		
-		return 0;
+		return match (strtolower($users_status)) {
+			"disabled" => 1,
+			default => 0,
+		};
+
 	}
 
 	/******************************* ACCESSEURS ********************************/
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsrgrpId() {
+	public function getUsrgrpId(): string
+	{
 		return $this->usrgrpid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsrgrpId($usrgrpid) {
+	public function &setUsrgrpId($usrgrpid): static
+	{
 		$this->usrgrpid = $usrgrpid;
 		return $this;
 	}
@@ -391,14 +398,16 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getName() {
+	public function getName(): string
+	{
 		return $this->name;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setName($name) {
+	public function &setName($name): static
+	{
 		$this->name = $name;
 		return $this;
 	}
@@ -406,14 +415,16 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDebugMode() {
+	public function getDebugMode(): string
+	{
 		return $this->debug_mode;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setDebugMode($debug_mode) {
+	public function &setDebugMode($debug_mode): static
+	{
 		$this->debug_mode = $this->retrouve_DebugMode ( $debug_mode );
 		return $this;
 	}
@@ -421,14 +432,16 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getGuiAccess() {
+	public function getGuiAccess(): string
+	{
 		return $this->gui_access;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setGuiAccess($gui_access) {
+	public function &setGuiAccess($gui_access): static
+	{
 		$this->gui_access = $this->retrouve_GuiAccess ( $gui_access );
 		return $this;
 	}
@@ -436,14 +449,16 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsersStatus() {
+	public function getUsersStatus(): string
+	{
 		return $this->users_status;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setUsersStatus($users_status) {
+	public function &setUsersStatus($users_status): static
+	{
 		$this->users_status = $this->retrouve_UsersStatus ( $users_status );
 		return $this;
 	}
@@ -451,14 +466,16 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &getObjetListePermissions() {
+	public function &getObjetListePermissions(): ?zabbix_permissions
+	{
 		return $this->liste_permission;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetListePermissions(&$liste_permission) {
+	public function &setObjetListePermissions(&$liste_permission): static
+	{
 		$this->liste_permission = $liste_permission;
 		return $this;
 	}
@@ -469,7 +486,8 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -482,4 +500,3 @@ class zabbix_usergroup extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

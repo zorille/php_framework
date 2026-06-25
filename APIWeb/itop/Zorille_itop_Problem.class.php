@@ -54,7 +54,7 @@ class Problem extends ci {
 	 * @return Problem
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'Problem' )
 			->champ_obligatoire_standard ()
@@ -68,7 +68,6 @@ class Problem extends ci {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
@@ -137,7 +136,7 @@ class Problem extends ci {
 
 	/**
 	 * Champs existants : title, org_name, description, impact, urgency, contacts_list, functionalcis_list, workorders_list
-	 * @return Incident
+	 * @return self
 	 */
 	public function gestion_Problem(
 			$parametres) {
@@ -176,7 +175,8 @@ class Problem extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Problem :";

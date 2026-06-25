@@ -46,7 +46,7 @@ class splunk_scheduled_views extends splunk_scheduled {
 	 * @param array $liste_class
 	 * @return splunk_scheduled_views
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		 return $this ->reset_resource();
@@ -60,7 +60,6 @@ class splunk_scheduled_views extends splunk_scheduled {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion du parent
@@ -103,7 +102,8 @@ class splunk_scheduled_views extends splunk_scheduled {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

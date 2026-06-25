@@ -6,6 +6,7 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -23,15 +24,16 @@ class Service extends Services {
 	 * Instancie un objet de type Service. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
-	 * @return Service
+	 * @return self
+	 * @throws Exception
 	 */
 	static function &creer_Service(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): static {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Service ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -45,9 +47,10 @@ class Service extends Services {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return Service
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->champ_obligatoire_standard ()
 			->setFormat ( 'Service' );
@@ -60,11 +63,10 @@ class Service extends Services {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		string|bool $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -76,7 +78,7 @@ class Service extends Services {
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
 	 * @return Service
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'host' => false,
@@ -94,21 +96,19 @@ class Service extends Services {
 	 * @return array liste des parametres au format coservit
 	 */
 	public function prepare_params_Service(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				default :
-			}
-		}
-		return $params;
+		array $parametres): array {
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
 	 * ******************************* Service URI ******************************
 	 */
-	public function service_id_uri() {
-		if ($this->valide_item_id () == false) {
+
+	/**
+	 * @throws Exception
+	 */
+	public function service_id_uri(): bool|string {
+		if (!$this->valide_item_id()) {
 			return $this->onError ( "Il n'y pas d'id de Service selectionne" );
 		}
 		return $this->services_list_uri () . '/' . $this->getId ();
@@ -117,8 +117,11 @@ class Service extends Services {
 	/**
 	 * ******************************* Coservit Service *********************************
 	 */
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_service(
-			$params = array ()) {
+			$params = array ()): Service|bool {
 		$this->onDebug ( __METHOD__, 1 );
 		if (empty ( $this->getId () )) {
 			return $this->onError ( "Il faut un ID pour recuperer les donnees d'un service", "", 1 );
@@ -135,9 +138,10 @@ class Service extends Services {
 	 * Creer un service la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande service. (parametres obligatoires) : 'service_alias',"service_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function creerService(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Service ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -154,9 +158,10 @@ class Service extends Services {
 	 * Creer un service la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande service. (parametres obligatoires) : 'service_alias',"service_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function updateService(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Service ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -168,8 +173,9 @@ class Service extends Services {
 	/**
 	 * Delete un service
 	 * @return $this
+	 * @throws Exception
 	 */
-	public function deleteService() {
+	public function deleteService(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->deleteMethod ( $this->service_id_uri (), array () );
@@ -185,11 +191,10 @@ class Service extends Services {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Service :";
 		return $help;
 	}
 }
-?>

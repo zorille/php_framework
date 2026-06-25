@@ -32,11 +32,12 @@ class fork extends abstract_log {
 	 * Instancie un objet de type fork.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fork
 	 */
-	static function &creer_fork(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fork(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fork
+	{
 		$objet = new fork ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -50,8 +51,9 @@ class fork extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fork
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -74,7 +76,8 @@ class fork extends abstract_log {
 	 * @return int Renvoi 0 en cas de fork deja fait, 1 on est dans le pere, 2 on est dans le fils.
 	 * @throws Exception en cas d'erreur
 	 */
-	public function fork_local() {
+	public function fork_local(): int
+	{
 		if ($this->getPid () == "") {
 			$this->setPid ( pcntl_fork () );
 			// @codeCoverageIgnoreStart
@@ -99,7 +102,8 @@ class fork extends abstract_log {
 	 * @param string $commande Commande systeme a appliquer.
 	 * @param array $arguments Arguments de la commande systeme.
 	 */
-	static public function execute_process($commande, $arguments = array()) {
+	static public function execute_process(string $commande, array $arguments = array()): bool
+	{
 		// le process courant devient le nouveau programme
 		pcntl_exec ( $commande, $arguments, array (
 				"PATH" => "/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin:/home/echo/bin" 
@@ -112,9 +116,10 @@ class fork extends abstract_log {
 	 * Accesseur en lecture<br>
 	 * Renvoi le code retour du processus fils.
 	 *
-	 * @return int Renvoi -1 si le processus n'est pas termine, le code retour du processus sinon.
+	 * @return int|array|string Renvoi -1 si le processus n'est pas termine, le code retour du processus sinon.
 	 */
-	public function renvoi_code_retour() {
+	public function renvoi_code_retour(): int|array|string
+	{
 		if ($this->getCodeRetour () != "")
 			return $this->getCodeRetour ();
 		
@@ -124,11 +129,12 @@ class fork extends abstract_log {
 	//renvoi -1 en cas d'erreur de process
 	//renvoi le code retour de fin de processus
 	/**
-	* Verifie l'etat du processus fils et attend la fin de celui-ci.
-	* 
-	* @return int Renvoi -1 en cas d'erreur, le code retour du processus sinon.
-	*/
-	public function wait_children() {
+	 * Verifie l'etat du processus fils et attend la fin de celui-ci.
+	 *
+	 * @return array|int|string Renvoi -1 en cas d'erreur, le code retour du processus sinon.
+	 */
+	public function wait_children(): array|int|string
+	{
 		if ($this->getPid () != "") {
 			pcntl_waitpid ( $this->getPid (), $status, WUNTRACED );
 			$this->setCodeRetour ( pcntl_wexitstatus ( $status ) );
@@ -148,11 +154,12 @@ class fork extends abstract_log {
 	//meme renvoi que precedement +
 	//renvoi false si le process est en cours
 	/**
-	* Verifie l'etat du processus fils sans attendre la fin de celui-ci.
-	* @codeCoverageIgnore
-	* @return int|false FALSE si le processus est en cours, -1 en cas d'erreur, le code retour du processus sinon.
-	*/
-	public function wait_child_nohup() {
+	 * Verifie l'etat du processus fils sans attendre la fin de celui-ci.
+	 * @codeCoverageIgnore
+	 * @return bool|int|array|string FALSE si le processus est en cours, -1 en cas d'erreur, le code retour du processus sinon.
+	 */
+	public function wait_child_nohup(): bool|int|array|string
+	{
 		if ($this->getPid () != "") {
 			$var_return = pcntl_waitpid ( $this->getPid (), $status, WNOHANG or WUNTRACED );
 			// @codeCoverageIgnoreStart
@@ -194,17 +201,20 @@ class fork extends abstract_log {
 	 * Accesseur en lecture a la liste des mois
 	 * @codeCoverageIgnore
 	 *
-	 * @return array Renvoi la liste des mois.
+	 * @return int|array|string Renvoi la liste des mois.
 	 */
-	public function getPid() {
+	public function getPid(): int|array|string
+	{
 		return $this->pid;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return dates
+	 * @param $pid
+	 * @return fork
 	 */
-	public function &setPid($pid) {
+	public function &setPid($pid): fork
+	{
 		$this->pid = $pid;
 		return $this;
 	}
@@ -213,21 +223,23 @@ class fork extends abstract_log {
 	 * Accesseur en lecture a la liste des mois
 	 * @codeCoverageIgnore
 	 *
-	 * @return array Renvoi la liste des mois.
+	 * @return int|array|string Renvoi la liste des mois.
 	 */
-	public function getCodeRetour() {
+	public function getCodeRetour(): int|array|string
+	{
 		return $this->code_retour;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return dates
+	 * @param $code_retour
+	 * @return fork
 	 */
-	public function &setCodeRetour($code_retour) {
+	public function &setCodeRetour($code_retour): fork
+	{
 		$this->code_retour = $code_retour;
 		return $this;
 	}
 
 /*************** ACCESSEURS *******************/
 } //Fin de la class
-?>

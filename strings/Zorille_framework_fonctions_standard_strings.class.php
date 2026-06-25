@@ -5,9 +5,10 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class fonctions_standard_strings<br>
-
  * @package Lib
  * @subpackage Generation
  */
@@ -18,11 +19,13 @@ class fonctions_standard_strings extends abstract_log {
 	 * Instancie un objet de type fonctions_standard_strings.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fonctions_standard_strings
+	 * @throws Exception
 	 */
-	static function &creer_fonctions_standard_strings(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fonctions_standard_strings(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fonctions_standard_strings
+	{
 		$objet = new fonctions_standard_strings ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -36,8 +39,9 @@ class fonctions_standard_strings extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fonctions_standard_strings
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -55,14 +59,16 @@ class fonctions_standard_strings extends abstract_log {
 	}
 
 	/*********************** GESTION de BASE64 ****************************/
-	
+
 	/**
-     * Creer un objet generation.
-     *
-     * @param options &$liste_option Pointeur sur les arguments.
-     * @return $base64,NULL en cas d'erreur
-     */
-	static public function creer_base64(&$liste_option) {
+	 * Creer un objet generation.
+	 *
+	 * @param options &$liste_option Pointeur sur les arguments.
+	 * @return base64|null $base64,NULL en cas d'erreur
+	 * @throws Exception
+	 */
+	static public function creer_base64(options &$liste_option): ?base64
+	{
 		if ($liste_option->verifie_option_existe ( "base64_encode" ) !== false) {
 			$base64 = base64::creer_base64 ( $liste_option, false, "base64" );
 		} else {
@@ -74,4 +80,3 @@ class fonctions_standard_strings extends abstract_log {
 
 /************************* GESTION de BASE64 *******************************/
 }
-?>

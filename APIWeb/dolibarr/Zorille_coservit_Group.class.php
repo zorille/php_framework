@@ -6,6 +6,7 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -23,15 +24,15 @@ class Group extends Groups {
 	 * Instancie un objet de type Group. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return $this
 	 */
 	static function &creer_Group(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Group|static {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Group ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -47,7 +48,7 @@ class Group extends Groups {
 	 * @return $this
 	 */
 	public function &_initialise(
-			$liste_class) {
+		array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->champ_obligatoire_standard ()
 			->setFormat ( 'Group' );
@@ -58,13 +59,12 @@ class Group extends Groups {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -73,7 +73,7 @@ class Group extends Groups {
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
 	 * @return $this
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 				// 'group_alias' => false,
@@ -88,34 +88,37 @@ class Group extends Groups {
 	 * @return array liste des parametres au format coservit
 	 */
 	public function prepare_params_Group(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				default :
-			}
-		}
-		return $params;
+		array $parametres): array {
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
 	 * ******************************* Group URI ******************************
 	 */
-	public function group_id_uri() {
-		if ($this->valide_item_id () == false) {
+	/**
+	 * @throws Exception
+	 */
+	public function group_id_uri(): bool|string {
+		if (!$this->valide_item_id()) {
 			return $this->onError ( "Il n'y pas d'id de Group selectionne" );
 		}
 		return $this->groups_list_uri () . '/' . $this->getId ();
 	}
 
-	public function group_metrics_uri() {
+	/**
+	 * @throws Exception
+	 */
+	public function group_metrics_uri(): string {
 		return $this->group_id_uri () . '/metrics';
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function group_measurement_uri(
-			$metricUuid) {
+			$metricUuid): bool|string {
 		if (empty ( $metricUuid )) {
-			return $this->onError ( "Il faut un Metric-Uuid pour recuperer les donnees de mesure", "", 1 );
+			return $this->onError ( "Il faut un Metric-Uuid pour recuperer les donnees de mesure" );
 		}
 		return $this->group_metrics_uri () . '/' . $metricUuid . "/measurements";
 	}
@@ -123,8 +126,11 @@ class Group extends Groups {
 	/**
 	 * ******************************* Coservit Group *********************************
 	 */
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_group(
-			$params = array ()) {
+			$params = array ()): Group {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->group_id_uri (), $params );
@@ -135,9 +141,10 @@ class Group extends Groups {
 	 * Creer un group en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande group. (parametres obligatoires) : 'group_alias',"group_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function creerGroup(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Group ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -154,9 +161,10 @@ class Group extends Groups {
 	 * Update un group de la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande group. (parametres obligatoires) : 'group_alias',"group_address","company","collector"
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function updateGroup(
-			$parametres) {
+			$parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Group ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -168,21 +176,28 @@ class Group extends Groups {
 	/**
 	 * ******************************* Metrics *********************************
 	 */
+
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_group_metrics(
-			$params = array ()) {
+			$params = array ()): Group {
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->group_metrics_uri (), $params );
 		return $this->setDonnees ( $resultat );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_group_measurement(
 			$metricUuid,
-			$params = array ()) {
+			$params = array ()): Group {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setMandatory ( array (
 				'date_start' => false,
-				'date_stop' => false,
+				'date_stop' => false
 		) );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->group_measurement_uri ( $metricUuid ), $params );
@@ -193,16 +208,13 @@ class Group extends Groups {
 	 * ***************************** ACCESSEURS *******************************
 	 */
 	/**
-	 * ***************************** ACCESSEURS *******************************
+	 * Affiche le help.<br>
+	 * @codeCoverageIgnore
 	 */
-	/**
-	 * Affiche le help.<br> @codeCoverageIgnore
-	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Group :";
 		return $help;
 	}
 }
-?>

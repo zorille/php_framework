@@ -64,14 +64,15 @@ class machine extends abstract_log {
 	 * Instancie un objet de type machine.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return machine
 	 */
 	static function &creer_machine(
-			&$liste_option,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): machine
+	{
 		$objet = new machine ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -84,9 +85,10 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return machine
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -97,14 +99,12 @@ class machine extends abstract_log {
 	/**
 	 * Prend les valeurs intrinsecs du machine et les charges en memoire
 	 * @codeCoverageIgnore
-	 * @return TRUE
 	 */
 	public function __construct(
 			$sort_en_erreur = false,
 			$entete = __CLASS__) {
 		// Gestion de abstract_log
 		parent::__construct ( $sort_en_erreur, $entete );
-		return true;
 	}
 
 	public function manage_entete(
@@ -125,7 +125,7 @@ class machine extends abstract_log {
 	 */
 	public function &retrouve_machine_param(
 			$nom_machine,
-			$entete = false) {
+			$entete = false): static|bool {
 		$this->onDebug ( __METHOD__, 1 );
 		// Le nom est obligatoire
 		$this->setNom ( $this->getListeOptions ()
@@ -134,7 +134,8 @@ class machine extends abstract_log {
 				"nom"
 		), $entete ) ) );
 		if ($this->getNom () == null) {
-			return $this->onError ( "Il faut un nom a la machine", "", 10000 );
+			$r = $this->onError ( "Il faut un nom a la machine", "", 10000 );
+			return $r;
 		}
 		$this->setHost ( $this->getListeOptions ()
 			->_valideOption ( $this->manage_entete ( array (
@@ -186,7 +187,8 @@ class machine extends abstract_log {
 	 * @return Bool Renvoi TRUE si le job est acceptable ou FALSE sinon.
 	 */
 	public function compare_diskspace(
-			$disk) {
+		int $disk): bool
+	{
 		if ($disk <= $this->getDiskSpace ())
 			return true;
 		return false;
@@ -199,7 +201,8 @@ class machine extends abstract_log {
 	 * @return Bool Renvoi TRUE si le job est acceptable ou FALSE sinon.
 	 */
 	public function compare_maxram(
-			$RamSpace) {
+		int $RamSpace): bool
+	{
 		if ($RamSpace <= $this->getMaxRamJob ())
 			return true;
 		return false;
@@ -212,14 +215,13 @@ class machine extends abstract_log {
 	 * @return string|false Renvoi la valeur demande ou FALSE si cette valeur n'existe pas.
 	 */
 	public function renvoi_donnees_machine(
-			$choix) {
-		switch ($choix) {
-			case "Name" :
-				return $this->getNom ();
-			case "NetName" :
-				return $this->getNetName ();
-		}
-		return false;
+		string $choix): bool|string
+	{
+		return match ($choix) {
+			"Name" => $this->getNom(),
+			"NetName" => $this->getNetName(),
+			default => false,
+		};
 	}
 
 	/**
@@ -228,7 +230,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getNom() {
+	public function getNom(): string
+	{
 		return $this->Nom;
 	}
 
@@ -236,7 +239,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setNom(
-			$Nom) {
+			$Nom): static
+	{
 		$this->Nom = $Nom;
 		return $this;
 	}
@@ -244,7 +248,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getHost() {
+	public function getHost(): string
+	{
 		return $this->NetName;
 	}
 
@@ -252,7 +257,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHost(
-			$NetName) {
+			$NetName): static
+	{
 		$this->NetName = $NetName;
 		return $this;
 	}
@@ -260,7 +266,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getIP() {
+	public function getIP(): string
+	{
 		return $this->IP;
 	}
 
@@ -268,7 +275,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setIP(
-			$IP) {
+			$IP): static
+	{
 		$this->IP = $IP;
 		return $this;
 	}
@@ -276,7 +284,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUsername() {
+	public function getUsername(): string
+	{
 		return $this->Username;
 	}
 
@@ -284,7 +293,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUsername(
-			$Username) {
+			$Username): static
+	{
 		$this->Username = $Username;
 		return $this;
 	}
@@ -292,7 +302,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getDiskSpace() {
+	public function getDiskSpace(): int|string
+	{
 		return $this->DiskSpace;
 	}
 
@@ -300,7 +311,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setDiskSpace(
-			$DiskSpace) {
+			$DiskSpace): static
+	{
 		$this->DiskSpace = $DiskSpace;
 		return $this;
 	}
@@ -308,7 +320,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getRamSpace() {
+	public function getRamSpace(): int|string
+	{
 		return $this->RamSpace;
 	}
 
@@ -316,7 +329,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setRamSpace(
-			$RamSpace) {
+			$RamSpace): static
+	{
 		$this->RamSpace = $RamSpace;
 		return $this;
 	}
@@ -324,7 +338,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCPUUnit() {
+	public function getCPUUnit(): int|string
+	{
 		return $this->CPUUnit;
 	}
 
@@ -332,7 +347,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCPUUnit(
-			$CPUUnit) {
+			$CPUUnit): static
+	{
 		$this->CPUUnit = $CPUUnit;
 		return $this;
 	}
@@ -340,7 +356,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getOs() {
+	public function getOs(): string
+	{
 		return $this->OS;
 	}
 
@@ -348,7 +365,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setOs(
-			$Os) {
+			$Os): static
+	{
 		$this->OS = $Os;
 		return $this;
 	}
@@ -356,7 +374,8 @@ class machine extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getTypeConnexion() {
+	public function getTypeConnexion(): string
+	{
 		return $this->type_connexion;
 	}
 
@@ -364,7 +383,8 @@ class machine extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTypeConnexion(
-			$type_connexion) {
+			$type_connexion): static
+	{
 		$this->type_connexion = $type_connexion;
 		return $this;
 	}
@@ -375,11 +395,11 @@ class machine extends abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "machine :";
 		return $help;
 	}
 }
-?>

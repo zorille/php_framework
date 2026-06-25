@@ -5,7 +5,7 @@
  *
  */
 namespace Zorille\framework;
-use \Exception as Exception;
+use Exception;
 /**
  * class machines<br> Gere l'attribution et la liberation des jobs sur plusieurs machines.<br> Necessite la class machine pour fonctionner.
  * @package Lib
@@ -54,7 +54,7 @@ class machines extends abstract_log {
 	 * @return machines
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->setObjetMachineRef ( machine::creer_machine ( $liste_class ["options"] ) );
 		return $this;
@@ -79,25 +79,26 @@ class machines extends abstract_log {
 	 * Prend une liste de machines avec leurs caracteristiques (cf class machine) et cree la liste de machine avec la class machine
 	 *
 	 * @param array $liste liste de machine avec tous leurs attribues (cf class machine sans le s)
-	 * @return Bool Renvoi TRUE si des machines sont creer, FALSE sinon.
+	 * @return bool|self Renvoi TRUE si des machines sont creer, FALSE sinon.
 	 * @throws Exception
 	 */
 	public function &charge_liste_machines() {
 		if($this->getListeOptions()->verifie_option_existe ( "machines" )){
 			$liste_machine = $this->getListeMachines ();
 			foreach($this->getListeOptions()->getOption ( "machines" ) as $nom_machine=>$donnees_machine){
-				$donnees_machine;
 				$machine=clone $this->getObjetMachineRef();
 				$liste_machine [$nom_machine] =$machine->retrouve_machine_param($nom_machine,"machines");
 			}
 			$this->setListeMachines($liste_machine);
 		} else {
-			return $this->onError ( "Il manque le parametre machines" );
-		}
+			$err = $this->onError ( "Il manque le parametre machines", entete: get_class($this) );
+		    return $err;
+        }
 		if (count ( $this->getListeMachines () ) == 0) {
-			return $this->onError ( "Pas de machines dans la liste des machines" );
-		}
-		$this->onDebug ( $this->getListeMachines (), 2 );
+			$err = $this->onError ( "Pas de machines dans la liste des machines", entete: get_class($this) );
+            return $err;
+        }
+		$this->onDebug ( $this->getListeMachines (), 2, get_class($this) );
 		return $this;
 	}
 
@@ -146,7 +147,8 @@ class machines extends abstract_log {
 	 * @param string $echo Affiche le help
 	 * @return string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "";

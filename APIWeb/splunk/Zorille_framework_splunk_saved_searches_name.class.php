@@ -48,7 +48,7 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	 * @param array $liste_class
 	 * @return splunk_saved_searches_name
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		$this ->setSavedSearchesName ( $liste_class ['saved_searches_name'] );
 		parent::_initialise ( $liste_class );
 		
@@ -63,7 +63,6 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion du parent
@@ -194,7 +193,8 @@ class splunk_saved_searches_name extends splunk_saved_searches {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

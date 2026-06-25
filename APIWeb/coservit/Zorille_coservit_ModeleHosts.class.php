@@ -6,8 +6,8 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
-use Zorille\framework\abstract_log;
 
 /**
  * class ModeleHosts
@@ -42,15 +42,16 @@ class ModeleHosts extends globalapi {
 	 * Instancie un objet de type ModeleHosts. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return ModeleHosts
+	 * @throws Exception
 	 */
 	static function &creer_ModeleHosts(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): ModeleHosts {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new ModeleHosts ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -64,9 +65,10 @@ class ModeleHosts extends globalapi {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return ModeleHosts
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		$this->retrouve_check_template ()
 			->retrouve_modeleHost ();
@@ -78,18 +80,20 @@ class ModeleHosts extends globalapi {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
-	public function retrouve_check_template() {
+	/**
+	 * @throws Exception
+	 */
+	public function retrouve_check_template(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_modeleHosts = array ();
 		$donnee_coservit = $this->_valideOption ( array (
@@ -114,12 +118,17 @@ class ModeleHosts extends globalapi {
 	/**
 	 * ******************************* ModeleHosts URI ******************************
 	 */
-	public function modeleHost_uri() {
+	public function modeleHost_uri(): string
+	{
 		return $this->globalapi_uri () . '/host_templates';
 	}
 
 	/**
 	 * ******************************* Coservit ModeleHosts *********************************
+	 */
+
+	/**
+	 * @throws Exception
 	 */
 	public function retrouve_id_modeleHost(
 			$modeleHosts) {
@@ -130,10 +139,11 @@ class ModeleHosts extends globalapi {
 		if (isset ( $this->getModeleHost () [strtoupper ( $modeleHosts )] )) {
 			return $this->getModeleHost () [strtoupper ( $modeleHosts )];
 		}
-		return $this->onError ( "Le modele de host " . $modeleHosts . " n'existe pas dans la liste", "", 1 );
+		return $this->onError ( "Le modele de host " . $modeleHosts . " n'existe pas dans la liste" );
 	}
 
-	public function prepare_modeleHost() {
+	public function prepare_modeleHost(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_modeleHosts = array ();
 		if (isset ( $this->getDonnees ()->_embedded->items )) {
@@ -145,6 +155,9 @@ class ModeleHosts extends globalapi {
 		return $this->setmodeleHost ( $liste_modeleHosts );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_modeleHost(
 			$params = array (
 					"company" => array (
@@ -156,7 +169,8 @@ class ModeleHosts extends globalapi {
 					"sort" => array (
 							"+name"
 					)
-			)) {
+			)): ModeleHosts
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$resultat = $this->getObjetCoservitWsclient ()
 			->getMethod ( $this->modeleHost_uri (), $params );
@@ -164,8 +178,12 @@ class ModeleHosts extends globalapi {
 			->prepare_modeleHost ();
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_id_checkTemplate(
-			$CheckTemplate) {
+			$CheckTemplate): bool|int
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( $this->getCheckTemplates (), 2 );
 		if (isset ( $this->getCheckTemplates () [strtoupper ( $CheckTemplate )] )) {
@@ -177,10 +195,11 @@ class ModeleHosts extends globalapi {
 	/**
 	 * Creer un host la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande host. (parametres obligatoires) : 'host_alias',"host_address","company","collector"
-	 * @return \Zorille\coservit\Company
+	 * @return ModeleHosts
 	 */
 	public function creerModeleHosts(
-			$parametres) {
+		array $parametres): ModeleHosts
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -190,9 +209,9 @@ class ModeleHosts extends globalapi {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array|string
 	 */
-	public function getModeleHost() {
+	public function getModeleHost(): array|string {
 		return $this->modeleHosts;
 	}
 
@@ -200,16 +219,16 @@ class ModeleHosts extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setModeleHost(
-			$liste_modeleHosts) {
+			$liste_modeleHosts): static {
 		$this->modeleHosts = $liste_modeleHosts;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array|int[]
 	 */
-	public function getCheckTemplates() {
+	public function getCheckTemplates(): array {
 		return $this->checkTemplates;
 	}
 
@@ -217,7 +236,7 @@ class ModeleHosts extends globalapi {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCheckTemplates(
-			$checkTemplates) {
+			$checkTemplates): static {
 		$this->checkTemplates = $checkTemplates;
 		return $this;
 	}
@@ -228,11 +247,11 @@ class ModeleHosts extends globalapi {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "ModeleHosts :";
+		$help [__CLASS__] ["text"] = [
+			'ModeleHosts :'
+		];
 		return $help;
 	}
 }
-?>

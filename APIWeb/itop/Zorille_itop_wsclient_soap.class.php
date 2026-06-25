@@ -64,14 +64,15 @@ class wsclient_soap extends Core\abstract_log {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient_soap
+	 * @return wsclient_soap|bool
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["datas"] )) {
-			$this ->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this ->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this ->setObjetItopdatas ( $liste_class ["datas"] ) 
 			->setObjetSoap ( Core\soap::creer_soap ( $liste_class ["options"] ) );
@@ -86,7 +87,6 @@ class wsclient_soap extends Core\abstract_log {
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 * @throws Exception
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
@@ -499,7 +499,7 @@ class wsclient_soap extends Core\abstract_log {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();

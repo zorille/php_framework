@@ -65,15 +65,15 @@ class pingdom_wsclient extends wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return pingdom_wsclient
+	 * @return self|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["pingdom_datas"] )) {
-			$this->onError ( "il faut un objet de type pingdom_datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type pingdom_datas" );
+			return $r;
 		}
 		$this->setObjetpingdomDatas ( $liste_class ["pingdom_datas"] )
 			->setContentType ( 'application/json' )
@@ -389,7 +389,7 @@ class pingdom_wsclient extends wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "pingdom Wsclient :";

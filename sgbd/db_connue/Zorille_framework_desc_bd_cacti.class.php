@@ -19,11 +19,12 @@ class desc_bd_cacti extends gestion_definition_table {
 	 * Instancie un objet de type desc_bd_cacti.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return desc_bd_cacti
 	 */
-	static function &creer_desc_bd_cacti(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_desc_bd_cacti(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): desc_bd_cacti
+	{
 		$objet = new desc_bd_cacti ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -38,7 +39,8 @@ class desc_bd_cacti extends gestion_definition_table {
 	 * @param array $liste_class
 	 * @return desc_bd_cacti
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -59,19 +61,22 @@ class desc_bd_cacti extends gestion_definition_table {
 		$this->_chargeChamps ();
 	}
 
-	private function _chargeTable() {
+	private function _chargeTable(): void
+	{
 		$this->setTable ( 'host', "host" );
 		$this->setTable ( 'host_template', "host_template" );
 	}
 
-	private function _chargeChamps () {
+	private function _chargeChamps (): bool
+	{
 		$this->_chargeChampsHost ();
 		$this->_chargeChampsHostTemplate ();
 		
 		return true;
 	}
 
-	private function _chargeChampsHost() {
+	private function _chargeChampsHost(): bool
+	{
 		$this->setChamp ( "id", "id", "host", "numeric" );
 		$this->setChamp ( "host_template_id", "host_template_id", "host", "numeric" );
 		$this->setChamp ( "description", "description", "host", "text" );
@@ -111,7 +116,8 @@ class desc_bd_cacti extends gestion_definition_table {
 		return true;
 	}
 
-	private function _chargeChampsHostTemplate() {
+	private function _chargeChampsHostTemplate(): bool
+	{
 		$this->setChamp ( "id", "id", "host_template", "numeric" );
 		$this->setChamp ( "hash", "hash", "host_template", "text" );
 		$this->setChamp ( "name", "name", "host_template", "text" );
@@ -122,10 +128,10 @@ class desc_bd_cacti extends gestion_definition_table {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -133,4 +139,3 @@ class desc_bd_cacti extends gestion_definition_table {
 		return $help;
 	}
 }
-?>

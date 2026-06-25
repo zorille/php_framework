@@ -54,14 +54,16 @@ class curl extends abstract_log {
 	 * Instancie un objet de type curl.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return curl
+	 * @throws Exception
 	 */
 	static function &creer_curl(
-			&$liste_option,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): curl
+	{
 		$objet = new curl ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option
@@ -74,9 +76,11 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return curl
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static
+	{
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -90,18 +94,19 @@ class curl extends abstract_log {
 	 * @param string $sort_en_erreur
 	 */
 	public function __construct(
-			$sort_en_erreur = "non",
-			$nom_module = "curl") {
+		$sort_en_erreur = "non",
+		string $nom_module = "curl") {
 		parent::__construct ( $sort_en_erreur, $nom_module );
 	}
 
 	/**
 	 * Se connecte au Web Service
-	 * @param options $liste_option Pointeur sur la liste d'option standard.
+	 * @param $url
 	 * @return curl
 	 */
 	public function &connectService(
-			$url) {
+			$url): static
+	{
 		$this->setCurl ( $url );
 		return $this->setConnexion ( curl_init ( $this->getCurl () ) );
 	}
@@ -112,7 +117,8 @@ class curl extends abstract_log {
 	 * @return mixed|false en cas d'erreur
 	 * @throws Exception
 	 */
-	public function send_curl() {
+	public function send_curl(): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setCurlUserAgent ();
 		$retour = curl_exec ( $this->getConnexion () );
@@ -138,9 +144,11 @@ class curl extends abstract_log {
 	/**
 	 * Test les code retour d'erreur standard.
 	 * @return false|curl
+	 * @throws Exception
 	 */
 	public function test_code_retour(
-			$retour) {
+			$retour): bool|curl|static
+	{
 		/* Test des codes retour HTTP. */
 		$httpCode = $this->curl_getinfo ();
 		if ($httpCode == 404) {
@@ -153,14 +161,15 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param string $nom_local
 	 * @param boolean $mode_ascii
-	 * @param string $chmod
+	 * @param bool|string $chmod
 	 * @return mixed|false
 	 * @throws Exception
 	 */
 	public function ftp_curl_put(
-			$nom_local,
-			$mode_ascii = FALSE,
-			$chmod = FALSE) {
+		string      $nom_local,
+		bool        $mode_ascii = FALSE,
+		bool|string $chmod = FALSE): mixed
+	{
 		$this->onInfo ( "On envoi le fichier : " . $nom_local . " " . filesize ( $nom_local ) );
 		$ret = FALSE;
 		if (is_file ( $nom_local )) {
@@ -191,7 +200,8 @@ class curl extends abstract_log {
 	 * @throws Exception
 	 */
 	public function ftp_curl_get(
-			$sortie) {
+		string $sortie): mixed
+	{
 		if ($fp = fopen ( $sortie, 'w' )) {
 			curl_setopt ( $this->getConnexion (), CURLOPT_FILE, $fp );
 			$ret = $this->send_curl ();
@@ -207,7 +217,8 @@ class curl extends abstract_log {
 	 * @return mixed|false
 	 * @throws Exception
 	 */
-	public function ftp_curl_list() {
+	public function ftp_curl_list(): mixed
+	{
 		$this->setReturnTransfert ( TRUE );
 		curl_setopt ( $this->getConnexion (), CURLOPT_FTPLISTONLY, TRUE );
 		return $this->send_curl ();
@@ -219,7 +230,8 @@ class curl extends abstract_log {
 	 * @return mixed|false
 	 * @throws Exception
 	 */
-	public function curl_getinfo() {
+	public function curl_getinfo(): mixed
+	{
 		$this->setCurlInfos ( curl_getinfo ( $this->getConnexion () ) );
 		$code_retour = curl_getinfo ( $this->getConnexion (), CURLINFO_HTTP_CODE );
 		$this->setCodeRetourCurl ( $code_retour );
@@ -233,7 +245,8 @@ class curl extends abstract_log {
 	 * @throws Exception
 	 */
 	public function curl_connecttimeout(
-			$time = 1) {
+			$time = 1): static
+	{
 		$this->setReturnTransfert ( TRUE );
 		curl_setopt ( $this->getConnexion (), CURLOPT_CONNECTTIMEOUT, $time );
 		return $this;
@@ -244,7 +257,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @return curl
 	 */
-	public function close() {
+	public function close(): static
+	{
 		curl_close ( $this->getConnexion () );
 		return $this;
 	}
@@ -263,7 +277,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setConnexion(
-			$connexion) {
+			$connexion): static
+	{
 		$this->connexion = $connexion;
 		return $this;
 	}
@@ -271,7 +286,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCurl() {
+	public function getCurl(): string
+	{
 		return $this->curl;
 	}
 
@@ -279,7 +295,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCurl(
-			$url) {
+			$url): static
+	{
 		$this->curl = $url;
 		return $this;
 	}
@@ -287,7 +304,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCodeRetourCurl() {
+	public function getCodeRetourCurl(): int|string
+	{
 		return $this->code_retour_curl;
 	}
 
@@ -295,7 +313,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCodeRetourCurl(
-			$code_retour_curl) {
+			$code_retour_curl): static
+	{
 		$this->code_retour_curl = $code_retour_curl;
 		return $this;
 	}
@@ -303,7 +322,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getUAgent() {
+	public function getUAgent(): string
+	{
 		return $this->UAgent;
 	}
 
@@ -311,7 +331,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setUAgent(
-			$UAgent) {
+			$UAgent): static
+	{
 		$this->UAgent = $UAgent;
 		return $this;
 	}
@@ -320,7 +341,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setEpsv(
-			$use = true) {
+			$use = true): static
+	{
 		curl_setopt ( $this->getConnexion (), CURLOPT_FTP_USE_EPSV, $use );
 		return $this;
 	}
@@ -329,7 +351,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setSslVerifyPeerAndHost(
-			$actif) {
+			$actif): static
+	{
 		$this->onDebug ( "VerifyPeerAndHost : " . (($actif) ? 'Yes' : 'No'), 2 );
 		curl_setopt ( $this->getConnexion (), CURLOPT_SSL_VERIFYPEER, $actif );
 		curl_setopt ( $this->getConnexion (), CURLOPT_SSL_VERIFYHOST, $actif );
@@ -340,7 +363,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHttpHAuth(
-			$type = "any") {
+			$type = "any"): static
+	{
 		$this->onDebug ( "Auth type : " . $type, 2 );
 		switch ($type) {
 			case "any" :
@@ -357,7 +381,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHttpHeader(
-			$headers) {
+			$headers): static
+	{
 		$this->onDebug ( "Headers : " . print_r ( $headers, true ), 2 );
 		curl_setopt ( $this->getConnexion (), CURLOPT_HTTPHEADER, $headers );
 		return $this;
@@ -367,7 +392,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHeader(
-			$actif) {
+			$actif): static
+	{
 		$this->onDebug ( "Header : " . (($actif) ? 'Yes' : 'No'), 2 );
 		if (is_bool ( $actif )) {
 			curl_setopt ( $this->getConnexion (), CURLOPT_HEADER, $actif );
@@ -379,7 +405,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setReturnTransfert(
-			$actif) {
+			$actif): static
+	{
 		$this->onDebug ( "Return Transfert : " . (($actif) ? 'Yes' : 'No'), 2 );
 		if (is_bool ( $actif )) {
 			curl_setopt ( $this->getConnexion (), CURLOPT_RETURNTRANSFER, $actif );
@@ -392,7 +419,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setLocation(
-			$actif) {
+			$actif): static
+	{
 		$this->onDebug ( "Location : " . (($actif) ? 'Yes' : 'No'), 2 );
 		if (is_bool ( $actif )) {
 			curl_setopt ( $this->getConnexion (), CURLOPT_FOLLOWLOCATION, $actif );
@@ -401,10 +429,22 @@ class curl extends abstract_log {
 	}
 
 	/**
+	 * pour suivre tous les en-tetes "Location: " que le serveur envoie dans les en-tetes HTTP
+	 * @codeCoverageIgnore
+	 */
+	public function &setFollowRedirections(): self
+    {
+        $this->onDebug(__METHOD__, 1);
+        curl_setopt ( $this->getConnexion (), CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL );
+		return $this;
+	}
+
+	/**
 	 * @codeCoverageIgnore
 	 */
 	public function &setUseDns(
-			$actif) {
+			$actif): static
+	{
 		$this->onDebug ( "DNS use global cache : " . ($actif) ? 'Yes' : 'No', 2 );
 		if (is_bool ( $actif )) {
 			curl_setopt ( $this->getConnexion (), CURLOPT_DNS_USE_GLOBAL_CACHE, $actif );
@@ -416,7 +456,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCookie(
-			$cookie) {
+			$cookie): static
+	{
 		$this->onDebug ( "cookie : " . $cookie, 2 );
 		if ($cookie != "") {
 			curl_setopt ( $this->getConnexion (), CURLOPT_COOKIE, $cookie );
@@ -427,7 +468,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setCurlUserAgent() {
+	public function &setCurlUserAgent(): static
+	{
 		curl_setopt ( $this->getConnexion (), CURLOPT_USERAGENT, $this->getUAgent () );
 		return $this;
 	}
@@ -437,7 +479,8 @@ class curl extends abstract_log {
 	 */
 	public function &setUserPasswd(
 			$user,
-			$passwd) {
+			$passwd): static
+	{
 		$this->onDebug ( "User/pass : " . $user . "/*********", 2 );
 		if ($user != "" && $passwd != "") {
 			curl_setopt ( $this->getConnexion (), CURLOPT_USERPWD, $user . ":" . $passwd );
@@ -449,7 +492,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setReferer(
-			$referer) {
+			$referer): static
+	{
 		$this->onDebug ( "referer : " . $referer, 2 );
 		if ($referer != "") {
 			curl_setopt ( $this->getConnexion (), CURLOPT_REFERER, $referer );
@@ -465,7 +509,8 @@ class curl extends abstract_log {
 			$port_proxy,
 			$login_proxy,
 			$passwd_proxy,
-			$type_proxy) {
+			$type_proxy): static
+	{
 		$this->onDebug ( "adresse_proxy:" . $adresse_proxy . ",port_proxy:" . $port_proxy . ",login_proxy:" . $login_proxy . ",passwd_proxy:" . $passwd_proxy . ",type_proxy:" . $type_proxy, 2 );
 		curl_setopt ( $this->getConnexion (), CURLOPT_HTTPPROXYTUNNEL, true );
 		curl_setopt ( $this->getConnexion (), CURLOPT_PROXY, $adresse_proxy );
@@ -480,7 +525,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setNoProxy() {
+	public function &setNoProxy(): static
+	{
 		$this->onDebug ( "setNoProxy", 2 );
 		curl_setopt ( $this->getConnexion (), CURLOPT_HTTPPROXYTUNNEL, false );
 		curl_setopt ( $this->getConnexion (), CURLOPT_PROXY, "" );
@@ -496,7 +542,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setPostData(
-			$postData) {
+			$postData): static
+	{
 		if ($postData != "") {
 			curl_setopt ( $this->getConnexion (), CURLOPT_POST, true );
 			curl_setopt ( $this->getConnexion (), CURLOPT_POSTFIELDS, $postData );
@@ -508,7 +555,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setTimeout(
-			$timeout) {
+			$timeout): static
+	{
 		if ($timeout != "") {
 			curl_setopt ( $this->getConnexion (), CURLOPT_TIMEOUT, $timeout );
 			curl_setopt ( $this->getConnexion (), CURLOPT_CONNECTTIMEOUT, $timeout );
@@ -520,7 +568,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setRequest(
-			$request) {
+			$request): static
+	{
 		if ($request != "") {
 			$this->setReturnTransfert ( TRUE );
 			curl_setopt ( $this->getConnexion (), CURLOPT_CUSTOMREQUEST, $request );
@@ -531,7 +580,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setVerbose() {
+	public function &setVerbose(): static
+	{
 		curl_setopt ( $this->getConnexion (), CURLOPT_VERBOSE, TRUE );
 		return $this;
 	}
@@ -540,7 +590,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setOptionArray(
-			$option_array) {
+			$option_array): static
+	{
 		curl_setopt_array ( $this->getConnexion (), $option_array );
 		return $this;
 	}
@@ -548,7 +599,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getValideCodeErreur() {
+	public function getValideCodeErreur(): bool
+	{
 		return $this->valide_code_retour;
 	}
 
@@ -556,7 +608,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setValideCodeErreur(
-			$valide_code_erreur) {
+			$valide_code_erreur): static
+	{
 		$this->valide_code_retour = $valide_code_erreur;
 		return $this;
 	}
@@ -564,7 +617,8 @@ class curl extends abstract_log {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getCurlInfos() {
+	public function getCurlInfos(): string
+	{
 		return $this->curl_infos;
 	}
 
@@ -572,7 +626,8 @@ class curl extends abstract_log {
 	 * @codeCoverageIgnore
 	 */
 	public function &setCurlInfos(
-			$curl_infos) {
+			$curl_infos): static
+	{
 		$this->curl_infos = $curl_infos;
 		return $this;
 	}
@@ -586,10 +641,10 @@ class curl extends abstract_log {
 	/**
 	 * @static
 	 * @codeCoverageIgnore
-	 * @param string $echo Affiche le help
-	 * @return string Renvoi le help
+	 * @return array|string Renvoi le help
 	 */
-	static function help() {
+	static function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		return $help;
@@ -598,4 +653,3 @@ class curl extends abstract_log {
  * ****************** HELP *********************
  */
 }
-?>

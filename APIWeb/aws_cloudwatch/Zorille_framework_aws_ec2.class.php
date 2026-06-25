@@ -5,6 +5,8 @@
  *
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class aws_ec2<br>
  *
@@ -19,13 +21,17 @@ class aws_ec2 extends aws_wsclient {
 	 * Instancie un objet de type aws_ec2.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
 	 * @param aws_datas &$aws_datas Reference sur un objet aws_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return aws_ec2
+	 * @throws Exception
 	 */
-	static function &creer_aws_ec2(&$liste_option, &$aws_datas, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_aws_ec2(
+		options     &$liste_option,
+		aws_datas   &$aws_datas,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): aws_ec2 {
 		$objet = new aws_ec2 ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option,
@@ -38,13 +44,15 @@ class aws_ec2 extends aws_wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return aws_ec2
+	 * @return bool|aws_ec2
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		if (! isset ( $liste_class ["aws_datas"] )) {
-			return $this->onError ( "il faut un objet de type aws_datas" );
+			$r = $this->onError ( "il faut un objet de type aws_datas" );
+			return $r;
 		}
 		$this->setObjetAwsDatas ( $liste_class ["aws_datas"] );
 		return $this;
@@ -70,7 +78,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeInstances 
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeInstances() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeInstances(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', 'DescribeInstances' );
@@ -209,7 +220,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeSpotPriceHistory
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeSpotPriceHistory() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeSpotPriceHistory(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', "DescribeSpotPriceHistory" );
@@ -246,7 +260,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// DescribeAccountAttributes
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeAccountAttributes() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeAccountAttributes(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', "DescribeAccountAttributes" );
@@ -260,15 +277,15 @@ class aws_ec2 extends aws_wsclient {
 		// spotPriceHistorySet - so iterate through that.
 		// Each spotPriceHistorySet in turn will have zero, one or more
 		// items and each item will have an instanceType and spotPrice.
-		foreach ( $xml_object->DescribeAccountAttributes as $DescribeAccountAttributes ) {
-			if (empty ( $DescribeAccountAttributes )) {
-				break;
-			}
-			foreach ( $DescribeAccountAttributes->item as $item ) {
+//		foreach ( $xml_object->DescribeAccountAttributes as $DescribeAccountAttributes ) {
+//			if (empty ( $DescribeAccountAttributes )) {
+//				break;
+//			}
+//			foreach ( $DescribeAccountAttributes->item as $item ) {
 				// Print all the data to be sent to Zabbix
 				//	$retour [] .= "DescribeAccountAttributes_" . "$item->instanceType" . $item->productDescription . " " . $item->spotPrice;
-			}
-		}
+//			}
+//		}
 		
 		return $retour;
 	}
@@ -278,7 +295,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeSpotPriceHistory
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeVpcs() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeVpcs(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', "DescribeVpcs" );
@@ -306,7 +326,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeAddresses 
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeAddresses() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeAddresses(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', 'DescribeAddresses' );
@@ -348,7 +371,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeReservedInstances 
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeReservedInstances() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeReservedInstances(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', 'DescribeReservedInstances' );
@@ -392,7 +418,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeSnapshots
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeSnapshots() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeSnapshots(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', 'DescribeSnapshots' );
@@ -445,17 +474,10 @@ class aws_ec2 extends aws_wsclient {
 			foreach ( $snapshotSet->item as $snapshot ) {
 				
 				$snapshot_status = $snapshot->status;
-				switch ($snapshot->ownerAlias) {
-					case "amazon" :
-						$owner = $snapshot->ownerAlias;
-						break;
-					case "self" :
-						$owner = $snapshot->ownerAlias;
-						break;
-					default :
-						$owner = "other";
-						break;
-				}
+				$owner = match ($snapshot->ownerAlias) {
+					"self", "amazon" => $snapshot->ownerAlias,
+					default => "other",
+				};
 				
 				$snapshots_array ["All"] ["Snapshots_All_Total"] ++;
 				$snapshots_array ["$owner"] ["Snapshots_${owner}_Total"] ++;
@@ -481,7 +503,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeVolumes 
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeVolumes() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeVolumes(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', 'DescribeVolumes' );
@@ -537,9 +562,8 @@ class aws_ec2 extends aws_wsclient {
 				$volume_status = $volumeId->status;
 				$volume_size = $volumeId->size;
 				switch ($volume_status) {
+					case "available":
 					case "creating" :
-						break;
-					case "available" :
 						break;
 					default :
 						$volume_status = "other";
@@ -582,7 +606,10 @@ class aws_ec2 extends aws_wsclient {
 	//-------------------------------------------------------------------------//
 	// EC2_DescribeImages
 	//-------------------------------------------------------------------------//
-	function EC2_DescribeImages() {
+	/**
+	 * @throws Exception
+	 */
+	function EC2_DescribeImages(): array {
 		$retour = array ();
 		
 		$this->setParams ( 'Action', "DescribeImages" );
@@ -604,7 +631,7 @@ class aws_ec2 extends aws_wsclient {
 			}
 			foreach ( $imagesSet->item as $item ) {
 				$total_image_count ++;
-				if ($item->isPublic == true) {
+				if ($item->isPublic) {
 					$public_image_count ++;
 				}
 			}
@@ -619,20 +646,6 @@ class aws_ec2 extends aws_wsclient {
 		return $retour;
 	}
 	//-------------------------------------------------------------------------//
-	/************************* GESTION Aws HOST ****************************/
-	public function valide_requete() {
-		
-		// Since every successful query to the EC2 API will have a
-		// "RequestId" returned, check for that first.
-		/*if (isset ( $xml_object->ResponseMetadata )) {
-		 $requestId = $xml_object->ResponseMetadata->RequestId;
-		} else {
-		$requestId = $xml_object->requestId;
-		}
-		if (is_null ( $requestId ) or empty ( $requestId )) {
-		return $this->onError ( "Error: EC2 requestId was either null or empty\n", $requestId );
-		}*/
-	}
 
 	/************************* Accesseurs ***********************/
 	
@@ -642,13 +655,11 @@ class aws_ec2 extends aws_wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		
-		$help [__CLASS__] ["text"] = array ();
+		$help [__CLASS__] ["text"] = [];
 		
 		return $help;
 	}
 }
-
-?>

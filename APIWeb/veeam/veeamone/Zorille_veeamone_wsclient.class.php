@@ -7,9 +7,12 @@
  */
 namespace Zorille\veeamone;
 
+use stdClass;
 use Zorille\framework as Core;
 use Exception as Exception;
 use SimpleXMLElement as SimpleXMLElement;
+use Zorille\framework\gestion_connexion_url;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des informations via un webservice.
@@ -48,18 +51,19 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param datas &$datas Reference sur un objet datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null &$datas Reference sur un objet datas
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = NULL,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = NULL,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): Core\wsclient
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -73,15 +77,15 @@ class wsclient extends Core\wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return wsclient|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type datas" );
+			return $r;
 		}
 		$this->setObjetveeamDatas ( $liste_class ["datas"] )
 			->setContentType ( 'application/x-www-form-urlencoded' )
@@ -95,13 +99,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -113,7 +116,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): bool|wsclient|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_veeamone = $this->getObjetveeamDatas ()
 			->valide_presence_data ( $nom );
@@ -144,9 +148,10 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Http Veeam header creator
 	 *
-	 * @return string Http Header
+	 * @return wsclient Http Header
 	 */
-	public function prepare_html_entete() {
+	public function prepare_html_entete(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getAuth ()) {
 			return $this->setHttpHeader ( array (
@@ -166,7 +171,8 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @return wsclient
 	 */
-	public function prepare_params() {
+	public function prepare_params(): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -178,7 +184,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function valide_retour(
-			$retour_wsclient) {
+		mixed $retour_wsclient): bool
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if (preg_match ( '/HTTP Error (.*)</', $retour_wsclient, $retour ) === 1) {
 			return $this->onError ( "Requete en erreur : " . $retour [1], $retour_wsclient, 1 );
@@ -190,11 +197,13 @@ class wsclient extends Core\wsclient {
 	 * Nettoie le retour JSon contenant {"message":"","success":true,"ressource":0}
 	 * @param string $retour_json
 	 * @param boolean $return_array
-	 * @return array
+	 * @return mixed
+	 * @throws Exception
 	 */
 	public function traite_retour_json(
-			$retour_json,
-			$return_array = true) {
+		string $retour_json,
+		bool   $return_array = true): mixed
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$tableau_resultat = json_decode ( $retour_json, $return_array );
 		if ($tableau_resultat == null) {
@@ -208,10 +217,11 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Sends are prepare_requete_json to the veeamone API and returns the response as object.
 	 *
-	 * @return string API JSON response.
+	 * @return bool|array|string API JSON response.
 	 * @throws Exception
 	 */
-	public function prepare_requete() {
+	public function prepare_requete(): bool|array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) && ($this->getHttpMethod () == 'POST' || $this->getHttpMethod () == 'DELETE')) {
@@ -239,7 +249,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function userLogin(
-			$params = array ()) {
+		array $params = array ()): bool|wsclient
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		/* username string Nullable password string <password> rememberMe boolean Nullable Default: false asCurrentUser boolean Nullable Default: false grant_type string Nullable Default: "password" refresh_token string Nullable */
 		$resultat = $this->postMethod ( 'token', $params );
@@ -259,7 +270,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	final public function userLogout(
-			$params = array ()) {
+		array $params = array ()): static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->postMethod ( 'revoke' , array () );
 		return $this;
@@ -273,10 +285,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listSessions(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v1/sessions', $params );
-		return $resultat;
+		return $this->getMethod ( 'v1/sessions', $params );
 	}
 
 	/**
@@ -287,11 +299,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSession(
-			$sessionid,
-			$params = array ()) {
+		$sessionid,
+		array $params = array ()): SimpleXMLElement|bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v1/sessions/' . $sessionid, $params );
-		return $resultat;
+		return $this->getMethod ( 'v1/sessions/' . $sessionid, $params );
 	}
 
 	/**
@@ -302,11 +314,11 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSessionDetails(
-			$sessionid,
-			$params = array ()) {
+		$sessionid,
+		array $params = array ()): SimpleXMLElement|bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'v1/sessions/' . $sessionid . "/details", $params );
-		return $resultat;
+		return $this->getMethod ( 'v1/sessions/' . $sessionid . "/details", $params );
 	}
 
 	/**
@@ -317,10 +329,10 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function listBackups(
-			$params = array ()) {
+		array $params = array ()): SimpleXMLElement|bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->getMethod ( 'backupFiles', $params );
-		return $resultat;
+		return $this->getMethod ( 'backupFiles', $params );
 	}
 
 	/**
@@ -330,12 +342,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|bool|string
 	 * @throws Exception
 	 */
 	public function getMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -348,12 +361,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|bool|string
 	 * @throws Exception
 	 */
 	public function postMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string|stdClass
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -366,12 +380,13 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @param string $resource Url Resource
 	 * @param array $params Data to send
-	 * @return SimpleXMLElement
+	 * @return array|bool|string
 	 * @throws Exception
 	 */
 	public function deleteMethod(
-			$resource,
-			$params = array ()) {
+		string $resource,
+		array  $params = array ()): bool|array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$full_params = array_merge ( $this->getDefaultParams (), $params );
 		$this->setUrl ( $resource )
@@ -388,9 +403,10 @@ class wsclient extends Core\wsclient {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return datas
+	 * @return datas|null
 	 */
-	public function &getObjetveeamDatas() {
+	public function &getObjetveeamDatas(): ?datas
+	{
 		return $this->datas;
 	}
 
@@ -398,7 +414,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetveeamDatas(
-			&$datas) {
+			&$datas): static
+	{
 		$this->datas = $datas;
 		return $this;
 	}
@@ -407,7 +424,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getAuth() {
+	public function getAuth(): string
+	{
 		return $this->auth;
 	}
 
@@ -415,7 +433,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setAuth(
-			$auth) {
+			$auth): static
+	{
 		$this->auth = $auth;
 		return $this;
 	}
@@ -424,7 +443,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public function getRefreshToken() {
+	public function getRefreshToken(): string
+	{
 		return $this->refresh_token;
 	}
 
@@ -432,7 +452,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setRefreshToken(
-			$refresh_token) {
+			$refresh_token): static
+	{
 		$this->refresh_token = $refresh_token;
 		return $this;
 	}
@@ -443,7 +464,8 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array
+	{
 		return $this->defaultParams;
 	}
 
@@ -451,13 +473,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retrun wsclient
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): bool|static
+	{
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -472,13 +495,11 @@ class wsclient extends Core\wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "veeamone Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, datas::help () );
-		return $help;
+		return array_merge ( $help, datas::help () );
 	}
 }
-?>

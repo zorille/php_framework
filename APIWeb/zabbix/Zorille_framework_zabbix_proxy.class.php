@@ -68,11 +68,12 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	 * Instancie un objet de type zabbix_proxy. @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
 	 * @param zabbix_wsclient $zabbix_ws Reference sur un objet zabbix_wsclient
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
-	 * @return zabbix_proxy
+	 * @return abstract_log|zabbix_proxy
 	 */
-	static function &creer_zabbix_proxy(&$liste_option, &$zabbix_ws, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_zabbix_proxy(options &$liste_option, zabbix_wsclient &$zabbix_ws, bool|string $sort_en_erreur = false, string $entete = __CLASS__): abstract_log|zabbix_proxy
+	{
 		abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new zabbix_proxy ( $sort_en_erreur, $entete );
 		return $objet ->_initialise ( array (
@@ -83,9 +84,9 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return abstract_log
+	 * @return zabbix_proxy
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		$this ->setObjetInterface ( zabbix_proxy_interface::creer_zabbix_proxy_interface ( $liste_class ["options"] ) ) 
@@ -100,7 +101,6 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * Constructeur. @codeCoverageIgnore
 	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
-	 * @return true
 	 */
 	public function __construct($sort_en_erreur = false, $entete = __CLASS__) {
 		// Gestion de zabbix_fonctions_standard
@@ -109,10 +109,11 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 
 	/**
 	 * Retrouve les parametres dans la ligne de commande/fichier de conf
-	 * @return boolean True est OK, False sinon.
+	 * @return zabbix_proxy True est OK, False sinon.
 	 * @throws Exception
 	 */
-	public function retrouve_zabbix_param($nom_seulement = false) {
+	public function retrouve_zabbix_param($nom_seulement = false): static
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		//Gestion d'un host
 		$this ->setProxy ( $this ->_valideOption ( array (
@@ -142,24 +143,25 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	 * Creer une definition d'un proxy sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_proxy_create_ws() {
+	public function creer_definition_proxy_create_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
-		$proxyid = array (
+		return array (
 				"host" => $this ->getProxy (),
 				"status" => $this ->getStatus (),
-				"interface" => $this ->getObjetInterface () 
+				"interface" => $this ->getObjetInterface ()
 					->creer_definition_proxy_interface_ws (),
-				"hosts" => $this ->getObjetHosts () 
+				"hosts" => $this ->getObjetHosts ()
 					->creer_definition_hostids_ws () );
-		
-		return $proxyid;
 	}
 
 	/**
 	 * Creer un proxy dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function creer_proxy() {
+	public function creer_proxy(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_proxy_create_ws ();
 		$this ->onDebug ( $datas, 1 );
@@ -171,7 +173,8 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	 * Creer un definition d'un proxy sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_proxy_delete_ws() {
+	public function creer_definition_proxy_delete_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$proxyid = array ();
 		
@@ -185,8 +188,10 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * supprime un proxy dans zabbix
 	 * @return array
+	 * @throws Exception
 	 */
-	public function supprime_proxy() {
+	public function supprime_proxy(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$liste_proxyids = $this ->recherche_proxy ();
 		foreach ( $liste_proxyids as $proxyid ) {
@@ -205,7 +210,8 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	 * Creer un definition d'un proxy sous forme de tableau
 	 * @return array;
 	 */
-	public function creer_definition_proxy_get_ws() {
+	public function creer_definition_proxy_get_ws(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		return array (
 				"output" => "proxyid",
@@ -216,8 +222,10 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * recherche un proxy dans zabbix a partir de son sendto
 	 * @return array
+	 * @throws Exception
 	 */
-	public function recherche_proxy() {
+	public function recherche_proxy(): array
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		$datas = $this ->creer_definition_proxy_get_ws ();
 		$this ->onDebug ( $datas, 1 );
@@ -228,22 +236,19 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * 5 - active; 6 - passive;
 	 * @param string $type
-	 * @return number
+	 * @return float|int|string
 	 */
-	public function retrouve_Status($type) {
+	public function retrouve_Status(string $type): float|int|string
+	{
 		$this ->onDebug ( __METHOD__, 1 );
 		if (is_numeric ( $type )) {
 			return $type;
 		}
-		switch (strtolower ( $type )) {
-			case "passive" :
-				return 6;
-				break;
-			case "active" :
-			default :
-		}
-		
-		return 5;
+		return match (strtolower($type)) {
+			"passive" => 6,
+			default => 5,
+		};
+
 	}
 
 	/**
@@ -252,14 +257,16 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getProxyId() {
+	public function getProxyId(): int|string
+	{
 		return $this->proxyId;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setProxyId($proxyId) {
+	public function &setProxyId($proxyId): static
+	{
 		$this->proxyId = $proxyId;
 		return $this;
 	}
@@ -267,14 +274,16 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getProxy() {
+	public function getProxy(): string
+	{
 		return $this->proxy;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setProxy($proxy) {
+	public function &setProxy($proxy): static
+	{
 		$this->proxy = $proxy;
 		return $this;
 	}
@@ -282,14 +291,16 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getStatus() {
+	public function getStatus(): int
+	{
 		return $this->status;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setStatus($status) {
+	public function &setStatus($status): static
+	{
 		$this->status = $this ->retrouve_Status ( $status );
 		return $this;
 	}
@@ -297,46 +308,52 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function getLastAccess() {
+	public function getLastAccess(): int
+	{
 		return $this->lastaccess;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setLastAccess($lastaccess) {
+	public function &setLastAccess($lastaccess): static
+	{
 		$this->lastaccess = $lastaccess;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_proxy_interface
+	 * @return zabbix_proxy_interface|null
 	 */
-	public function &getObjetInterface() {
+	public function &getObjetInterface(): ?zabbix_proxy_interface
+	{
 		return $this->proxy_interface;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetInterface(&$ProxyInterface) {
+	public function &setObjetInterface(&$ProxyInterface): static
+	{
 		$this->proxy_interface = $ProxyInterface;
 		return $this;
 	}
 
 	/**
 	 * @codeCoverageIgnore
-	 * @return zabbix_hosts
+	 * @return zabbix_hosts|null
 	 */
-	public function &getObjetHosts() {
+	public function &getObjetHosts(): ?zabbix_hosts
+	{
 		return $this->hosts;
 	}
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	public function &setObjetHosts(&$Hosts) {
+	public function &setObjetHosts(&$Hosts): static
+	{
 		$this->hosts = $Hosts;
 		return $this;
 	}
@@ -348,7 +365,8 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		
 		$help [__CLASS__] ["text"] = array ();
@@ -361,4 +379,3 @@ class zabbix_proxy extends zabbix_fonctions_standard {
 		return $help;
 	}
 }
-?>

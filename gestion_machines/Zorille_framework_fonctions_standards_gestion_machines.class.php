@@ -4,6 +4,8 @@
  * @package Lib
  */
 namespace Zorille\framework;
+use Exception;
+
 /**
  * class fonctions_standards_gestion_machines.
  * @package Lib
@@ -16,11 +18,13 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * Instancie un objet de type fonctions_standards_gestion_machines.
 	 * @codeCoverageIgnore
 	 * @param options $liste_option Reference sur un objet options
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet
 	 * @return fonctions_standards_gestion_machines
+	 * @throws Exception
 	 */
-	static function &creer_fonctions_standards_gestion_machines(&$liste_option, $sort_en_erreur = false, $entete = __CLASS__) {
+	static function &creer_fonctions_standards_gestion_machines(options &$liste_option, bool|string $sort_en_erreur = false, string $entete = __CLASS__): fonctions_standards_gestion_machines
+	{
 		$objet = new fonctions_standards_gestion_machines ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
 				"options" => $liste_option 
@@ -34,8 +38,9 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return fonctions_standards_gestion_machines
+	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -61,7 +66,7 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * @param string $valeur Valeur a mettre a jour.
 	 * @return TRUE
 	 */
-	public function update_calculateur(&$calculateur, $nom_case, $valeur) {
+	public function update_calculateur(array &$calculateur, string $nom_case, string $valeur) {
 		$netname = $calculateur;
 		if (is_array ( $calculateur ))
 			$calculateur [$nom_case] = $valeur;
@@ -85,7 +90,7 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * @param string $valeur_defaut Valeur par defaut (optionnel).
 	 * @return TRUE
 	 */
-	public function update_liste_calculateurs(&$liste_calculateurs, &$liste, $nom_case, $valeur_defaut) {
+	public function update_liste_calculateurs(array &$liste_calculateurs, array &$liste, string $nom_case, string $valeur_defaut) {
 		$pos = 0;
 		
 		foreach ( $liste as $data ) {
@@ -109,7 +114,7 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * @param string $valeur_defaut Valeur par defaut (optionnel).
 	 * @return TRUE
 	 */
-	public function organise_variables_calculateurs(&$liste_calculateurs, $option_ligne_commande, $valeur_defaut = "") {
+	public function organise_variables_calculateurs(array &$liste_calculateurs, string $option_ligne_commande, string $valeur_defaut = "") {
 		
 		//Si la variable est en ligne de commande
 		if ($this->getListeOptions ()
@@ -172,7 +177,8 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 *
 	 * @return array|false Renvoi un tableau de calculateurs ou FALSE en cas d'erreur.
 	 */
-	public function trouve_attribut_calculateur() {
+	public function trouve_attribut_calculateur(): bool|array
+	{
 		$liste_calculateurs = array ();
 		
 		if ($this->getListeOptions ()
@@ -223,8 +229,6 @@ class fonctions_standards_gestion_machines extends abstract_log {
 			$this->organise_variables_calculateurs ( $liste_calculateurs, "MaxCPUJob", 41 );
 			
 			$this->organise_variables_calculateurs ( $liste_calculateurs, "MaxNbJob", 20 );
-		} else {
-			$liste_calculateurs = array ();
 		}
 		
 		$this->onDebug ( $liste_calculateurs, 2 );
@@ -236,10 +240,12 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * Sinon on cherche des calculateurs dans la liste des parametres (cf trouve_attribut_calculateur).<br>
 	 * Include : $INCLUDE_FONCTIONS<br>
 	 *
-	 * @param options &$lien_compte Pointeur sur une base de donnee type compte type gestion_bd_compte.
+	 * @param bool $ramdom_liste
 	 * @return true.
+	 * @throws Exception
 	 */
-	public function creer_liste_calculateurs($ramdom_liste = true) {
+	public function creer_liste_calculateurs(bool $ramdom_liste = true): bool
+	{
 		$liste_calculateurs = array ();
 		
 		$liste_calculateurs = $this->trouve_attribut_calculateur ();
@@ -278,7 +284,8 @@ class fonctions_standards_gestion_machines extends abstract_log {
 	 * @param string $nom_serveur Pour limiter a un serveur.
 	 * @return array Liste de structure des machines.
 	 */
-	public function renvoi_liste_machines_standard($type = "", $nom_serveur = "") {
+	public function renvoi_liste_machines_standard(string $type = "", string $nom_serveur = ""): array
+	{
 		$pos = 0;
 		$CODE_RETOUR = array ();
 		if (is_array ( $this->getListeOptions ()
@@ -303,4 +310,3 @@ class fonctions_standards_gestion_machines extends abstract_log {
 		return $CODE_RETOUR;
 	}
 }
-?>

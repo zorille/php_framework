@@ -6,8 +6,8 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
 use Zorille\framework as Core;
-use Zorille\framework\abstract_log;
 
 /**
  * class Boxe
@@ -31,15 +31,17 @@ class Boxes extends item {
 	 * Instancie un objet de type Boxe. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return $this
+	 * @throws Exception
 	 */
 	static function &creer_Boxes(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Boxes|static
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Boxes ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -53,9 +55,10 @@ class Boxes extends item {
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this;
 	}
@@ -65,13 +68,12 @@ class Boxes extends item {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -82,29 +84,24 @@ class Boxes extends item {
 	 * @return array liste des parametres au format coservit
 	 */
 	public function prepare_params_Boxe(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				default :
-			}
-		}
-		return $params;
+		array $parametres): array {
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
 	 * ******************************* Boxe URI ******************************
 	 */
-	public function boxes_uri() {
+	public function boxes_uri(): string {
 		return $this->globalapi_uri () . '/boxes';
 	}
 
-	public function boxe_conf_uri() {
+	public function boxe_conf_uri(): string {
 		return $this->boxes_uri () . '/configurations';
 	}
 
 	/**
 	 * ******************************* Coservit Boxe *********************************
+	 * @throws Exception
 	 */
 	public function retrouve_id_boxe(
 			$Boxe,
@@ -120,7 +117,7 @@ class Boxes extends item {
 		return $this->onError ( "Le Collecteur " . $Boxe . " n'existe pas dans la liste", "", 1 );
 	}
 
-	public function prepare_Boxes() {
+	public function prepare_Boxes(): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_Boxe = array ();
 		if (isset ( $this->getDonnees ()->_embedded->items )) {
@@ -132,19 +129,22 @@ class Boxes extends item {
 		return $this->setBoxes ( $liste_Boxe );
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_Boxes(
 			$company_id = 2,
 			$params = array (
-					"company" => array (
-							1,
-							2
-					),
-					"inheritance" => true,
-					"limit" => 1000,
-					"sort" => array (
-							"+name"
-					)
-			)) {
+				"company" => array (
+						1,
+						2
+				),
+				"inheritance" => true,
+				"limit" => 1000,
+				"sort" => array (
+						"+name"
+				)
+			)): Boxes {
 		$this->onDebug ( __METHOD__, 1 );
 		if (! in_array ( $company_id, $params ["company"] )) {
 			$params ["company"] [] .= $company_id;
@@ -154,8 +154,11 @@ class Boxes extends item {
 		return $this->setDonnees ( $resultat )
 			->prepare_Boxes ();
 	}
-	
-	public function verifie_presence_boxes(){
+
+	/**
+	 * @throws Exception
+	 */
+	public function verifie_presence_boxes(): static {
 		if(empty($this->getBoxes ())){
 			$this->retrouve_Boxes();
 		}
@@ -164,26 +167,29 @@ class Boxes extends item {
 
 	/**
 	 * Met a jour les configurations de toutes les boxes de collecte
-	 * @param array $parametres
 	 * @return $this
+	 * @throws Exception
 	 */
-	public function updateConfigurationToutesBoxes() {
+	public function updateConfigurationToutesBoxes(): static {
 		$parametres = array (
 				"collectorIds" => array ()
 		);
-		foreach ( $this->verifie_presence_boxes()->getBoxes () as $boxe_id ) {
-			$parametres ["collectorIds"] [] = $boxe_id;
+		foreach ( $this->verifie_presence_boxes()->getBoxes () as $box_name=>$boxe_id ) {
+			$this->onInfo("On update ".$box_name);
+			$parametres ["collectorIds"] [0] = $boxe_id;
+			$this->updateConfiguration ( $parametres );
 		}
-		return $this->updateConfiguration ( $parametres );
+		return $this;
 	}
 
 	/**
 	 * Met a jour les configurations des boxes de collecte
 	 * @param array $parametres
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function updateConfiguration(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setMandatory ( array (
 				"collectorIds" => false
@@ -199,10 +205,10 @@ class Boxes extends item {
 	/**
 	 * Creer un host la companie en parametre (cf: company)
 	 * @param array $parametres Liste des parametres de la commande host. (parametres obligatoires) : 'host_alias',"host_address","company","collector"
-	 * @return \Zorille\coservit\Company
+	 * @return Boxes
 	 */
 	public function creerBoxe(
-			$parametres) {
+		array $parametres): Boxes {
 		$this->onDebug ( __METHOD__, 1 );
 		return $this;
 	}
@@ -212,9 +218,9 @@ class Boxes extends item {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return string
+	 * @return array
 	 */
-	public function getBoxes() {
+	public function getBoxes(): array {
 		return $this->boxe;
 	}
 
@@ -222,7 +228,7 @@ class Boxes extends item {
 	 * @codeCoverageIgnore
 	 */
 	public function &setBoxes(
-			$liste_boxe) {
+			$liste_boxe): static {
 		$this->boxe = $liste_boxe;
 		return $this;
 	}
@@ -233,11 +239,10 @@ class Boxes extends item {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "Boxes :";
 		return $help;
 	}
 }
-?>

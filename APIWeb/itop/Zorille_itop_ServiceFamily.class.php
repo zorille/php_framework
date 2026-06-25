@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -31,15 +32,16 @@ class ServiceFamily extends ci {
 	 * Instancie un objet de type ServiceFamily.
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return ServiceFamily
 	 */
 	static function &creer_ServiceFamily(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): ServiceFamily
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new ServiceFamily ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -53,10 +55,11 @@ class ServiceFamily extends ci {
 	 * @codeCoverageIgnore
 	 * Initialisation de l'objet
 	 * @param array $liste_class
-	 * @return ServiceFamily
+	 * @return ServiceFamily|Organization
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'ServiceFamily' )
 			->champ_obligatoire_standard ();
@@ -69,22 +72,22 @@ class ServiceFamily extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return ServiceFamily
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false
@@ -93,8 +96,12 @@ class ServiceFamily extends ci {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_ServiceFamily(
-			$name) {
+			$name): ci|bool|ServiceFamily
+	{
 		return $this->creer_oql ( array (
 				'name' => $name
 		) )
@@ -107,9 +114,9 @@ class ServiceFamily extends ci {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_ServiceFamily(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		return $params;
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
@@ -118,23 +125,26 @@ class ServiceFamily extends ci {
 	 * @return ServiceFamily
 	 */
 	public function creer_oql_ServiceFamily(
-			$fields = array ()) {
+		array $fields = array ()): ServiceFamily
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
-			switch ($field) {
-				default :
-					$filtre [$field] = $fields [$field];
-			}
+			$filtre [$field] = match ($field) {
+				default => $fields [$field],
+			};
 		}
 		return parent::creer_oql ( $filtre );
 	}
 
 	/**
 	 * Creer une entree ServiceFamily Champs standards : name
+	 * @param $parametres
 	 * @return ServiceFamily
+	 * @throws Exception
 	 */
 	public function gestion_ServiceFamily(
-			$parametres) {
+			$parametres): ServiceFamily
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_ServiceFamily ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -148,9 +158,10 @@ class ServiceFamily extends ci {
 	 */
 	/**
 	 * @codeCoverageIgnore
-	 * @return Service
+	 * @return Service|null
 	 */
-	public function &getObjetItopService() {
+	public function &getObjetItopService(): ?Service
+	{
 		return $this->Service;
 	}
 
@@ -158,7 +169,8 @@ class ServiceFamily extends ci {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetItopService(
-			&$Service) {
+			&$Service): static
+	{
 		$this->Service = $Service;
 		return $this;
 	}
@@ -169,11 +181,11 @@ class ServiceFamily extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string
+	{
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "ServiceFamily :";
 		return $help;
 	}
 }
-?>

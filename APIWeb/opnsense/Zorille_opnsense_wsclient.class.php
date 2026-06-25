@@ -9,6 +9,8 @@ namespace Zorille\opnsense;
 
 use Zorille\framework as Core;
 use Exception as Exception;
+use Zorille\framework\gestion_connexion_url;
+use Zorille\framework\options;
 
 /**
  * class wsclient<br> Renvoi des information via un webservice.
@@ -35,18 +37,19 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Instancie un objet de type wsclient.
 	 * @codeCoverageIgnore
-	 * @param Core\options $liste_option Reference sur un objet options
-	 * @param gestion_connexion_url &$gestion_connexion_url Reference sur un objet gestion_connexion_url
-	 * @param opnsense_datas &$datas Reference sur un objet opnsense_datas
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param options $liste_option Reference sur un objet options
+	 * @param object|null &$datas Reference sur un objet opnsense_datas
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return wsclient
+	 * @throws Exception
 	 */
 	static function &creer_wsclient(
-			&$liste_option,
-			&$datas = NULL,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		options     &$liste_option,
+		object      &$datas = NULL,
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__): Core\wsclient
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new wsclient ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -60,15 +63,15 @@ class wsclient extends Core\wsclient {
 	 * Initialisation de l'objet
 	 * @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return wsclient
+	 * @return wsclient|bool
 	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["opnsense_datas"] )) {
-			$this->onError ( "il faut un objet de type opnsense_datas" );
-			return false;
+			$r = $this->onError ( "il faut un objet de type opnsense_datas" );
+			return $r;
 		}
 		$this->setObjetOpnsenseDatas ( $liste_class ["opnsense_datas"] )
 			->setContentType ( 'application/json' )
@@ -82,13 +85,12 @@ class wsclient extends Core\wsclient {
 	/**
 	 * Constructeur.
 	 * @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete lors de l'affichage.
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de wsclient
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -100,7 +102,8 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function prepare_connexion(
-			$nom) {
+		string $nom): wsclient|bool|static
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$liste_data_opnsense = $this->getObjetOpnsenseDatas ()
 			->valide_presence_data ( $nom );
@@ -132,11 +135,12 @@ class wsclient extends Core\wsclient {
 	 * Sends are prepare_requete_json to the opnsense API and returns the response as object.
 	 *
 	 * @param string $method Name of the API method.
-	 * @return string API JSON response.
+	 * @return string|array API JSON response.
 	 * @throws Exception
 	 */
 	public function prepare_requete_json(
-			$method) {
+		string $method): string|array
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		if ($this->getListeOptions ()
 			->verifie_option_existe ( "dry-run" ) !== false && (preg_match ( "/^set$|^add$|^del$/", $method ) === 1 || $this->getHttpMethod () == "DELETE" || $this->getHttpMethod () == "POST")) {
@@ -167,14 +171,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getMenu(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'core/menu/search' );
 		$this->setHttpMethod ( "GET" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'search' );
-		return $retour;
+		return $this->prepare_requete_json ( 'search' );
 	}
 
 	/**
@@ -191,14 +195,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSGlobal(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/sockdglobal/get' );
 		$this->setHttpMethod ( "GET" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'get' );
-		return $retour;
+		return $this->prepare_requete_json ( 'get' );
 	}
 
 	/**
@@ -209,14 +213,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSClients(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/clientslist/get' );
 		$this->setHttpMethod ( "GET" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'get' );
-		return $retour;
+		return $this->prepare_requete_json ( 'get' );
 	}
 
 	/**
@@ -227,14 +231,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSSocks(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/sockslist/get' );
 		$this->setHttpMethod ( "GET" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'get' );
-		return $retour;
+		return $this->prepare_requete_json ( 'get' );
 	}
 
 	/**
@@ -245,14 +249,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function getSockdIOPSRoutes(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/routeslist/get' );
 		$this->setHttpMethod ( "GET" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'get' );
-		return $retour;
+		return $this->prepare_requete_json ( 'get' );
 	}
 
 	/**
@@ -263,14 +267,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function searchSockdIOPSClients(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/clientslist/searchClient' );
 		$this->setHttpMethod ( "POST" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'search' );
-		return $retour;
+		return $this->prepare_requete_json ( 'search' );
 	}
 
 	/**
@@ -281,14 +285,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function searchSockdIOPSSocks(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/sockslist/searchSock' );
 		$this->setHttpMethod ( "POST" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'search' );
-		return $retour;
+		return $this->prepare_requete_json ( 'search' );
 	}
 
 	/**
@@ -299,14 +303,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function searchSockdIOPSRoutes(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/routeslist/searchRoute' );
 		$this->setHttpMethod ( "POST" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'search' );
-		return $retour;
+		return $this->prepare_requete_json ( 'search' );
 	}
 
 	/**
@@ -317,14 +321,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function SockdIOPSServiceStatus(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/service/status' );
 		$this->setHttpMethod ( "POST" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'get' );
-		return $retour;
+		return $this->prepare_requete_json ( 'get' );
 	}
 
 	/**
@@ -335,14 +339,14 @@ class wsclient extends Core\wsclient {
 	 * @throws Exception
 	 */
 	public function SockdIOPSServiceDirty(
-			$params = array ()) {
+		array $params = array ()): array|string
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$this->setUrl ( 'sockdiops/service/dirty' );
 		$this->setHttpMethod ( "get" )
 			->setParams ( $params );
 		// prepare_requete_json
-		$retour = $this->prepare_requete_json ( 'get' );
-		return $retour;
+		return $this->prepare_requete_json ( 'get' );
 	}
 
 	/**
@@ -355,7 +359,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @return datas
 	 */
-	public function &getObjetOpnsenseDatas() {
+	public function &getObjetOpnsenseDatas(): ?datas
+	{
 		return $this->opnsense_datas;
 	}
 
@@ -363,7 +368,8 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 */
 	public function &setObjetOpnsenseDatas(
-			&$opnsense_datas) {
+			&$opnsense_datas): static
+	{
 		$this->opnsense_datas = $opnsense_datas;
 		return $this;
 	}
@@ -374,7 +380,8 @@ class wsclient extends Core\wsclient {
 	 *
 	 * @retval  array   Array with default params.
 	 */
-	public function getDefaultParams() {
+	public function getDefaultParams(): array
+	{
 		return $this->defaultParams;
 	}
 
@@ -382,13 +389,14 @@ class wsclient extends Core\wsclient {
 	 * @codeCoverageIgnore
 	 * @brief   Sets the default params.
 	 *
-	 * @param $defaultParams Array with default params.
+	 * @param $defaultParams array with default params.
 	 * @retval  ZabbixApiAbstract
 	 *
 	 * @throws Exception
 	 */
 	public function setDefaultParams(
-			$defaultParams) {
+		array $defaultParams): static
+	{
 		if (is_array ( $defaultParams ))
 			$this->defaultParams = $defaultParams;
 		else
@@ -403,13 +411,11 @@ class wsclient extends Core\wsclient {
 	 * Affiche le help.<br>
 	 * @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "opnsense Wsclient :";
 		$help [__CLASS__] ["text"] [] .= "\t--dry-run n'applique pas les changements";
-		$help = array_merge ( $help, datas::help () );
-		return $help;
+		return array_merge ( $help, datas::help () );
 	}
 }
-?>

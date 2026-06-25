@@ -40,7 +40,7 @@ class VirtualVmxnet3 extends VirtualEthernetCard {
 	 * @return VirtualVmxnet3
 	 * @throws Exception
 	 */
-	public function &_initialise($liste_class) {
+	public function &_initialise(array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		
 		return $this;

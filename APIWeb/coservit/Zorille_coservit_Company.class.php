@@ -6,6 +6,8 @@
  */
 namespace Zorille\coservit;
 
+use Exception;
+use stdClass;
 use Zorille\framework as Core;
 
 /**
@@ -37,15 +39,16 @@ class Company extends Companies {
 	 * Instancie un objet de type Company. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return $this
+	 * @throws Exception
 	 */
 	static function &creer_Company(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options &$liste_option,
+		wsclient     &$webservice_rest,
+		bool|string  $sort_en_erreur = false,
+		string       $entete = __CLASS__): Company|static {
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new Company ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -60,9 +63,10 @@ class Company extends Companies {
 	 * @param array $liste_class
 	 * @return $this
 	 * @exception
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->champ_obligatoire_standard ()
 			->setFormat ( 'Company' );
@@ -73,13 +77,12 @@ class Company extends Companies {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
@@ -88,7 +91,7 @@ class Company extends Companies {
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
 	 * @return $this
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static {
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'id' => false
@@ -103,35 +106,40 @@ class Company extends Companies {
 	 * @return array liste des parametres au format coservit
 	 */
 	public function prepare_params_Company(
-			$parametres) {
-		$params = $this->prepare_standard_params ( $parametres );
-		foreach ( $parametres as $champ => $valeur ) {
-			switch ($champ) {
-				default :
-			}
-		}
-		return $params;
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
 	}
 
 	/**
 	 * ******************************* Company URI ******************************
+	 * @throws Exception
 	 */
-	public function item_id_uri() {
-		if ($this->valide_item_id () == false) {
+	public function item_id_uri(): bool|string {
+		if (!$this->valide_item_id()) {
 			return $this->onError ( "Il n'y pas d'id de Company selectionne" );
 		}
 		return $this->companies_list_uri () . '/' . $this->getId ();
 	}
 
-	public function company_tree_uri() {
+	/**
+	 * @throws Exception
+	 */
+	public function company_tree_uri(): string {
 		return $this->item_id_uri () . '/tree';
 	}
 
-	public function company_hosts_uri() {
+	/**
+	 * @throws Exception
+	 */
+	public function company_hosts_uri(): string {
 		return $this->item_id_uri () . '/hosts';
 	}
 
-	public function company_services_uri() {
+	/**
+	 * @throws Exception
+	 */
+	public function company_services_uri(): string {
 		return $this->item_id_uri () . '/services';
 	}
 
@@ -139,11 +147,11 @@ class Company extends Companies {
 	 * ******************************* Coservit Company *********************************
 	 */
 	/**
-	 * @param \stdClass $liste_companies
+	 * @param stdClass $liste_companies
 	 * @return $this
 	 */
 	public function separe_donnees_companies_customers(
-			$liste_companies) {
+		stdClass $liste_companies): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$this->onDebug ( $liste_companies, 2);
 		if (isset ( $liste_companies->children ) && ! empty ( $liste_companies->children )) {
@@ -171,9 +179,10 @@ class Company extends Companies {
 	 * Recupere la liste des companies et des clients sous la companie en parametre (cf: id)
 	 * @param array $parametres Liste des parametres de la commande tree. ("id"=> x est un parametre obligatoire)
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function recupere_company_tree(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Company ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -187,9 +196,10 @@ class Company extends Companies {
 	 * Recupere la liste des hosts sous la companie en parametre (cf: id)
 	 * @param array $parametres Liste des parametres de la commande tree. ("id"=> x est un parametre obligatoire)
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function recupere_company_hosts(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Company ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -204,9 +214,10 @@ class Company extends Companies {
 	 * Recupere la liste des hosts sous la companie en parametre (cf: id)
 	 * @param array $parametres Liste des parametres de la commande tree. ("id"=> x est un parametre obligatoire)
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function recupere_company_services(
-			$parametres) {
+		array $parametres): static {
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_Company ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -216,8 +227,11 @@ class Company extends Companies {
 		$this->onDebug ( $liste_services, 2 );
 		return $this->setServices ( $liste_services );
 	}
-	
-	public function retrouve_id_company($nom_company){
+
+	/**
+	 * @throws Exception
+	 */
+	public function retrouve_id_company($nom_company): mixed {
 		foreach($this->getCompanies() as $company){
 			if($company->name==$nom_company){
 				return $company->id;
@@ -234,11 +248,11 @@ class Company extends Companies {
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
-	/**
-	 * @codeCoverageIgnore
-	 * @return array
-	 */
-	public function &getHosts() {
+    /**
+     * @codeCoverageIgnore
+     * @return array|null
+     */
+	public function &getHosts(): array|null {
 		return $this->Hosts;
 	}
 
@@ -246,7 +260,7 @@ class Company extends Companies {
 	 * @codeCoverageIgnore
 	 */
 	public function &setHosts(
-			&$liste_Hosts) {
+			&$liste_Hosts): static {
 		$this->Hosts = $liste_Hosts;
 		return $this;
 	}
@@ -255,7 +269,7 @@ class Company extends Companies {
 	 * @codeCoverageIgnore
 	 * @return array
 	 */
-	public function &getServices() {
+	public function &getServices(): array {
 		return $this->Services;
 	}
 
@@ -263,7 +277,7 @@ class Company extends Companies {
 	 * @codeCoverageIgnore
 	 */
 	public function &setServices(
-			&$liste_Services) {
+			&$liste_Services): static {
 		$this->Services = $liste_Services;
 		return $this;
 	}
@@ -274,11 +288,11 @@ class Company extends Companies {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
-		$help [__CLASS__] ["text"] = array ();
-		$help [__CLASS__] ["text"] [] .= "Company :";
+		$help [__CLASS__] ["text"] = [
+			'Company :'
+		];
 		return $help;
 	}
 }
-?>

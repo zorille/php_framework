@@ -6,6 +6,7 @@
  */
 namespace Zorille\itop;
 
+use Exception;
 use Zorille\framework as Core;
 
 /**
@@ -23,15 +24,16 @@ class NetworkSocket extends ci {
 	 * Instancie un objet de type NetworkSocket. @codeCoverageIgnore
 	 * @param Core\options $liste_option Reference sur un objet options
 	 * @param wsclient_rest $webservice_rest Reference sur un objet webservice_rest
-	 * @param string|Boolean $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Boolean|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete Entete des logs de l'objet gestion_connexion_url
 	 * @return NetworkSocket
 	 */
 	static function &creer_NetworkSocket(
-			&$liste_option,
-			&$webservice_rest,
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		Core\options  &$liste_option,
+		wsclient_rest &$webservice_rest,
+		bool|string   $sort_en_erreur = false,
+		string        $entete = __CLASS__): NetworkSocket
+	{
 		Core\abstract_log::onDebug_standard ( __METHOD__, 1 );
 		$objet = new NetworkSocket ( $sort_en_erreur, $entete );
 		$objet->_initialise ( array (
@@ -44,10 +46,11 @@ class NetworkSocket extends ci {
 	/**
 	 * Initialisation de l'objet @codeCoverageIgnore
 	 * @param array $liste_class
-	 * @return NetworkSocket
+	 * @return NetworkSocket|Organization
+	 * @throws Exception
 	 */
 	public function &_initialise(
-			$liste_class) {
+        array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		return $this->setFormat ( 'NetworkSocket' )
 			->champ_obligatoire_standard ();
@@ -58,22 +61,22 @@ class NetworkSocket extends ci {
 	 */
 	/**
 	 * Constructeur. @codeCoverageIgnore
-	 * @param string|Bool $sort_en_erreur Prend les valeurs oui/non ou true/false
+	 * @param Bool|string $sort_en_erreur Prend les valeurs oui/non ou true/false
 	 * @param string $entete entete de log
-	 * @return true
 	 */
 	public function __construct(
-			$sort_en_erreur = false,
-			$entete = __CLASS__) {
+		bool|string $sort_en_erreur = false,
+		string      $entete = __CLASS__) {
 		// Gestion de serveur_datas
 		parent::__construct ( $sort_en_erreur, $entete );
 	}
 
 	/**
 	 * Met les valeurs obligatoires par defaut pour cette class, sauf si des valeurs sont déjà présentes Format array('nom du champ obligatoire'=>false, ... )
-	 * @return Organization
+	 * @return NetworkSocket
 	 */
-	public function &champ_obligatoire_standard() {
+	public function &champ_obligatoire_standard(): static
+	{
 		if (empty ( $this->getMandatory () )) {
 			$this->setMandatory ( array (
 					'name' => false,
@@ -83,8 +86,12 @@ class NetworkSocket extends ci {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public function retrouve_NetworkSocket(
-			$name) {
+			$name): ci|NetworkSocket|bool
+	{
 		return $this->creer_oql ( array (
 				'fiendlyname' => $name
 		) )
@@ -97,7 +104,8 @@ class NetworkSocket extends ci {
 	 * @return array liste des parametres au format iTop
 	 */
 	public function prepare_params_NetworkSocket(
-			$parametres) {
+		array $parametres): array
+	{
 		$params = $this->prepare_standard_params ( $parametres );
 		foreach ( $parametres as $champ => $valeur ) {
 			switch ($champ) {
@@ -126,7 +134,8 @@ class NetworkSocket extends ci {
 	 * @return NetworkSocket
 	 */
 	public function creer_oql_NetworkSocket(
-			$fields = array ()) {
+		array $fields = array ()): NetworkSocket
+	{
 		$filtre = array ();
 		foreach ( $this->getMandatory () as $field => $inutile ) {
 			switch ($field) {
@@ -142,10 +151,13 @@ class NetworkSocket extends ci {
 
 	/**
 	 * Champs standards : name, socketvalue, socketprotocol, software_friendlyname, logicalinterface_friendlyname
+	 * @param $parametres
 	 * @return NetworkSocket
+	 * @throws Exception
 	 */
 	public function gestion_NetworkSocket(
-			$parametres) {
+			$parametres): NetworkSocket
+	{
 		$this->onDebug ( __METHOD__, 1 );
 		$params = $this->prepare_params_NetworkSocket ( $parametres );
 		$this->onDebug ( $params, 1 );
@@ -163,11 +175,10 @@ class NetworkSocket extends ci {
 	/**
 	 * Affiche le help.<br> @codeCoverageIgnore
 	 */
-	static public function help() {
+	static public function help(): array|string {
 		$help = parent::help ();
 		$help [__CLASS__] ["text"] = array ();
 		$help [__CLASS__] ["text"] [] .= "NetworkSocket :";
 		return $help;
 	}
 }
-?>
