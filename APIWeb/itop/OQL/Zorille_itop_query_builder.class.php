@@ -8,8 +8,8 @@ use ReflectionClass;
 use ReflectionObject;
 use Zorille\framework as core;
 use Zorille\framework\options;
-use Zorille\framework\QueryBuilderLikeOperatorType;
-use Zorille\framework\QueryBuilderOperator as QLOperator;
+use Zorille\itop\QueryBuilderLikeOperatorType;
+use Zorille\itop\QueryBuilderOperator as QLOperator;
 use Zorille\salesforce\connexion_connector;
 
 abstract class query_builder extends wsclient_rest implements iquery_builder

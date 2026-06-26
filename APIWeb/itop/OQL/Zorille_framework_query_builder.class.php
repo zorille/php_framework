@@ -2,7 +2,7 @@
 
 namespace Zorille\framework;
 
-use Zorille\framework\QueryBuilderOperator as QLOperator;
+use Zorille\itop\QueryBuilderOperator as QLOperator;
 
 interface query_builder
 {

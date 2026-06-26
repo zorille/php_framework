@@ -208,6 +208,7 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/zabbix
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop" );
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop/query_fetchers" );
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop/data_models" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/itop/OQL" );
 /**
  * Inclue Les class d'appel a OPNSense
  */
