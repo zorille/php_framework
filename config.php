@@ -236,9 +236,11 @@ set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/doliba
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/pipedrive" );
 /**
- * Inclue Les class d'appel a Pipedrive
+ * Inclue Les class d'appel a Easyvista
  */
 set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/evobserve" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/servicemanager" );
+set_include_path ( get_include_path () . PATH_SEPARATOR . $rep_APIWeb . "/otrs" );
 /**
  * Inclue Les class d'appel a Splunk
  */
