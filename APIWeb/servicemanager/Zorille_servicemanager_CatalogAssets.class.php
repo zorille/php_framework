@@ -25,14 +25,12 @@ class CatalogAssets extends item {
         Core\options &$liste_option,
         &$webservice_rest,
         bool|string $sort_en_erreur = false,
-        string $entete = __CLASS__,
-        string|int $account = '40000'): CatalogAssets|static {
+        string $entete = __CLASS__): CatalogAssets|static {
         Core\abstract_log::onDebug_standard(__METHOD__, 1);
         $objet = new CatalogAssets($sort_en_erreur, $entete);
         $objet->_initialise(array(
             'options' => $liste_option,
-            'wsclient' => $webservice_rest,
-            'account' => $account
+            'wsclient' => $webservice_rest
         ));
         return $objet;
     }

@@ -37,7 +37,12 @@ class wsclient extends Core\wsclient {
 	 * @var string.
 	 */
 	private $auth = '';
-	private string $account = '40000';
+	/**
+	 * var privee
+	 * @access private
+	 * @var string.
+	 */
+	private string $account = 'accNum';
 
 	/**
 	 * ********************* Creation de l'objet ********************
@@ -117,12 +122,17 @@ class wsclient extends Core\wsclient {
 		if ($liste_data_servicemanager === false) {
 			return $this->onError ( "Aucune definition de servicemanager pour " . $nom );
 		}
-		/*if (! isset ( $liste_data_servicemanager ["username"] )) {
+		if (! isset ( $liste_data_servicemanager ["account"] )) {
+			return $this->onError ( "Il faut un account dans la liste des parametres servicemanager" );
+		} else {
+			$this->setAccount($liste_data_servicemanager ["account"]);
+		}
+		if (! isset ( $liste_data_servicemanager ["username"] )) {
 			return $this->onError ( "Il faut un username dans la liste des parametres servicemanager" );
 		}
 		if (! isset ( $liste_data_servicemanager ["password"] )) {
 			return $this->onError ( "Il faut un password dans la liste des parametres servicemanager" );
-		}*/
+		}
 		if (! isset ( $liste_data_servicemanager ["url"] )) {
 			return $this->onError ( "Il faut une url dans la liste des parametres servicemanager" );
 		}
@@ -130,7 +140,7 @@ class wsclient extends Core\wsclient {
 			->retrouve_connexion_params ( $liste_data_servicemanager )
 			->prepare_prepend_url ( $liste_data_servicemanager ["url"] );
 		// On prepare l'objet utilisateurs de la connexion, car l'objet curl ne connait pas l'objet datas
-		$this->userLogin ();
+		$this->userLogin ($liste_data_servicemanager);
 		return $this;
 	}
 
@@ -186,6 +196,18 @@ class wsclient extends Core\wsclient {
 	public function valide_retour(
 		mixed $retour_wsclient): bool {
 		$this->onDebug ( __METHOD__, 1 );
+		// En cas de retour avec un texte d'erreur
+		if (isset ( $retour_wsclient->title ) && isset ( $retour_wsclient->status ) && isset ( $retour_wsclient->message )) {
+			$this->onDebug ( "Code retour " . $retour_wsclient->status, 2 );
+			$this->onDebug ( $retour_wsclient, 2 );
+			return $this->onError ( $retour_wsclient->title . " : " . $retour_wsclient->message, "", $retour_wsclient->status );
+		}
+		// En cas d'exception
+		if (isset ( $retour_wsclient->exception )) {
+			$this->onDebug ( "Code retour " .  $retour_wsclient->exception[0]->code, 2 );
+			$this->onDebug ( $retour_wsclient, 2 );
+			return $this->onError ( $retour_wsclient->message . " | correlationId :" . $retour_wsclient->correlationId, $retour_wsclient->exception[0], $retour_wsclient->exception[0]->code );
+		}
 		// En cas de retour avec un code erreur
 		if (isset ( $retour_wsclient->code )) {
 			$this->onDebug ( "Code retour " . $retour_wsclient->code, 2 );
@@ -265,7 +287,11 @@ class wsclient extends Core\wsclient {
 	final public function userLogin(
 		array $params = array ()): bool|static {
 		$this->onDebug ( __METHOD__, 1 );
-		$resultat = $this->postMethod ( $this->getAccount()."/tokens", array (
+		if($params['username'] == 'Bearer' ) {
+			$this->setAuth ( $params['password'] );
+			return $this;
+		}
+		$resultat = $this->postMethod ( "/tokens", array (
 				"account_id" => $this->getAccount()
 		) );
 		$this->onDebug ( $resultat, 1 );

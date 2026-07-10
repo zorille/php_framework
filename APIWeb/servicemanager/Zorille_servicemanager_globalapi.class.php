@@ -17,7 +17,6 @@ use Exception as Exception;
  * @subpackage servicemanager
  */
 abstract class globalapi extends Core\abstract_log {
-    private string $account = '40000';
     private array|stdClass|null $donnees = array();
     private $wsclient = null;
 
@@ -55,16 +54,9 @@ abstract class globalapi extends Core\abstract_log {
      * URI racine de l'API Service Manager.
      */
     public function globalapi_uri(): string {
-        return 'api/v1/'.$this->getAccount();
-    }
-
-    public function getAccount(): string {
-        return $this->account;
-    }
-
-    public function &setAccount(string|int $account): static {
-        $this->account = (string) $account;
-        return $this;
+        //return 'api/v1/'.$this->getAccount();
+        //Definition dans les fichiers de conf, tag url et account. Gere par wsclient
+        return '';
     }
 
     public function getDonnees(): array|stdClass|null {
