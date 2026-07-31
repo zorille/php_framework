@@ -37,6 +37,11 @@ class wsclient extends Core\wsclient {
 	 * @var string.
 	 */
 	private $auth = '';
+	
+	private array $pagination = [
+		'page' => 1,
+		'limit' => 0
+	];
 
 	/**
 	 * ********************* Creation de l'objet ********************

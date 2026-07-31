@@ -51,6 +51,9 @@ class Assets extends item {
      * @throws Exception
      */
     public function getAssets(array $parametres = array()): static|bool {
+         if(!isset($parametres['max_rows'])) {
+            $parametres['max_rows']=3000;
+        }
         return $this->execute_operation('get', '/assets', $parametres);
     }
 

@@ -30,7 +30,7 @@ class wsclient extends Core\wsclient {
 	 * @access private
 	 * @var array.
 	 */
-	private $defaultParams = array ();
+	private $defaultParams = [];
 	/**
 	 * var privee
 	 * @access private

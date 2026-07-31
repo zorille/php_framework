@@ -5,7 +5,7 @@
  * @author dvargas
  */
 namespace Zorille\evobserve;
-
+use stdClass;
 use Exception;
 
 /**
@@ -51,9 +51,43 @@ abstract class Companies extends item {
 	public function companies_list_uri(): string {
 		return $this->globalapi_uri().'/companies';
 	}
+
+	/**
+	 * @throws Exception
+	 */
+	public function all_companies_list_uri(): string {
+		return $this->companies_list_uri () . '/list';
+	}
 	/**
 	 * ******************************* Evobserve Companies *********************************
 	 */
+	/**
+	 * Prepare les parametres standards d'un objet + org_name s'il existe
+	 * @param array $parametres
+	 * @return array liste des parametres au format evobserve
+	 */
+	public function prepare_params_Companies(
+		array $parametres): array
+	{
+		return $this->prepare_standard_params ( $parametres );
+	}
+	
+	/**
+	 * Recupere la liste des companies et des clients sous la companie en parametre (cf: id)
+	 * @param array $parametres Liste des parametres de la commande tree. ("id"=> x est un parametre obligatoire)
+	 * @return stdClass | NULL
+	 * @throws Exception
+	 */
+	public function recupere_companies_list(
+		array $parametres): stdClass|NULL {
+		$this->onDebug ( __METHOD__, 1 );
+		$params = $this->prepare_params_Companies ( $parametres );
+		$this->onDebug ( $params, 1 );
+		$liste_companies = $this->getObjetEvobserveWsclient ()
+			->getMethod ( $this->all_companies_list_uri (), $params );
+		return $liste_companies;
+	}
+
 	/**
 	 * ***************************** ACCESSEURS *******************************
 	 */
