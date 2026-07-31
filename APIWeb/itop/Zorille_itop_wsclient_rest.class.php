@@ -80,9 +80,7 @@ class wsclient_rest extends Core\wsclient {
         array $liste_class): static {
 		parent::_initialise ( $liste_class );
 		if (! isset ( $liste_class ["datas"] )) {
-			$this->onError ( "il faut un objet de type datas" );
-			$return = false;
-			return $return;
+			return $this->onError ( "il faut un objet de type datas" );
 		}
 		$this->setObjetItopdatas ( $liste_class ["datas"] )
 			->setContentType ( 'plain/text' )
@@ -356,6 +354,28 @@ class wsclient_rest extends Core\wsclient {
 				'key' => $key,
 				'output_fields' => $output_fields,
 				'fields' => $fields
+		) );
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * Valid user by requesting iTop creds
+	 *
+	 * @param $user
+	 * @param $password
+	 * @return array|string
+	 * @throws Exception
+	 */
+	public function core_check_credentials(
+		$user,
+		$password): array|string
+	{
+		$this->onDebug ( __METHOD__, 1 );
+		// prepare_requete_json
+		return $this->prepare_requete_json ( array (
+				'operation' => 'core/check_credentials',
+				'user' => $user,
+				'password' => $password,
 		) );
 	}
 
